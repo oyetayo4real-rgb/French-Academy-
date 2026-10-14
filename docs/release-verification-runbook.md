@@ -28,7 +28,7 @@ Open **Supabase Dashboard → staging project → Edge Functions → Secrets**. 
 | DAILY_API_KEY | live-room | Required for Daily room/token calls |
 | CF_TURN_KEY_ID | turn-credentials | Required only if Cloudflare TURN credentials are used |
 | CF_TURN_API_TOKEN | turn-credentials | Required only if Cloudflare TURN credentials are used |
-| TUTOR_MODEL | tutor | Optional override; otherwise source defaults to the documented claude-sonnet-5 API ID |
+| TUTOR_MODEL | tutor | Optional override; otherwise source defaults to `claude-haiku-5-5` (verified against Anthropic's current Claude API model IDs on 2026-10-14) |
 | MAX_PARTICIPANTS | live-room | Optional; current standard-room path must remain between 2 and 200 and refuses values above 200 |
 | DAILY_RECORDING | live-room | Optional; use only after the chosen recording mode is approved and tested |
 
