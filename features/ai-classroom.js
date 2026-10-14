@@ -161,10 +161,38 @@
     finally { if (button) { button.disabled = false; button.textContent = examplesOnly ? "📝 Generate 8 extra examples" : "📘 Expand this lesson with AI"; } }
   }
 
+  // Recover a saved Supabase session whose user object was not persisted.
+  // Keep the existing auth gate: only a valid Supabase user session may open these tools.
+  async function faRestoreAuthUser() {
+    if (typeof AUTH !== "undefined" && AUTH && AUTH.user) return true;
+    if (typeof AUTH === "undefined" || !AUTH || !AUTH.access_token) return false;
+    async function fetchUser() {
+      return fetch(SBURL + "/auth/v1/user", {
+        headers: { apikey: SBKEY, Authorization: "Bearer " + AUTH.access_token }
+      });
+    }
+    try {
+      let response = await fetchUser();
+      if (response.status === 401 && AUTH.refresh_token && typeof refreshTok === "function") {
+        await refreshTok();
+        if (!AUTH || !AUTH.access_token) return false;
+        response = await fetchUser();
+      }
+      if (!response.ok) return false;
+      const user = await response.json();
+      if (!user || !user.id) return false;
+      AUTH.user = user;
+      if (typeof store === "function") store("fa_auth", AUTH);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   document.addEventListener("click", async (event) => {
     const button = event.target instanceof Element ? event.target.closest("button") : null; if (!button) return;
-    if (button.id === "htutor") { FA_AI.error = ""; view = "tutor"; render(); }
-    else if (button.id === "hdict") { FA_DICT.error = ""; view = "dict"; render(); }
+    if (button.id === "htutor") { if (!(await faRestoreAuthUser())) { view = "auth"; render(); return; } FA_AI.error = ""; view = "tutor"; render(); }
+    else if (button.id === "hdict") { if (!(await faRestoreAuthUser())) { view = "auth"; render(); return; } FA_DICT.error = ""; view = "dict"; render(); }
     else if (button.id === "faHome") { view = "home"; render(); }
     else if (button.id === "faCallBack") await faExitCall(false);
     else if (button.id === "faSignIn") { view = "auth"; render(); }
