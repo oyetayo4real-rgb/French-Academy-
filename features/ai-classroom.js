@@ -33,7 +33,9 @@
     list.innerHTML = filtered.map((p) => {
       const name = String(p.user_name || p.user_id || "Student").slice(0, 80), audioOn = !!(p.audio && p.audio.state === "playable");
       const actions = FA_DAILY_META && FA_DAILY_META.owner
-        ? '<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="g" data-fa-audio="' + escA(p.session_id) + '" data-fa-enabled="' + (audioOn ? "1" : "0") + '">' + (audioOn ? "Mute" : "Unmute") + '</button><button class="g" style="color:var(--bad)" data-fa-eject="' + escA(p.session_id) + '">Remove</button></div>' : "";
+        ? '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
+          (audioOn ? '<button class="g" data-fa-audio="' + escA(p.session_id) + '" data-fa-enabled="1">Mute</button>' : '<span class="mu">Student controls microphone</span>') +
+          '<button class="g" style="color:var(--bad)" data-fa-eject="' + escA(p.session_id) + '">Remove</button></div>' : "";
       return '<div class="asg" style="cursor:default;align-items:center"><span style="min-width:0"><b>' + faSafe(name) + '</b><div class="mu">' + (audioOn ? "Microphone active" : "Microphone muted or unavailable") + "</div></span>" + actions + "</div>";
     }).join("");
   }
@@ -70,7 +72,7 @@
     const meta = FA_DAILY_META;
     $.innerHTML = (typeof topbar === "function" ? topbar() : "") + '<button class="g" id="faCallBack">← Back</button><h1>📹 ' + faSafe(meta.name) + '</h1><div class="mu" id="faDailyStatus">' + faSafe(meta.status || "Preparing your classroom…") + '</div>' +
       '<div class="card" style="padding:8px"><div id="faDailyFrame" style="width:100%;min-height:420px;border-radius:12px;overflow:hidden;background:#080d18"></div></div>' +
-      (meta.owner ? '<div class="card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><h2>👥 Participants</h2><span class="pill" id="faParticipantCount">Loading…</span></div><details><summary>Open lecturer controls</summary><p class="mu">Mute, request unmute, or remove a participant from this call. This does not change class enrolment.</p><input class="inp" id="faRosterSearch" placeholder="Find a student by name"><div id="faDailyRoster"></div></details></div>' : "") +
+      (meta.owner ? '<div class="card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><h2>👥 Participants</h2><span class="pill" id="faParticipantCount">Loading…</span></div><details><summary>Open lecturer controls</summary><p class="mu">Mute an active microphone or remove a participant. Students must enable their own microphone; lecturers cannot remotely unmute them. This does not change class enrolment.</p><input class="inp" id="faRosterSearch" placeholder="Find a student by name"><div id="faDailyRoster"></div></details></div>' : "") +
       '<button id="faEndCall" style="width:100%;background:var(--bad)">Leave live class</button>';
     if (typeof bindTop === "function") bindTop(); faRefreshRoster();
   }
@@ -172,10 +174,11 @@
     else if (button.id === "faMoreExamples") await faLessonRequest("examples");
     else if (button.id === "faEndCall") await faExitCall(false);
     else if (button.hasAttribute("data-fa-audio") && FA_DAILY_CALL && FA_DAILY_META && FA_DAILY_META.owner) {
-      const session = button.getAttribute("data-fa-audio"), wasOn = button.getAttribute("data-fa-enabled") === "1";
-      if (!wasOn && !confirm("Request to unmute this student's microphone? Only the meeting owner can do this; browser and device permissions still apply.")) return;
-      try { FA_DAILY_CALL.updateParticipant(session, { setAudio: !wasOn }); faSetStatus(wasOn ? "Mute command sent." : "Unmute request sent."); }
-      catch (error) { alert((error && error.message) || "Could not change this participant's microphone."); }
+      const session = button.getAttribute("data-fa-audio");
+      // Remote unmute is intentionally prohibited; students control their own microphone.
+      if (button.getAttribute("data-fa-enabled") !== "1") return;
+      try { FA_DAILY_CALL.updateParticipant(session, { setAudio: false }); faSetStatus("Mute command sent."); }
+      catch (error) { alert((error && error.message) || "Could not mute this participant."); }
     } else if (button.hasAttribute("data-fa-eject") && FA_DAILY_CALL && FA_DAILY_META && FA_DAILY_META.owner) {
       const session = button.getAttribute("data-fa-eject");
       if (!confirm("Remove this student from the live call? Their class enrolment will remain unchanged.")) return;
