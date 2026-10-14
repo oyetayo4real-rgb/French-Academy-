@@ -21,12 +21,23 @@ Deno.serve(async (req: Request) => {
     const cid = String(body.class_id || "");
     if (!/^[0-9a-f-]{36}$/i.test(cid)) return J({ error: "bad_request", message: "Missing class." }, 400);
     const SU = Deno.env.get("SUPABASE_URL")!, AK = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const ur = (path: string) => fetch(SU + path, { headers: { apikey: AK, Authorization: "Bearer " + jwt } }).then((r) => r.json());
-    const cls = await ur("/rest/v1/classes?id=eq." + cid + "&select=id,name,lecturer_id");
+    const ur = async (path: string) => {
+      const response = await fetch(SU + path, { headers: { apikey: AK, Authorization: "Bearer " + jwt } });
+      if (!response.ok) throw new Error("Supabase authorization lookup failed.");
+      return response.json();
+    };
+    const cls = await ur("/rest/v1/classes?id=eq." + encodeURIComponent(cid) + "&select=id,name,lecturer_id");
     if (!Array.isArray(cls) || !cls[0]) return J({ error: "forbidden", message: "You are not in this class." }, 403);
     const owner = cls[0].lecturer_id === uid;
-    const pr = await ur("/rest/v1/profiles?id=eq." + uid + "&select=full_name");
-    const userName = String((pr && pr[0] && pr[0].full_name) || (owner ? "Lecturer" : "Student")).slice(0, 60);
+    const pr = await ur("/rest/v1/profiles?id=eq." + encodeURIComponent(uid) + "&select=full_name,role");
+    if (!Array.isArray(pr) || !pr[0]) return J({ error: "profile_required", message: "Your profile is not ready. Please sign in again." }, 403);
+    if (owner && pr[0].role !== "lecturer") return J({ error: "forbidden", message: "Only a lecturer account can host this class." }, 403);
+    if (!owner) {
+      const enrollment = await ur("/rest/v1/enrollments?class_id=eq." + encodeURIComponent(cid) + "&student_id=eq." + encodeURIComponent(uid) + "&select=student_id");
+      if (!Array.isArray(enrollment) || enrollment.length === 0) return J({ error: "forbidden", message: "You must be enrolled in this class to join its live room." }, 403);
+      if (pr[0].role !== "student") return J({ error: "forbidden", message: "This account is not authorized as a student in this class." }, 403);
+    }
+    const userName = String(pr[0].full_name || (owner ? "Lecturer" : "Student")).slice(0, 60);
     const D = (path: string, opt: RequestInit = {}) => fetch("https://api.daily.co/v1" + path, { ...opt, headers: { Authorization: "Bearer " + dk, "Content-Type": "application/json", ...((opt.headers as Record<string, string>) || {}) } });
     const name = "fa-" + cid;
     let room: { url: string } | null = null;
@@ -35,10 +46,13 @@ Deno.serve(async (req: Request) => {
     else if (g.status === 404) {
       if (!owner) return J({ error: "not_started", message: "The lecturer has not opened the room yet. Try again in a moment." }, 409);
       const exp = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30;
-      const full = { name, privacy: "private", properties: { exp, enable_chat: true, enable_hand_raising: true, enable_people_ui: true, enable_screenshare: true, experimental_optimize_large_calls: true, max_participants: Number(Deno.env.get("MAX_PARTICIPANTS") || 200) } };
-      let c = await D("/rooms", { method: "POST", body: JSON.stringify(full) });
-      if (!c.ok) c = await D("/rooms", { method: "POST", body: JSON.stringify({ name, privacy: "private", properties: { exp, enable_chat: true, enable_screenshare: true } }) });
-      if (!c.ok) return J({ error: "daily_error", message: "Could not open the room. Check the Daily account." }, 502);
+      const maxParticipants = Number(Deno.env.get("MAX_PARTICIPANTS") || 200);
+      if (!Number.isInteger(maxParticipants) || maxParticipants < 2 || maxParticipants > 200) {
+        return J({ error: "large_class_not_configured", message: "This room is not configured for more than 200 participants. The dedicated large-class provider setup must be completed and verified first." }, 503);
+      }
+      const full = { name, privacy: "private", properties: { exp, enable_chat: true, enable_hand_raising: true, enable_people_ui: true, enable_screenshare: true, experimental_optimize_large_calls: true, max_participants: maxParticipants } };
+      const c = await D("/rooms", { method: "POST", body: JSON.stringify(full) });
+      if (!c.ok) return J({ error: "daily_error", message: "Could not open the room with the required settings. No fallback room was created." }, 502);
       room = await c.json();
     } else return J({ error: "daily_error", message: "The call service is unavailable right now." }, 502);
     const voice = !!body.voice;
