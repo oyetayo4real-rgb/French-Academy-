@@ -1,0 +1,33 @@
+name: Draft release safety checks
+
+on:
+  pull_request:
+    paths:
+      - "features/ai-classroom.js"
+      - "supabase/functions/live-room/index.ts"
+      - "supabase/functions/tutor/index.ts"
+      - "docs/live-class-1000-architecture.md"
+      - "scripts/check-release-gates.mjs"
+      - ".github/workflows/release-gates.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  static-release-gates:
+    name: Static safety assertions (not E2E/load tests)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out PR
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run release-gate assertions
+        run: node scripts/check-release-gates.mjs
+      - name: Syntax-check browser JavaScript
+        run: |
+          node --check features/ai-classroom.js
+          node --check scripts/check-release-gates.mjs
+          node --check scripts/smoke-tutor.mjs
