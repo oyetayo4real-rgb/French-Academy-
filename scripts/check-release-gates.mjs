@@ -32,7 +32,7 @@ pass("room creation has no unsafe fallback");
 
 assert.match(tutor, /ANTHROPIC_API_KEY/, "tutor provider key must be read server-side");
 assert.match(tutor, /if \(!uid\).*not_signed_in/s, "tutor must reject missing/unverified authenticated user");
-assert.match(tutor, /claude-sonnet-5/, "default tutor model must be a documented API model ID");
+assert.match(tutor, /Deno\.env\.get\("TUTOR_MODEL"\) \|\| "claude-haiku-5-5"/, "default tutor model must match the verified low-cost API model ID");
 pass("tutor requires authenticated identity and a configured provider key");
 
 assert.match(classroom, /updateParticipant\(session, \{ setAudio: false \}\)/, "lecturer action must support remote mute");
