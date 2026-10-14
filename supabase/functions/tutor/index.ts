@@ -75,7 +75,7 @@ Deno.serve(async (req: Request) => {
     const r = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-      body: JSON.stringify({ model: Deno.env.get("TUTOR_MODEL") || "claude-haiku-5-5", max_tokens: mode === "chat" || mode === "practice" ? 700 : 1000, system, messages }),
+      body: JSON.stringify({ model: Deno.env.get("TUTOR_MODEL") || "claude-sonnet-5", max_tokens: mode === "chat" || mode === "practice" ? 700 : 1000, system, messages }),
     });
     if (!r.ok) { await r.text().catch(() => ""); return J({ error: "ai_error", message: "The tutor is unavailable right now. Please try again in a moment." }, 502); }
     const j = await r.json();
