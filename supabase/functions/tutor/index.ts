@@ -39,7 +39,9 @@ function providerConfig() {
   if (!secretNames[provider]) throw new Error("bad_provider");
   const selectedName = secretNames[provider].find((name) => Boolean(Deno.env.get(name)));
   if (!selectedName) throw new Error("not_configured");
-  return { provider, key: Deno.env.get(selectedName)!, selectedName, model: Deno.env.get("AI_MODEL") || MODELS[provider] };
+  const modelNames: Record<string, string> = { gemini: "GEMINI_MODEL", groq: "GROQ_MODEL", mistral: "MISTRAL_MODEL", openrouter: "OPENROUTER_MODEL" };
+  // Do not reuse a legacy generic AI_MODEL value across providers; it can name a model that Gemini does not serve.
+  return { provider, key: Deno.env.get(selectedName)!, selectedName, model: Deno.env.get(modelNames[provider]) || MODELS[provider] };
 }
 
 async function callAI(system: string, messages: { role: string; content: string }[], maxTokens: number) {
