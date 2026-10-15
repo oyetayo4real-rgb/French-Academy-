@@ -202,6 +202,10 @@
     }
   }
 
+  // Export view renderers because index.html owns the global render() dispatcher.
+  window.FATutorView = faTutorView;
+  window.FADictionaryView = faDictionaryView;
+
   document.addEventListener("click", async (event) => {
     const button = event.target instanceof Element ? event.target.closest("button") : null; if (!button) return;
     if (button.id === "htutor") { if (!(await faRestoreAuthUser())) { view = "auth"; render(); return; } FA_AI.error = ""; view = "tutor"; render(); }
