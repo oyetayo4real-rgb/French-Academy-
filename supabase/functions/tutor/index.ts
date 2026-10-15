@@ -17,7 +17,7 @@ function subOf(req: Request): string | null {
 const clip = (value: unknown, max: number) => String(value ?? "").slice(0, max);
 const LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"];
 const MODELS: Record<string, string> = {
-  gemini: "gemini-2.5-flash",
+  gemini: "gemini-3.8-flash",
   groq: "llama-3.3-70b-versatile",
   mistral: "mistral-small-latest",
   openrouter: "meta-llama/llama-3.3-70b-instruct:free"
@@ -50,32 +50,61 @@ function providerConfig() {
 async function callAI(system: string, messages: { role: string; content: string }[], maxTokens: number) {
   const config = providerConfig();
   if (config.provider === "gemini") {
-    const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(config.model) + ":generateContent",
-      {
-        method: "POST",
-        headers: { "x-goog-api-key": config.key, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: system }] },
-          contents: messages.map((message) => ({
-            role: message.role === "assistant" ? "model" : "user",
-            parts: [{ text: message.content }]
-          })),
-          // Do not force Gemini thinkingBudget to zero: the Tutor must handle deeper questions.
-          generationConfig: { maxOutputTokens: maxTokens, temperature: 0.4 }
-        }),
-        signal: AbortSignal.timeout(30000)
+    // Start with a current, stable model and recover from model-specific 404s.
+    // Some keys/projects cannot access legacy Gemini 2.5 models, even though they remain listed.
+    const candidates = [...new Set([
+      config.model,
+      "gemini-3.8-flash",
+      "gemini-3.6-flash",
+      "gemini-3.5-flash-lite",
+      "gemini-2.5-flash"
+    ].filter(Boolean))];
+    let lastStatus = 0;
+    for (const model of candidates) {
+      const response = await fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent",
+        {
+          method: "POST",
+          headers: { "x-goog-api-key": config.key, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: system }] },
+            contents: messages.map((message) => ({
+              role: message.role === "assistant" ? "model" : "user",
+              parts: [{ text: message.content }]
+            })),
+            // Leave thinking enabled so complex French questions can be answered in depth.
+            generationConfig: { maxOutputTokens: maxTokens, temperature: 0.4 }
+          }),
+          signal: AbortSignal.timeout(30000)
+        }
+      );
+      if (response.ok) {
+        const json = await response.json();
+        const candidate = json?.candidates?.[0];
+        if (candidate?.finishReason === "SAFETY") throw new Error("blocked");
+        return (candidate?.content?.parts || []).map((part: { text?: string }) => part.text || "").join("").trim();
       }
-    );
-    if (response.status === 429) throw new Error("rate");
-    if (!response.ok) {
-      console.error("[tutor] provider request failed", JSON.stringify({ provider: config.provider, status: response.status }));
+
+      const rawError = await response.text().catch(() => "");
+      let reason = "";
+      try {
+        const parsed = JSON.parse(rawError);
+        reason = String(parsed?.error?.message || parsed?.error?.status || "");
+      } catch (_) {}
+      console.error("[tutor] provider request failed", JSON.stringify({
+        provider: "gemini",
+        model,
+        status: response.status,
+        reason: clip(reason, 180)
+      }));
+      if (response.status === 429) throw new Error("rate");
+      if (response.status === 404) {
+        lastStatus = response.status;
+        continue;
+      }
       throw new Error("provider_http_" + response.status);
     }
-    const json = await response.json();
-    const candidate = json?.candidates?.[0];
-    if (candidate?.finishReason === "SAFETY") throw new Error("blocked");
-    return (candidate?.content?.parts || []).map((part: { text?: string }) => part.text || "").join("").trim();
+    throw new Error("provider_http_" + (lastStatus || 404));
   }
 
   const response = await fetch(BASES[config.provider] + "/chat/completions", {
@@ -106,7 +135,7 @@ function grabJson(text: string) {
 function dictionarySources(query: string) {
   const term = encodeURIComponent(query);
   return [
-    { name: "Wiktionnaire (CC BY-SA 4.0)", url: "https://fr.wiktionary.org/wiki/" + term.replace(/%20/g, "_"), licence: "Community-authored content; preserve attribution and the applicable share-alike licence." },
+    { name: "Wiktionary — French entry (CC BY-SA 4.0)", url: "https://en.wiktionary.org/wiki/" + term.replace(/%20/g, "_"), licence: "Community-authored content; preserve attribution and the applicable share-alike licence." },
     { name: "Dictionnaire de l’Académie française", url: "https://www.dictionnaire-academie.fr/search/" + term, licence: "Editorial reference; consult the entry at the source rather than copying its text." },
     { name: "CNRTL / TLFi", url: "https://www.cnrtl.fr/definition/" + term, licence: "Historical reference; consult the source for its entry and usage notes." }
   ];
@@ -143,7 +172,7 @@ Deno.serve(async (req: Request) => {
       let wiki: Record<string, any> | null = null;
       let sourceError = "";
       try {
-        const response = await fetch("https://fr.wiktionary.org/api/rest_v1/page/definition/" + encodeURIComponent(text), {
+        const response = await fetch("https://en.wiktionary.org/api/rest_v1/page/definition/" + encodeURIComponent(text), {
           headers: {
             Accept: "application/json",
             "Api-User-Agent": "AcademieFrancaise/1.0 (French dictionary; https://github.com/oyetayo4real-rgb/French-Academy-)"
