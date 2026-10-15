@@ -245,7 +245,7 @@ Deno.serve(async (req: Request) => {
       if (!allowance.ok) return J({ error: "limit", message: "You have reached today's AI-use limit. Please try again later." }, 429);
       try {
         const generated = await callAI(
-          "You are a careful French lexicographer. Explain the queried word or expression using French usage. Return valid JSON only with keys headword, pos, gender, ipa, meanings (array of strings), examples (array of {fr,en}), notes, related (array of strings), and notFound (boolean). Prefer reliable, conventional definitions; do not claim this is an official dictionary entry. Give two original French examples with English translations. If the query is gibberish or cannot be identified as a French word/expression, set notFound=true and explain briefly.",
+          "You are a modern French lexicographer. Return valid JSON only with keys headword, pos, gender, ipa, meanings (array of concise strings ordered from common/current to less common or figurative), examples (array of objects with fr and en strings), notes, related (array of strings), and notFound (boolean). Use natural, idiomatic contemporary French and precise English translations. Give 2–4 short, natural French examples, each paired with a faithful English translation; keep punctuation and register consistent. Explain part of speech, gender and usage when relevant. Distinguish standard, formal, informal, regional and dated senses when reliably known. Do not invent etymology, citations or official dictionary authority. If the query is not identifiable as a French word or expression, set notFound=true and explain briefly.",
           [{ role: "user", content: "French dictionary lookup: " + text }],
           1700
         );
