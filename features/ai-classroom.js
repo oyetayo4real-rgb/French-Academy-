@@ -6,6 +6,20 @@
   const FA_DICT = { level: "none", mode: "dict", query: "", result: null, error: "", pending: false };
   const faEl = (id) => document.getElementById(id);
   const faSafe = (value) => esc(String(value == null ? "" : value));
+  // Render a small safe Markdown subset for tutor answers. Escape HTML before adding markup.
+  function faMarkdown(value) {
+    const escaped = faSafe(value);
+    const inline = (line) => line.replace(/`([^`]+)`/g,"<code>$1</code>").replace(/**([^*]+)**/g,"<strong>$1</strong>").replace(/(^|[^*])*([^*]+)*/g,"$1<em>$2</em>");
+    const lines=escaped.split(/\r?\n/), out=[]; let list="", paragraph=[];
+    const flush=()=>{if(paragraph.length){out.push("<p>"+inline(paragraph.join(" "))+"</p>");paragraph=[];}};
+    const close=()=>{if(list){out.push("</"+list+">");list="";}};
+    for(const raw of lines){const line=raw.trim();if(!line){flush();close();continue;}
+      const h=line.match(/^(#{1,4})\s+(.+)$/);if(h){flush();close();const n=Math.min(h[1].length+1,5);out.push("<h"+n+">"+inline(h[2])+"</h"+n+">");continue;}
+      const li=line.match(/^[-*•]\s+(.+)$/);if(li){flush();if(list!=="ul"){close();list="ul";out.push("<ul>");}out.push("<li>"+inline(li[1])+"</li>");continue;}
+      const oi=line.match(/^\d+[.)]\s+(.+)$/);if(oi){flush();if(list!=="ol"){close();list="ol";out.push("<ol>");}out.push("<li>"+inline(oi[1])+"</li>");continue;}
+      paragraph.push(line);
+    } flush();close();return out.join("");
+  }
   function faNeedSignIn() { if (typeof AUTH !== "undefined" && AUTH && AUTH.user) return true; view = "auth"; render(); return false; }
   async function faTutorRequest(payload) { return api("/functions/v1/tutor", { m: "POST", body: payload }); }
   async function faLoadDailySdk() {
@@ -80,7 +94,7 @@
 
   function faTutorView() {
     if (!AUTH || !AUTH.user) { $.innerHTML = '<button class="g" id="faHome">← Home</button><h1>🤖 AI French tutor</h1><div class="card"><p>Sign in to use the tutor and keep your learning progress.</p><button id="faSignIn" style="width:100%">Sign in / Create account</button></div>'; return; }
-    const messageHtml = FA_AI.messages.map((m) => '<div class="card" style="margin:8px 0"><b>' + (m.role === "user" ? "You" : "Académie AI") + '</b><div style="white-space:pre-wrap;margin-top:6px">' + faSafe(m.content) + "</div></div>").join("");
+    const messageHtml = FA_AI.messages.map((m) => '<div class="card" style="margin:8px 0"><b>' + (m.role === "user" ? "You" : "Académie AI") + '</b><div class="fa-answer" style="margin-top:8px;line-height:1.7">' + (m.role === "assistant" ? faMarkdown(m.content) : '<div style="white-space:pre-wrap">' + faSafe(m.content) + "</div>") + "</div></div>").join("");
     $.innerHTML = (typeof topbar === "function" ? topbar() : "") + '<button class="g" id="faHome">← Home</button><h1>🤖 AI French tutor</h1><p class="mu">Ask deep grammar questions, explore French usage, practise conversation, translate text or get detailed corrections. Choose a level only when you want learning scaffolding.</p>' +
       '<div class="card"><label for="faTutorLevel"><b>Answer style</b></label><select class="inp" id="faTutorLevel">' + [["none","Unrestricted · full depth"],["A1","A1 support"],["A2","A2 support"],["B1","B1 support"],["B2","B2 support"],["C1","C1 support"],["C2","C2 support"]].map((l) => '<option value="' + l[0] + '"' + (l[0] === FA_AI.level ? " selected" : "") + ">" + l[1] + "</option>").join("") +
       '</select><label for="faTutorMode"><b>Practice mode</b></label><select class="inp" id="faTutorMode">' + [["chat","Ask the tutor"],["practice","Conversation practice"],["correct","Correct my French"],["translate","Translate French ↔ English"]].map((o) => '<option value="' + o[0] + '"' + (o[0] === FA_AI.mode ? " selected" : "") + ">" + o[1] + "</option>").join("") +
@@ -107,23 +121,25 @@
   function faDictionaryView() {
     if (!AUTH || !AUTH.user) { $.innerHTML = '<button class="g" id="faHome">← Home</button><h1>📖 French dictionary</h1><div class="card"><p>Sign in to use the dictionary and translator.</p><button id="faSignIn" style="width:100%">Sign in / Create account</button></div>'; return; }
     let output = ""; const result = FA_DICT.result;
-    if (result && FA_DICT.mode === "translate") output = '<div class="card"><h2>Translation</h2><div style="white-space:pre-wrap">' + faSafe(result.text || "") + "</div></div>";
+    if (result && FA_DICT.mode === "translate") output = '<div class="card"><h2>Translation</h2><div style="line-height:1.7;white-space:pre-wrap">' + faSafe(result.text || "") + "</div></div>";
     else if (result && result.data) {
       const d = result.data;
-      if (d.notFound) {
-        output = '<div class="card"><h2>' + faSafe(d.headword || FA_DICT.query) + '</h2><p class="mu">No reliable French dictionary entry was found for this query.</p>' + (d.notes ? '<p>' + faSafe(d.notes) + '</p>' : '') + '</div>';
-      } else output = '<div class="card"><h2>' + faSafe(d.headword || FA_DICT.query) + (d.gender ? ' <span class="pill">' + faSafe(d.gender) + "</span>" : "") + '</h2><div class="mu">' + faSafe(d.pos || "Word or phrase") + (d.ipa ? " · " + faSafe(d.ipa) : "") + "</div>" +
-        (Array.isArray(d.meanings) ? "<h3>Meaning</h3><ul>" + d.meanings.map((x) => "<li>" + faSafe(x) + "</li>").join("") + "</ul>" : "") + (d.notes ? "<p><b>Usage note:</b> " + faSafe(d.notes) + "</p>" : "") +
-        (Array.isArray(d.examples) ? "<h3>Examples</h3>" + d.examples.map((x) => '<div style="margin:10px 0"><div class="fr">' + faSafe(x.fr || "") + '</div><div class="en">' + faSafe(x.en || "") + "</div></div>").join("") : "") +
-        (Array.isArray(d.related) ? "<p><b>Related:</b> " + d.related.map(faSafe).join(" · ") + "</p>" : "") +
-        (Array.isArray(d.sources) && d.sources.length ? '<h3>Sources & attribution</h3><ul>' + d.sources.map((s) => '<li>' + (s.url ? '<a href="' + escA(s.url) + '" target="_blank" rel="noopener noreferrer">' + faSafe(s.name || "Source") + '</a>' : faSafe(s.name || "Source")) + (s.licence ? '<div class="mu">' + faSafe(s.licence) + '</div>' : '') + '</li>').join("") + '</ul>' : "") + "</div>";
+      if (d.notFound) output = '<div class="card"><h2>' + faSafe(d.headword || FA_DICT.query) + '</h2><p class="mu">No reliable French dictionary entry was found for this query.</p>' + (d.notes ? '<p>' + faSafe(d.notes) + '</p>' : '') + (Array.isArray(d.sources) && d.sources.length ? '<h3>Sources to consult</h3><ul>' + d.sources.map((s) => '<li>' + (s.url ? '<a href="' + escA(s.url) + '" target="_blank" rel="noopener noreferrer">' + faSafe(s.name || "Source") + '</a>' : faSafe(s.name || "Source")) + '</li>').join("") + '</ul>' : '') + '</div>';
+      else {
+        const groups = Array.isArray(d.entries) ? d.entries : [], sourceBacked = groups.length > 0;
+        const senses = sourceBacked ? groups.map((group) => '<section style="margin-top:18px"><h3 style="margin-bottom:6px">' + faSafe(group.partOfSpeech || "Meaning") + '</h3><ol style="padding-left:22px;margin-top:8px">' + (Array.isArray(group.definitions) ? group.definitions : []).map((sense) => '<li style="padding:0 0 12px 4px;line-height:1.65"><div>' + faSafe(sense.definition || "") + '</div>' + (Array.isArray(sense.examples) && sense.examples.length ? '<div style="margin-top:8px;padding:10px 12px;border-left:3px solid var(--accent,#6b8afd);background:rgba(127,127,127,.07);border-radius:0 8px 8px 0"><div class="mu" style="font-size:.82em;margin-bottom:5px">French example · source text</div>' + sense.examples.map((ex) => '<div class="fr" style="line-height:1.6">' + faSafe(ex) + '</div>').join("") + '<div class="mu" style="font-size:.82em;margin-top:5px">The source does not provide an English translation for these examples.</div></div>' : '') + '</li>').join("") + '</ol></section>').join("") : (Array.isArray(d.meanings) && d.meanings.length ? '<section style="margin-top:18px"><h3>Meanings</h3><ol style="padding-left:22px;line-height:1.7">' + d.meanings.map((meaning) => '<li style="padding:0 0 8px 4px">' + faSafe(meaning) + '</li>').join("") + '</ol></section>' : '');
+        const examples = !sourceBacked && Array.isArray(d.examples) && d.examples.length ? '<section style="margin-top:18px"><h3>Examples in context</h3>' + d.examples.map((ex,i) => '<div style="margin:10px 0;padding:12px;border:1px solid var(--line,rgba(127,127,127,.25));border-radius:10px"><div class="mu" style="font-size:.82em;margin-bottom:5px">Example ' + (i+1) + '</div><div class="fr" style="line-height:1.6">' + faSafe(ex.fr || "") + '</div>' + (ex.en ? '<div class="en" style="margin-top:5px;line-height:1.6">' + faSafe(ex.en) + '</div>' : '') + '</div>').join("") + '</section>' : '';
+        const related = Array.isArray(d.related) && d.related.length ? '<section style="margin-top:18px"><h3>Related words and expressions</h3><p>' + d.related.map(faSafe).join(" · ") + '</p></section>' : '';
+        const sources = Array.isArray(d.sources) && d.sources.length ? '<section style="margin-top:18px"><h3>Sources & attribution</h3><ul>' + d.sources.map((s) => '<li style="margin-bottom:8px">' + (s.url ? '<a href="' + escA(s.url) + '" target="_blank" rel="noopener noreferrer">' + faSafe(s.name || "Source") + '</a>' : faSafe(s.name || "Source")) + (s.licence ? '<div class="mu" style="font-size:.85em;margin-top:3px">' + faSafe(s.licence) + '</div>' : '') + '</li>').join("") + '</ul></section>' : '';
+        output = '<div class="card fa-dictionary-entry"><div class="mu" style="font-size:.82em;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">' + (d.generated ? 'AI-generated lexical explanation' : 'Dictionary entry') + '</div><h2 style="margin-bottom:6px">' + faSafe(d.headword || FA_DICT.query) + (d.gender ? ' <span class="pill">' + faSafe(d.gender) + '</span>' : '') + '</h2><div class="mu">' + faSafe(d.pos || (sourceBacked ? groups.map((g) => g.partOfSpeech).filter(Boolean).join(", ") : "Word or expression") || "Word or expression") + (d.ipa ? " · " + faSafe(d.ipa) : "") + '</div>' + senses + examples + (d.notes ? '<section style="margin-top:16px"><h3>Usage notes</h3><p style="line-height:1.65">' + faSafe(d.notes) + '</p></section>' : '') + related + sources + '</div>';
+      }
     }
-    $.innerHTML = (typeof topbar === "function" ? topbar() : "") + '<button class="g" id="faHome">← Home</button><h1>📖 Dictionary & translation</h1><p class="mu">Look up French words, review source links and attribution, or translate a complete sentence.</p><div class="card">' +
+    $.innerHTML = (typeof topbar === "function" ? topbar() : "") + '<button class="g" id="faHome">← Home</button><h1>📖 Dictionary & translation</h1><p class="mu">Look up French words in a consistent dictionary layout, compare meanings and examples, or translate a complete sentence.</p><div class="card">' +
       '<label for="faDictMode"><b>Tool</b></label><select id="faDictMode" class="inp"><option value="dict"' + (FA_DICT.mode === "dict" ? " selected" : "") + '>Dictionary lookup</option><option value="translate"' + (FA_DICT.mode === "translate" ? " selected" : "") + '>Translate a sentence</option></select>' +
-
       '<input class="inp" id="faDictInput" value="' + escA(FA_DICT.query) + '" placeholder="E.g. pourtant, apprendre, or I am looking for the station…"><button id="faDictLookup" style="width:100%"' + (FA_DICT.pending ? " disabled" : "") + ">" + (FA_DICT.pending ? "Working…" : "Look up / translate") + "</button>" + (FA_DICT.error ? '<div class="err">' + faSafe(FA_DICT.error) + "</div>" : "") + "</div>" + output;
     if (typeof bindTop === "function") bindTop();
   }
+
   async function faDictionaryLookup() {
     if (!faNeedSignIn()) return;
     FA_DICT.query = (faEl("faDictInput")?.value || "").trim(); FA_DICT.mode = faEl("faDictMode")?.value || "dict"; FA_DICT.level = "none";
