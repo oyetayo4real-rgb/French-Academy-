@@ -30,12 +30,19 @@ pass("student enrollment and lecturer role authorization are present");
 assert.match(liveRoom, /No fallback room was created/, "Daily room configuration errors must fail closed");
 pass("room creation has no unsafe fallback");
 
-assert.match(tutor, /function providerConfig\(\)/, "provider and API key must be selected together");
-assert.match(tutor, /gemini: \["GEMINI_API_KEY", "AI_API_KEY"\]/, "Gemini must use only its dedicated or explicitly generic key");
-assert.match(tutor, /No CEFR restriction/, "Tutor must support unrestricted detailed answers");
-assert.doesNotMatch(tutor, /thinkingBudget:\s*0/, "deep-answer mode must not force Gemini reasoning off");
-assert.match(tutor, /if \(!uid\)/, "Tutor must reject missing authenticated identity");
-pass("provider/key pairing, unrestricted Tutor defaults, and authenticated identity guards are present");
+assert.match(tutor, /function providerConfig\\(\\)/, "provider and API key must be selected together");
+assert.match(tutor, /gemini: \\["GEMINI_API_KEY", "AI_API_KEY"\\]/, "Gemini must use its own secret or explicit generic key");
+assert.match(tutor, /No CEFR restriction/, "Tutor should support unrestricted detailed answers");
+assert.doesNotMatch(tutor, /thinkingBudget:\\s*0/, "Tutor must not force reasoning budget to zero");
+assert.match(tutor, /if \\(!uid\\)/, "Tutor must require an authenticated identity");
+pass("provider/key pairing, unrestricted Tutor default and auth guards are present");
+
+assert.match(tutor, /const frenchGroups = Array\\.isArray\\(wiki\\?\\.fr\\)/, "dictionary must read French lexical groups only");
+assert.match(tutor, /CC BY-SA 4\\.0/, "dictionary must retain Wiktionary attribution/licence");
+assert.match(classroom, /Sources & attribution/, "dictionary UI must render sources and attribution");
+assert.match(classroom, /Unrestricted · full depth/, "Tutor UI must offer unrestricted answers");
+assert.match(classroom, /No reliable French dictionary entry/, "dictionary UI must show not-found state");
+pass("French-only definitions, source attribution and unrestricted Tutor UI are covered by static assertions");
 
 // Dictionary regressions: never use the English Wiktionary group as a French definition.
 assert.match(tutor, /const frenchGroups = Array\.isArray\(wiki\?\.fr\)/, "dictionary should read French lexical groups only");
