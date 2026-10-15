@@ -155,6 +155,16 @@ function home(){
   L.map((l,i)=>{const u=lvOpen(i),d=levelDone(i),ls=LS(l),pc=ls.filter((_,k)=>S.passed[key(i,k)]).length;return `<div class="card lv ${u?"":"lock"} ${d?"done":""}" data-i="${i}"><div class="b">${d?"✓":u?l.id:"🔒"}</div><div><b>${l.id} · ${l.name}</b> <span class="mu">(${l.en})</span><div class="mu">${l.goal}</div><div class="mu">${pc}/${ls.length} lessons passed${l.exam?" · exam "+(S.passed[l.id+"-exam"]?"✓":"pending"):""}</div></div></div>`}).join("")+
   `<p class="mu"><button class="g" id="rs">Reset progress</button></p><p class="mu" style="text-align:center">Académie Française · version ${APP_VER}</p>`;
   $.querySelectorAll(".lv").forEach(e=>e.onclick=()=>{const i=+e.dataset.i;if(!lvOpen(i)){alert("Pass every lesson test in the previous level to unlock this class.");return}cur=i;view="level";render()});
+  const openOptionalFeature=(globalName,label)=>event=>{
+    event.preventDefault();event.stopPropagation();
+    const open=window[globalName];
+    if(typeof open==="function"){open();return}
+    let note=el("faFeatureLoadError");
+    if(!note){note=document.createElement("div");note.id="faFeatureLoadError";note.className="card err";note.setAttribute("role","alert");$.prepend(note)}
+    note.textContent=label+" did not load. Check your connection, then refresh the page.";
+  };
+  el("htutor").onclick=openOptionalFeature("FAOpenTutor","AI French tutor");
+  el("hdict").onclick=openOptionalFeature("FAOpenDictionary","Dictionary & translation");
   bindTop();bindClassCards();el("hs").onclick=()=>{stopPl();view="speak";render()};el("hf").onclick=()=>{fc=null;view="flash";render()};el("hm").onclick=()=>{ms=null;view="miss";render()};el("hv").onclick=()=>{vt.q=null;view="verbs";render()};el("hg").onclick=()=>{view="grammar";render()};bindSound();{const ti=el("tinst2");if(ti)ti.onclick=()=>{if(deferred){deferred.prompt();deferred=null}}}el("rs").onclick=()=>{if(confirm("Erase all progress?")){S={passed:{},best:{}};ens();save();render()}};
 }
 function levelView(){const l=L[cur];

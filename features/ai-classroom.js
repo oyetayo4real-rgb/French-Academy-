@@ -6,6 +6,19 @@
   const FA_DICT = { level: "A1", mode: "dict", query: "", result: null, error: "", pending: false };
   const faEl = (id) => document.getElementById(id);
   const faSafe = (value) => esc(String(value == null ? "" : value));
+  // Explicit entry points let the home-page buttons work even if event delegation changes.
+  window.FAOpenTutor = async function () {
+    if (!(await faRestoreAuthUser())) { view = "auth"; render(); return; }
+    FA_AI.error = "";
+    view = "tutor";
+    render();
+  };
+  window.FAOpenDictionary = async function () {
+    if (!(await faRestoreAuthUser())) { view = "auth"; render(); return; }
+    FA_DICT.error = "";
+    view = "dict";
+    render();
+  };
   function faNeedSignIn() { if (typeof AUTH !== "undefined" && AUTH && AUTH.user) return true; view = "auth"; render(); return false; }
   async function faTutorRequest(payload) { return api("/functions/v1/tutor", { m: "POST", body: payload }); }
   async function faLoadDailySdk() {
