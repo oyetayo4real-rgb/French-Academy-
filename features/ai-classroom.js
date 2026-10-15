@@ -16,6 +16,7 @@
   window.FAOpenDictionary = async function () {
     if (!(await faRestoreAuthUser())) { view = "auth"; render(); return; }
     FA_DICT.error = "";
+    FA_DICT.mode = "dict";
     view = "dict";
     render();
   };
