@@ -9,17 +9,17 @@
   // Display Tutor answers with consistent headings, paragraphs, lists and emphasis.
   function faMarkdown(value) {
     const escaped = faSafe(value);
-    const inline = (line) => line.replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\\*\\*([^*]+)\\*\\*/g, "<strong>$1</strong>").replace(/(^|[^*])\\*([^*]+)\\*/g, "$1<em>$2</em>");
-    const lines = escaped.split(/\\r?\\n/), out = []; let list = "", paragraph = [];
+    const inline = (line) => line.replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>").replace(/(^|[^*])\*([^*]+)\*/g, "$1<em>$2</em>");
+    const lines = escaped.split(/\r?\n/), out = []; let list = "", paragraph = [];
     const flush = () => { if (paragraph.length) { out.push("<p>" + inline(paragraph.join(" ")) + "</p>"); paragraph = []; } };
     const close = () => { if (list) { out.push("</" + list + ">"); list = ""; } };
     for (const raw of lines) {
       const line = raw.trim(); if (!line) { flush(); close(); continue; }
-      const heading = line.match(/^(#{1,4})\\s+(.+)$/);
+      const heading = line.match(/^(#{1,4})\s+(.+)$/);
       if (heading) { flush(); close(); const n = Math.min(heading[1].length + 1, 5); out.push("<h" + n + ">" + inline(heading[2]) + "</h" + n + ">"); continue; }
-      const bullet = line.match(/^[-*•]\\s+(.+)$/);
+      const bullet = line.match(/^[-*•]\s+(.+)$/);
       if (bullet) { flush(); if (list !== "ul") { close(); list = "ul"; out.push("<ul>"); } out.push("<li>" + inline(bullet[1]) + "</li>"); continue; }
-      const numbered = line.match(/^\\d+[.)]\\s+(.+)$/);
+      const numbered = line.match(/^\d+[.)]\s+(.+)$/);
       if (numbered) { flush(); if (list !== "ol") { close(); list = "ol"; out.push("<ol>"); } out.push("<li>" + inline(numbered[1]) + "</li>"); continue; }
       paragraph.push(line);
     }
