@@ -141,7 +141,17 @@
   }
   function faDictHtml(d) {
     const word = faSafe(d.headword || FA_DICT.query);
-    if (d.notFound) return '<div class="card fa-dictionary-entry"><div class="mu" style="font-size:.82em;text-transform:uppercase;letter-spacing:.08em">French dictionary</div><h2>' + word + '</h2><p>No verified French-language entry was returned for this spelling.</p>' + (d.notes ? '<p class="mu">' + faSafe(d.notes) + '</p>' : '') + '<p class="mu">Try an accented spelling, an infinitive, or a singular form. Reference links are available below for independent checking.</p></div>';
+    if (d.notFound) {
+      const unavailable = d.sourceStatus === 'unavailable';
+      const heading = unavailable ? 'Dictionary source unavailable' : 'French dictionary entry not found';
+      const message = unavailable
+        ? 'The live French dictionary source could not be reached. This does not mean the word is missing.'
+        : 'No verified French-language entry was returned for this spelling.';
+      return '<div class="card fa-dictionary-entry"><div class="mu" style="font-size:.82em;text-transform:uppercase;letter-spacing:.08em">French dictionary</div><h2>' + word + '</h2><h3>' + heading + '</h3><p>' + message + '</p>' +
+        (d.sourceError ? '<p class="mu">' + faSafe(d.sourceError) + '</p>' : '') +
+        (d.notes ? '<p class="mu">' + faSafe(d.notes) + '</p>' : '') +
+        '<p class="mu">Try an accented spelling, an infinitive, or a singular form. You can also compare the editorial and historical references below.</p></div>';
+    }
     const groups = Array.isArray(d.entries) ? d.entries : [];
     const hasSourceEntry = groups.length > 0 && !d.generated;
     const list = (items) => Array.isArray(items) ? items.filter(x => x != null && String(typeof x === 'object' ? (x.text || x.form || x.value || '') : x).trim()).map(x => typeof x === 'object' ? (x.text || x.form || x.value || '') : x) : [];
