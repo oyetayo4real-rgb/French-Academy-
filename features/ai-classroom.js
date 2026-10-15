@@ -2,8 +2,8 @@
 (function () {
   "use strict";
   let FA_DAILY_CALL = null, FA_DAILY_META = null, FA_DAILY_SDK_PROMISE = null;
-  const FA_AI = { level: "A1", mode: "chat", messages: [], pending: false, error: "" };
-  const FA_DICT = { level: "A1", mode: "dict", query: "", result: null, error: "", pending: false };
+  const FA_AI = { level: "none", mode: "chat", messages: [], pending: false, error: "" };
+  const FA_DICT = { level: "none", mode: "dict", query: "", result: null, error: "", pending: false };
   const faEl = (id) => document.getElementById(id);
   const faSafe = (value) => esc(String(value == null ? "" : value));
   function faNeedSignIn() { if (typeof AUTH !== "undefined" && AUTH && AUTH.user) return true; view = "auth"; render(); return false; }
@@ -81,8 +81,8 @@
   function faTutorView() {
     if (!AUTH || !AUTH.user) { $.innerHTML = '<button class="g" id="faHome">← Home</button><h1>🤖 AI French tutor</h1><div class="card"><p>Sign in to use the tutor and keep your learning progress.</p><button id="faSignIn" style="width:100%">Sign in / Create account</button></div>'; return; }
     const messageHtml = FA_AI.messages.map((m) => '<div class="card" style="margin:8px 0"><b>' + (m.role === "user" ? "You" : "Académie AI") + '</b><div style="white-space:pre-wrap;margin-top:6px">' + faSafe(m.content) + "</div></div>").join("");
-    $.innerHTML = (typeof topbar === "function" ? topbar() : "") + '<button class="g" id="faHome">← Home</button><h1>🤖 AI French tutor</h1><p class="mu">Ask grammar questions, practise a conversation, translate a sentence or get gentle corrections at your CEFR level.</p>' +
-      '<div class="card"><label for="faTutorLevel"><b>Your level</b></label><select class="inp" id="faTutorLevel">' + ["A1","A2","B1","B2","C1","C2"].map((l) => '<option value="' + l + '"' + (l === FA_AI.level ? " selected" : "") + ">" + l + "</option>").join("") +
+    $.innerHTML = (typeof topbar === "function" ? topbar() : "") + '<button class="g" id="faHome">← Home</button><h1>🤖 AI French tutor</h1><p class="mu">Ask deep grammar questions, explore French usage, practise conversation, translate text or get detailed corrections. Choose a level only when you want learning scaffolding.</p>' +
+      '<div class="card"><label for="faTutorLevel"><b>Answer style</b></label><select class="inp" id="faTutorLevel">' + [["none","Unrestricted · full depth"],["A1","A1 support"],["A2","A2 support"],["B1","B1 support"],["B2","B2 support"],["C1","C1 support"],["C2","C2 support"]].map((l) => '<option value="' + l[0] + '"' + (l[0] === FA_AI.level ? " selected" : "") + ">" + l[1] + "</option>").join("") +
       '</select><label for="faTutorMode"><b>Practice mode</b></label><select class="inp" id="faTutorMode">' + [["chat","Ask the tutor"],["practice","Conversation practice"],["correct","Correct my French"],["translate","Translate French ↔ English"]].map((o) => '<option value="' + o[0] + '"' + (o[0] === FA_AI.mode ? " selected" : "") + ">" + o[1] + "</option>").join("") +
       "</select></div><div id=\"faTutorMessages\">" + (messageHtml || '<div class="card mu">Bonjour ! Ask me a French question, or choose a practice mode above.</div>') + "</div>" +
       (FA_AI.pending ? '<div class="card mu">The tutor is thinking…</div>' : "") + (FA_AI.error ? '<div class="err">' + faSafe(FA_AI.error) + "</div>" : "") +
@@ -110,12 +110,15 @@
     if (result && FA_DICT.mode === "translate") output = '<div class="card"><h2>Translation</h2><div style="white-space:pre-wrap">' + faSafe(result.text || "") + "</div></div>";
     else if (result && result.data) {
       const d = result.data;
-      output = '<div class="card"><h2>' + faSafe(d.headword || FA_DICT.query) + (d.gender ? ' <span class="pill">' + faSafe(d.gender) + "</span>" : "") + '</h2><div class="mu">' + faSafe(d.pos || "Word or phrase") + (d.ipa ? " · " + faSafe(d.ipa) : "") + "</div>" +
+      if (d.notFound) {
+        output = '<div class="card"><h2>' + faSafe(d.headword || FA_DICT.query) + '</h2><p class="mu">No reliable French dictionary entry was found for this query.</p>' + (d.notes ? '<p>' + faSafe(d.notes) + '</p>' : '') + '</div>';
+      } else output = '<div class="card"><h2>' + faSafe(d.headword || FA_DICT.query) + (d.gender ? ' <span class="pill">' + faSafe(d.gender) + "</span>" : "") + '</h2><div class="mu">' + faSafe(d.pos || "Word or phrase") + (d.ipa ? " · " + faSafe(d.ipa) : "") + "</div>" +
         (Array.isArray(d.meanings) ? "<h3>Meaning</h3><ul>" + d.meanings.map((x) => "<li>" + faSafe(x) + "</li>").join("") + "</ul>" : "") + (d.notes ? "<p><b>Usage note:</b> " + faSafe(d.notes) + "</p>" : "") +
         (Array.isArray(d.examples) ? "<h3>Examples</h3>" + d.examples.map((x) => '<div style="margin:10px 0"><div class="fr">' + faSafe(x.fr || "") + '</div><div class="en">' + faSafe(x.en || "") + "</div></div>").join("") : "") +
-        (Array.isArray(d.related) ? "<p><b>Related:</b> " + d.related.map(faSafe).join(" · ") + "</p>" : "") + "</div>";
+        (Array.isArray(d.related) ? "<p><b>Related:</b> " + d.related.map(faSafe).join(" · ") + "</p>" : "") +
+        (Array.isArray(d.sources) && d.sources.length ? '<h3>Sources & attribution</h3><ul>' + d.sources.map((s) => '<li>' + (s.url ? '<a href="' + escA(s.url) + '" target="_blank" rel="noopener noreferrer">' + faSafe(s.name || "Source") + '</a>' : faSafe(s.name || "Source")) + (s.licence ? '<div class="mu">' + faSafe(s.licence) + '</div>' : '') + '</li>').join("") + '</ul>' : "") + "</div>";
     }
-    $.innerHTML = (typeof topbar === "function" ? topbar() : "") + '<button class="g" id="faHome">← Home</button><h1>📖 Dictionary & translation</h1><p class="mu">Look up French or English words for meanings, usage notes and examples, or translate a complete sentence.</p><div class="card">' +
+    $.innerHTML = (typeof topbar === "function" ? topbar() : "") + '<button class="g" id="faHome">← Home</button><h1>📖 Dictionary & translation</h1><p class="mu">Look up French words, review source links and attribution, or translate a complete sentence.</p><div class="card">' +
       '<label for="faDictMode"><b>Tool</b></label><select id="faDictMode" class="inp"><option value="dict"' + (FA_DICT.mode === "dict" ? " selected" : "") + '>Dictionary lookup</option><option value="translate"' + (FA_DICT.mode === "translate" ? " selected" : "") + '>Translate a sentence</option></select>' +
       '<label for="faDictLevel"><b>CEFR level for examples</b></label><select id="faDictLevel" class="inp">' + ["A1","A2","B1","B2","C1","C2"].map((l) => '<option value="' + l + '"' + (l === FA_DICT.level ? " selected" : "") + ">" + l + "</option>").join("") + "</select>" +
       '<input class="inp" id="faDictInput" value="' + escA(FA_DICT.query) + '" placeholder="E.g. pourtant, apprendre, or I am looking for the station…"><button id="faDictLookup" style="width:100%"' + (FA_DICT.pending ? " disabled" : "") + ">" + (FA_DICT.pending ? "Working…" : "Look up / translate") + "</button>" + (FA_DICT.error ? '<div class="err">' + faSafe(FA_DICT.error) + "</div>" : "") + "</div>" + output;
