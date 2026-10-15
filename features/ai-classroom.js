@@ -137,16 +137,17 @@
   }
 
   function faDictSourceLinks() {
-    return '<div class="card"><h3>Dictionary sources</h3><p class="mu">The in-app entry uses French-language Wiktionnaire data when a matching entry is available. The Académie française and CNRTL/TLFi links are reference destinations for independent comparison; they are not represented as live lookups already performed.</p><p class="mu">Wiktionnaire data is licensed CC BY-SA and attributed. Protected dictionary text is not copied from CNRTL/TLFi.</p></div>';
+    return '<div class="card"><h3>Dictionary sources</h3><p class="mu">The in-app entry loads French-language Wiktionnaire definitions live. The app also resolves matching Académie française article links and checks CNRTL/TLFi page availability live; protected CNRTL/TLFi editorial text stays on its original site.</p><p class="mu">Wiktionnaire data is licensed CC BY-SA and attributed. Protected dictionary text is not copied from CNRTL/TLFi.</p></div>';
   }
   function faDictHtml(d) {
     const word = faSafe(d.headword || FA_DICT.query);
     if (d.notFound) {
       const unavailable = d.sourceStatus === 'unavailable';
-      const heading = unavailable ? 'Dictionary source unavailable' : 'French dictionary entry not found';
+      const aiUnavailable = d.sourceStatus === 'ai_unavailable';
+      const heading = unavailable ? 'Dictionary source unavailable' : (aiUnavailable ? 'AI enrichment temporarily unavailable' : 'French dictionary entry not found');
       const message = unavailable
         ? 'The live French dictionary source could not be reached. This does not mean the word is missing.'
-        : 'No verified French-language entry was returned for this spelling.';
+        : (aiUnavailable ? 'No source-backed entry was found for this spelling, and the optional AI explanation could not be generated. The reference sources are still available below.' : 'No verified French-language entry was returned for this spelling.');
       return '<div class="card fa-dictionary-entry"><div class="mu" style="font-size:.82em;text-transform:uppercase;letter-spacing:.08em">French dictionary</div><h2>' + word + '</h2><h3>' + heading + '</h3><p>' + message + '</p>' +
         (d.sourceError ? '<p class="mu">' + faSafe(d.sourceError) + '</p>' : '') +
         (d.notes ? '<p class="mu">' + faSafe(d.notes) + '</p>' : '') +
