@@ -141,3 +141,22 @@ A review on 2026-10-14 showed:
 The answer-key exposure is an actionable finding. The draft now contains a reviewable SQL patch at supabase/patches/20261014_remove_exam_answer_key_responses.sql: it removes the lkeys/rkeys fields from submit_exam responses, removes the answer array from submit_quiz responses, rejects null auth.uid() in both scoring RPCs, and limits execution to the authenticated role (revoking PUBLIC/anon grants). The current app exam screen uses score/criteria fields only; the quiz sync path ignores the RPC return body. Apply this patch in staging first and verify both response payloads before planning production rollout.
 
 This patch is intentionally stored under supabase/patches, not represented as an automatically applied migration, because the repository currently lacks the original migration history that created the production RPCs. Do not apply it directly to production from this PR. The remaining project-wide findings still need a reviewed remediation plan. Do not blindly revoke the other RPCs or add broad policies: first inspect each function body, intended caller, grants, and app call sites in staging; then apply least-privilege grants/policies in a reviewed migration. Enable leaked-password protection in Auth settings after validating the sign-in/password-reset experience in staging.
+
+
+## Repair branch update — provider and dictionary regression fix
+
+A follow-up branch, `fix/gemini-dictionary-provider`, was created on top of `feat/scalable-classes-ai-tutor`. It changes branch source only:
+- Provider-specific key selection takes precedence over the generic `AI_API_KEY`; a key for a different provider is never selected.
+- Gemini is the default if `AI_PROVIDER` is unset, though the intended runtime configuration is explicit `AI_PROVIDER=gemini`.
+- Tutor output allowance is increased for detailed answers; there is no zero-thinking-budget override.
+- Source-backed dictionary entries are restricted to French Wiktionary groups; English entries are never labelled as French.
+- The dictionary UI shows source links and licence/attribution notes and a clear not-found state.
+- AI-generated dictionary fallback is labelled as generated text and uses the existing per-user AI quota.
+
+### Verification status after branch edit
+- Branch code edited: yes.
+- Production Supabase functions/secrets changed: no.
+- Authenticated staging smoke test: blocked; no staging branch/project is listed, and the existing smoke test refuses the production project.
+- Live authenticated Gemini request: not run.
+- Static checks: pending; CI must pass on the repair PR before merge.
+- Release decision: HOLD until CI and staging test results are recorded.

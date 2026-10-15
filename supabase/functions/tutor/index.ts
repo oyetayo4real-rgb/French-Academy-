@@ -1,93 +1,347 @@
-// AI tutor + dictionary for Académie Française. Requires secret ANTHROPIC_API_KEY.
+// AI tutor + source-first French dictionary for Académie Française.
+// The provider and its key are resolved together; never choose another provider's key.
+// Secrets must remain server-side and must never be logged or returned.
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type", "Access-Control-Allow-Methods": "POST, OPTIONS" };
-const J = (o: unknown, s = 200) => new Response(JSON.stringify(o), { status: s, headers: { ...CORS, "Content-Type": "application/json" } });
+const J = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: { ...CORS, "Content-Type": "application/json" } });
+
 function subOf(req: Request): string | null {
   try {
-    const t = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
-    const p = t.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
-    const j = JSON.parse(atob(p + "=".repeat((4 - (p.length % 4)) % 4)));
-    return j.role === "authenticated" && j.sub ? String(j.sub) : null;
+    const bearer = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
+    const part = bearer.split(".")[1];
+    if (!part) return null;
+    const normalized = part.replace(/-/g, "+").replace(/_/g, "/");
+    const claims = JSON.parse(atob(normalized + "=".repeat((4 - normalized.length % 4) % 4)));
+    return claims.role === "authenticated" && claims.sub ? String(claims.sub) : null;
   } catch (_) { return null; }
 }
-const norm = (s: unknown) => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim().slice(0, 80);
-const clip = (s: unknown, n: number) => String(s || "").slice(0, n);
+const clip = (value: unknown, max: number) => String(value ?? "").slice(0, max);
 const LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"];
-function grabJson(t: string) {
-  const a = t.indexOf("{"), b = t.lastIndexOf("}");
-  if (a < 0 || b <= a) return null;
-  try { return JSON.parse(t.slice(a, b + 1)); } catch (_) { return null; }
+const MODELS: Record<string, string> = {
+  gemini: "gemini-3.8-flash",
+  groq: "llama-3.3-70b-versatile",
+  mistral: "mistral-small-latest",
+  openrouter: "meta-llama/llama-3.3-70b-instruct:free"
+};
+const BASES: Record<string, string> = {
+  groq: "https://api.groq.com/openai/v1",
+  mistral: "https://api.mistral.ai/v1",
+  openrouter: "https://openrouter.ai/api/v1"
+};
+
+function providerConfig() {
+  const configuredProvider = (Deno.env.get("AI_PROVIDER") || "gemini").trim().toLowerCase();
+  // Older production configuration used "auto" when Gemini was the configured provider.
+  const provider = configuredProvider === "auto" ? "gemini" : configuredProvider;
+  const secretNames: Record<string, string[]> = {
+    gemini: ["GEMINI_API_KEY", "AI_API_KEY"],
+    groq: ["GROQ_API_KEY", "AI_API_KEY"],
+    mistral: ["MISTRAL_API_KEY", "AI_API_KEY"],
+    openrouter: ["OPENROUTER_API_KEY", "AI_API_KEY"]
+  };
+  if (!secretNames[provider]) throw new Error("bad_provider");
+  const selectedName = secretNames[provider].find((name) => Boolean(Deno.env.get(name)));
+  if (!selectedName) throw new Error("not_configured");
+  const modelNames: Record<string, string> = { gemini: "GEMINI_MODEL", groq: "GROQ_MODEL", mistral: "MISTRAL_MODEL", openrouter: "OPENROUTER_MODEL" };
+  // Keep Gemini on a known supported default; legacy model overrides caused production 404s.
+  const configuredModel = provider === "gemini" ? "" : Deno.env.get(modelNames[provider]);
+  return { provider, key: Deno.env.get(selectedName)!, selectedName, model: configuredModel || MODELS[provider] };
 }
+
+async function callAI(system: string, messages: { role: string; content: string }[], maxTokens: number) {
+  const config = providerConfig();
+  if (config.provider === "gemini") {
+    // Start with a current, stable model and recover from model-specific 404s.
+    // Some keys/projects cannot access legacy Gemini 2.5 models, even though they remain listed.
+    const candidates = [...new Set([
+      config.model,
+      "gemini-3.8-flash",
+      "gemini-3.6-flash",
+      "gemini-3.5-flash-lite",
+      "gemini-2.5-flash"
+    ].filter(Boolean))];
+    let lastStatus = 0;
+    for (const model of candidates) {
+      const response = await fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent",
+        {
+          method: "POST",
+          headers: { "x-goog-api-key": config.key, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: system }] },
+            contents: messages.map((message) => ({
+              role: message.role === "assistant" ? "model" : "user",
+              parts: [{ text: message.content }]
+            })),
+            // Leave thinking enabled so complex French questions can be answered in depth.
+            generationConfig: { maxOutputTokens: maxTokens, temperature: 0.4 }
+          }),
+          signal: AbortSignal.timeout(30000)
+        }
+      );
+      if (response.ok) {
+        const json = await response.json();
+        const candidate = json?.candidates?.[0];
+        if (candidate?.finishReason === "SAFETY") throw new Error("blocked");
+        return (candidate?.content?.parts || []).map((part: { text?: string }) => part.text || "").join("").trim();
+      }
+
+      const rawError = await response.text().catch(() => "");
+      let reason = "";
+      try {
+        const parsed = JSON.parse(rawError);
+        reason = String(parsed?.error?.message || parsed?.error?.status || "");
+      } catch (_) {}
+      console.error("[tutor] provider request failed", JSON.stringify({
+        provider: "gemini",
+        model,
+        status: response.status,
+        reason: clip(reason, 180)
+      }));
+      if (response.status === 429) throw new Error("rate");
+      if (response.status === 404) {
+        lastStatus = response.status;
+        continue;
+      }
+      throw new Error("provider_http_" + response.status);
+    }
+    throw new Error("provider_http_" + (lastStatus || 404));
+  }
+
+  const response = await fetch(BASES[config.provider] + "/chat/completions", {
+    method: "POST",
+    headers: { Authorization: "Bearer " + config.key, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: config.model,
+      max_tokens: maxTokens,
+      temperature: 0.4,
+      messages: [{ role: "system", content: system }, ...messages]
+    }),
+    signal: AbortSignal.timeout(30000)
+  });
+  if (response.status === 429) throw new Error("rate");
+  if (!response.ok) {
+    console.error("[tutor] provider request failed", JSON.stringify({ provider: config.provider, status: response.status }));
+    throw new Error("provider_http_" + response.status);
+  }
+  const json = await response.json();
+  return String(json?.choices?.[0]?.message?.content || "").trim();
+}
+
+function grabJson(text: string) {
+  const start = text.indexOf("{"), end = text.lastIndexOf("}");
+  if (start < 0 || end <= start) return null;
+  try { return JSON.parse(text.slice(start, end + 1)); } catch (_) { return null; }
+}
+function dictionarySources(query: string) {
+  const term = encodeURIComponent(query);
+  return [
+    { name: "Wiktionary — French entry (CC BY-SA 4.0)", url: "https://en.wiktionary.org/wiki/" + term.replace(/%20/g, "_"), licence: "Community-authored content; preserve attribution and the applicable share-alike licence." },
+    { name: "Dictionnaire de l’Académie française", url: "https://www.dictionnaire-academie.fr/search/" + term, licence: "Editorial reference; consult the entry at the source rather than copying its text." },
+    { name: "CNRTL / TLFi", url: "https://www.cnrtl.fr/definition/" + term, licence: "Historical reference; consult the source for its entry and usage notes." }
+  ];
+}
+async function takeAiAllowance(uid: string) {
+  const url = Deno.env.get("SUPABASE_URL");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !serviceKey) return { ok: false, status: 503 };
+  const response = await fetch(url + "/rest/v1/rpc/ai_use", {
+    method: "POST",
+    headers: { apikey: serviceKey, Authorization: "Bearer " + serviceKey, "Content-Type": "application/json" },
+    body: JSON.stringify({ p_uid: uid })
+  });
+  if (!response.ok) {
+    console.error("[tutor] quota RPC failed", JSON.stringify({ status: response.status }));
+    return { ok: false, status: 503 };
+  }
+  const allowed = await response.json().catch(() => false);
+  return { ok: allowed === true, status: allowed === true ? 200 : 429 };
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   try {
-    const key = Deno.env.get("ANTHROPIC_API_KEY");
-    if (!key) return J({ error: "not_configured" }, 503);
     const uid = subOf(req);
-    if (!uid) return J({ error: "not_signed_in" }, 401);
+    if (!uid) return J({ error: "not_signed_in", message: "Please sign in again." }, 401);
     const body = await req.json().catch(() => ({}));
-    const mode = ["chat", "translate", "correct", "practice", "dict", "examples"].includes(body.mode) ? body.mode : "chat";
-    const level = LEVELS.includes(body.level) ? body.level : "A1";
-    const text = clip(body.text, 1500).trim();
+    const mode = ["chat", "translate", "correct", "practice", "dict", "sources", "examples"].includes(body.mode) ? body.mode : "chat";
+    const text = clip(body.text, 1800).trim();
     if (!text && mode !== "examples") return J({ error: "empty", message: "Type something first." }, 400);
-    const SU = Deno.env.get("SUPABASE_URL")!, SK = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const sb = (path: string, opt: RequestInit = {}) => fetch(SU + path, { ...opt, headers: { apikey: SK, Authorization: "Bearer " + SK, "Content-Type": "application/json", ...((opt.headers as Record<string, string>) || {}) } });
-    let ck: string | null = null;
-    if (mode === "dict") ck = "dict:" + norm(text);
-    if (mode === "examples") ck = "lesson:" + clip(body.key, 20).replace(/[^A-Za-z0-9-]/g, "");
-    if (ck) {
-      const r = await sb("/rest/v1/dict_cache?word=eq." + encodeURIComponent(ck) + "&select=data");
-      const j = await r.json().catch(() => null);
-      if (Array.isArray(j) && j[0]) return J({ ok: true, data: j[0].data, cached: true });
+
+    // Dictionary: use source-backed French entries first. Never relabel English entries as French.
+    if (mode === "dict" || mode === "sources") {
+      let wiki: Record<string, any> | null = null;
+      let sourceError = "";
+      try {
+        const response = await fetch("https://en.wiktionary.org/api/rest_v1/page/definition/" + encodeURIComponent(text), {
+          headers: {
+            Accept: "application/json",
+            "Api-User-Agent": "AcademieFrancaise/1.0 (French dictionary; https://github.com/oyetayo4real-rgb/French-Academy-)"
+          },
+          signal: AbortSignal.timeout(7000)
+        });
+        if (response.ok) wiki = await response.json();
+        else sourceError = "Wiktionary returned HTTP " + response.status + ".";
+      } catch (_) { sourceError = "Wiktionary is unavailable at the moment."; }
+
+      const frenchGroups = Array.isArray(wiki?.French) ? wiki!.French : Array.isArray(wiki?.fr) ? wiki!.fr : [];
+      const entries = frenchGroups
+        .filter((group: any) => String(group.language || "").toLowerCase() === "french" && Array.isArray(group.definitions))
+        .map((group: any) => ({
+          language: "French",
+          partOfSpeech: clip(group.partOfSpeech, 80),
+          definitions: group.definitions.slice(0, 12).map((definition: any) => ({
+            definition: clip(definition.definition, 1800),
+            examples: (Array.isArray(definition.examples) ? definition.examples : []).slice(0, 4)
+              .map((example: any) => clip(typeof example === "string" ? example : example?.text, 400)),
+            parsedExamples: (Array.isArray(definition.parsedExamples) ? definition.parsedExamples : []).slice(0, 2)
+          }))
+        }))
+        .filter((group: any) => group.definitions.some((definition: any) => definition.definition));
+
+      const sources = dictionarySources(text);
+      if (mode === "sources") return J({
+        ok: true,
+        data: { headword: text, entries, sources, sourceStatus: wiki ? "ok" : "unavailable", sourceError }
+      });
+
+      if (entries.length) {
+        const definitions = entries.flatMap((group: any) => group.definitions.map((definition: any) => definition.definition)).slice(0, 30);
+        const examples = entries.flatMap((group: any) => group.definitions.flatMap((definition: any) =>
+          definition.examples.map((example: string) => ({ fr: example, en: "" }))
+        )).slice(0, 8);
+        return J({
+          ok: true,
+          data: {
+            headword: text,
+            pos: [...new Set(entries.map((group: any) => group.partOfSpeech).filter(Boolean))].join(", "),
+            entries,
+            meanings: definitions,
+            examples,
+            sources,
+            notes: "Wiktionnaire entry. Community-edited definitions are licensed under CC BY-SA 4.0; follow the linked page for attribution and licence details."
+          }
+        });
+      }
+
+      // If the source has no French entry, optionally generate a clearly-labelled explanation.
+      // It consumes the normal per-user AI quota and is never represented as an official entry.
+      let config;
+      try { config = providerConfig(); }
+      catch (error) {
+        if (error instanceof Error && error.message === "bad_provider") {
+          return J({ error: "bad_provider", message: "AI_PROVIDER must be gemini, groq, mistral or openrouter." }, 503);
+        }
+        return J({
+          ok: true,
+          data: {
+            headword: text, entries: [], meanings: [], examples: [], sources,
+            notFound: true,
+            notes: sourceError || "No French-language entry was available. Check the spelling or try an accented form."
+          }
+        });
+      }
+      const allowance = await takeAiAllowance(uid);
+      if (!allowance.ok && allowance.status === 503) return J({ error: "quota_unavailable", message: "The Tutor usage-limit service is temporarily unavailable." }, 503);
+      if (!allowance.ok) return J({ error: "limit", message: "You have reached today's AI-use limit. Please try again later." }, 429);
+      try {
+        const generated = await callAI(
+          "You are a modern French lexicographer. Return valid JSON only with keys headword, pos, gender, ipa, meanings (array of concise strings ordered from common/current to less common or figurative), examples (array of objects with fr and en strings), notes, related (array of strings), and notFound (boolean). Use natural, idiomatic contemporary French and precise English translations. Give 2–4 short, natural French examples, each paired with a faithful English translation; keep punctuation and register consistent. Explain part of speech, gender and usage when relevant. Distinguish standard, formal, informal, regional and dated senses when reliably known. Do not invent etymology, citations or official dictionary authority. If the query is not identifiable as a French word or expression, set notFound=true and explain briefly.",
+          [{ role: "user", content: "French dictionary lookup: " + text }],
+          1700
+        );
+        const data = grabJson(generated);
+        if (!data || data.notFound || !data.headword) return J({
+          ok: true, data: {
+            headword: text, entries: [], meanings: [], examples: [], sources,
+            notFound: true, notes: data?.reason || "No reliable French entry could be produced. Try another spelling."
+          }
+        });
+        return J({
+          ok: true, data: {
+            ...data, entries: [], sources: [
+              ...sources,
+              { name: "AI-generated explanation (not an official dictionary entry)", url: null, licence: "Generated explanation; not copied from an external source." }
+            ],
+            generated: true,
+            notes: (data.notes ? String(data.notes) + " " : "") + "AI-generated explanation, not a verified quotation from an external dictionary."
+          }
+        });
+      } catch (error) {
+        console.error("[tutor] dictionary fallback failed", error instanceof Error ? error.message : "unknown");
+        return J({ error: "ai_error", message: "The source lookup was empty and the AI fallback failed. Please retry later." }, 502);
+      }
     }
-    const u = await sb("/rest/v1/rpc/ai_use", { method: "POST", body: JSON.stringify({ p_uid: uid }) });
-    const allowed = await u.json().catch(() => false);
-    if (allowed !== true) return J({ error: "limit", message: "You have reached today's limit for the AI tutor. Please try again tomorrow." }, 429);
-    const base = "You are a warm, patient French tutor for university students. The student's level is " + level + " on the CEFR scale. Write mainly in English, show French examples with English translations, keep answers short and clear, and never invent facts. If unsure, say so.";
-    let system = base, messages: { role: string; content: string }[] = [];
-    const hist = () => {
-      const out: { role: string; content: string }[] = [];
-      const h = Array.isArray(body.history) ? body.history.slice(-8) : [];
-      for (const m of h) if (m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string") out.push({ role: m.role, content: clip(m.content, 1500) });
-      while (out.length && out[0].role !== "user") out.shift();
-      if (out.length && out[out.length - 1].role === "user") out.pop();
-      out.push({ role: "user", content: text });
-      return out;
-    };
+
+    let config;
+    try { config = providerConfig(); }
+    catch (error) {
+      if (error instanceof Error && error.message === "bad_provider") return J({ error: "bad_provider", message: "AI_PROVIDER must be gemini, groq, mistral or openrouter." }, 503);
+      return J({ error: "not_configured", message: "No key is configured for the selected AI provider. Check the server-side secret names." }, 503);
+    }
+
+    const allowance = await takeAiAllowance(uid);
+    if (!allowance.ok && allowance.status === 503) return J({ error: "quota_unavailable", message: "The Tutor usage-limit service is temporarily unavailable." }, 503);
+    if (!allowance.ok) return J({ error: "limit", message: "You have reached today's AI-use limit. Please try again later." }, 429);
+
+    const level = LEVELS.includes(body.level) ? body.level : "none";
+    const levelNote = level === "none"
+      ? "No CEFR restriction. Answer in the depth the question deserves; be comprehensive when helpful."
+      : "The learner selected " + level + " as an optional scaffold. Do not remove important nuance, edge cases, exceptions or deeper analysis just because of that preference.";
+    const base = "You are Académie Française Intelligence: a rigorous French linguist, lexicographer, grammar specialist, translator, writing editor and research assistant. " +
+      levelNote + " Prefer structured, substantial answers for difficult questions. Explain the reasoning and distinctions, rules and exceptions, register and regional variation, original examples with translations, common mistakes and uncertainty. Cite or link sources only when reliable source retrieval actually happened. Never fabricate citations or claim a generated dictionary entry came from an external authority.";
+    let system = base;
+    let messages: { role: string; content: string }[] = [];
+
     if (mode === "chat") {
-      system += " Answer the student's question about French. Use at most about 150 words unless asked for more.";
-      messages = hist();
+      system += " Answer the question in the depth it deserves. Do not impose a fixed short word limit. Use headings and tables when they improve the explanation.";
+      const history = Array.isArray(body.history) ? body.history.slice(-12) : [];
+      for (const item of history) if (item && (item.role === "user" || item.role === "assistant") && typeof item.content === "string") {
+        messages.push({ role: item.role, content: clip(item.content, 3000) });
+      }
+      while (messages.length && messages[0].role !== "user") messages.shift();
+      if (messages.length && messages[messages.length - 1].role === "user") messages.pop();
+      messages.push({ role: "user", content: text });
     } else if (mode === "translate") {
-      system += " Translate the student's text. If it is English, translate to French; if French, translate to English. Give the translation first, then at most 3 short notes on tricky words or grammar.";
+      system += " Translate in the correct direction based on the input language. Show the best contextual translation first, then explain alternatives, idioms, register, ambiguity and relevant grammar when useful.";
       messages = [{ role: "user", content: text }];
     } else if (mode === "correct") {
-      system += " The student wrote French. Give the corrected version first, then a short bullet list of each correction with a one-line reason. Be encouraging. If the text is already correct, say so.";
+      system += " Correct French carefully. Show the corrected text first. Explain actual errors separately from stylistic choices; preserve intended meaning and offer alternatives where useful.";
       messages = [{ role: "user", content: text }];
     } else if (mode === "practice") {
-      system += " Role-play a simple everyday conversation in French at the student's level. Reply in French (short, 1-3 sentences) followed by an English translation in brackets, then ask one easy follow-up question. If the student made a mistake, add a one-line gentle correction at the end.";
-      messages = hist();
-    } else if (mode === "dict") {
-      system = "You are a precise French-English dictionary for learners. Respond with ONLY a JSON object, no other text, in this shape: {\"headword\":\"French word\",\"input_language\":\"fr or en\",\"pos\":\"part of speech\",\"gender\":\"m, f, m/f or empty\",\"ipa\":\"/.../\",\"meanings\":[\"English meaning 1\",\"meaning 2\"],\"examples\":[{\"fr\":\"French sentence\",\"en\":\"English translation\"}],\"notes\":\"one short usage or grammar note\",\"related\":[\"word1\",\"word2\"]}. If the input is English, headword is the best French translation, and meanings list other French options. Give exactly 4 natural example sentences suited to level " + level + ". If the input is not a word or phrase, return {\"error\":\"not a word\"}.";
-      messages = [{ role: "user", content: text }];
+      system += " Conduct natural French conversation. Reply in French with context-appropriate depth, then give an English translation and useful language notes. Do not force beginner simplification unless asked.";
+      const history = Array.isArray(body.history) ? body.history.slice(-12) : [];
+      for (const item of history) if (item && (item.role === "user" || item.role === "assistant") && typeof item.content === "string") {
+        messages.push({ role: item.role, content: clip(item.content, 3000) });
+      }
+      while (messages.length && messages[0].role !== "user") messages.shift();
+      if (messages.length && messages[messages.length - 1].role === "user") messages.pop();
+      messages.push({ role: "user", content: text });
     } else {
-      system = "You write extra practice material for a French lesson. Respond with ONLY a JSON object: {\"examples\":[{\"fr\":\"...\",\"en\":\"...\"}],\"tip\":\"one short study tip\"}. Write exactly 8 natural, correct example sentences at level " + level + " that practise the lesson's grammar and vocabulary, each with an English translation.";
-      messages = [{ role: "user", content: "Lesson: " + clip(body.title, 120) + "\nGrammar and focus: " + clip(body.focus, 700) + "\nSome phrases from the lesson: " + clip(body.phrases, 600) }];
+      system += " Generate supplementary French lesson examples. Return valid JSON only with examples as an array of {fr,en} and a short tip.";
+      messages = [{
+        role: "user",
+        content: "Lesson: " + clip(body.title, 120) + "\\nFocus: " + clip(body.focus, 700) + "\\nPhrases: " + clip(body.phrases, 600)
+      }];
     }
-    const r = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-      body: JSON.stringify({ model: Deno.env.get("TUTOR_MODEL") || "claude-haiku-5-5", max_tokens: mode === "chat" || mode === "practice" ? 700 : 1000, system, messages }),
-    });
-    if (!r.ok) { await r.text().catch(() => ""); return J({ error: "ai_error", message: "The tutor is unavailable right now. Please try again in a moment." }, 502); }
-    const j = await r.json();
-    const out = (j.content || []).filter((c: { type: string }) => c.type === "text").map((c: { text: string }) => c.text).join("").trim();
-    if (mode === "dict" || mode === "examples") {
-      const data = grabJson(out);
-      if (!data || data.error) return J({ ok: true, raw: data && data.error ? "I could not find that as a word or phrase." : out });
-      if (ck) await sb("/rest/v1/dict_cache?on_conflict=word", { method: "POST", headers: { Prefer: "resolution=merge-duplicates,return=minimal" }, body: JSON.stringify({ word: ck, data }) }).catch(() => {});
-      return J({ ok: true, data });
+
+    try {
+      const output = await callAI(system, messages, mode === "chat" ? 4800 : mode === "practice" ? 2000 : 2400);
+      if (!output) return J({ error: "ai_empty", message: "The AI provider returned an empty answer. Please retry." }, 502);
+      if (mode === "examples") {
+        const data = grabJson(output);
+        if (!data || !Array.isArray(data.examples)) return J({ error: "invalid_ai_json", message: "The Tutor returned lesson examples in an unexpected format." }, 502);
+        return J({ ok: true, data });
+      }
+      return J({ ok: true, text: output });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "unknown";
+      if (message === "rate") return J({ error: "busy", message: "The selected AI provider is rate-limited. Please try again shortly." }, 429);
+      if (message === "not_configured") return J({ error: "not_configured", message: "The selected provider key is missing." }, 503);
+      if (message === "blocked") return J({ error: "blocked", message: "The provider declined this request under its safety rules. Please rephrase it." }, 422);
+      return J({ error: "ai_error", message: "The AI provider could not complete this request. Check the selected provider, model, key validity and quota." }, 502);
     }
-    return J({ ok: true, text: out });
-  } catch (_e) {
+  } catch (error) {
+    console.error("[tutor] unhandled request failure", error instanceof Error ? error.message : "unknown");
     return J({ error: "server", message: "Something went wrong. Please try again." }, 500);
   }
 });
