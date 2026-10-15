@@ -9,7 +9,7 @@
   // Render a small safe Markdown subset for tutor answers. Escape HTML before adding markup.
   function faMarkdown(value) {
     const escaped = faSafe(value);
-    const inline = (line) => line.replace(/`([^`]+)`/g,"<code>$1</code>").replace(/**([^*]+)**/g,"<strong>$1</strong>").replace(/(^|[^*])*([^*]+)*/g,"$1<em>$2</em>");
+    const inline = (line) => line.replace(/`([^`]+)`/g,"<code>$1</code>").replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>").replace(/(^|[^*])\*([^*]+)\*/g,"$1<em>$2</em>");
     const lines=escaped.split(/\r?\n/), out=[]; let list="", paragraph=[];
     const flush=()=>{if(paragraph.length){out.push("<p>"+inline(paragraph.join(" "))+"</p>");paragraph=[];}};
     const close=()=>{if(list){out.push("</"+list+">");list="";}};
