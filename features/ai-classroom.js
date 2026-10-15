@@ -93,54 +93,67 @@
 
   function faTutorView() {
     if (!AUTH || !AUTH.user) { $.innerHTML = '<button class="g" id="faHome">← Home</button><h1>🤖 AI French tutor</h1><div class="card"><p>Sign in to use the tutor and keep your learning progress.</p><button id="faSignIn" style="width:100%">Sign in / Create account</button></div>'; return; }
-    const messageHtml = FA_AI.messages.map((m) => '<div class="card" style="margin:8px 0"><b>' + (m.role === "user" ? "You" : "Académie AI") + '</b><div style="white-space:pre-wrap;margin-top:6px">' + faSafe(m.content) + "</div></div>").join("");
-    $.innerHTML = (typeof topbar === "function" ? topbar() : "") + '<button class="g" id="faHome">← Home</button><h1>🤖 AI French tutor</h1><p class="mu">Ask grammar questions, practise a conversation, translate a sentence or get gentle corrections at your CEFR level.</p>' +
-      '<div class="card"><label for="faTutorLevel"><b>Your level</b></label><select class="inp" id="faTutorLevel">' + ["A1","A2","B1","B2","C1","C2"].map((l) => '<option value="' + l + '"' + (l === FA_AI.level ? " selected" : "") + ">" + l + "</option>").join("") +
-      '</select><label for="faTutorMode"><b>Practice mode</b></label><select class="inp" id="faTutorMode">' + [["chat","Ask the tutor"],["practice","Conversation practice"],["correct","Correct my French"],["translate","Translate French ↔ English"]].map((o) => '<option value="' + o[0] + '"' + (o[0] === FA_AI.mode ? " selected" : "") + ">" + o[1] + "</option>").join("") +
-      "</select></div><div id=\"faTutorMessages\">" + (messageHtml || '<div class="card mu">Bonjour ! Ask me a French question, or choose a practice mode above.</div>') + "</div>" +
-      (FA_AI.pending ? '<div class="card mu">The tutor is thinking…</div>' : "") + (FA_AI.error ? '<div class="err">' + faSafe(FA_AI.error) + "</div>" : "") +
-      '<div class="card"><textarea class="inp" id="faTutorInput" rows="3" placeholder="E.g. Explain when to use passé composé instead of imparfait…"></textarea><button id="faTutorSend" style="width:100%"' + (FA_AI.pending ? " disabled" : "") + ">" + (FA_AI.pending ? "Please wait…" : "Send to tutor") + '</button><p class="mu">AI explanations can make mistakes. Check important language details.</p></div>';
+    const messageHtml = FA_AI.messages.map((m) => '<div class="card" style="margin:8px 0"><b>' + (m.role === "user" ? "You" : "Académie AI") + '</b><div style="white-space:pre-wrap;margin-top:6px;line-height:1.75">' + faSafe(m.content) + "</div></div>").join("");
+    $.innerHTML = (typeof topbar === "function" ? topbar() : "") + '<button class="g" id="faHome">← Home</button><h1>🤖 Académie French Intelligence</h1><p class="mu">A deep French-language research assistant for grammar, syntax, semantics, literature, history, translation, writing and contemporary usage. CEFR level is optional guidance, never a ceiling on answer depth.</p>' +
+      '<div class="card"><label for="faTutorLevel"><b>Optional explanation style</b></label><select class="inp" id="faTutorLevel"><option value="none"' + (FA_AI.level === "none" ? " selected" : "") + '>No level restriction · full-depth answer</option>' + ["A1","A2","B1","B2","C1","C2"].map((l) => '<option value="' + l + '"' + (l === FA_AI.level ? " selected" : "") + '>' + l + ' · optional learner scaffolding</option>').join("") + '</select><label for="faTutorMode"><b>Tool</b></label><select class="inp" id="faTutorMode">' + [["chat","Deep answer / research"],["practice","Conversation practice"],["correct","Correct and analyse my French"],["translate","Translate French ↔ English"]].map((o) => '<option value="' + o[0] + '"' + (o[0] === FA_AI.mode ? " selected" : "") + '>' + o[1] + '</option>').join("") + "</select></div><div id=\"faTutorMessages\">" + (messageHtml || '<div class="card mu">Ask a question of any depth. For complex questions, I should explain the reasoning, alternatives, exceptions, examples and sources where available.</div>') + "</div>" +
+      (FA_AI.pending ? '<div class="card mu">Researching and preparing an answer…</div>' : "") + (FA_AI.error ? '<div class="err">' + faSafe(FA_AI.error) + "</div>" : "") +
+      '<div class="card"><textarea class="inp" id="faTutorInput" rows="5" placeholder="Ask anything about French: a complex grammar question, literary passage, idiom, translation, essay, etymology or language research…"></textarea><button id="faTutorSend" style="width:100%"' + (FA_AI.pending ? " disabled" : "") + ">" + (FA_AI.pending ? "Please wait…" : "Ask Académie") + '</button><p class="mu">Answers should distinguish verified source material from analysis and uncertainty. Live AI answers require a configured provider.</p></div>';
     if (typeof bindTop === "function") bindTop();
   }
   async function faTutorSend() {
     if (!faNeedSignIn()) return;
     const input = faEl("faTutorInput"), text = input ? input.value.trim() : "";
     if (!text || FA_AI.pending) return;
-    FA_AI.level = faEl("faTutorLevel")?.value || FA_AI.level; FA_AI.mode = faEl("faTutorMode")?.value || FA_AI.mode;
-    const history = FA_AI.messages.slice(-8).map((m) => ({ role: m.role, content: m.content }));
+    FA_AI.level = faEl("faTutorLevel")?.value || "none"; FA_AI.mode = faEl("faTutorMode")?.value || "chat";
+    const history = FA_AI.messages.slice(-12).map((m) => ({ role: m.role, content: m.content }));
     FA_AI.messages.push({ role: "user", content: text }); FA_AI.pending = true; FA_AI.error = ""; faTutorView();
     try {
-      const response = await faTutorRequest({ mode: FA_AI.mode, level: FA_AI.level, text, history });
+      const response = await faTutorRequest({ mode: FA_AI.mode, level: FA_AI.level, text, history, depth: "comprehensive", research: true });
+      if (response && response.error === "not_configured") throw new Error("The AI provider is not configured yet. The sourced dictionary works independently; add an AI provider key in Supabase Edge Function Secrets to enable deep AI answers.");
       FA_AI.messages.push({ role: "assistant", content: response && typeof response.text === "string" ? response.text : "I could not prepare an answer. Please try again." });
-      FA_AI.messages = FA_AI.messages.slice(-20);
+      FA_AI.messages = FA_AI.messages.slice(-24);
     } catch (error) { FA_AI.error = (error && error.message) || "The tutor could not answer just now."; }
     finally { FA_AI.pending = false; render(true); const messages = faEl("faTutorMessages"); if (messages) messages.scrollIntoView({ block: "end", behavior: "smooth" }); }
   }
 
+  function faDictSourceLinks() {
+    const q = encodeURIComponent(FA_DICT.query || "");
+    return '<div class="card"><h3>Reference sources</h3><p class="mu">Compare editorial and historical references. Their contents remain on their own sites unless a reuse licence permits reproduction.</p><p><a target="_blank" rel="noopener noreferrer" href="https://fr.wiktionary.org/wiki/' + q + '">Wiktionnaire · lexical entry</a></p><p><a target="_blank" rel="noopener noreferrer" href="https://www.dictionnaire-academie.fr/search/' + q + '">Dictionnaire de l’Académie française · modern normative reference</a></p><p><a target="_blank" rel="noopener noreferrer" href="https://www.cnrtl.fr/definition/' + q + '">CNRTL / TLFi · historical definitions and etymology</a></p><p><a target="_blank" rel="noopener noreferrer" href="https://conjugaison.app/">French conjugation dataset · CC0</a></p><p class="mu">Wiktionnaire content is CC BY-SA: attribution and share-alike terms apply. TLFi terms exclude commercial exploitation; this app links to TLFi rather than copying its entries.</p></div>';
+  }
   function faDictionaryView() {
-    if (!AUTH || !AUTH.user) { $.innerHTML = '<button class="g" id="faHome">← Home</button><h1>📖 French dictionary</h1><div class="card"><p>Sign in to use the dictionary and translator.</p><button id="faSignIn" style="width:100%">Sign in / Create account</button></div>'; return; }
-    let output = ""; const result = FA_DICT.result;
+    if (!AUTH || !AUTH.user) { $.innerHTML = '<button class="g" id="faHome">← Home</button><h1>📖 French reference dictionary</h1><div class="card"><p>Sign in to use the dictionary and translator.</p><button id="faSignIn" style="width:100%">Sign in / Create account</button></div>'; return; }
+    let output = "", result = FA_DICT.result;
     if (result && FA_DICT.mode === "translate") output = '<div class="card"><h2>Translation</h2><div style="white-space:pre-wrap">' + faSafe(result.text || "") + "</div></div>";
     else if (result && result.data) {
       const d = result.data;
       output = '<div class="card"><h2>' + faSafe(d.headword || FA_DICT.query) + (d.gender ? ' <span class="pill">' + faSafe(d.gender) + "</span>" : "") + '</h2><div class="mu">' + faSafe(d.pos || "Word or phrase") + (d.ipa ? " · " + faSafe(d.ipa) : "") + "</div>" +
-        (Array.isArray(d.meanings) ? "<h3>Meaning</h3><ul>" + d.meanings.map((x) => "<li>" + faSafe(x) + "</li>").join("") + "</ul>" : "") + (d.notes ? "<p><b>Usage note:</b> " + faSafe(d.notes) + "</p>" : "") +
-        (Array.isArray(d.examples) ? "<h3>Examples</h3>" + d.examples.map((x) => '<div style="margin:10px 0"><div class="fr">' + faSafe(x.fr || "") + '</div><div class="en">' + faSafe(x.en || "") + "</div></div>").join("") : "") +
-        (Array.isArray(d.related) ? "<p><b>Related:</b> " + d.related.map(faSafe).join(" · ") + "</p>" : "") + "</div>";
+        (Array.isArray(d.meanings) ? "<h3>Meanings</h3><ul>" + d.meanings.map((x) => "<li>" + faSafe(typeof x === "string" ? x : x.definition || x.text || "") + "</li>").join("") + "</ul>" : "") +
+        (d.notes ? "<p><b>Usage note:</b> " + faSafe(d.notes) + "</p>" : "") +
+        (Array.isArray(d.examples) ? "<h3>Examples</h3>" + d.examples.map((x) => '<div style="margin:10px 0"><div class="fr">' + faSafe(x.fr || x.text || "") + '</div><div class="en">' + faSafe(x.en || x.translation || "") + "</div></div>").join("") : "") +
+        (Array.isArray(d.related) ? "<p><b>Related:</b> " + d.related.map(faSafe).join(" · ") + "</p>" : "") +
+        (Array.isArray(d.entries) ? "<h3>Dictionary data</h3>" + d.entries.map((x) => '<div style="margin:12px 0"><b>' + faSafe(x.partOfSpeech || "Entry") + '</b><ul>' + (x.definitions || []).map(y => "<li>" + faSafe(y.definition || "") + "</li>").join("") + "</ul></div>").join("") : "") +
+        (d.sources ? '<p class="mu">Sources: ' + d.sources.map(s => '<a href="' + faSafe(s.url) + '" target="_blank" rel="noopener noreferrer">' + faSafe(s.name) + '</a>').join(" · ") + "</p>" : "") + "</div>";
     }
-    $.innerHTML = (typeof topbar === "function" ? topbar() : "") + '<button class="g" id="faHome">← Home</button><h1>📖 Dictionary & translation</h1><p class="mu">Look up French or English words for meanings, usage notes and examples, or translate a complete sentence.</p><div class="card">' +
+    $.innerHTML = (typeof topbar === "function" ? topbar() : "") + '<button class="g" id="faHome">← Home</button><h1>📖 French Modern Dictionary</h1><p class="mu">Word meanings, grammar, pronunciation, etymology, register, conjugation and references. Dictionary entries do not change with learner level.</p><div class="card">' +
       '<label for="faDictMode"><b>Tool</b></label><select id="faDictMode" class="inp"><option value="dict"' + (FA_DICT.mode === "dict" ? " selected" : "") + '>Dictionary lookup</option><option value="translate"' + (FA_DICT.mode === "translate" ? " selected" : "") + '>Translate a sentence</option></select>' +
-      '<label for="faDictLevel"><b>CEFR level for examples</b></label><select id="faDictLevel" class="inp">' + ["A1","A2","B1","B2","C1","C2"].map((l) => '<option value="' + l + '"' + (l === FA_DICT.level ? " selected" : "") + ">" + l + "</option>").join("") + "</select>" +
-      '<input class="inp" id="faDictInput" value="' + escA(FA_DICT.query) + '" placeholder="E.g. pourtant, apprendre, or I am looking for the station…"><button id="faDictLookup" style="width:100%"' + (FA_DICT.pending ? " disabled" : "") + ">" + (FA_DICT.pending ? "Working…" : "Look up / translate") + "</button>" + (FA_DICT.error ? '<div class="err">' + faSafe(FA_DICT.error) + "</div>" : "") + "</div>" + output;
+      '<input class="inp" id="faDictInput" value="' + escA(FA_DICT.query) + '" placeholder="Search a French or English word, expression, or phrase…"><button id="faDictLookup" style="width:100%"' + (FA_DICT.pending ? " disabled" : "") + ">" + (FA_DICT.pending ? "Searching sources…" : "Search dictionary") + "</button>" + (FA_DICT.error ? '<div class="err">' + faSafe(FA_DICT.error) + "</div>" : "") + "</div>" + output +
+      (FA_DICT.query && FA_DICT.mode === "dict" ? faDictSourceLinks() : "") +
+      '<div class="card"><h3>About these references</h3><p class="mu">The Académie française publishes its new 10th edition progressively. Wiktionnaire is a reusable collaborative lexical source. TLFi/CNRTL is a rich historical reference, not a continuously updated modern dictionary.</p></div>';
     if (typeof bindTop === "function") bindTop();
   }
   async function faDictionaryLookup() {
     if (!faNeedSignIn()) return;
-    FA_DICT.query = (faEl("faDictInput")?.value || "").trim(); FA_DICT.mode = faEl("faDictMode")?.value || "dict"; FA_DICT.level = faEl("faDictLevel")?.value || "A1";
+    FA_DICT.query = (faEl("faDictInput")?.value || "").trim(); FA_DICT.mode = faEl("faDictMode")?.value || "dict";
     if (!FA_DICT.query || FA_DICT.pending) return;
     FA_DICT.pending = true; FA_DICT.error = ""; FA_DICT.result = null; faDictionaryView();
-    try { FA_DICT.result = await faTutorRequest({ mode: FA_DICT.mode, level: FA_DICT.level, text: FA_DICT.query }); if (FA_DICT.result && FA_DICT.result.raw) FA_DICT.error = String(FA_DICT.result.raw); }
-    catch (error) { FA_DICT.error = (error && error.message) || "The dictionary could not answer just now."; }
+    try {
+      FA_DICT.result = await faTutorRequest({ mode: FA_DICT.mode, level: "none", text: FA_DICT.query, sources: true });
+      if (FA_DICT.result && FA_DICT.result.error === "not_configured" && FA_DICT.mode === "dict") {
+        FA_DICT.result = await faTutorRequest({ mode: "sources", level: "none", text: FA_DICT.query });
+      }
+      if (FA_DICT.result && FA_DICT.result.error === "not_configured") throw new Error("The AI provider is not configured. Dictionary reference links are available below; lexical API lookup is being activated.");
+      if (FA_DICT.result && FA_DICT.result.raw) FA_DICT.error = String(FA_DICT.result.raw);
+    } catch (error) { FA_DICT.error = (error && error.message) || "The dictionary could not answer just now."; }
     finally { FA_DICT.pending = false; render(true); }
   }
 
