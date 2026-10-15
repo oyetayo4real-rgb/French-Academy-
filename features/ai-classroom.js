@@ -120,13 +120,13 @@
     }
     $.innerHTML = (typeof topbar === "function" ? topbar() : "") + '<button class="g" id="faHome">← Home</button><h1>📖 Dictionary & translation</h1><p class="mu">Look up French words, review source links and attribution, or translate a complete sentence.</p><div class="card">' +
       '<label for="faDictMode"><b>Tool</b></label><select id="faDictMode" class="inp"><option value="dict"' + (FA_DICT.mode === "dict" ? " selected" : "") + '>Dictionary lookup</option><option value="translate"' + (FA_DICT.mode === "translate" ? " selected" : "") + '>Translate a sentence</option></select>' +
-      '<label for="faDictLevel"><b>CEFR level for examples</b></label><select id="faDictLevel" class="inp">' + ["A1","A2","B1","B2","C1","C2"].map((l) => '<option value="' + l + '"' + (l === FA_DICT.level ? " selected" : "") + ">" + l + "</option>").join("") + "</select>" +
+
       '<input class="inp" id="faDictInput" value="' + escA(FA_DICT.query) + '" placeholder="E.g. pourtant, apprendre, or I am looking for the station…"><button id="faDictLookup" style="width:100%"' + (FA_DICT.pending ? " disabled" : "") + ">" + (FA_DICT.pending ? "Working…" : "Look up / translate") + "</button>" + (FA_DICT.error ? '<div class="err">' + faSafe(FA_DICT.error) + "</div>" : "") + "</div>" + output;
     if (typeof bindTop === "function") bindTop();
   }
   async function faDictionaryLookup() {
     if (!faNeedSignIn()) return;
-    FA_DICT.query = (faEl("faDictInput")?.value || "").trim(); FA_DICT.mode = faEl("faDictMode")?.value || "dict"; FA_DICT.level = faEl("faDictLevel")?.value || "A1";
+    FA_DICT.query = (faEl("faDictInput")?.value || "").trim(); FA_DICT.mode = faEl("faDictMode")?.value || "dict"; FA_DICT.level = "none";
     if (!FA_DICT.query || FA_DICT.pending) return;
     FA_DICT.pending = true; FA_DICT.error = ""; FA_DICT.result = null; faDictionaryView();
     try { FA_DICT.result = await faTutorRequest({ mode: FA_DICT.mode, level: FA_DICT.level, text: FA_DICT.query }); if (FA_DICT.result && FA_DICT.result.raw) FA_DICT.error = String(FA_DICT.result.raw); }
