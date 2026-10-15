@@ -29,7 +29,9 @@ const BASES: Record<string, string> = {
 };
 
 function providerConfig() {
-  const provider = (Deno.env.get("AI_PROVIDER") || "gemini").trim().toLowerCase();
+  const configuredProvider = (Deno.env.get("AI_PROVIDER") || "gemini").trim().toLowerCase();
+  // Older production configuration used "auto" when Gemini was the configured provider.
+  const provider = configuredProvider === "auto" ? "gemini" : configuredProvider;
   const secretNames: Record<string, string[]> = {
     gemini: ["GEMINI_API_KEY", "AI_API_KEY"],
     groq: ["GROQ_API_KEY", "AI_API_KEY"],
@@ -40,8 +42,9 @@ function providerConfig() {
   const selectedName = secretNames[provider].find((name) => Boolean(Deno.env.get(name)));
   if (!selectedName) throw new Error("not_configured");
   const modelNames: Record<string, string> = { gemini: "GEMINI_MODEL", groq: "GROQ_MODEL", mistral: "MISTRAL_MODEL", openrouter: "OPENROUTER_MODEL" };
-  // Do not reuse a legacy generic AI_MODEL value across providers; it can name a model that Gemini does not serve.
-  return { provider, key: Deno.env.get(selectedName)!, selectedName, model: Deno.env.get(modelNames[provider]) || MODELS[provider] };
+  // Keep Gemini on a known supported default; legacy model overrides caused production 404s.
+  const configuredModel = provider === "gemini" ? "" : Deno.env.get(modelNames[provider]);
+  return { provider, key: Deno.env.get(selectedName)!, selectedName, model: configuredModel || MODELS[provider] };
 }
 
 async function callAI(system: string, messages: { role: string; content: string }[], maxTokens: number) {
