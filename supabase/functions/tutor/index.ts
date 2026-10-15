@@ -6,7 +6,7 @@ const J = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status
 
 function subOf(req: Request): string | null {
   try {
-    const bearer = (req.headers.get("Authorization") || "").replace(/^Bearer\\s+/i, "");
+    const bearer = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
     const part = bearer.split(".")[1];
     if (!part) return null;
     const normalized = part.replace(/-/g, "+").replace(/_/g, "/");
@@ -138,7 +138,7 @@ Deno.serve(async (req: Request) => {
       let wiki: Record<string, any> | null = null;
       let sourceError = "";
       try {
-        const response = await fetch("https://en.wiktionary.org/api/rest_v1/page/definition/" + encodeURIComponent(text), {
+        const response = await fetch("https://fr.wiktionary.org/api/rest_v1/page/definition/" + encodeURIComponent(text), {
           headers: {
             Accept: "application/json",
             "Api-User-Agent": "AcademieFrancaise/1.0 (French dictionary; https://github.com/oyetayo4real-rgb/French-Academy-)"
@@ -149,7 +149,7 @@ Deno.serve(async (req: Request) => {
         else sourceError = "Wiktionary returned HTTP " + response.status + ".";
       } catch (_) { sourceError = "Wiktionary is unavailable at the moment."; }
 
-      const frenchGroups = Array.isArray(wiki?.fr) ? wiki!.fr : [];
+      const frenchGroups = Array.isArray(wiki?.French) ? wiki!.French : Array.isArray(wiki?.fr) ? wiki!.fr : [];
       const entries = frenchGroups
         .filter((group: any) => String(group.language || "").toLowerCase() === "french" && Array.isArray(group.definitions))
         .map((group: any) => ({
