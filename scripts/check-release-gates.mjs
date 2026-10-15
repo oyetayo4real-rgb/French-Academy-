@@ -30,10 +30,20 @@ pass("student enrollment and lecturer role authorization are present");
 assert.match(liveRoom, /No fallback room was created/, "Daily room configuration errors must fail closed");
 pass("room creation has no unsafe fallback");
 
-assert.match(tutor, /ANTHROPIC_API_KEY/, "tutor provider key must be read server-side");
-assert.match(tutor, /if \(!uid\).*not_signed_in/s, "tutor must reject missing/unverified authenticated user");
-assert.match(tutor, /Deno\.env\.get\("TUTOR_MODEL"\) \|\| "claude-haiku-5-5"/, "default tutor model must match the verified low-cost API model ID");
-pass("tutor requires authenticated identity and a configured provider key");
+assert.match(tutor, /function providerConfig\(\)/, "provider and API key must be selected together");
+assert.match(tutor, /gemini: \["GEMINI_API_KEY", "AI_API_KEY"\]/, "Gemini must use only its dedicated or explicitly generic key");
+assert.match(tutor, /No CEFR restriction/, "Tutor must support unrestricted detailed answers");
+assert.doesNotMatch(tutor, /thinkingBudget:\s*0/, "deep-answer mode must not force Gemini reasoning off");
+assert.match(tutor, /if \(!uid\)/, "Tutor must reject missing authenticated identity");
+pass("provider/key pairing, unrestricted Tutor defaults, and authenticated identity guards are present");
+
+// Dictionary regressions: never use the English Wiktionary group as a French definition.
+assert.match(tutor, /const frenchGroups = Array\.isArray\(wiki\?\.fr\)/, "dictionary should read French lexical groups only");
+assert.doesNotMatch(tutor, /wiki!?\.en\s*\)/, "dictionary must not silently fall back to English entries");
+assert.match(tutor, /CC BY-SA 4\.0/, "Wiktionnaire licence/attribution must be preserved");
+assert.match(classroom, /Sources & attribution/, "dictionary UI must render source links and licences");
+assert.match(classroom, /Unrestricted · full depth/, "Tutor UI must offer unrestricted answers by default");
+pass("dictionary language isolation, attribution, and unrestricted Tutor UI are present");
 
 assert.match(classroom, /updateParticipant\(session, \{ setAudio: false \}\)/, "lecturer action must support remote mute");
 assert.doesNotMatch(classroom, /setAudio:\s*true/, "lecturer UI must not remotely unmute students");
