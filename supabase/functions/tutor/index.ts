@@ -47,7 +47,7 @@ function providerConfig() {
   return { provider, key: Deno.env.get(selectedName)!, selectedName, model: configuredModel || MODELS[provider] };
 }
 
-async function callAI(system: string, messages: { role: string; content: string }[], maxTokens: number) {
+async function callAI(system: string, messages: { role: string; content: string }[], maxTokens: number, timeoutMs = 9000, maxCandidates = 2) {
   const config = providerConfig();
   if (config.provider === "gemini") {
     // Discover models available to this exact API key/project. Model access differs
@@ -56,7 +56,7 @@ async function callAI(system: string, messages: { role: string; content: string 
     try {
       const catalog = await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000", {
         headers: { "x-goog-api-key": config.key },
-        signal: AbortSignal.timeout(4000)
+        signal: AbortSignal.timeout(2500)
       });
       if (catalog.ok) {
         const json = await catalog.json();
@@ -76,7 +76,7 @@ async function callAI(system: string, messages: { role: string; content: string 
     } catch (_) {}
     if (config.model && !candidates.includes(config.model)) candidates.unshift(config.model);
     if (!candidates.length) candidates = ["gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"];
-    candidates = [...new Set(candidates)].slice(0, 6);
+    candidates = [...new Set(candidates)].slice(0, Math.max(1, Math.min(maxCandidates, 3)));
     let lastStatus = 0;
     for (const model of candidates) {
       let response: Response;
@@ -95,11 +95,18 @@ async function callAI(system: string, messages: { role: string; content: string 
             // Gemini 3.x controls reasoning through thinkingConfig; do not send legacy sampling parameters such as temperature.
             generationConfig: { maxOutputTokens: maxTokens, thinkingConfig: { thinkingLevel: maxTokens <= 1800 ? "low" : "medium" } }
           }),
-          signal: AbortSignal.timeout(22000)
+          signal: AbortSignal.timeout(timeoutMs)
           }
         );
       } catch (error) {
-        if (error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError")) throw new Error("provider_timeout");
+        if (error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError")) {
+          lastStatus = 504;
+          console.error("[tutor] model request timed out; trying next available model", JSON.stringify({
+            model,
+            remainingCandidates: Math.max(0, candidates.length - candidates.indexOf(model) - 1)
+          }));
+          continue;
+        }
         throw error;
       }
       if (response.ok) {
@@ -232,6 +239,46 @@ function parseFrenchWikitext(raw: string) {
     ...group, partOfSpeech: group.partOfSpeech.charAt(0).toUpperCase() + group.partOfSpeech.slice(1),
     definitions: group.definitions.slice(0, 20)
   }));
+}
+async function translateFrenchToEnglish(text: string) {
+  const input = clip(text, 900).trim();
+  if (!input) return "";
+  try {
+    const url = new URL("https://api.mymemory.translated.net/get");
+    url.searchParams.set("q", input);
+    url.searchParams.set("langpair", "fr|en");
+    const response = await fetch(url.toString(), {
+      headers: { Accept: "application/json", "User-Agent": "FrenchAcademyApp/1.2 (educational French dictionary)" },
+      signal: AbortSignal.timeout(3500)
+    });
+    if (!response.ok) return "";
+    const json = await response.json();
+    const translated = String(json?.responseData?.translatedText || "").trim();
+    if (Number(json?.responseStatus) !== 200 || !translated || /MYMEMORY WARNING|PLEASE SELECT|QUOTA/i.test(translated)) return "";
+    return clip(translated, 900);
+  } catch (_) {
+    return "";
+  }
+}
+async function addEnglishSenseTranslations(entries: any[]) {
+  const pending: { groupIndex: number; senseIndex: number; definition: string }[] = [];
+  for (let groupIndex = 0; groupIndex < entries.length; groupIndex++) {
+    const senses = Array.isArray(entries[groupIndex]?.definitions) ? entries[groupIndex].definitions : [];
+    for (let senseIndex = 0; senseIndex < senses.length; senseIndex++) {
+      if (!senses[senseIndex].translationEn && senses[senseIndex].definition) {
+        pending.push({ groupIndex, senseIndex, definition: String(senses[senseIndex].definition) });
+      }
+    }
+  }
+  // Keep external translation traffic bounded and prioritize the most common senses.
+  const batch = pending.slice(0, 8);
+  const translations = await Promise.all(batch.map(item => translateFrenchToEnglish(item.definition)));
+  translations.forEach((translation, index) => {
+    if (!translation) return;
+    const item = batch[index];
+    entries[item.groupIndex].definitions[item.senseIndex].translationEn = translation;
+    entries[item.groupIndex].definitions[item.senseIndex].translationSource = "Machine-assisted translation";
+  });
 }
 async function lookupReferenceSources(query: string) {
   const term = clip(query, 180).trim();
@@ -438,7 +485,9 @@ Deno.serve(async (req: Request) => {
             const lexical = await callAI(
               "You are a rigorous modern French-English lexicographer. Return valid JSON only. The input includes a French headword and source-backed French definitions. Do NOT rewrite or replace those source definitions. Add concise, accurate metadata: headwordTranslation (the most useful English equivalent or short list of equivalents as a string), definitionTranslations (an array aligned positionally with sourceDefinitions; each item must have the same partOfSpeech and a translations array with one concise, faithful English translation for each definition in exactly the same order), gender (string or empty), ipa (IPA string or empty), grammar (short part-of-speech/form note), forms (array of useful inflected forms as strings), synonyms (array), antonyms (array), collocations (array), related (array of expressions), etymology (short string only if reliably known, otherwise empty), notes (usage/register/region notes; do not overclaim), and examples (array of 2-4 objects {fr,en} with natural contemporary French and faithful English translations). Translate each sense according to its actual meaning and part of speech; preserve ambiguity when an English equivalent depends on context. Do not fabricate citations or pretend examples are source quotations. Return JSON only.",
               [{ role: "user", content: JSON.stringify({ headword: resolvedTitle, sourceDefinitions: entries.map((group: any) => ({ partOfSpeech: group.partOfSpeech, definitions: group.definitions.map((item: any) => item.definition).slice(0, 8) })) }) }],
-              1400
+              1400,
+              5000,
+              1
             );
             const extra = grabJson(lexical);
             if (extra && typeof extra === "object") {
@@ -470,6 +519,15 @@ Deno.serve(async (req: Request) => {
         } catch (error) {
           console.error("[tutor] dictionary enrichment unavailable", error instanceof Error ? error.message : "unknown");
         }
+        // English translations are useful even when the AI provider is slow or unavailable.
+        // These are explicitly labelled as machine-assisted, not official dictionary text.
+        try {
+          await addEnglishSenseTranslations(entries);
+          if (!data.headwordTranslation && entries.length) {
+            const firstDefinition = entries.find((group: any) => Array.isArray(group.definitions) && group.definitions.some((sense: any) => sense.translationEn));
+            if (firstDefinition) data.headwordTranslation = firstDefinition.definitions.find((sense: any) => sense.translationEn)?.translationEn || "";
+          }
+        } catch (_) {}
         return J({ ok: true, data });
       }
 
