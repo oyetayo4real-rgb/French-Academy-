@@ -17,7 +17,7 @@ function subOf(req: Request): string | null {
 const clip = (value: unknown, max: number) => String(value ?? "").slice(0, max);
 const LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"];
 const MODELS: Record<string, string> = {
-  gemini: "gemini-3.8-flash",
+  gemini: "gemini-3.5-flash-lite",
   groq: "llama-3.3-70b-versatile",
   mistral: "mistral-small-latest",
   openrouter: "meta-llama/llama-3.3-70b-instruct:free"
@@ -47,7 +47,7 @@ function providerConfig() {
   return { provider, key: Deno.env.get(selectedName)!, selectedName, model: configuredModel || MODELS[provider] };
 }
 
-async function callAI(system: string, messages: { role: string; content: string }[], maxTokens: number, timeoutMs = 9000, maxCandidates = 2) {
+async function callAI(system: string, messages: { role: string; content: string }[], maxTokens: number, timeoutMs = 7000, maxCandidates = 2) {
   const config = providerConfig();
   if (config.provider === "gemini") {
     // Discover models available to this exact API key/project. Model access differs
@@ -56,7 +56,7 @@ async function callAI(system: string, messages: { role: string; content: string 
     try {
       const catalog = await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000", {
         headers: { "x-goog-api-key": config.key },
-        signal: AbortSignal.timeout(2500)
+        signal: AbortSignal.timeout(1500)
       });
       if (catalog.ok) {
         const json = await catalog.json();
@@ -64,7 +64,7 @@ async function callAI(system: string, messages: { role: string; content: string 
           .filter((item: any) => Array.isArray(item.supportedGenerationMethods) && item.supportedGenerationMethods.includes("generateContent"))
           .map((item: any) => String(item.name || "").replace(/^models\//, ""))
           .filter((name: string) => /^gemini-/.test(name) && !/(embedding|aqa|robotics|tts|image|audio|live|computer-use)/i.test(name) && !/^gemini-2\./.test(name));
-        const preferred = ["gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"];
+        const preferred = ["gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-3.1-flash-lite", "gemini-3.6-flash"];
         candidates = [...new Set([
           ...preferred.filter((name) => available.includes(name)),
           ...available.filter((name) => /flash/i.test(name)),
@@ -75,7 +75,7 @@ async function callAI(system: string, messages: { role: string; content: string 
       }
     } catch (_) {}
     if (config.model && !candidates.includes(config.model)) candidates.unshift(config.model);
-    if (!candidates.length) candidates = ["gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"];
+    if (!candidates.length) candidates = ["gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-3.1-flash-lite", "gemini-3.6-flash"];
     candidates = [...new Set(candidates)].slice(0, Math.max(1, Math.min(maxCandidates, 3)));
     let lastStatus = 0;
     for (const model of candidates) {
@@ -671,7 +671,7 @@ Deno.serve(async (req: Request) => {
       if (message === "rate") return J({ error: "busy", message: "The selected AI provider is rate-limited. Please try again shortly." }, 429);
       if (message === "not_configured") return J({ error: "not_configured", message: "The selected provider key is missing." }, 503);
       if (message === "blocked") return J({ error: "blocked", message: "The provider declined this request under its safety rules. Please rephrase it." }, 422);
-      if (message === "provider_timeout") return J({ error: "provider_timeout", message: "The AI provider did not answer within 22 seconds. Please retry; the request was stopped rather than left hanging." }, 504);
+      if (message === "provider_timeout" || message === "provider_http_504") return J({ error: "provider_timeout", message: "The available Gemini models did not respond within the Tutor time budget. The request was stopped safely; please retry shortly." }, 504);
       if (message === "provider_http_401" || message === "provider_http_403") return J({ error: "provider_auth", message: "The AI provider rejected the configured key or its permissions. Check the selected provider and server-side key; never paste the key into chat." }, 502);
       if (message === "provider_http_404") return J({ error: "provider_model", message: "No available model was found for this provider key. Check model access and the provider configuration." }, 502);
       if (message === "provider_http_400") return J({ error: "provider_request", message: "The AI provider rejected the request format or model settings. The backend needs the provider's specific error detail to diagnose this." }, 502);
