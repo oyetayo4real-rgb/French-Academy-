@@ -162,7 +162,7 @@
       if (!senses.length) return '';
       return '<div style="margin:0 0 18px"><h3 style="font-size:1.03em;margin:0 0 10px;color:var(--ac,#1d4ed8)">' + faSafe(group.partOfSpeech || 'Meaning') + '</h3><ol style="padding-left:24px;line-height:1.75;margin:0">' + senses.map((sense) => {
         const def = faSafe(sense.definition || '');
-        const englishDefinition = sense.translationEn ? '<div class="en" style="margin-top:5px;line-height:1.65"><b>English:</b> ' + faSafe(sense.translationEn) + '</div>' : '';
+        const englishDefinition = sense.translationEn ? '<div class="en" style="margin-top:5px;line-height:1.65"><b>English translation' + (sense.translationSource ? ' · ' + faSafe(sense.translationSource) : '') + ':</b> ' + faSafe(sense.translationEn) + '</div>' : '';
         const label = sense.register || sense.label || sense.usage || sense.region || '';
         const examples = list(sense.examples);
         const exampleHtml = examples.length ? '<div style="margin-top:10px;padding:10px 12px;border-left:3px solid var(--ac,#1d4ed8);background:rgba(127,127,127,.06);border-radius:0 8px 8px 0">' + examples.map(ex => '<div class="fr" style="line-height:1.65;margin:3px 0">' + faSafe(ex) + '</div>').join('') + '</div>' : '';
