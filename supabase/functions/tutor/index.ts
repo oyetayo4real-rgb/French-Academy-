@@ -67,7 +67,7 @@ async function callAI(system: string, messages: { role: string; content: string 
         const preferred = ["gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-3.1-flash-lite", "gemini-3.6-flash"];
         candidates = [...new Set([
           ...preferred.filter((name) => available.includes(name)),
-          ...available.filter((name) => /flash/i.test(name)),
+          ...available.filter((name: string) => /flash/i.test(name)),
           ...available
         ])];
       } else {
