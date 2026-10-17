@@ -436,14 +436,26 @@ Deno.serve(async (req: Request) => {
           const allowance = await takeAiAllowance(uid);
           if (allowance.ok) {
             const lexical = await callAI(
-              "You are a rigorous modern French lexicographer. Return valid JSON only. The input includes a French headword and source-backed definitions. Do NOT rewrite or replace those definitions. Add concise, accurate metadata only: gender (string or empty), ipa (IPA string or empty), grammar (short part-of-speech/form note), forms (array of useful inflected forms as strings), synonyms (array), antonyms (array), collocations (array), related (array of expressions), etymology (short string only if reliably known, otherwise empty), notes (usage/register/region notes; do not overclaim), and examples (array of 2-4 objects {fr,en} with natural contemporary French and faithful English translations). Keep examples idiomatic and genuinely illustrative of the word. Do not fabricate citations or pretend the examples are source quotations. Return JSON only.",
+              "You are a rigorous modern French-English lexicographer. Return valid JSON only. The input includes a French headword and source-backed French definitions. Do NOT rewrite or replace those source definitions. Add concise, accurate metadata: headwordTranslation (the most useful English equivalent or short list of equivalents as a string), definitionTranslations (an array aligned positionally with sourceDefinitions; each item must have the same partOfSpeech and a translations array with one concise, faithful English translation for each definition in exactly the same order), gender (string or empty), ipa (IPA string or empty), grammar (short part-of-speech/form note), forms (array of useful inflected forms as strings), synonyms (array), antonyms (array), collocations (array), related (array of expressions), etymology (short string only if reliably known, otherwise empty), notes (usage/register/region notes; do not overclaim), and examples (array of 2-4 objects {fr,en} with natural contemporary French and faithful English translations). Translate each sense according to its actual meaning and part of speech; preserve ambiguity when an English equivalent depends on context. Do not fabricate citations or pretend examples are source quotations. Return JSON only.",
               [{ role: "user", content: JSON.stringify({ headword: resolvedTitle, sourceDefinitions: entries.map((group: any) => ({ partOfSpeech: group.partOfSpeech, definitions: group.definitions.map((item: any) => item.definition).slice(0, 8) })) }) }],
               1400
             );
             const extra = grabJson(lexical);
             if (extra && typeof extra === "object") {
-              for (const key of ["gender", "ipa", "grammar", "etymology", "notes"]) {
+              for (const key of ["headwordTranslation", "gender", "ipa", "grammar", "etymology", "notes"]) {
                 if (typeof extra[key] === "string" && extra[key].trim()) data[key] = clip(extra[key], key === "notes" ? 1200 : 500);
+              }
+              if (Array.isArray(extra.definitionTranslations)) {
+                for (let groupIndex = 0; groupIndex < entries.length; groupIndex++) {
+                  const translatedGroup = extra.definitionTranslations[groupIndex];
+                  const translations = Array.isArray(translatedGroup?.translations) ? translatedGroup.translations : [];
+                  for (let senseIndex = 0; senseIndex < entries[groupIndex].definitions.length; senseIndex++) {
+                    const translation = translations[senseIndex];
+                    if (typeof translation === "string" && translation.trim()) {
+                      entries[groupIndex].definitions[senseIndex].translationEn = clip(translation, 700);
+                    }
+                  }
+                }
               }
               for (const key of ["forms", "synonyms", "antonyms", "collocations", "related"]) {
                 if (Array.isArray(extra[key])) data[key] = extra[key].slice(0, 12).map((item: any) => clip(item, 180)).filter(Boolean);
