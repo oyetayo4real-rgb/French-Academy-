@@ -523,10 +523,6 @@ Deno.serve(async (req: Request) => {
         // These are explicitly labelled as machine-assisted, not official dictionary text.
         try {
           await addEnglishSenseTranslations(entries);
-          if (!data.headwordTranslation && entries.length) {
-            const firstDefinition = entries.find((group: any) => Array.isArray(group.definitions) && group.definitions.some((sense: any) => sense.translationEn));
-            if (firstDefinition) data.headwordTranslation = firstDefinition.definitions.find((sense: any) => sense.translationEn)?.translationEn || "";
-          }
         } catch (_) {}
         return J({ ok: true, data });
       }
