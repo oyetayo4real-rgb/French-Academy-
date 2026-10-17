@@ -162,10 +162,11 @@
       if (!senses.length) return '';
       return '<div style="margin:0 0 18px"><h3 style="font-size:1.03em;margin:0 0 10px;color:var(--ac,#1d4ed8)">' + faSafe(group.partOfSpeech || 'Meaning') + '</h3><ol style="padding-left:24px;line-height:1.75;margin:0">' + senses.map((sense) => {
         const def = faSafe(sense.definition || '');
+        const englishDefinition = sense.translationEn ? '<div class="en" style="margin-top:5px;line-height:1.65"><b>English:</b> ' + faSafe(sense.translationEn) + '</div>' : '';
         const label = sense.register || sense.label || sense.usage || sense.region || '';
         const examples = list(sense.examples);
         const exampleHtml = examples.length ? '<div style="margin-top:10px;padding:10px 12px;border-left:3px solid var(--ac,#1d4ed8);background:rgba(127,127,127,.06);border-radius:0 8px 8px 0">' + examples.map(ex => '<div class="fr" style="line-height:1.65;margin:3px 0">' + faSafe(ex) + '</div>').join('') + '</div>' : '';
-        return '<li style="padding:0 0 14px 4px"><div>' + def + '</div>' + (label ? '<div class="mu" style="font-size:.83em;margin-top:4px">' + faSafe(label) + '</div>' : '') + exampleHtml + '</li>';
+        return '<li style="padding:0 0 14px 4px"><div>' + def + '</div>' + englishDefinition + (label ? '<div class="mu" style="font-size:.83em;margin-top:4px">' + faSafe(label) + '</div>' : '') + exampleHtml + '</li>';
       }).join('') + '</ol></div>';
     }).join('');
     const meanings = list(d.meanings).map(x => typeof x === 'object' ? (x.definition || x.text || '') : x).filter(Boolean);
@@ -187,7 +188,7 @@
     });
     const sources = Array.isArray(d.sources) && d.sources.length ? '<ul style="padding-left:20px;line-height:1.6">' + d.sources.map(src => { const name = typeof src === 'string' ? src : src.name || 'Reference'; const url = typeof src === 'object' && src ? src.url : null; return '<li style="margin:0 0 9px">' + (url ? '<a href="' + escA(url) + '" target="_blank" rel="noopener noreferrer">' + faSafe(name) + '</a>' : faSafe(name)) + (src && src.licence ? '<div class="mu" style="font-size:.83em;margin-top:2px">' + faSafe(src.licence) + '</div>' : '') + '</li>'; }).join('') + '</ul>' : '';
     const sourceLabel = d.generated ? 'AI-assisted lexical explanation · not an official quotation' : (hasSourceEntry ? 'Source-backed French entry' : 'French dictionary entry');
-    return '<div class="card fa-dictionary-entry"><div class="mu" style="font-size:.8em;text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px">' + sourceLabel + '</div><h2 style="font-size:1.8em;margin:0 0 5px;line-height:1.2">' + word + (d.gender ? ' <span class="pill">' + faSafe(d.gender) + '</span>' : '') + '</h2>' + grammar + pronunciation +
+    return '<div class="card fa-dictionary-entry"><div class="mu" style="font-size:.8em;text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px">' + sourceLabel + '</div><h2 style="font-size:1.8em;margin:0 0 5px;line-height:1.2">' + word + (d.gender ? ' <span class="pill">' + faSafe(d.gender) + '</span>' : '') + '</h2>' + (d.headwordTranslation ? '<p class="en" style="margin:0 0 10px;line-height:1.65"><b>English translation:</b> ' + faSafe(d.headwordTranslation) + '</p>' : '') + grammar + pronunciation +
       section('Meanings', definitions || meaningsHtml, hasSourceEntry ? 'Definitions are adapted from the linked community-edited source; follow the entry link for full context and attribution.' : '') +
       section('Grammar and word forms', formsHtml) +
       section('Examples in context', examplesHtml, examples.some(ex => !(ex.en || ex.translation)) ? 'The source does not provide English translations for every example.' : '') +
