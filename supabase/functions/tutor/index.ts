@@ -64,7 +64,7 @@ async function callAI(system: string, messages: { role: string; content: string 
           .filter((item: any) => Array.isArray(item.supportedGenerationMethods) && item.supportedGenerationMethods.includes("generateContent"))
           .map((item: any) => String(item.name || "").replace(/^models\//, ""))
           .filter((name: string) => /^gemini-/.test(name) && !/(embedding|aqa|robotics|tts|image|audio|live|computer-use)/i.test(name) && !/^gemini-2\./.test(name));
-        const preferred = ["gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-3.1-flash-lite", "gemini-3.6-flash"];
+        const preferred = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.8-flash", "gemini-3.6-flash"];
         candidates = [...new Set([
           ...preferred.filter((name) => available.includes(name)),
           ...available.filter((name: string) => /flash/i.test(name)),
@@ -75,7 +75,7 @@ async function callAI(system: string, messages: { role: string; content: string 
       }
     } catch (_) {}
     if (config.model && !candidates.includes(config.model)) candidates.unshift(config.model);
-    if (!candidates.length) candidates = ["gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-3.1-flash-lite", "gemini-3.6-flash"];
+    if (!candidates.length) candidates = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.8-flash", "gemini-3.6-flash"];
     candidates = [...new Set(candidates)].slice(0, Math.max(1, Math.min(maxCandidates, 3)));
     let lastStatus = 0;
     for (const model of candidates) {
@@ -93,7 +93,7 @@ async function callAI(system: string, messages: { role: string; content: string 
               parts: [{ text: message.content }]
             })),
             // Gemini 3.x controls reasoning through thinkingConfig; do not send legacy sampling parameters such as temperature.
-            generationConfig: { maxOutputTokens: maxTokens, thinkingConfig: { thinkingLevel: maxTokens <= 1800 ? "low" : "medium" } }
+            generationConfig: { maxOutputTokens: maxTokens, thinkingConfig: { thinkingLevel: "low" } }
           }),
           signal: AbortSignal.timeout(timeoutMs)
           }
