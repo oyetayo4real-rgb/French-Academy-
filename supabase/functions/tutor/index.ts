@@ -47,7 +47,7 @@ function providerConfig() {
   return { provider, key: Deno.env.get(selectedName)!, selectedName, model: configuredModel || MODELS[provider] };
 }
 
-async function callAI(system: string, messages: { role: string; content: string }[], maxTokens: number, timeoutMs = 7000, maxCandidates = 2) {
+async function callAI(system: string, messages: { role: string; content: string }[], maxTokens: number, timeoutMs = 4800, maxCandidates = 2) {
   const config = providerConfig();
   if (config.provider === "gemini") {
     // Discover models available to this exact API key/project. Model access differs
@@ -56,7 +56,7 @@ async function callAI(system: string, messages: { role: string; content: string 
     try {
       const catalog = await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000", {
         headers: { "x-goog-api-key": config.key },
-        signal: AbortSignal.timeout(1500)
+        signal: AbortSignal.timeout(1000)
       });
       if (catalog.ok) {
         const json = await catalog.json();
@@ -113,7 +113,14 @@ async function callAI(system: string, messages: { role: string; content: string 
         const json = await response.json();
         const candidate = json?.candidates?.[0];
         if (candidate?.finishReason === "SAFETY") throw new Error("blocked");
-        return (candidate?.content?.parts || []).map((part: { text?: string }) => part.text || "").join("").trim();
+        const output = (candidate?.content?.parts || []).map((part: { text?: string }) => part.text || "").join("").trim();
+        if (output) return output;
+        lastStatus = 502;
+        console.error("[tutor] Gemini model returned an empty response; trying fallback", JSON.stringify({
+          model,
+          remainingCandidates: Math.max(0, candidates.length - candidates.indexOf(model) - 1)
+        }));
+        continue;
       }
 
       const rawError = await response.text().catch(() => "");
@@ -346,17 +353,25 @@ async function takeAiAllowance(uid: string) {
   const url = Deno.env.get("SUPABASE_URL");
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (!url || !serviceKey) return { ok: false, status: 503 };
-  const response = await fetch(url + "/rest/v1/rpc/ai_use", {
-    method: "POST",
-    headers: { apikey: serviceKey, Authorization: "Bearer " + serviceKey, "Content-Type": "application/json" },
-    body: JSON.stringify({ p_uid: uid })
-  });
-  if (!response.ok) {
-    console.error("[tutor] quota RPC failed", JSON.stringify({ status: response.status }));
+  try {
+    const response = await fetch(url + "/rest/v1/rpc/ai_use", {
+      method: "POST",
+      headers: { apikey: serviceKey, Authorization: "Bearer " + serviceKey, "Content-Type": "application/json" },
+      body: JSON.stringify({ p_uid: uid }),
+      signal: AbortSignal.timeout(2500)
+    });
+    if (!response.ok) {
+      console.error("[tutor] quota RPC failed", JSON.stringify({ status: response.status }));
+      return { ok: false, status: 503 };
+    }
+    const allowed = await response.json().catch(() => false);
+    return { ok: allowed === true, status: allowed === true ? 200 : 429 };
+  } catch (error) {
+    console.error("[tutor] quota RPC unavailable", JSON.stringify({
+      timeout: error instanceof Error && error.name === "TimeoutError"
+    }));
     return { ok: false, status: 503 };
   }
-  const allowed = await response.json().catch(() => false);
-  return { ok: allowed === true, status: allowed === true ? 200 : 429 };
 }
 
 Deno.serve(async (req: Request) => {
@@ -389,7 +404,7 @@ Deno.serve(async (req: Request) => {
             "User-Agent": "FrenchAcademyApp/1.2 (educational French dictionary; https://github.com/oyetayo4real-rgb/French-Academy-)",
             "Api-User-Agent": "FrenchAcademyApp/1.2 (educational French dictionary; https://github.com/oyetayo4real-rgb/French-Academy-)"
           },
-          signal: AbortSignal.timeout(9000)
+          signal: AbortSignal.timeout(6000)
         });
         if (response.ok) {
           wiki = await response.json();
@@ -405,7 +420,7 @@ Deno.serve(async (req: Request) => {
       let resolvedTitle = String(wiki?.parse?.title || text);
       // If an unaccented spelling has no French entry, try ranked French Wiktionnaire
       // results whose spelling differs only by diacritics (etre -> être, deja -> déjà).
-      if (!entries.length) {
+      if (!entries.length && wikiTextSource) {
         try {
           const searchUrl = new URL("https://fr.wiktionary.org/w/api.php");
           searchUrl.searchParams.set("action", "query");
@@ -418,7 +433,7 @@ Deno.serve(async (req: Request) => {
           const searchResponse = await fetch(searchUrl.toString(), {
             headers: { Accept: "application/json", "User-Agent": "FrenchAcademyApp/1.2 (educational French dictionary; https://github.com/oyetayo4real-rgb/French-Academy-)",
             "Api-User-Agent": "FrenchAcademyApp/1.2 (educational French dictionary; https://github.com/oyetayo4real-rgb/French-Academy-)" },
-            signal: AbortSignal.timeout(5000)
+            signal: AbortSignal.timeout(2500)
           });
           if (searchResponse.ok) {
             const searchData = await searchResponse.json();
@@ -437,7 +452,7 @@ Deno.serve(async (req: Request) => {
               const candidateResponse = await fetch(candidateUrl.toString(), {
                 headers: { Accept: "application/json", "User-Agent": "FrenchAcademyApp/1.2 (educational French dictionary; https://github.com/oyetayo4real-rgb/French-Academy-)",
             "Api-User-Agent": "FrenchAcademyApp/1.2 (educational French dictionary; https://github.com/oyetayo4real-rgb/French-Academy-)" },
-                signal: AbortSignal.timeout(7000)
+                signal: AbortSignal.timeout(3000)
               });
               if (!candidateResponse.ok) continue;
               const candidateData = await candidateResponse.json();
