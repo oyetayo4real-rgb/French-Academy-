@@ -35,4 +35,4 @@ jobs:
         with:
           deno-version: v2.x
       - name: Run actual TypeScript helper tests with mocked providers
-        run: deno test --allow-env=AI_PROVIDER,GEMINI_API_KEY supabase/functions/tutor/tutor.test.ts
+        run: deno test --jobs=1 --allow-env=AI_PROVIDER,GEMINI_API_KEY supabase/functions/tutor/tutor.test.ts
