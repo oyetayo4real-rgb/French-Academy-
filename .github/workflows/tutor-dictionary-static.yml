@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - fix/nexus-tutor-dictionary-reliability
+      - nexus/local-isolated-staging
   pull_request:
     branches:
       - main
