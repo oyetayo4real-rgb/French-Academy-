@@ -1,0 +1,4 @@
+project_id = "french-academy-local"
+
+[functions.tutor]
+verify_jwt = true
