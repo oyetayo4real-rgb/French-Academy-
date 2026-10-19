@@ -374,7 +374,9 @@ async function takeAiAllowance(uid: string) {
   }
 }
 
-Deno.serve(async (req: Request) => {
+export { callAI, parseFrenchWikitext, translateFrenchToEnglish };
+
+if (import.meta.main) Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   try {
     const uid = subOf(req);
