@@ -1,4 +1,4 @@
-name: Tutor and dictionary static checks
+name: Tutor and dictionary reliability tests
 
 on:
   push:
@@ -9,6 +9,7 @@ on:
       - main
     paths:
       - "supabase/functions/tutor/index.ts"
+      - "supabase/functions/tutor/tutor.test.ts"
       - "features/ai-classroom.js"
       - "scripts/check-tutor-dictionary.mjs"
       - ".github/workflows/tutor-dictionary-static.yml"
@@ -27,5 +28,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Run focused Tutor and dictionary regression checks
+      - name: Run focused frontend and source assertions
         run: node scripts/check-tutor-dictionary.mjs
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Run actual TypeScript helper tests with mocked providers
+        run: deno test --allow-env=AI_PROVIDER,GEMINI_API_KEY supabase/functions/tutor/tutor.test.ts
