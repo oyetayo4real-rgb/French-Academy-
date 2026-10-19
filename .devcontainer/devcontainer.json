@@ -1,0 +1,14 @@
+{
+  "name": "French Academy isolated local verification",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+  },
+  "forwardPorts": [54321, 54322, 54323],
+  "portsAttributes": {
+    "54321": { "label": "Local Supabase API", "onAutoForward": "notify" },
+    "54322": { "label": "Local Supabase database", "onAutoForward": "silent" },
+    "54323": { "label": "Local Supabase Studio", "onAutoForward": "notify" }
+  },
+  "postCreateCommand": "npm install --global supabase && curl -fsSL https://deno.land/install.sh | sh && echo 'export DENO_INSTALL=\"$HOME/.deno\"; export PATH=\"$DENO_INSTALL/bin:$PATH\"' >> ~/.bashrc"
+}
