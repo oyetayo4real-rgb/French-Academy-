@@ -129,8 +129,24 @@
     FA_AI.messages.push({ role: "user", content: text }); FA_AI.pending = true; FA_AI.error = ""; faTutorView();
     try {
       const response = await faTutorRequest({ mode: FA_AI.mode, level: FA_AI.level, text, history, depth: "comprehensive", research: true });
-      if (response && response.error === "not_configured") throw new Error("The AI provider is not configured yet. The sourced dictionary works independently; add an AI provider key in Supabase Edge Function Secrets to enable deep AI answers.");
-      FA_AI.messages.push({ role: "assistant", content: response && typeof response.text === "string" ? response.text : "I could not prepare an answer. Please try again." });
+      if (response && response.error) {
+        const fallbackMessages = {
+          provider_timeout: "The AI models did not respond within the time limit. Please retry; the request was stopped safely.",
+          provider_model: "No available model was found for the configured provider. The provider's model access needs review.",
+          provider_auth: "The AI provider rejected its configured credentials or permissions. The administrator should check server-side configuration without sharing key values.",
+          busy: "The AI provider is temporarily rate-limited. Please try again shortly.",
+          quota_unavailable: "The Tutor usage-limit service is temporarily unavailable. Please retry shortly.",
+          limit: "You have reached today's AI-use limit. Please try again later."
+        };
+        if (response.error === "not_configured") {
+          throw new Error("The AI provider is not configured yet. The sourced dictionary works independently; add an AI provider key in Supabase Edge Function Secrets to enable deep AI answers.");
+        }
+        throw new Error((typeof response.message === "string" && response.message.trim()) || fallbackMessages[response.error] || "The Tutor could not complete this request (" + String(response.error) + "). Please retry.");
+      }
+      if (!response || typeof response.text !== "string" || !response.text.trim()) {
+        throw new Error("The Tutor returned an empty answer. Please retry; no empty response was saved as a successful answer.");
+      }
+      FA_AI.messages.push({ role: "assistant", content: response.text.trim() });
       FA_AI.messages = FA_AI.messages.slice(-24);
     } catch (error) { FA_AI.error = (error && error.message) || "The tutor could not answer just now."; }
     finally { FA_AI.pending = false; render(true); const messages = faEl("faTutorMessages"); if (messages) messages.scrollIntoView({ block: "end", behavior: "smooth" }); }
