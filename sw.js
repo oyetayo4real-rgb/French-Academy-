@@ -1,4 +1,4 @@
-const V="fa-v14",AUD="fa-audio",CORE=["/","/index.html","/manifest.webmanifest","/icon-192.png","/icon-512.png","/icon-180.png","/icon-maskable-512.png"];
+const V="fa-v15",AUD="fa-audio",CORE=["/","/index.html","/manifest.webmanifest","/icon-192.png","/icon-512.png","/icon-180.png","/icon-maskable-512.png"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting()))});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==V&&k!==AUD).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 async function ranged(req,res){const h=req.headers.get("range");if(!h)return res;const b=await res.arrayBuffer(),m=/bytes=(\d+)-(\d*)/.exec(h);if(!m)return res;const s=+m[1],e=m[2]?Math.min(+m[2],b.byteLength-1):b.byteLength-1;
