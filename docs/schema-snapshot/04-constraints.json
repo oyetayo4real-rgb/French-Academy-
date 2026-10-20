@@ -1,0 +1,370 @@
+[
+    {
+        "name": "ai_usage_pkey",
+        "type": "p",
+        "table": "ai_usage",
+        "schema": "public",
+        "validated": true,
+        "definition": "PRIMARY KEY (user_id, day)"
+    },
+    {
+        "name": "ai_usage_user_id_fkey",
+        "type": "f",
+        "table": "ai_usage",
+        "schema": "public",
+        "validated": true,
+        "definition": "FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
+        "name": "app_secrets_pkey",
+        "type": "p",
+        "table": "app_secrets",
+        "schema": "public",
+        "validated": true,
+        "definition": "PRIMARY KEY (name)"
+    },
+    {
+        "name": "assignments_class_id_fkey",
+        "type": "f",
+        "table": "assignments",
+        "schema": "public",
+        "validated": true,
+        "definition": "FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE"
+    },
+    {
+        "name": "assignments_pkey",
+        "type": "p",
+        "table": "assignments",
+        "schema": "public",
+        "validated": true,
+        "definition": "PRIMARY KEY (id)"
+    },
+    {
+        "name": "attempts_pkey",
+        "type": "p",
+        "table": "attempts",
+        "schema": "public",
+        "validated": true,
+        "definition": "PRIMARY KEY (id)"
+    },
+    {
+        "name": "attempts_student_id_fkey",
+        "type": "f",
+        "table": "attempts",
+        "schema": "public",
+        "validated": true,
+        "definition": "FOREIGN KEY (student_id) REFERENCES profiles(id) ON DELETE CASCADE"
+    },
+    {
+        "name": "attendance_pkey",
+        "type": "p",
+        "table": "attendance",
+        "schema": "public",
+        "validated": true,
+        "definition": "PRIMARY KEY (session_id, student_id)"
+    },
+    {
+        "name": "attendance_session_id_fkey",
+        "type": "f",
+        "table": "attendance",
+        "schema": "public",
+        "validated": true,
+        "definition": "FOREIGN KEY (session_id) REFERENCES live_sessions(id) ON DELETE CASCADE"
+    },
+    {
+        "name": "attendance_student_id_fkey",
+        "type": "f",
+        "table": "attendance",
+        "schema": "public",
+        "validated": true,
+        "definition": "FOREIGN KEY (student_id) REFERENCES profiles(id) ON DELETE CASCADE"
+    },
+    {
+        "name": "audio_clips_lecturer_id_fkey",
+        "type": "f",
+        "table": "audio_clips",
+        "schema": "public",
+        "validated": true,
+        "definition": "FOREIGN KEY (lecturer_id) REFERENCES profiles(id) ON DELETE SET NULL"
+    },
+    {
+        "name": "audio_clips_pkey",
+        "type": "p",
+        "table": "audio_clips",
+        "schema": "public",
+        "validated": true,
+        "definition": "PRIMARY KEY (key)"
+    },
+    {
+        "name": "classes_join_code_key",
+        "type": "u",
+        "table": "classes",
+        "schema": "public",
+        "validated": true,
+        "definition": "UNIQUE (join_code)"
+    },
+    {
+        "name": "classes_lecturer_id_fkey",
+        "type": "f",
+        "table": "classes",
+        "schema": "public",
+        "validated": true,
+        "definition": "FOREIGN KEY (lecturer_id) REFERENCES profiles(id) ON DELETE CASCADE"
+    },
+    {
+        "name": "classes_pkey",
+        "type": "p",
+        "table": "classes",
+        "schema": "public",
+        "validated": true,
+        "definition": "PRIMARY KEY (id)"
+    },
+    {
+        "name": "custom_keys_lesson_id_fkey",
+        "type": "f",
+        "table": "custom_keys",
+        "schema": "public",
+        "validated": true,
+        "definition": "FOREIGN KEY (lesson_id) REFERENCES custom_lessons(id) ON DELETE CASCADE"
+    },
+    {
+        "name": "custom_keys_pkey",
+        "type": "p",
+        "table": "custom_keys",
+        "schema": "public",
+        "validated": true,
+        "definition": "PRIMARY KEY (lesson_id, idx)"
+    },
+    {
+        "name": "custom_lessons_lecturer_id_fkey",
+        "type": "f",
+        "table": "custom_lessons",
+        "schema": "public",
+        "validated": true,
+        "definition": "FOREIGN KEY (lecturer_id) REFERENCES profiles(id) ON DELETE SET NULL"
+    },
+    {
+        "name": "custom_lessons_level_check",
+        "type": "c",
+        "table": "custom_lessons",
+        "schema": "public",
+        "validated": true,
+        "definition": "CHECK (level = ANY (ARRAY['A1'::text, 'A2'::text, 'B1'::text, 'B2'::text, 'C1'::text, 'C2'::text]))"
+    },
+    {
+        "name": "custom_lessons_pkey",
+        "type": "p",
+        "table": "custom_lessons",
+        "schema": "public",
+        "validated": true,
+        "definition": "PRIMARY KEY (id)"
+    },
+    {
+        "name": "dict_cache_pkey",
+        "type": "p",
+        "table": "dict_cache",
+        "schema": "public",
+        "validated": true,
+        "definition": "PRIMARY KEY (word)"
+    },
+    {
+        "name": "enrollments_class_id_fkey",
+        "type": "f",
+        "table": "enrollments",
+        "schema": "public",
+        "validated": true,
+        "definition": "FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE"
+    },
+    {
+        "name": "enrollments_pkey",
+        "type": "p",
+        "table": "enrollments",
+        "schema": "public",
+        "validated": true,
+        "definition": "PRIMARY KEY (class_id, student_id)"
+    },
+    {
+        "name": "enrollments_student_id_fkey",
+        "type": "f",
+        "table": "enrollments",
+        "schema": "public",
+        "validated": true,
+        "definition": "FOREIGN KEY (student_id) REFERENCES profiles(id) ON DELETE CASCADE"
+    },
+    {
+        "name": "exam_crit_pkey",
+        "type": "p",
+        "table": "exam_crit",
+        "schema": "public",
+        "validated": true,
+        "definition": "PRIMARY KEY (level, idx)"
+    },
+    {
+        "name": "exam_keys_pkey",
+        "type": "p",
+        "table": "exam_keys",
+        "schema": "public",
+        "validated": true,
+        "definition": "PRIMARY KEY (level, section, idx)"
+    },
+    {
+        "name": "exam_keys_section_check",
+        "type": "c",
+        "table": "exam_keys",
+        "schema": "public",
+        "validated": true,
+        "definition": "CHECK (section = ANY (ARRAY['l'::text, 'r'::text]))"
+    },
+    {
+        "name": "lesson_media_pkey",
+        "type": "p",
+        "table": "lesson_media",
+        "schema": "public",
+        "validated": true,
+        "definition": "PRIMARY KEY (key)"
+    },
+    {
+        "name": "lesson_media_updated_by_fkey",
+        "type": "f",
+        "table": "lesson_media",
+        "schema": "public",
+        "validated": true,
+        "definition": "FOREIGN KEY (updated_by) REFERENCES profiles(id) ON DELETE SET NULL"
+    },
+    {
+        "name": "live_sessions_class_id_fkey",
+        "type": "f",
+        "table": "live_sessions",
+        "schema": "public",
+        "validated": true,
+        "definition": "FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE"
+    },
+    {
+        "name": "live_sessions_pkey",
+        "type": "p",
+        "table": "live_sessions",
+        "schema": "public",
+        "validated": true,
+        "definition": "PRIMARY KEY (id)"
+    },
+    {
+        "name": "profiles_id_fkey",
+        "type": "f",
+        "table": "profiles",
+        "schema": "public",
+        "validated": true,
+        "definition": "FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
+        "name": "profiles_pkey",
+        "type": "p",
+        "table": "profiles",
+        "schema": "public",
+        "validated": true,
+        "definition": "PRIMARY KEY (id)"
+    },
+    {
+        "name": "profiles_role_check",
+        "type": "c",
+        "table": "profiles",
+        "schema": "public",
+        "validated": true,
+        "definition": "CHECK (role = ANY (ARRAY['student'::text, 'lecturer'::text]))"
+    },
+    {
+        "name": "progress_pkey",
+        "type": "p",
+        "table": "progress",
+        "schema": "public",
+        "validated": true,
+        "definition": "PRIMARY KEY (student_id, key)"
+    },
+    {
+        "name": "progress_student_id_fkey",
+        "type": "f",
+        "table": "progress",
+        "schema": "public",
+        "validated": true,
+        "definition": "FOREIGN KEY (student_id) REFERENCES profiles(id) ON DELETE CASCADE"
+    },
+    {
+        "name": "quiz_keys_pkey",
+        "type": "p",
+        "table": "quiz_keys",
+        "schema": "public",
+        "validated": true,
+        "definition": "PRIMARY KEY (lesson_key, idx)"
+    },
+    {
+        "name": "recordings_class_id_fkey",
+        "type": "f",
+        "table": "recordings",
+        "schema": "public",
+        "validated": true,
+        "definition": "FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE"
+    },
+    {
+        "name": "recordings_created_by_fkey",
+        "type": "f",
+        "table": "recordings",
+        "schema": "public",
+        "validated": true,
+        "definition": "FOREIGN KEY (created_by) REFERENCES profiles(id) ON DELETE SET NULL"
+    },
+    {
+        "name": "recordings_pkey",
+        "type": "p",
+        "table": "recordings",
+        "schema": "public",
+        "validated": true,
+        "definition": "PRIMARY KEY (id)"
+    },
+    {
+        "name": "signals_pkey",
+        "type": "p",
+        "table": "signals",
+        "schema": "public",
+        "validated": true,
+        "definition": "PRIMARY KEY (id)"
+    },
+    {
+        "name": "signals_room_fkey",
+        "type": "f",
+        "table": "signals",
+        "schema": "public",
+        "validated": true,
+        "definition": "FOREIGN KEY (room) REFERENCES classes(id) ON DELETE CASCADE"
+    },
+    {
+        "name": "submissions_pkey",
+        "type": "p",
+        "table": "submissions",
+        "schema": "public",
+        "validated": true,
+        "definition": "PRIMARY KEY (id)"
+    },
+    {
+        "name": "submissions_student_id_fkey",
+        "type": "f",
+        "table": "submissions",
+        "schema": "public",
+        "validated": true,
+        "definition": "FOREIGN KEY (student_id) REFERENCES profiles(id) ON DELETE CASCADE"
+    },
+    {
+        "name": "user_state_pkey",
+        "type": "p",
+        "table": "user_state",
+        "schema": "public",
+        "validated": true,
+        "definition": "PRIMARY KEY (student_id)"
+    },
+    {
+        "name": "user_state_student_id_fkey",
+        "type": "f",
+        "table": "user_state",
+        "schema": "public",
+        "validated": true,
+        "definition": "FOREIGN KEY (student_id) REFERENCES profiles(id) ON DELETE CASCADE"
+    }
+]
