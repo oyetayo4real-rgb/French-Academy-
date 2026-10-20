@@ -1,0 +1,272 @@
+[
+    {
+        "acl": [
+            "postgres=X/postgres",
+            "authenticated=X/postgres",
+            "service_role=X/postgres"
+        ],
+        "name": "in_class",
+        "schema": "private",
+        "returns": "boolean",
+        "language": "sql",
+        "settings": [
+            "search_path=\"\""
+        ],
+        "definition": "CREATE OR REPLACE FUNCTION private.in_class(c uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\n  select exists (select 1 from public.enrollments where class_id = c and student_id = (select auth.uid())) $function$\n",
+        "identity_args": "c uuid",
+        "security_definer": true
+    },
+    {
+        "acl": [
+            "postgres=X/postgres",
+            "authenticated=X/postgres",
+            "service_role=X/postgres"
+        ],
+        "name": "in_session",
+        "schema": "private",
+        "returns": "boolean",
+        "language": "sql",
+        "settings": [
+            "search_path=\"\""
+        ],
+        "definition": "CREATE OR REPLACE FUNCTION private.in_session(sid uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\n  select exists (select 1 from public.live_sessions s join public.enrollments e on e.class_id = s.class_id\n                 where s.id = sid and e.student_id = (select auth.uid())) $function$\n",
+        "identity_args": "sid uuid",
+        "security_definer": true
+    },
+    {
+        "acl": [
+            "postgres=X/postgres",
+            "authenticated=X/postgres",
+            "service_role=X/postgres"
+        ],
+        "name": "is_lecturer",
+        "schema": "private",
+        "returns": "boolean",
+        "language": "sql",
+        "settings": [
+            "search_path=\"\""
+        ],
+        "definition": "CREATE OR REPLACE FUNCTION private.is_lecturer()\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\n  select coalesce((select role from public.profiles where id = (select auth.uid())) = 'lecturer', false) $function$\n",
+        "identity_args": "",
+        "security_definer": true
+    },
+    {
+        "acl": [
+            "postgres=X/postgres",
+            "authenticated=X/postgres",
+            "service_role=X/postgres"
+        ],
+        "name": "my_role",
+        "schema": "private",
+        "returns": "text",
+        "language": "sql",
+        "settings": [
+            "search_path=\"\""
+        ],
+        "definition": "CREATE OR REPLACE FUNCTION private.my_role()\n RETURNS text\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\n  select role from public.profiles where id = (select auth.uid()) $function$\n",
+        "identity_args": "",
+        "security_definer": true
+    },
+    {
+        "acl": [
+            "postgres=X/postgres",
+            "authenticated=X/postgres",
+            "service_role=X/postgres"
+        ],
+        "name": "owns_class",
+        "schema": "private",
+        "returns": "boolean",
+        "language": "sql",
+        "settings": [
+            "search_path=\"\""
+        ],
+        "definition": "CREATE OR REPLACE FUNCTION private.owns_class(c uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\n  select exists (select 1 from public.classes where id = c and lecturer_id = (select auth.uid())) $function$\n",
+        "identity_args": "c uuid",
+        "security_definer": true
+    },
+    {
+        "acl": [
+            "postgres=X/postgres",
+            "authenticated=X/postgres",
+            "service_role=X/postgres"
+        ],
+        "name": "owns_session",
+        "schema": "private",
+        "returns": "boolean",
+        "language": "sql",
+        "settings": [
+            "search_path=\"\""
+        ],
+        "definition": "CREATE OR REPLACE FUNCTION private.owns_session(sid uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\n  select exists (select 1 from public.live_sessions s join public.classes c on c.id = s.class_id\n                 where s.id = sid and c.lecturer_id = (select auth.uid())) $function$\n",
+        "identity_args": "sid uuid",
+        "security_definer": true
+    },
+    {
+        "acl": [
+            "postgres=X/postgres",
+            "authenticated=X/postgres",
+            "service_role=X/postgres"
+        ],
+        "name": "teaches",
+        "schema": "private",
+        "returns": "boolean",
+        "language": "sql",
+        "settings": [
+            "search_path=\"\""
+        ],
+        "definition": "CREATE OR REPLACE FUNCTION private.teaches(s uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\n  select exists (select 1 from public.enrollments e join public.classes c on c.id = e.class_id\n                 where e.student_id = s and c.lecturer_id = (select auth.uid())) $function$\n",
+        "identity_args": "s uuid",
+        "security_definer": true
+    },
+    {
+        "acl": [
+            "postgres=X/postgres",
+            "service_role=X/postgres"
+        ],
+        "name": "ai_use",
+        "schema": "public",
+        "returns": "boolean",
+        "language": "plpgsql",
+        "settings": [
+            "search_path=\"\""
+        ],
+        "definition": "CREATE OR REPLACE FUNCTION public.ai_use(p_uid uuid)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare lim int := 25; c int;\nbegin\n  if exists (select 1 from public.profiles where id = p_uid and role = 'lecturer') then lim := 150; end if;\n  insert into public.ai_usage (user_id, day, n) values (p_uid, current_date, 1)\n  on conflict (user_id, day) do update set n = public.ai_usage.n + 1 returning n into c;\n  return c <= lim;\nend $function$\n",
+        "identity_args": "p_uid uuid",
+        "security_definer": true
+    },
+    {
+        "acl": [
+            "postgres=X/postgres",
+            "authenticated=X/postgres",
+            "service_role=X/postgres"
+        ],
+        "name": "become_lecturer",
+        "schema": "public",
+        "returns": "boolean",
+        "language": "plpgsql",
+        "settings": [
+            "search_path=\"\""
+        ],
+        "definition": "CREATE OR REPLACE FUNCTION public.become_lecturer(code text)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare ok boolean;\nbegin\n  select (value = code) into ok from public.app_secrets where name = 'lecturer_code';\n  if coalesce(ok, false) then\n    update public.profiles set role = 'lecturer' where id = (select auth.uid());\n    return true;\n  end if;\n  return false;\nend $function$\n",
+        "identity_args": "code text",
+        "security_definer": true
+    },
+    {
+        "acl": [
+            "postgres=X/postgres",
+            "authenticated=X/postgres",
+            "service_role=X/postgres"
+        ],
+        "name": "delete_my_account",
+        "schema": "public",
+        "returns": "void",
+        "language": "plpgsql",
+        "settings": [
+            "search_path=\"\""
+        ],
+        "definition": "CREATE OR REPLACE FUNCTION public.delete_my_account()\n RETURNS void\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nbegin\n  delete from auth.users where id = (select auth.uid());\nend $function$\n",
+        "identity_args": "",
+        "security_definer": true
+    },
+    {
+        "acl": [
+            "postgres=X/postgres",
+            "authenticated=X/postgres",
+            "service_role=X/postgres"
+        ],
+        "name": "grade_submission",
+        "schema": "public",
+        "returns": "jsonb",
+        "language": "plpgsql",
+        "settings": [
+            "search_path=\"\""
+        ],
+        "definition": "CREATE OR REPLACE FUNCTION public.grade_submission(p_id uuid, p_w integer, p_feedback text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare s record; l int; r int; sc int; w int; tot int; ok boolean;\nbegin\n  select * into s from public.submissions where id = p_id;\n  if not found or not private.teaches(s.student_id) then raise exception 'not allowed'; end if;\n  w := least(greatest(coalesce(p_w, 0), 0), 25);\n  l := (s.scores->>'l')::int; r := (s.scores->>'r')::int; sc := (s.scores->>'s')::int;\n  tot := l + r + w + sc; ok := tot >= 50 and l >= 5 and r >= 5 and w >= 5 and sc >= 5;\n  update public.submissions set graded_w = w, feedback = left(p_feedback, 2000) where id = p_id;\n  insert into public.progress (student_id, key, best, passed, updated_at) values (s.student_id, s.level || '-exam', tot, ok, now())\n    on conflict (student_id, key) do update set best = excluded.best, passed = excluded.passed, updated_at = now();\n  return jsonb_build_object('t', tot, 'ok', ok);\nend $function$\n",
+        "identity_args": "p_id uuid, p_w integer, p_feedback text",
+        "security_definer": true
+    },
+    {
+        "acl": [
+            "postgres=X/postgres",
+            "service_role=X/postgres"
+        ],
+        "name": "handle_new_user",
+        "schema": "public",
+        "returns": "trigger",
+        "language": "plpgsql",
+        "settings": [
+            "search_path=\"\""
+        ],
+        "definition": "CREATE OR REPLACE FUNCTION public.handle_new_user()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nbegin\n  insert into public.profiles (id, full_name) values (new.id, coalesce(new.raw_user_meta_data->>'full_name', ''));\n  return new;\nend $function$\n",
+        "identity_args": "",
+        "security_definer": true
+    },
+    {
+        "acl": [
+            "postgres=X/postgres",
+            "authenticated=X/postgres",
+            "service_role=X/postgres"
+        ],
+        "name": "join_class",
+        "schema": "public",
+        "returns": "text",
+        "language": "plpgsql",
+        "settings": [
+            "search_path=\"\""
+        ],
+        "definition": "CREATE OR REPLACE FUNCTION public.join_class(code text)\n RETURNS text\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare cid uuid; cname text;\nbegin\n  select id, name into cid, cname from public.classes where join_code = upper(trim(code));\n  if cid is null then return null; end if;\n  insert into public.enrollments (class_id, student_id) values (cid, (select auth.uid())) on conflict do nothing;\n  return cname;\nend $function$\n",
+        "identity_args": "code text",
+        "security_definer": true
+    },
+    {
+        "acl": [
+            "postgres=X/postgres",
+            "authenticated=X/postgres",
+            "service_role=X/postgres"
+        ],
+        "name": "save_custom_lesson",
+        "schema": "public",
+        "returns": "uuid",
+        "language": "plpgsql",
+        "settings": [
+            "search_path=\"\""
+        ],
+        "definition": "CREATE OR REPLACE FUNCTION public.save_custom_lesson(p jsonb)\n RETURNS uuid\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare uid uuid := (select auth.uid()); lid uuid := nullif(p->>'id', '')::uuid; q jsonb; i int := 0; qn jsonb;\nbegin\n  if not private.is_lecturer() then raise exception 'lecturers only'; end if;\n  if jsonb_array_length(coalesce(p->'quiz', '[]'::jsonb)) < 3 then raise exception 'add at least 3 quiz questions'; end if;\n  if jsonb_array_length(coalesce(p->'scenes', '[]'::jsonb)) < 3 then raise exception 'add at least 3 scenes'; end if;\n  select jsonb_agg(e - 'a') into qn from jsonb_array_elements(p->'quiz') e;\n  if lid is not null and not exists (select 1 from public.custom_lessons where id = lid and lecturer_id = uid) then raise exception 'not your lesson'; end if;\n  if lid is null then\n    insert into public.custom_lessons (level, title, icon, can, grammar, scenes, quiz, video_path, lecturer_id)\n    values (p->>'level', left(p->>'title', 120), coalesce(nullif(p->>'icon', ''), '📘'), coalesce(p->'can', '[]'::jsonb), left(coalesce(p->>'grammar', ''), 4000), p->'scenes', qn, nullif(p->>'video_path', ''), uid) returning id into lid;\n  else\n    update public.custom_lessons set level = p->>'level', title = left(p->>'title', 120), icon = coalesce(nullif(p->>'icon', ''), '📘'), can = coalesce(p->'can', '[]'::jsonb),\n      grammar = left(coalesce(p->>'grammar', ''), 4000), scenes = p->'scenes', quiz = qn, video_path = nullif(p->>'video_path', '') where id = lid;\n    delete from public.custom_keys where lesson_id = lid;\n  end if;\n  for q in select * from jsonb_array_elements(p->'quiz') loop\n    insert into public.custom_keys (lesson_id, idx, answer) values (lid, i, (q->>'a')::int); i := i + 1;\n  end loop;\n  return lid;\nend $function$\n",
+        "identity_args": "p jsonb",
+        "security_definer": true
+    },
+    {
+        "acl": [
+            "postgres=X/postgres",
+            "authenticated=X/postgres",
+            "service_role=X/postgres"
+        ],
+        "name": "submit_exam",
+        "schema": "public",
+        "returns": "jsonb",
+        "language": "plpgsql",
+        "settings": [
+            "search_path=\"\""
+        ],
+        "definition": "CREATE OR REPLACE FUNCTION public.submit_exam(p jsonb)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare uid uuid := (select auth.uid()); lv text := p->>'level'; l_sc int := 0; r_sc int := 0; w_sc int := 0; s_sc int; tot int; ok boolean;\n  rec record; mw jsonb := '[]'::jsonb; lk jsonb := '[]'::jsonb; rk jsonb := '[]'::jsonb; sid uuid; best int; ever boolean; txt text := left(coalesce(p->>'w', ''), 6000);\nbegin\n  if uid is null then raise exception 'not signed in'; end if;\n  if not exists (select 1 from public.exam_keys where level = lv) then raise exception 'unknown exam'; end if;\n  for rec in select idx, answer from public.exam_keys where level = lv and section = 'l' order by idx loop\n    lk := lk || to_jsonb(rec.answer);\n    if (p->'l'->>rec.idx) is not null and (p->'l'->>rec.idx)::int = rec.answer then l_sc := l_sc + 5; end if;\n  end loop;\n  for rec in select idx, answer from public.exam_keys where level = lv and section = 'r' order by idx loop\n    rk := rk || to_jsonb(rec.answer);\n    if (p->'r'->>rec.idx) is not null and (p->'r'->>rec.idx)::int = rec.answer then r_sc := r_sc + 5; end if;\n  end loop;\n  for rec in select idx, pattern from public.exam_crit where level = lv order by idx loop\n    if txt ~* rec.pattern then w_sc := w_sc + 5; mw := mw || to_jsonb(true); else mw := mw || to_jsonb(false); end if;\n  end loop;\n  s_sc := least(greatest(coalesce((p->>'s')::int, 0), 0), 5) * 5;\n  tot := l_sc + r_sc + w_sc + s_sc;\n  ok := tot >= 50 and l_sc >= 5 and r_sc >= 5 and w_sc >= 5 and s_sc >= 5;\n  insert into public.submissions (student_id, level, writing, scores) values (uid, lv, txt, jsonb_build_object('l', l_sc, 'r', r_sc, 'w', w_sc, 's', s_sc, 't', tot, 'ok', ok)) returning id into sid;\n  insert into public.attempts (student_id, key, score, passed) values (uid, lv || '-exam', tot, ok);\n  insert into public.progress (student_id, key, best, passed, updated_at) values (uid, lv || '-exam', tot, ok, now())\n    on conflict (student_id, key) do update set best = greatest(public.progress.best, excluded.best), passed = public.progress.passed or excluded.passed, updated_at = now();\n  select pr.best, pr.passed into best, ever from public.progress pr where pr.student_id = uid and pr.key = lv || '-exam';\n  return jsonb_build_object('l', l_sc, 'r', r_sc, 'w', w_sc, 's', s_sc, 't', tot, 'ok', ok, 'crit', mw, 'lkeys', lk, 'rkeys', rk, 'best', best, 'ever_passed', ever, 'submission', sid);\nend $function$\n",
+        "identity_args": "p jsonb",
+        "security_definer": true
+    },
+    {
+        "acl": [
+            "postgres=X/postgres",
+            "authenticated=X/postgres",
+            "service_role=X/postgres"
+        ],
+        "name": "submit_quiz",
+        "schema": "public",
+        "returns": "jsonb",
+        "language": "plpgsql",
+        "settings": [
+            "search_path=\"\""
+        ],
+        "definition": "CREATE OR REPLACE FUNCTION public.submit_quiz(p_key text, p_answers jsonb)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare uid uuid := (select auth.uid()); n int; c int := 0; sc int; ok boolean; keys jsonb; i int; best int; ever boolean;\nbegin\n  if uid is null then raise exception 'not signed in'; end if;\n  if p_key like 'C-%' then\n    select jsonb_agg(answer order by idx), count(*) into keys, n from public.custom_keys where lesson_id = substr(p_key, 3)::uuid;\n  else\n    select jsonb_agg(answer order by idx), count(*) into keys, n from public.quiz_keys where lesson_key = p_key;\n  end if;\n  if coalesce(n, 0) = 0 then raise exception 'unknown lesson'; end if;\n  for i in 0..n-1 loop\n    if (p_answers->>i) is not null and (p_answers->>i)::int = (keys->>i)::int then c := c + 1; end if;\n  end loop;\n  sc := round(c * 100.0 / n); ok := sc >= 70;\n  insert into public.attempts (student_id, key, score, passed) values (uid, p_key, sc, ok);\n  insert into public.progress (student_id, key, best, passed, updated_at) values (uid, p_key, sc, ok, now())\n    on conflict (student_id, key) do update set best = greatest(public.progress.best, excluded.best), passed = public.progress.passed or excluded.passed, updated_at = now();\n  select pr.best, pr.passed into best, ever from public.progress pr where pr.student_id = uid and pr.key = p_key;\n  return jsonb_build_object('score', sc, 'passed', ok, 'answers', keys, 'best', best, 'ever_passed', ever);\nend $function$\n",
+        "identity_args": "p_key text, p_answers jsonb",
+        "security_definer": true
+    }
+]
