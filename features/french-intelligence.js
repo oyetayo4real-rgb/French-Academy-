@@ -185,9 +185,10 @@
   function norm(s){return String(s||"").toLocaleLowerCase("fr").normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();}
   function lookup(word){
     const q=String(word||"").trim();if(!q)return null;
-    let found=dictionary[q.toLocaleLowerCase("fr")];
-    if(!found){const key=Object.keys(dictionary).find(k=>norm(k)===norm(q));if(key)found=dictionary[key];}
-    if(found)return {word:q,meaning:found[0],part:found[1],example:found[2],notes:found[3],builtIn:true};
+    let foundKey=q.toLocaleLowerCase("fr");
+    let found=dictionary[foundKey];
+    if(!found){const key=Object.keys(dictionary).find(k=>norm(k)===norm(q));if(key){foundKey=key;found=dictionary[key];}}
+    if(found)return {word:foundKey,meaning:found[0],part:found[1],example:found[2],notes:found[3],builtIn:true};
     const rev=Object.keys(dictionary).find(k=>norm(dictionary[k][0].split(";")[0])===norm(q));
     if(rev)return {word:rev,meaning:dictionary[rev][0],part:dictionary[rev][1],example:dictionary[rev][2],notes:dictionary[rev][3],builtIn:true};
     return null;
