@@ -12,6 +12,9 @@ try {
     const context = await browser.newContext(profile);
     const page = await context.newPage();
     page.on("pageerror", error => failures.push(`${profile.name} pageerror: ${error.message}`));
+    page.on("console", message => {
+      if (message.type() === "error") failures.push(`${profile.name} console.error: ${message.text()}`);
+    });
     await page.goto(baseURL, { waitUntil: "networkidle", timeout: 30000 });
     await page.locator("#app").waitFor({ state: "visible" });
     // A fresh browser context starts on the public landing page; enter guest mode first.
@@ -25,12 +28,13 @@ try {
     await page.locator('[data-fitab="dict"]').click();
     await page.locator("#fiWord").fill("bonjour");
     await page.locator("#fiLookup").click();
-    await page.locator("#fiAnswer").getByText(/hello|good morning/i).waitFor();
+    await page.locator("#fiAnswer").getByText(/hello|good morning/i).first().waitFor();
 
     await page.locator('[data-fitab="translate"]').click();
     await page.locator("#fiInput").fill("Bonjour");
     await page.locator("#fiTranslate").click();
-    await page.locator("#fiAnswer").getByText(/hello|good morning/i).waitFor();
+    // Assert the actual translation output, not the explanatory metadata that repeats it.
+    await page.locator("#fiAnswer .fi-output").getByText(/hello|good morning/i).first().waitFor();
 
     await page.locator('[data-fitab="verbs"]').click();
     await page.locator("#fiVerb").fill("être");
@@ -46,7 +50,7 @@ try {
     console.log(`PASS ${profile.name}: open, dictionary, translation, conjugation, grammar filter, return navigation`);
     await context.close();
   }
-  assert.deepEqual(failures, [], "Browser page errors were detected");
+  assert.deepEqual(failures, [], "Browser console/page errors were detected");
 } finally {
   await browser.close();
 }
