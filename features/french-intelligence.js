@@ -31,6 +31,51 @@
     bonne:["good","adjective","C'est une bonne idée.","Feminine form of bon."],
     petit:["small; little","adjective","Un petit chat.","Feminine petite; agreement matters."],
     grande:["big; tall","adjective","Une grande maison.","Feminine form of grand."],
+    "travail":["work; job","noun (masculine)","Je cherche du travail.","Usually masculine: un travail; plural travaux in many contexts."],
+    famille:["family","noun (feminine)","Ma famille habite ici.","Usually feminine: une famille."],
+    enfant:["child","noun (masculine or feminine by person)","L'enfant joue dehors.","The noun is grammatically masculine; the person's sex is contextual."],
+    ville:["city; town","noun (feminine)","Paris est une grande ville.","Usually feminine: une ville."],
+    pays:["country","noun (masculine, usually)","La France est un pays européen.","Usually masculine; some country names use articles of other genders."],
+    temps:["time; weather","noun (masculine)","Je n'ai pas le temps.","Meaning depends on context: time, weather, or tense."],
+    jour:["day","noun (masculine)","Bonne journée !","Un jour means a day; tous les jours means every day."],
+    nuit:["night","noun (feminine)","Bonne nuit !","Usually feminine: la nuit."],
+    matin:["morning","noun (masculine)","Je travaille le matin.","Bonjour is used as a greeting during the day."],
+    soir:["evening","noun (masculine)","Je rentre ce soir.","Bonsoir is the usual evening greeting."],
+    heureux:["happy","adjective","Je suis heureux.","Feminine heureuse; agreement depends on the person described."],
+    difficile:["difficult; hard","adjective","C'est une question difficile.","Same written form for masculine and feminine singular."],
+    facile:["easy","adjective","Cet exercice est facile.","Same written form for masculine and feminine singular."],
+    important:["important","adjective","C'est un point important.","Feminine importante; agrees with the noun."],
+    besoin:["need","noun (masculine)","J'ai besoin d'aide.","Common construction: avoir besoin de."],
+    envie:["desire; urge","noun (feminine)","J'ai envie de dormir.","Common construction: avoir envie de + noun/infinitive."],
+    raison:["reason; right","noun (feminine)","Tu as raison.","Avoir raison means to be right; avoir tort means to be wrong."],
+    question:["question","noun (feminine)","J'ai une question.","Usually feminine: une question."],
+    réponse:["answer; reply","noun (feminine)","Merci pour votre réponse.","Canonical spelling uses é."],
+    choisir:["to choose","verb","Je choisis un livre.","Regular -ir verb following the finir pattern."],
+    attendre:["to wait for","verb","J'attends le bus.","The object waited for follows attendre directly, without pour."],
+    connaître:["to know; be familiar with","verb","Je connais cette ville.","Use connaître for people/places/things you are familiar with; savoir for facts or skills."],
+    depuis:["since; for (duration continuing to now)","preposition/adverb","J'habite ici depuis trois ans.","Often used with the present tense for an action/state that began in the past and continues."],
+    pendant:["during; for (duration)","preposition","J'ai étudié pendant deux heures.","Frames a duration; tense depends on whether the event is ongoing or completed."],
+    "en revanche":["on the other hand; by contrast","conjunction phrase","Il est petit. En revanche, il est très rapide.","Introduces a contrast."],
+    "tout à fait":["absolutely; quite","adverbial phrase","Tout à fait, je suis d'accord.","Can express strong agreement."],
+    "pas du tout":["not at all","adverbial phrase","Je ne suis pas du tout fatigué.","Intensifies a negation."],
+    "de temps en temps":["from time to time","adverbial phrase","Je cuisine de temps en temps.","Means occasionally."],
+    "en train de":["in the process of; currently","verbal expression","Je suis en train de lire.","Être en train de + infinitive emphasizes an action in progress."],
+    "avoir besoin de":["to need","verbal expression","J'ai besoin de repos.","Avoir + besoin + de + noun/infinitive."],
+    "avoir envie de":["to feel like; want to","verbal expression","J'ai envie de sortir.","Avoir + envie + de + noun/infinitive."],
+    "avoir raison":["to be right","verbal expression","Tu as raison.","Literally “to have reason”."],
+    "avoir tort":["to be wrong","verbal expression","Je crois que j'ai tort.","Fixed expression."],
+    "il faut":["it is necessary; one must","impersonal expression","Il faut étudier régulièrement.","Followed by an infinitive or de + noun depending on structure."],
+    "tout de suite":["right away; immediately","adverbial phrase","J'arrive tout de suite.","Means immediately."],
+    "à cause de":["because of","prepositional phrase","Le match est annulé à cause de la pluie.","Introduces a cause."],
+    "grâce à":["thanks to","prepositional phrase","Grâce à toi, j'ai réussi.","Usually introduces a helpful or positive cause."],
+    "en fait":["actually; in fact","discourse marker","En fait, je suis déjà prêt.","Often used to clarify or correct information."],
+    "quand même":["anyway; nevertheless","adverbial phrase","Il pleut, mais je sors quand même.","Meaning depends strongly on context."],
+    "d'accord":["okay; agreed","expression","D'accord, on commence.","Common expression of agreement."],
+    "ça dépend":["it depends","expression","Ça dépend de la situation.","Often followed by de."],
+    "par exemple":["for example","adverbial phrase","Par exemple, on peut lire ce texte.","Introduces an example."],
+    "en général":["in general; generally","adverbial phrase","En général, je prends le bus.","Often placed at the start of a sentence."],
+    "de plus":["moreover; in addition","adverbial phrase","De plus, cette solution est simple.","Adds information."],
+    "au contraire":["on the contrary","adverbial phrase","Au contraire, je suis d'accord.","Corrects or reverses an expectation."],
     "aujourd'hui":["today","adverb","Aujourd'hui, je travaille.","Often placed at the beginning of a sentence."],
     demain:["tomorrow","adverb/noun","À demain !","À demain means see you tomorrow."],
     hier:["yesterday","adverb/noun","Hier, j'ai travaillé.","Often used with the passé composé for completed events."],
@@ -165,7 +210,16 @@
     {title:"C'est vs il est",body:"C'est + noun phrase or stressed pronoun: C'est un professeur; c'est intéressant. Il/elle est + adjective or profession without an article in many cases: Elle est gentille; elle est médecin."},
     {title:"Partitive articles",body:"Use du, de la, de l' for an unspecified quantity: du pain, de la soupe, de l'eau. After a quantity expression, use de: beaucoup de pain."},
     {title:"Question forms",body:"Three common forms: Tu viens ? (informal spoken), Est-ce que tu viens ? (neutral), Viens-tu ? (inversion, more formal). Question words include qui (who), que/qu'est-ce que (what), où (where), quand (when), pourquoi (why), comment (how)."}
-  ];
+,
+    {title:"Depuis vs pendant",body:"Depuis describes a starting point or duration that continues up to now: J'habite ici depuis 2022; J'attends depuis une heure. Pendant frames the duration of an event: J'ai étudié pendant deux heures. The tense and context matter; do not translate either word mechanically."},
+    {title:"Savoir vs connaître",body:"Use savoir for facts, information, or knowing how to do something: Je sais la réponse; Je sais nager. Use connaître for familiarity with people, places, works, or things: Je connais Marie; Je connais Paris. A following infinitive often signals savoir + skill."},
+    {title:"Avoir besoin de vs avoir envie de",body:"Avoir besoin de means to need: J'ai besoin d'aide; J'ai besoin de dormir. Avoir envie de means to feel like or want: J'ai envie d'un café; J'ai envie de sortir. Before a vowel, de may contract to d'."},
+    {title:"Object pronouns before the verb",body:"In a simple affirmative clause, common object pronouns usually come before the conjugated verb: Je le vois; Elle me connaît; Nous leur parlons. With a positive infinitive construction, the pronoun often goes immediately before the infinitive: Je veux le voir. Imperatives have different placement rules."},
+    {title:"Y and en",body:"Y often replaces à + thing/place: Je vais à Paris → J'y vais; Je pense à ce problème → J'y pense. En often replaces de + thing or a quantity: Je parle de ce livre → J'en parle; Tu veux du pain ? → Oui, j'en veux deux. People and idioms may require other pronouns."},
+    {title:"Agreement with être in passé composé",body:"With many verbs that take être in the passé composé, the past participle agrees with the subject: Elle est arrivée; Ils sont partis; Elles sont parties. Most verbs take avoir, and agreement with a preceding direct object is a separate rule. Check the verb and sentence structure."},
+    {title:"Imparfait endings",body:"For most verbs, take the nous form of the present, remove -ons, and add -ais, -ais, -ait, -ions, -iez, -aient: nous parlons → je parlais. Être is irregular: j'étais, tu étais, il était, nous étions, vous étiez, ils étaient. Use the imparfait for background, habits and ongoing past states."},
+    {title:"Conditional politeness",body:"The conditionnel présent often softens a request: Je voudrais un café; Pourriez-vous m'aider ? It can also express a hypothetical result: Si j'avais le temps, je voyagerais. In the common si + imparfait pattern, do not put the conditional directly after si."},
+    {title:"Negation with an infinitive",body:"When the infinitive is negated, ne pas usually comes directly before it: Je préfère ne pas sortir; Il faut ne pas oublier. With a conjugated verb, ne surrounds the verb: Je ne sors pas. In everyday speech ne is often dropped, but formal writing usually retains it."}  ];
   let tab = "ask", history = [], busy = false;
   function rootStyle(){return `<style>
   .fi-wrap{color:var(--tx,#1d2433);font:inherit}.fi-hero{padding:20px;border-radius:18px;background:linear-gradient(135deg,#172554,#3730a3 65%,#6d28d9);color:#fff;margin:12px 0}.fi-hero h1{font:700 26px Georgia,serif;margin:4px 0}.fi-hero p{margin:6px 0;opacity:.9}.fi-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}.fi-tab{width:100%;text-align:left;background:var(--card,#fff);color:var(--tx,#1d2433);border:1px solid var(--bd,#e5e1d8);padding:12px;min-height:76px}.fi-tab.active{border:2px solid var(--ac,#1d4ed8);background:rgba(59,130,246,.1)}.fi-panel{background:var(--card,#fff);border:1px solid var(--bd,#e5e1d8);border-radius:14px;padding:14px;margin:10px 0}.fi-label{display:block;font-weight:650;margin:8px 0 4px}.fi-input{display:block;width:100%;font:inherit;padding:12px;border:1px solid var(--bd,#e5e1d8);border-radius:10px;background:var(--bg,#f7f5f0);color:var(--tx,#1d2433);margin:6px 0}.fi-output{white-space:pre-wrap;line-height:1.7;overflow-wrap:anywhere}.fi-muted{font-size:13px;color:var(--mu,#6b7280)}.fi-result{padding:12px 0;border-top:1px solid var(--bd,#e5e1d8)}.fi-tag{display:inline-block;padding:2px 8px;border-radius:20px;background:var(--bg,#f7f5f0);font-size:12px;margin:2px}.fi-answer{background:var(--bg,#f7f5f0);border-radius:10px;padding:12px;margin-top:10px}.fi-row{display:flex;gap:8px;flex-wrap:wrap}.fi-row button{flex:1;min-width:120px}.fi-note{border-left:3px solid var(--ac,#1d4ed8);padding:8px 10px;background:var(--bg,#f7f5f0);font-size:13px}.fi-back{margin:4px 0}.fi-source{font-size:12px;color:var(--mu,#6b7280)}@media(max-width:420px){.fi-grid{grid-template-columns:1fr}.fi-hero{padding:16px}.fi-hero h1{font-size:23px}}</style>`;}
@@ -222,6 +276,11 @@
   function answerQuestion(q){
     const n=norm(q);
     if(!q.trim())return "Type a question first.";
+    if(/depuis/.test(n)&&/pendant/.test(n))return "<b>Depuis vs pendant</b><p><i>Depuis</i> usually links a past starting point to a situation continuing now: <i>J'habite ici depuis trois ans</i> (I've lived here for three years). <i>Pendant</i> frames a duration: <i>J'ai étudié pendant deux heures</i> (I studied for two hours). Context and tense determine the best translation.</p>";
+    if(/savoir/.test(n)&&/connaitre|connaître/.test(n))return "<b>Savoir vs connaître</b><p>Use <i>savoir</i> for facts or skills: <i>Je sais la réponse</i>; <i>Je sais nager</i>. Use <i>connaître</i> for familiarity: <i>Je connais cette ville</i>; <i>Je connais Marie</i>.</p>";
+    if(/y\b/.test(n)&&/en\b/.test(n)&&/(pronoun|pronom|difference|différence|use|utilis)/.test(n))return "<b>Y vs en</b><p><i>Y</i> often replaces <i>à</i> + thing/place: <i>Je vais à Paris → J'y vais</i>. <i>En</i> often replaces <i>de</i> + thing or a quantity: <i>Je parle de ce livre → J'en parle</i>; <i>J'en veux deux</i>. Pronoun choice depends on the verb's construction and meaning.</p>";
+    if(/conditionnel|conditional/.test(n))return "<b>Conditional for polite requests and hypotheses</b><p><i>Je voudrais un café</i> is a polite request; <i>Pourriez-vous m'aider ?</i> means “Could you help me?” In a common hypothesis: <i>Si j'avais le temps, je voyagerais</i>. Do not put the conditional directly after <i>si</i> in this pattern.</p>";
+
     const matched=rules.find(r=>n.includes(norm(r.title).replace("ne ... pas","ne"))|| (n.includes("negation")&&r.title.startsWith("Negation")) || (n.includes("tu")&&n.includes("vous")&&r.title==="Tu and vous"));
     if(matched)return `<b>${esc(matched.title)}</b><p>${esc(matched.body)}</p>`;
     if(/maison/.test(n)&&/(feminin|gender|genre|why|pourquoi)/.test(n))return "<b>Why is “maison” feminine?</b><p>In French, grammatical gender is a property of each noun and is not always predictable from meaning. Learn it together with its article: <i>la maison</i>. The ending -on does not reliably tell you a noun's gender.</p>";
