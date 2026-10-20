@@ -52,6 +52,7 @@ const checks = [
   ["phrasebook preserves negation in supported English-to-French phrase", core.translate("I don't understand", "en-fr").includes("je ne comprends pas")],
   ["French-to-English phrasebook accepts typographic apostrophes", core.translate("J’ai besoin d’aide", "fr-en").includes("I need help")],
   ["French-to-English phrasebook matches feminine accented adjective", core.translate("Je suis fatiguée.", "fr-en").includes("I am tired")],
+  ["French-to-English phrasebook matches an accented standalone word", core.translate("école", "fr-en").includes("school")],
   ["conjugation returns complete venir paradigm", JSON.stringify(Array.from(core.conjugate("venir").forms)) === JSON.stringify(["viens","viens","vient","venons","venez","viennent"])],
   ["conjugation returns complete prendre paradigm", JSON.stringify(Array.from(core.conjugate("prendre").forms)) === JSON.stringify(["prends","prends","prend","prenons","prenez","prennent"])],
   ["conjugation returns complete pouvoir paradigm", JSON.stringify(Array.from(core.conjugate("pouvoir").forms)) === JSON.stringify(["peux","peux","peut","pouvons","pouvez","peuvent"])],
