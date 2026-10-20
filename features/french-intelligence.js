@@ -36,8 +36,6 @@
     enfant:["child","noun (masculine or feminine by person)","L'enfant joue dehors.","The noun is grammatically masculine; the person's sex is contextual."],
     ville:["city; town","noun (feminine)","Paris est une grande ville.","Usually feminine: une ville."],
     pays:["country","noun (masculine, usually)","La France est un pays européen.","Usually masculine; some country names use articles of other genders."],
-    temps:["time; weather","noun (masculine)","Je n'ai pas le temps.","Meaning depends on context: time, weather, or tense."],
-    jour:["day","noun (masculine)","Bonne journée !","Un jour means a day; tous les jours means every day."],
     nuit:["night","noun (feminine)","Bonne nuit !","Usually feminine: la nuit."],
     matin:["morning","noun (masculine)","Je travaille le matin.","Bonjour is used as a greeting during the day."],
     soir:["evening","noun (masculine)","Je rentre ce soir.","Bonsoir is the usual evening greeting."],
@@ -96,7 +94,6 @@
     vouloir:["to want","verb","Je voudrais un café.","Je voudrais is a polite conditional form."],
     pouvoir:["to be able to; can","verb","Je peux vous aider.","Irregular present: peux, peux, peut, pouvons, pouvez, peuvent."],
     devoir:["must; to have to; owe","verb","Je dois partir.","Irregular present: dois, dois, doit, devons, devez, doivent."],
-    travail:["work; job","noun (masculine)","Je vais au travail.","Plural: travaux in many senses."],
     temps:["time; weather","noun (masculine)","Je n'ai pas le temps.","The meaning depends on context."],
     jour:["day","noun (masculine)","Bonne journée !","Bonne journée is a friendly daytime farewell."],
     fille:["girl; daughter","noun (feminine)","Sa fille parle français.","Context determines girl or daughter."],
@@ -106,9 +103,6 @@
     école:["school","noun (feminine)","Les enfants vont à l'école.","Use à l'école."],
     travailleur:["hard-working; worker","adjective/noun","Il est très travailleur.","Feminine travailleuse."],
     gentil:["kind; nice","adjective","Il est gentil.","Feminine gentille."],
-    difficile:["difficult","adjective","Cette question est difficile.","Same form for masculine and feminine."],
-    facile:["easy","adjective","C'est facile à comprendre.","Same form for masculine and feminine."],
-    toujours:["always; still","adverb","Je suis toujours ici.","Check context to distinguish always from still."],
     beaucoup:["a lot; much; many","adverb","Merci beaucoup.","Before a noun, use beaucoup de: beaucoup de livres."],
     très:["very","adverb","C'est très intéressant.","Usually placed before the adjective or adverb."],
     intéressant:["interesting","adjective","Un sujet intéressant.","Feminine intéressante."],
@@ -237,7 +231,7 @@
     else b.innerHTML=`<div class="fi-panel"><h2>French grammar guide</h2><input class="fi-input" id="fiRuleSearch" placeholder="Filter rules…"><div id="fiRules">${ruleHtml(rules)}</div></div>`;
   }
   function ruleHtml(list){return list.map((r,i)=>`<details class="fi-result"><summary><b>${esc(r.title)}</b></summary><p class="fi-output">${esc(r.body)}</p><button class="g" data-firule="${i}">Ask about this rule</button></details>`).join("");}
-  function norm(s){return String(s||"").toLocaleLowerCase("fr").normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();}
+  function norm(s){return String(s||"").replace(/[’‘‛ʼ＇]/g,"'").replace(/[＂“”„]/g,'"').toLocaleLowerCase("fr").normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim().replace(/\s+/g," ");}
   function lookup(word){
     const q=String(word||"").trim();if(!q)return null;
     let foundKey=q.toLocaleLowerCase("fr");
@@ -303,7 +297,6 @@
       [/\bbonjor\b/gi,()=>"bonjour","Spelling: bonjour."],
       [/\bmerçi\b/gi,()=>"merci","Merci is written without a cedilla."],
       [/\bje ne comprends pas pas\b/gi,()=>"je ne comprends pas","Avoid repeating pas in this standard negation."],
-      [/\bje parle le français\b/gi,()=>"je parle français","For languages after parler, the article is commonly omitted: parler français."],
       [/\bune livre\b/gi,()=>"un livre","Un livre means a book; une livre can mean a pound, so context matters."]
     ];
     for(const [re,rep,why] of checks){if(re.test(corrected)){re.lastIndex=0;const before=corrected;corrected=corrected.replace(re,rep);suggestions.push({before,why});}}
