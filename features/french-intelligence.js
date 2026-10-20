@@ -39,7 +39,7 @@
     quand:["when","question word/conjunction","Quand arrives-tu ?","Can introduce a time clause."],
     où:["where","question word/adverb","Où habites-tu ?","Accent distinguishes où (where) from ou (or)."],
     mais:["but","conjunction","Je suis fatigué, mais content.","Connects contrasting ideas."],
-    parce que:["because","conjunction","Je reste parce qu'il pleut.","Before il, que elides to qu'."],
+    "parce que":["because","conjunction","Je reste parce qu'il pleut.","Before il, que elides to qu'."],
     avec:["with","preposition","Je viens avec toi.","Usually followed by a noun or stressed pronoun."],
     sans:["without","preposition","Un café sans sucre.","Opposite of avec in many contexts."],
     toujours:["always; still","adverb","Elle arrive toujours à l'heure.","Meaning depends on context."],
