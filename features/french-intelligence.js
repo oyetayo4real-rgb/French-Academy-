@@ -107,7 +107,7 @@
     pourquoi:["why","question word","Pourquoi apprends-tu le français ?","A question word used to ask for a reason."],
     combien:["how much; how many","question word","Combien ça coûte ?","Use combien de before a noun in many quantity questions."],
     lequel:["which one","interrogative pronoun","Lequel préfères-tu ?","Forms vary by gender and number: lequel, laquelle, lesquels, lesquelles."],
-    parce que:["because","conjunction","Je reste parce qu'il pleut.","Before il, que elides to qu'."],
+    "parce que":["because","conjunction","Je reste parce qu'il pleut.","Before il, que elides to qu'."],
     donc:["so; therefore","adverb/conjunction","Il pleut, donc je reste.","Expresses a consequence."],
     pourtant:["however; yet","adverb","Il est fatigué, pourtant il continue.","Introduces contrast."],
     déjà:["already","adverb","J'ai déjà mangé.","Often used with a completed action."],
