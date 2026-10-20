@@ -13,6 +13,8 @@ on:
       - "supabase/functions/tutor/tutor.test.ts"
       - "features/ai-classroom.js"
       - "scripts/check-tutor-dictionary.mjs"
+      - "scripts/check-schema-snapshot.mjs"
+      - "docs/schema-snapshot/**"
       - ".github/workflows/tutor-dictionary-static.yml"
 
 permissions:
@@ -31,6 +33,8 @@ jobs:
           node-version: 22
       - name: Run focused frontend and source assertions
         run: node scripts/check-tutor-dictionary.mjs
+      - name: Validate captured schema snapshot
+        run: node scripts/check-schema-snapshot.mjs
       - name: Set up Deno
         uses: denoland/setup-deno@v2
         with:
