@@ -135,7 +135,7 @@ try {
       }
     }
     await page.locator('[data-fitab="dict"]').click();
-    await page.locator("#fiWord").fill("e\\u0301cole");
+    await page.locator("#fiWord").fill(String.fromCharCode(0x65, 0x0301) + "cole");
     await page.locator("#fiLookup").click();
     await page.locator("#fiAnswer").getByText(/school/i).first().waitFor();
     console.log(`PASS ${profile.name}: combining accent e + U+0301 matches école`);
@@ -200,9 +200,8 @@ try {
       if (!await cache.match(new URL(path, location.origin).href)) throw new Error("Required offline cache entry missing: " + path);
     }
   });
-  await offlinePage.locator("#lgo").click().catch(async () => {
-    if (await offlinePage.locator("#hfrenchint").count() === 0) throw new Error("Could not enter home before offline test");
-  });
+  if (await offlinePage.locator("#lgo").count()) await offlinePage.locator("#lgo").click();
+  if (await offlinePage.locator("#hfrenchint").count() === 0) throw new Error("Could not enter home before offline test");
   await offlinePage.locator("#hfrenchint").first().click();
   await offlinePage.getByRole("heading", { name: /French Intelligence/ }).waitFor();
   await offlinePage.locator('[data-fitab="dict"]').click();
