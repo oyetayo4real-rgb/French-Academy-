@@ -31,7 +31,7 @@
     bonne:["good","adjective","C'est une bonne idée.","Feminine form of bon."],
     petit:["small; little","adjective","Un petit chat.","Feminine petite; agreement matters."],
     grande:["big; tall","adjective","Une grande maison.","Feminine form of grand."],
-    aujourd'hui:["today","adverb","Aujourd'hui, je travaille.","Often placed at the beginning of a sentence."],
+    "aujourd'hui":["today","adverb","Aujourd'hui, je travaille.","Often placed at the beginning of a sentence."],
     demain:["tomorrow","adverb/noun","À demain !","À demain means see you tomorrow."],
     hier:["yesterday","adverb/noun","Hier, j'ai travaillé.","Often used with the passé composé for completed events."],
     pourquoi:["why","question word","Pourquoi apprends-tu le français ?","Answer a why-question with parce que (because)."],
