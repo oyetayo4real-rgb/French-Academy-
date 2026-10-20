@@ -1,0 +1,218 @@
+[
+    {
+        "name": "ai_usage_pkey",
+        "table": "ai_usage",
+        "schema": "public",
+        "definition": "CREATE UNIQUE INDEX ai_usage_pkey ON public.ai_usage USING btree (user_id, day)"
+    },
+    {
+        "name": "app_secrets_pkey",
+        "table": "app_secrets",
+        "schema": "public",
+        "definition": "CREATE UNIQUE INDEX app_secrets_pkey ON public.app_secrets USING btree (name)"
+    },
+    {
+        "name": "assignments_class_id_idx",
+        "table": "assignments",
+        "schema": "public",
+        "definition": "CREATE INDEX assignments_class_id_idx ON public.assignments USING btree (class_id)"
+    },
+    {
+        "name": "assignments_pkey",
+        "table": "assignments",
+        "schema": "public",
+        "definition": "CREATE UNIQUE INDEX assignments_pkey ON public.assignments USING btree (id)"
+    },
+    {
+        "name": "attempts_pkey",
+        "table": "attempts",
+        "schema": "public",
+        "definition": "CREATE UNIQUE INDEX attempts_pkey ON public.attempts USING btree (id)"
+    },
+    {
+        "name": "attempts_student_id_idx",
+        "table": "attempts",
+        "schema": "public",
+        "definition": "CREATE INDEX attempts_student_id_idx ON public.attempts USING btree (student_id)"
+    },
+    {
+        "name": "attendance_pkey",
+        "table": "attendance",
+        "schema": "public",
+        "definition": "CREATE UNIQUE INDEX attendance_pkey ON public.attendance USING btree (session_id, student_id)"
+    },
+    {
+        "name": "attendance_student_id_idx",
+        "table": "attendance",
+        "schema": "public",
+        "definition": "CREATE INDEX attendance_student_id_idx ON public.attendance USING btree (student_id)"
+    },
+    {
+        "name": "audio_clips_lecturer_id_idx",
+        "table": "audio_clips",
+        "schema": "public",
+        "definition": "CREATE INDEX audio_clips_lecturer_id_idx ON public.audio_clips USING btree (lecturer_id)"
+    },
+    {
+        "name": "audio_clips_pkey",
+        "table": "audio_clips",
+        "schema": "public",
+        "definition": "CREATE UNIQUE INDEX audio_clips_pkey ON public.audio_clips USING btree (key)"
+    },
+    {
+        "name": "classes_join_code_key",
+        "table": "classes",
+        "schema": "public",
+        "definition": "CREATE UNIQUE INDEX classes_join_code_key ON public.classes USING btree (join_code)"
+    },
+    {
+        "name": "classes_lecturer_id_idx",
+        "table": "classes",
+        "schema": "public",
+        "definition": "CREATE INDEX classes_lecturer_id_idx ON public.classes USING btree (lecturer_id)"
+    },
+    {
+        "name": "classes_pkey",
+        "table": "classes",
+        "schema": "public",
+        "definition": "CREATE UNIQUE INDEX classes_pkey ON public.classes USING btree (id)"
+    },
+    {
+        "name": "custom_keys_pkey",
+        "table": "custom_keys",
+        "schema": "public",
+        "definition": "CREATE UNIQUE INDEX custom_keys_pkey ON public.custom_keys USING btree (lesson_id, idx)"
+    },
+    {
+        "name": "custom_lessons_lecturer_id_idx",
+        "table": "custom_lessons",
+        "schema": "public",
+        "definition": "CREATE INDEX custom_lessons_lecturer_id_idx ON public.custom_lessons USING btree (lecturer_id)"
+    },
+    {
+        "name": "custom_lessons_pkey",
+        "table": "custom_lessons",
+        "schema": "public",
+        "definition": "CREATE UNIQUE INDEX custom_lessons_pkey ON public.custom_lessons USING btree (id)"
+    },
+    {
+        "name": "dict_cache_pkey",
+        "table": "dict_cache",
+        "schema": "public",
+        "definition": "CREATE UNIQUE INDEX dict_cache_pkey ON public.dict_cache USING btree (word)"
+    },
+    {
+        "name": "enrollments_pkey",
+        "table": "enrollments",
+        "schema": "public",
+        "definition": "CREATE UNIQUE INDEX enrollments_pkey ON public.enrollments USING btree (class_id, student_id)"
+    },
+    {
+        "name": "enrollments_student_id_idx",
+        "table": "enrollments",
+        "schema": "public",
+        "definition": "CREATE INDEX enrollments_student_id_idx ON public.enrollments USING btree (student_id)"
+    },
+    {
+        "name": "exam_crit_pkey",
+        "table": "exam_crit",
+        "schema": "public",
+        "definition": "CREATE UNIQUE INDEX exam_crit_pkey ON public.exam_crit USING btree (level, idx)"
+    },
+    {
+        "name": "exam_keys_pkey",
+        "table": "exam_keys",
+        "schema": "public",
+        "definition": "CREATE UNIQUE INDEX exam_keys_pkey ON public.exam_keys USING btree (level, section, idx)"
+    },
+    {
+        "name": "lesson_media_pkey",
+        "table": "lesson_media",
+        "schema": "public",
+        "definition": "CREATE UNIQUE INDEX lesson_media_pkey ON public.lesson_media USING btree (key)"
+    },
+    {
+        "name": "lesson_media_updated_by_idx",
+        "table": "lesson_media",
+        "schema": "public",
+        "definition": "CREATE INDEX lesson_media_updated_by_idx ON public.lesson_media USING btree (updated_by)"
+    },
+    {
+        "name": "live_sessions_class_id_idx",
+        "table": "live_sessions",
+        "schema": "public",
+        "definition": "CREATE INDEX live_sessions_class_id_idx ON public.live_sessions USING btree (class_id)"
+    },
+    {
+        "name": "live_sessions_pkey",
+        "table": "live_sessions",
+        "schema": "public",
+        "definition": "CREATE UNIQUE INDEX live_sessions_pkey ON public.live_sessions USING btree (id)"
+    },
+    {
+        "name": "profiles_pkey",
+        "table": "profiles",
+        "schema": "public",
+        "definition": "CREATE UNIQUE INDEX profiles_pkey ON public.profiles USING btree (id)"
+    },
+    {
+        "name": "progress_pkey",
+        "table": "progress",
+        "schema": "public",
+        "definition": "CREATE UNIQUE INDEX progress_pkey ON public.progress USING btree (student_id, key)"
+    },
+    {
+        "name": "quiz_keys_pkey",
+        "table": "quiz_keys",
+        "schema": "public",
+        "definition": "CREATE UNIQUE INDEX quiz_keys_pkey ON public.quiz_keys USING btree (lesson_key, idx)"
+    },
+    {
+        "name": "recordings_class_id_idx",
+        "table": "recordings",
+        "schema": "public",
+        "definition": "CREATE INDEX recordings_class_id_idx ON public.recordings USING btree (class_id)"
+    },
+    {
+        "name": "recordings_created_by_idx",
+        "table": "recordings",
+        "schema": "public",
+        "definition": "CREATE INDEX recordings_created_by_idx ON public.recordings USING btree (created_by)"
+    },
+    {
+        "name": "recordings_pkey",
+        "table": "recordings",
+        "schema": "public",
+        "definition": "CREATE UNIQUE INDEX recordings_pkey ON public.recordings USING btree (id)"
+    },
+    {
+        "name": "signals_pkey",
+        "table": "signals",
+        "schema": "public",
+        "definition": "CREATE UNIQUE INDEX signals_pkey ON public.signals USING btree (id)"
+    },
+    {
+        "name": "signals_room_id_idx",
+        "table": "signals",
+        "schema": "public",
+        "definition": "CREATE INDEX signals_room_id_idx ON public.signals USING btree (room, id)"
+    },
+    {
+        "name": "submissions_pkey",
+        "table": "submissions",
+        "schema": "public",
+        "definition": "CREATE UNIQUE INDEX submissions_pkey ON public.submissions USING btree (id)"
+    },
+    {
+        "name": "submissions_student_id_idx",
+        "table": "submissions",
+        "schema": "public",
+        "definition": "CREATE INDEX submissions_student_id_idx ON public.submissions USING btree (student_id)"
+    },
+    {
+        "name": "user_state_pkey",
+        "table": "user_state",
+        "schema": "public",
+        "definition": "CREATE UNIQUE INDEX user_state_pkey ON public.user_state USING btree (student_id)"
+    }
+]
