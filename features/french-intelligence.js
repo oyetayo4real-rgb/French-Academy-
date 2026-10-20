@@ -70,7 +70,51 @@
     excusez:["excuse; excuse me","verb form/expression","Excusez-moi, où est la gare ?","Excusez-moi is polite/formal; excuse-moi is informal."],
     pardon:["sorry; excuse me; pardon","interjection","Pardon, je n'ai pas compris.","Can be used to ask someone to repeat."],
     oui:["yes","adverb","Oui, bien sûr.","Opposite: non."],
-    non:["no; not","adverb","Non, merci.","For standard negation, use ne ... pas around the verb."]
+    non:["no; not","adverb","Non, merci.","For standard negation, use ne ... pas around the verb."],
+    fenêtre:["window","noun (feminine)","J'ouvre la fenêtre.","Feminine: une fenêtre."],
+    porte:["door","noun (feminine)","La porte est ouverte.","Feminine: une porte."],
+    voiture:["car","noun (feminine)","La voiture est rouge.","Feminine: une voiture."],
+    gare:["train station","noun (feminine)","Où est la gare ?","Useful travel word."],
+    billet:["ticket","noun (masculine)","Un billet pour Paris, s'il vous plaît.","Can mean a ticket or banknote depending on context."],
+    eau:["water","noun (feminine)","Je bois de l'eau.","Use de l'eau for an unspecified quantity."],
+    nourriture:["food","noun (feminine)","La nourriture est prête.","General word for food."],
+    petit-déjeuner:["breakfast","noun (masculine)","Je prends le petit-déjeuner à huit heures.","Often used with prendre."],
+    déjeuner:["lunch; to have lunch","noun/verb","Nous déjeunons à midi.","Meaning depends on whether it is used as a noun or verb."],
+    dîner:["dinner; to have dinner","noun/verb","Nous dînons à dix-neuf heures.","Meaning depends on context."],
+    heureux:["happy","adjective","Je suis heureux.","Feminine heureuse."],
+    contente:["happy; pleased","adjective","Elle est contente.","Masculine content."],
+    fatigué:["tired","adjective","Je suis fatigué.","Feminine fatiguée."],
+    malade:["ill; sick","adjective/noun","Je suis malade.","Same adjective form for masculine and feminine."],
+    médecin:["doctor","noun (masculine/feminine)","Elle est médecin.","Profession noun often used without an article after être."],
+    apprendre:["to learn","verb","Nous apprenons le français.","Present: j'apprends, nous apprenons."],
+    écrire:["to write","verb","J'écris une lettre.","Irregular present-tense verb."],
+    lire:["to read","verb","Je lis un livre.","Irregular present-tense verb."],
+    boire:["to drink","verb","Je bois de l'eau.","Irregular present-tense verb."],
+    dormir:["to sleep","verb","Je dors bien.","Irregular present-tense verb."],
+    partir:["to leave","verb","Nous partons demain.","Irregular present-tense verb."],
+    sortir:["to go out; to take out","verb","Elle sort ce soir.","Meaning depends on context."],
+    mettre:["to put; to place; to wear","verb","Je mets mon manteau.","Irregular present-tense verb."],
+    recevoir:["to receive","verb","Je reçois un message.","Irregular present-tense verb."],
+    ouvrir:["to open","verb","J'ouvre la porte.","Present forms resemble many -er endings."],
+    croire:["to believe","verb","Je crois que oui.","Irregular present-tense verb."],
+    courir:["to run","verb","Je cours le matin.","Irregular present-tense verb."],
+    venir:["to come","verb","Tu viens avec nous ?","Irregular present-tense verb."],
+    maintenant:["now","adverb","Je travaille maintenant.","Often placed near the verb or at the beginning/end of a sentence."],
+    souvent:["often","adverb","Je lis souvent.","Frequency adverb."],
+    parfois:["sometimes","adverb","Parfois, je prends le train.","Frequency adverb."],
+    toujours:["always; still","adverb","Il est toujours là.","Meaning depends on context."],
+    jamais:["never; ever","adverb","Je ne viens jamais le dimanche.","In standard negation, ne ... jamais surrounds the verb."],
+    pourquoi:["why","question word","Pourquoi apprends-tu le français ?","A question word used to ask for a reason."],
+    combien:["how much; how many","question word","Combien ça coûte ?","Use combien de before a noun in many quantity questions."],
+    lequel:["which one","interrogative pronoun","Lequel préfères-tu ?","Forms vary by gender and number: lequel, laquelle, lesquels, lesquelles."],
+    parce que:["because","conjunction","Je reste parce qu'il pleut.","Before il, que elides to qu'."],
+    donc:["so; therefore","adverb/conjunction","Il pleut, donc je reste.","Expresses a consequence."],
+    pourtant:["however; yet","adverb","Il est fatigué, pourtant il continue.","Introduces contrast."],
+    déjà:["already","adverb","J'ai déjà mangé.","Often used with a completed action."],
+    encore:["again; still; yet","adverb","Tu es encore ici ?","Several meanings; context matters."],
+    bientôt:["soon","adverb","À bientôt !","Common farewell: à bientôt."],
+    ensemble:["together","adverb","Nous étudions ensemble.","Often follows the verb or object."],
+    aujourd'hui:["today","adverb","Aujourd'hui, je travaille.","Often placed at the beginning of a sentence."]
   };
   const irregular = {
     être:["suis","es","est","sommes","êtes","sont"],
@@ -83,7 +127,18 @@
     vouloir:["veux","veux","veut","voulons","voulez","veulent"],
     devoir:["dois","dois","doit","devons","devez","doivent"],
     savoir:["sais","sais","sait","savons","savez","savent"],
-    dire:["dis","dis","dit","disons","dites","disent"]
+    dire:["dis","dis","dit","disons","dites","disent"],
+    écrire:["écris","écris","écrit","écrivons","écrivez","écrivent"],
+    lire:["lis","lis","lit","lisons","lisez","lisent"],
+    boire:["bois","bois","boit","buvons","buvez","boivent"],
+    dormir:["dors","dors","dort","dormons","dormez","dorment"],
+    partir:["pars","pars","part","partons","partez","partent"],
+    sortir:["sors","sors","sort","sortons","sortez","sortent"],
+    mettre:["mets","mets","met","mettons","mettez","mettent"],
+    recevoir:["reçois","reçois","reçoit","recevons","recevez","reçoivent"],
+    ouvrir:["ouvre","ouvres","ouvre","ouvrons","ouvrez","ouvrent"],
+    croire:["crois","crois","croit","croyons","croyez","croient"],
+    courir:["cours","cours","court","courons","courez","courent"]
   };
   const persons = ["je / j'","tu","il / elle / on","nous","vous","ils / elles"];
   const examples = [
@@ -159,6 +214,8 @@
     if(v==="manger")return {v,forms:["mange","manges","mange","mangeons","mangez","mangent"],type:"Regular -er pattern with spelling adjustment"};
     if(v==="commencer")return {v,forms:["commence","commences","commence","commençons","commencez","commencent"],type:"Regular -er pattern with spelling adjustment"};
     if(/er$/.test(v)&&v.length>3){const stem=v.slice(0,-2);return {v,forms:[stem+"e",stem+"es",stem+"e",stem+"ons",stem+"ez",stem+"ent"],type:"Regular -er verb · present tense"};}
+    if(/ir$/.test(v)&&v.length>3&&!["partir","sortir","dormir","servir","sentir","mentir","courir","ouvrir","offrir","cueillir"].includes(v)){const stem=v.slice(0,-2);return {v,forms:[stem+"is",stem+"is",stem+"it",stem+"issons",stem+"issez",stem+"issent"],type:"Regular -ir verb · present tense (finir pattern)"};}
+    if(/re$/.test(v)&&v.length>3){const stem=v.slice(0,-2);return {v,forms:[stem+"s",stem+"s",stem,""+stem+"ons",stem+"ez",stem+"ent"],type:"Regular -re verb · present-tense pattern (verify exceptions)"};}
     return null;
   }
   function answerQuestion(q){
@@ -214,4 +271,6 @@
   document.addEventListener("input",(e)=>{if(e.target?.id==="fiRuleSearch"){const q=norm(e.target.value);const f=rules.filter(r=>norm(r.title+" "+r.body).includes(q));const out=$("fiRules");if(out)out.innerHTML=ruleHtml(f);}});
   document.addEventListener("keydown",(e)=>{if(e.target?.id==="fiWord"&&e.key==="Enter"){e.preventDefault();runAction("fiLookup");}});
   window.FrenchIntelligenceOpen=open;
+  // Small, read-only core API enables deterministic tests without a browser UI.
+  window.FrenchIntelligenceCore=Object.freeze({lookup,translate,conjugate,answerQuestion,checkWriting});
 })();
