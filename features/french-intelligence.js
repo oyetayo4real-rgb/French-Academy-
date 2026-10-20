@@ -78,7 +78,7 @@
     billet:["ticket","noun (masculine)","Un billet pour Paris, s'il vous plaît.","Can mean a ticket or banknote depending on context."],
     eau:["water","noun (feminine)","Je bois de l'eau.","Use de l'eau for an unspecified quantity."],
     nourriture:["food","noun (feminine)","La nourriture est prête.","General word for food."],
-    petit-déjeuner:["breakfast","noun (masculine)","Je prends le petit-déjeuner à huit heures.","Often used with prendre."],
+    "petit-déjeuner":["breakfast","noun (masculine)","Je prends le petit-déjeuner à huit heures.","Often used with prendre."],
     déjeuner:["lunch; to have lunch","noun/verb","Nous déjeunons à midi.","Meaning depends on whether it is used as a noun or verb."],
     dîner:["dinner; to have dinner","noun/verb","Nous dînons à dix-neuf heures.","Meaning depends on context."],
     heureux:["happy","adjective","Je suis heureux.","Feminine heureuse."],
