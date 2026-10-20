@@ -15,6 +15,7 @@ on:
       - "features/french-intelligence.js"
       - "index.html"
       - "scripts/check-french-intelligence.mjs"
+      - "scripts/check-french-intelligence.browser.mjs"
       - ".github/workflows/french-intelligence-check.yml"
 
 permissions:
