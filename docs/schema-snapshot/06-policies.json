@@ -1,0 +1,470 @@
+[
+    {
+        "name": "assign_delete",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "assignments",
+        "using": "private.owns_class(class_id)",
+        "schema": "public",
+        "command": "DELETE",
+        "permissive": "PERMISSIVE",
+        "with_check": null
+    },
+    {
+        "name": "assign_insert",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "assignments",
+        "using": null,
+        "schema": "public",
+        "command": "INSERT",
+        "permissive": "PERMISSIVE",
+        "with_check": "private.owns_class(class_id)"
+    },
+    {
+        "name": "assign_select",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "assignments",
+        "using": "(private.owns_class(class_id) OR private.in_class(class_id))",
+        "schema": "public",
+        "command": "SELECT",
+        "permissive": "PERMISSIVE",
+        "with_check": null
+    },
+    {
+        "name": "assign_update",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "assignments",
+        "using": "private.owns_class(class_id)",
+        "schema": "public",
+        "command": "UPDATE",
+        "permissive": "PERMISSIVE",
+        "with_check": "private.owns_class(class_id)"
+    },
+    {
+        "name": "attempts_select",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "attempts",
+        "using": "((student_id = ( SELECT auth.uid() AS uid)) OR private.teaches(student_id))",
+        "schema": "public",
+        "command": "SELECT",
+        "permissive": "PERMISSIVE",
+        "with_check": null
+    },
+    {
+        "name": "att_insert",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "attendance",
+        "using": null,
+        "schema": "public",
+        "command": "INSERT",
+        "permissive": "PERMISSIVE",
+        "with_check": "((student_id = ( SELECT auth.uid() AS uid)) AND private.in_session(session_id))"
+    },
+    {
+        "name": "att_select",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "attendance",
+        "using": "((student_id = ( SELECT auth.uid() AS uid)) OR private.owns_session(session_id))",
+        "schema": "public",
+        "command": "SELECT",
+        "permissive": "PERMISSIVE",
+        "with_check": null
+    },
+    {
+        "name": "clips_delete",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "audio_clips",
+        "using": "private.is_lecturer()",
+        "schema": "public",
+        "command": "DELETE",
+        "permissive": "PERMISSIVE",
+        "with_check": null
+    },
+    {
+        "name": "clips_insert",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "audio_clips",
+        "using": null,
+        "schema": "public",
+        "command": "INSERT",
+        "permissive": "PERMISSIVE",
+        "with_check": "(private.is_lecturer() AND (lecturer_id = ( SELECT auth.uid() AS uid)))"
+    },
+    {
+        "name": "clips_select",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "audio_clips",
+        "using": "true",
+        "schema": "public",
+        "command": "SELECT",
+        "permissive": "PERMISSIVE",
+        "with_check": null
+    },
+    {
+        "name": "clips_update",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "audio_clips",
+        "using": "private.is_lecturer()",
+        "schema": "public",
+        "command": "UPDATE",
+        "permissive": "PERMISSIVE",
+        "with_check": "(private.is_lecturer() AND (lecturer_id = ( SELECT auth.uid() AS uid)))"
+    },
+    {
+        "name": "classes_delete",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "classes",
+        "using": "(lecturer_id = ( SELECT auth.uid() AS uid))",
+        "schema": "public",
+        "command": "DELETE",
+        "permissive": "PERMISSIVE",
+        "with_check": null
+    },
+    {
+        "name": "classes_insert",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "classes",
+        "using": null,
+        "schema": "public",
+        "command": "INSERT",
+        "permissive": "PERMISSIVE",
+        "with_check": "((lecturer_id = ( SELECT auth.uid() AS uid)) AND private.is_lecturer())"
+    },
+    {
+        "name": "classes_select",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "classes",
+        "using": "((lecturer_id = ( SELECT auth.uid() AS uid)) OR private.in_class(id))",
+        "schema": "public",
+        "command": "SELECT",
+        "permissive": "PERMISSIVE",
+        "with_check": null
+    },
+    {
+        "name": "classes_update",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "classes",
+        "using": "(lecturer_id = ( SELECT auth.uid() AS uid))",
+        "schema": "public",
+        "command": "UPDATE",
+        "permissive": "PERMISSIVE",
+        "with_check": "(lecturer_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+        "name": "cl_delete",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "custom_lessons",
+        "using": "((lecturer_id = ( SELECT auth.uid() AS uid)) AND private.is_lecturer())",
+        "schema": "public",
+        "command": "DELETE",
+        "permissive": "PERMISSIVE",
+        "with_check": null
+    },
+    {
+        "name": "cl_select",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "custom_lessons",
+        "using": "(published OR (lecturer_id = ( SELECT auth.uid() AS uid)))",
+        "schema": "public",
+        "command": "SELECT",
+        "permissive": "PERMISSIVE",
+        "with_check": null
+    },
+    {
+        "name": "enroll_delete",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "enrollments",
+        "using": "((student_id = ( SELECT auth.uid() AS uid)) OR private.owns_class(class_id))",
+        "schema": "public",
+        "command": "DELETE",
+        "permissive": "PERMISSIVE",
+        "with_check": null
+    },
+    {
+        "name": "enroll_select",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "enrollments",
+        "using": "((student_id = ( SELECT auth.uid() AS uid)) OR private.owns_class(class_id))",
+        "schema": "public",
+        "command": "SELECT",
+        "permissive": "PERMISSIVE",
+        "with_check": null
+    },
+    {
+        "name": "media_delete",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "lesson_media",
+        "using": "private.is_lecturer()",
+        "schema": "public",
+        "command": "DELETE",
+        "permissive": "PERMISSIVE",
+        "with_check": null
+    },
+    {
+        "name": "media_insert",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "lesson_media",
+        "using": null,
+        "schema": "public",
+        "command": "INSERT",
+        "permissive": "PERMISSIVE",
+        "with_check": "(private.is_lecturer() AND (updated_by = ( SELECT auth.uid() AS uid)))"
+    },
+    {
+        "name": "media_select",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "lesson_media",
+        "using": "true",
+        "schema": "public",
+        "command": "SELECT",
+        "permissive": "PERMISSIVE",
+        "with_check": null
+    },
+    {
+        "name": "media_update",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "lesson_media",
+        "using": "private.is_lecturer()",
+        "schema": "public",
+        "command": "UPDATE",
+        "permissive": "PERMISSIVE",
+        "with_check": "(private.is_lecturer() AND (updated_by = ( SELECT auth.uid() AS uid)))"
+    },
+    {
+        "name": "live_delete",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "live_sessions",
+        "using": "private.owns_class(class_id)",
+        "schema": "public",
+        "command": "DELETE",
+        "permissive": "PERMISSIVE",
+        "with_check": null
+    },
+    {
+        "name": "live_insert",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "live_sessions",
+        "using": null,
+        "schema": "public",
+        "command": "INSERT",
+        "permissive": "PERMISSIVE",
+        "with_check": "private.owns_class(class_id)"
+    },
+    {
+        "name": "live_select",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "live_sessions",
+        "using": "(private.owns_class(class_id) OR private.in_class(class_id))",
+        "schema": "public",
+        "command": "SELECT",
+        "permissive": "PERMISSIVE",
+        "with_check": null
+    },
+    {
+        "name": "live_update",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "live_sessions",
+        "using": "private.owns_class(class_id)",
+        "schema": "public",
+        "command": "UPDATE",
+        "permissive": "PERMISSIVE",
+        "with_check": "private.owns_class(class_id)"
+    },
+    {
+        "name": "profiles_select",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "profiles",
+        "using": "((id = ( SELECT auth.uid() AS uid)) OR private.teaches(id))",
+        "schema": "public",
+        "command": "SELECT",
+        "permissive": "PERMISSIVE",
+        "with_check": null
+    },
+    {
+        "name": "profiles_update",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "profiles",
+        "using": "(id = ( SELECT auth.uid() AS uid))",
+        "schema": "public",
+        "command": "UPDATE",
+        "permissive": "PERMISSIVE",
+        "with_check": "((id = ( SELECT auth.uid() AS uid)) AND (role = private.my_role()))"
+    },
+    {
+        "name": "progress_select",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "progress",
+        "using": "((student_id = ( SELECT auth.uid() AS uid)) OR private.teaches(student_id))",
+        "schema": "public",
+        "command": "SELECT",
+        "permissive": "PERMISSIVE",
+        "with_check": null
+    },
+    {
+        "name": "rec_delete",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "recordings",
+        "using": "private.owns_class(class_id)",
+        "schema": "public",
+        "command": "DELETE",
+        "permissive": "PERMISSIVE",
+        "with_check": null
+    },
+    {
+        "name": "rec_insert",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "recordings",
+        "using": null,
+        "schema": "public",
+        "command": "INSERT",
+        "permissive": "PERMISSIVE",
+        "with_check": "(private.owns_class(class_id) AND (created_by = ( SELECT auth.uid() AS uid)))"
+    },
+    {
+        "name": "rec_select",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "recordings",
+        "using": "(private.owns_class(class_id) OR private.in_class(class_id))",
+        "schema": "public",
+        "command": "SELECT",
+        "permissive": "PERMISSIVE",
+        "with_check": null
+    },
+    {
+        "name": "sig_delete",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "signals",
+        "using": "private.owns_class(room)",
+        "schema": "public",
+        "command": "DELETE",
+        "permissive": "PERMISSIVE",
+        "with_check": null
+    },
+    {
+        "name": "sig_insert",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "signals",
+        "using": null,
+        "schema": "public",
+        "command": "INSERT",
+        "permissive": "PERMISSIVE",
+        "with_check": "((from_id = ( SELECT auth.uid() AS uid)) AND (private.owns_class(room) OR private.in_class(room)))"
+    },
+    {
+        "name": "sig_select",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "signals",
+        "using": "((private.owns_class(room) OR private.in_class(room)) AND ((to_id IS NULL) OR (to_id = ( SELECT auth.uid() AS uid))))",
+        "schema": "public",
+        "command": "SELECT",
+        "permissive": "PERMISSIVE",
+        "with_check": null
+    },
+    {
+        "name": "sig_select_owner",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "signals",
+        "using": "private.owns_class(room)",
+        "schema": "public",
+        "command": "SELECT",
+        "permissive": "PERMISSIVE",
+        "with_check": null
+    },
+    {
+        "name": "subs_select",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "submissions",
+        "using": "((student_id = ( SELECT auth.uid() AS uid)) OR private.teaches(student_id))",
+        "schema": "public",
+        "command": "SELECT",
+        "permissive": "PERMISSIVE",
+        "with_check": null
+    },
+    {
+        "name": "state_all",
+        "roles": [
+            "authenticated"
+        ],
+        "table": "user_state",
+        "using": "(student_id = ( SELECT auth.uid() AS uid))",
+        "schema": "public",
+        "command": "ALL",
+        "permissive": "PERMISSIVE",
+        "with_check": "(student_id = ( SELECT auth.uid() AS uid))"
+    }
+]
