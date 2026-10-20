@@ -287,6 +287,25 @@
   }
   function checkWriting(q){
     let suggestions=[],corrected=q;
+    const subjunctiveVerbs = [
+      { name: "être", indicative: ["suis","es","est","sommes","êtes","sont"], subjunctive: ["sois","sois","soit","soyons","soyez","soient"] },
+      { name: "avoir", indicative: ["ai","as","a","avons","avez","ont"], subjunctive: ["aie","aies","ait","ayons","ayez","aient"] },
+      { name: "aller", indicative: ["vais","vas","va","allons","allez","vont"], subjunctive: ["aille","ailles","aille","allions","alliez","aillent"] },
+      { name: "faire", indicative: ["fais","fais","fait","faisons","faites","font"], subjunctive: ["fasse","fasses","fasse","fassions","fassiez","fassent"] },
+      { name: "pouvoir", indicative: ["peux","peux","peut","pouvons","pouvez","peuvent"], subjunctive: ["puisse","puisses","puisse","puissions","puissiez","puissent"] },
+      { name: "savoir", indicative: ["sais","sais","sait","savons","savez","savent"], subjunctive: ["sache","saches","sache","sachions","sachiez","sachent"] },
+      { name: "vouloir", indicative: ["veux","veux","veut","voulons","voulez","veulent"], subjunctive: ["veuille","veuilles","veuille","voulions","vouliez","veuillent"] }
+    ];
+    const subjunctiveTriggers = "(?:bien\\s+que|bien\\s+qu['’]|quoique|quoiqu['’]|pour\\s+que|pour\\s+qu['’]|afin\\s+que|afin\\s+qu['’]|avant\\s+que|avant\\s+qu['’]|à\\s+moins\\s+que|à\\s+moins\\s+qu['’]|jusqu['’]à\\s+ce\\s+que|jusqu['’]à\\s+ce\\s+qu['’]|sans\\s+que|sans\\s+qu['’])";
+    const indicativeForms = [...new Set(subjunctiveVerbs.flatMap(v => v.indicative))].sort((a,b) => b.length-a.length).join("|");
+    const subjunctivePattern = new RegExp("(^|[^\\p{L}])(" + subjunctiveTriggers + ")\\s*(je|tu|il|elle|nous|vous|ils|elles)\\s+(" + indicativeForms + ")\\b", "giu");
+    corrected = corrected.replace(subjunctivePattern, (match, prefix, trigger, subject, verb) => {
+      const subjectIndex = ({je:0,tu:1,il:2,elle:2,nous:3,vous:4,ils:5,elles:5})[subject.toLocaleLowerCase("fr")];
+      const verbRule = subjunctiveVerbs.find(v => v.indicative.includes(verb.toLocaleLowerCase("fr")));
+      if (subjectIndex === undefined || !verbRule) return match;
+      suggestions.push({before: match, why: "After this conjunction, use the subjunctive mood rather than the indicative in this clause."});
+      return prefix + match.slice(prefix.length, match.length - verb.length) + verbRule.subjunctive[subjectIndex];
+    });
     const checks=[
       [/\bje suis (\d+) ans\b/gi,(m,n)=>"j'ai "+n+" ans","French uses avoir for age."],
       [/\bje suis faim\b/gi,()=>"j'ai faim","French says avoir faim (to be hungry)."],
