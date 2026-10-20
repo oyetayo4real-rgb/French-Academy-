@@ -236,6 +236,14 @@
   }
   function showAnswer(html){const out=$("fiAnswer");if(out)out.innerHTML=html;}
   function dictionaryHtml(d){return `<div class="fi-answer"><h3 style="margin:0 0 6px">${esc(d.word)}</h3><div><b>Meaning:</b> ${esc(d.meaning)}</div><div class="fi-muted">Part of speech: ${esc(d.part)}</div><p><b>Example:</b> <i>${esc(d.example)}</i></p><p><b>Usage:</b> ${esc(d.notes)}</p><span class="fi-tag">Built-in entry</span></div>`;}
+  function phraseMatcher(re){
+    let source=re.source;
+    if(source.startsWith("\\b"))source="(?<![\\p{L}\\p{N}_])"+source.slice(2);
+    if(source.endsWith("\\b"))source=source.slice(0,-2)+"(?![\\p{L}\\p{N}_])";
+    const groups={a:"[aàáâäãå]",c:"[cç]",e:"[eéèêë]",i:"[iîï]",o:"[oôö]",u:"[uùûü]",y:"[yÿ]",n:"[nñ]"};
+    source=source.replace(/[àáâäãåçéèêëîïôöùûüÿñ]/gi,ch=>{const base=ch.normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLowerCase();return groups[base]||ch;});
+    return new RegExp(source,re.flags.includes("u")?re.flags:re.flags+"u");
+  }
   function translate(text,direction){
     const q=String(text||"").trim();if(!q)return "Enter some text first.";
     if(direction==="en-fr"){
@@ -244,7 +252,7 @@
       return `<div class="fi-answer">This phrase is not in the local phrasebook yet. I won't guess a full translation. Try a shorter phrase, or use <a href="https://www.deepl.com/translator#en/fr/${encodeURIComponent(q)}" target="_blank" rel="noopener noreferrer">DeepL</a> or <a href="https://translate.google.com/?sl=en&tl=fr&text=${encodeURIComponent(q)}" target="_blank" rel="noopener noreferrer">Google Translate</a> and review the result.</div>`;
     }
     let result=q;let matches=[];
-    for(const [re,en] of phraseMap){if(re.test(result)){matches.push(en);result=result.replace(re,en);}}
+    for(const [re,en] of phraseMap){const matcher=phraseMatcher(re);if(matcher.test(result)){matches.push(en);result=result.replace(matcher,en);}}
     if(matches.length)return `<div class="fi-answer"><b>Approximate English:</b><div class="fi-output">${esc(result)}</div><p class="fi-muted">Matched local phrases: ${esc([...new Set(matches)].join("; "))}. This is a word/phrase substitution, not a full semantic translation; verify grammar and context.</p></div>`;
     const words=q.match(/[\p{L}’'-]+/gu)||[];const found=words.map(w=>({w,d:lookup(w)})).filter(x=>x.d);
     if(found.length)return `<div class="fi-answer"><b>Vocabulary hints (not a complete translation)</b>${found.map(x=>`<div class="fi-result"><b>${esc(x.w)}</b> — ${esc(x.d.meaning)}</div>`).join("")}</div>`;
