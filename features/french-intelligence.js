@@ -114,7 +114,7 @@
     encore:["again; still; yet","adverb","Tu es encore ici ?","Several meanings; context matters."],
     bientôt:["soon","adverb","À bientôt !","Common farewell: à bientôt."],
     ensemble:["together","adverb","Nous étudions ensemble.","Often follows the verb or object."],
-    aujourd'hui:["today","adverb","Aujourd'hui, je travaille.","Often placed at the beginning of a sentence."]
+    "aujourd'hui":["today","adverb","Aujourd'hui, je travaille.","Often placed at the beginning of a sentence."]
   };
   const irregular = {
     être:["suis","es","est","sommes","êtes","sont"],
