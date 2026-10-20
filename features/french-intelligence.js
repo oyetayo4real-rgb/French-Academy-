@@ -203,7 +203,7 @@
   document.addEventListener("click",(e)=>{
     const t=e.target instanceof Element?e.target.closest("button"):null;if(!t)return;
     if(t.id==="hfrenchint"){open();return;}
-    if(t.id==="fiHome"){if(typeof window.render==="function"){try{window.view="home";window.render();return}catch(_){}}const app=$("app");if(app)app.innerHTML='<div class="card">Return to the home screen using your app navigation.</div>';return;}
+    if(t.id==="fiHome"){if(typeof window.FAExitFrenchIntelligence==="function"){window.FAExitFrenchIntelligence();return;}location.reload();return;const app=$("app");if(app)app.innerHTML='<div class="card">Return to the home screen using your app navigation.</div>';return;}
     if(t.dataset.fitab){tab=t.dataset.fitab;const app=$("app");if(app)app.innerHTML=header();renderBody();return;}
     if(t.dataset.fiprompt){const prompts=["Explain ne … pas","When do I use tu and vous?","Explain passé composé","Why is maison feminine?"];const input=$("fiInput");if(input)input.value=prompts[Number(t.dataset.fiprompt)]||"";return;}
     if(t.dataset.fiexample){const input=$("fiInput");if(input)input.value=t.dataset.fiexample;return;}
