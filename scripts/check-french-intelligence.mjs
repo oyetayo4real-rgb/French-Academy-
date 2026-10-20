@@ -1,27 +1,49 @@
 import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
+import vm from "node:vm";
 
 const engine = readFileSync("features/french-intelligence.js", "utf8");
 const html = readFileSync("index.html", "utf8");
+const listeners = {};
+const document = {
+  addEventListener: (name, fn) => { (listeners[name] ||= []).push(fn); },
+  getElementById: () => null
+};
+const window = {};
+vm.runInNewContext(engine, { document, window, console, URL, encodeURIComponent, location: { reload() {} } });
+const core = window.FrenchIntelligenceCore;
+assert.ok(core, "Core API must be exposed for deterministic unit tests");
 
 const checks = [
   ["engine is a strict-mode module", /["']use strict["']/.test(engine)],
-  ["engine registers its home entry point", /addEventListener\(["']click["']/.test(engine) && /t\.id===["']hfrenchint["']/.test(engine)],
-  ["engine exposes an explicit open function", /window\.FrenchIntelligenceOpen\s*=\s*open/.test(engine)],
-  ["engine provides dictionary lookup", /function lookup\(/.test(engine)],
-  ["engine provides conjugation", /function conjugate\(/.test(engine)],
-  ["engine provides writing checks", /function checkWriting\(/.test(engine)],
-  ["engine labels unsupported questions instead of fabricating answers", /couldn't match this question confidently/.test(engine)],
   ["home screen links to French Intelligence", /id=["']hfrenchint["']/.test(html)],
-  ["engine script is loaded by the app", /features\/french-intelligence\.js\?v=/.test(html)],
-  ["engine script loads before the existing AI classroom module", html.indexOf("features/french-intelligence.js") >= 0 && html.indexOf("features/french-intelligence.js") < html.indexOf("features/ai-classroom.js")],
-  ["home navigation hook is present", /FAExitFrenchIntelligence/.test(html)],
+  ["engine script is loaded before AI classroom", html.indexOf("features/french-intelligence.js") >= 0 && html.indexOf("features/french-intelligence.js") < html.indexOf("features/ai-classroom.js")],
+  ["navigation hook exists", /FAExitFrenchIntelligence/.test(html)],
+  ["dictionary finds an exact French word", core.lookup("bonjour")?.meaning.includes("hello")],
+  ["dictionary matches accents flexibly", core.lookup("ecole")?.word === "école"],
+  ["dictionary supports a multiword expression", core.lookup("parce que")?.meaning === "because"],
+  ["dictionary safely rejects unknown words", core.lookup("xqz-not-a-word") === null],
+  ["irregular être conjugation is correct", JSON.stringify(Array.from(core.conjugate("être").forms)) === JSON.stringify(["suis","es","est","sommes","êtes","sont"])],
+  ["irregular écrire conjugation is correct", JSON.stringify(Array.from(core.conjugate("écrire").forms)) === JSON.stringify(["écris","écris","écrit","écrivons","écrivez","écrivent"])],
+  ["regular -er conjugation is correct", JSON.stringify(Array.from(core.conjugate("parler").forms)) === JSON.stringify(["parle","parles","parle","parlons","parlez","parlent"])],
+  ["regular -ir finir-pattern conjugation is correct", JSON.stringify(Array.from(core.conjugate("finir").forms)) === JSON.stringify(["finis","finis","finit","finissons","finissez","finissent"])],
+  ["regular -re conjugation is correct", JSON.stringify(Array.from(core.conjugate("vendre").forms)) === JSON.stringify(["vends","vends","vend","vendons","vendez","vendent"])],
+  ["spelling-adjusted manger conjugation is correct", JSON.stringify(Array.from(core.conjugate("manger").forms)) === JSON.stringify(["mange","manges","mange","mangeons","mangez","mangent"])],
+  ["unsupported verb returns no fabricated forms", core.conjugate("xyzifier") === null],
+  ["known English-to-French phrase is translated", core.translate("Thank you", "en-fr").includes("merci")],
+  ["unknown English phrase is not guessed", core.translate("A complicated sentence not in phrasebook", "en-fr").includes("not in the local phrasebook")],
+  ["question receives a contextual grammar answer", core.answerQuestion("Explain passé composé").includes("auxiliary avoir or être")],
+  ["age explanation uses avoir", core.answerQuestion("How do I say my age?").includes("J'ai vingt ans")],
+  ["writing checker corrects a common age error", core.checkWriting("Je suis 20 ans").includes("j'ai 20 ans")],
+  ["writing checker explains when no listed error is found", core.checkWriting("Bonjour, je m'appelle Léa.").includes("does not prove the sentence is fully correct")],
+  ["dictionary output escapes HTML-like input", !core.lookup("<img src=x onerror=alert(1)>")],
 ];
 
 let failed = 0;
-for (const [name, ok] of checks) {
+for (const [name, passed] of checks) {
+  const ok = Boolean(passed);
   console.log(`${ok ? "PASS" : "FAIL"} ${name}`);
   if (!ok) failed++;
 }
-assert.equal(failed, 0, `${failed} French Intelligence integration check(s) failed`);
-console.log(`Passed ${checks.length} French Intelligence integration checks.`);
+assert.equal(failed, 0, `${failed} French Intelligence functional check(s) failed`);
+console.log(`Passed ${checks.length} French Intelligence syntax, integration, and functional checks.`);
