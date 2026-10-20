@@ -1,0 +1,52 @@
+name: French Intelligence checks
+
+on:
+  pull_request:
+    paths:
+      - "features/french-intelligence.js"
+      - "index.html"
+      - "scripts/check-french-intelligence.mjs"
+      - "scripts/check-french-intelligence.browser.mjs"
+      - ".github/workflows/french-intelligence-check.yml"
+  push:
+    branches:
+      - feat/french-intelligence-engine
+    paths:
+      - "features/french-intelligence.js"
+      - "index.html"
+      - "scripts/check-french-intelligence.mjs"
+      - "scripts/check-french-intelligence.browser.mjs"
+      - ".github/workflows/french-intelligence-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  syntax-and-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check engine JavaScript syntax
+        run: node --check features/french-intelligence.js
+      - name: Check engine integration contract
+        run: node scripts/check-french-intelligence.mjs
+      - name: Install Playwright
+        run: npm install --no-save playwright
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Start local static server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/french-academy-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/french-academy-http.log
+          exit 1
+      - name: Verify the app in desktop and mobile Chromium
+        run: node scripts/check-french-intelligence.browser.mjs
