@@ -44,6 +44,15 @@ const checks = [
   ["age explanation uses avoir", core.answerQuestion("How do I say my age?").includes("J'ai vingt ans")],
   ["writing checker corrects a common age error", core.checkWriting("Je suis 20 ans").includes("j'ai 20 ans")],
   ["writing checker explains when no listed error is found", core.checkWriting("Bonjour, je m'appelle Léa.").includes("does not prove the sentence is fully correct")],
+  ["dictionary accepts typographic apostrophes", core.lookup("S’il vous plaît")?.word === "s'il vous plaît"],
+  ["dictionary keeps canonical accented display spelling", core.lookup("école")?.word === "école"],
+  ["phrasebook preserves negation in supported English-to-French phrase", core.translate("I don't understand", "en-fr").includes("je ne comprends pas")],
+  ["conjugation returns complete venir paradigm", JSON.stringify(Array.from(core.conjugate("venir").forms)) === JSON.stringify(["viens","viens","vient","venons","venez","viennent"])],
+  ["conjugation returns complete prendre paradigm", JSON.stringify(Array.from(core.conjugate("prendre").forms)) === JSON.stringify(["prends","prends","prend","prenons","prenez","prennent"])],
+  ["conjugation returns complete pouvoir paradigm", JSON.stringify(Array.from(core.conjugate("pouvoir").forms)) === JSON.stringify(["peux","peux","peut","pouvons","pouvez","peuvent"])],
+  ["writing checker does not flag valid context-sensitive parler le français", core.checkWriting("Je parle le français.") .includes("No issue from the small built-in check list was detected")],
+  ["writing checker does not guess the sense of une livre", core.checkWriting("J’achète une livre.") .includes("No issue from the small built-in check list was detected")],
+  ["writing checker distinguishes detection from full grammar validation", core.checkWriting("Bien que je suis fatigué, je continue.").includes("does not prove the sentence is fully correct")],
   ["dictionary output escapes HTML-like input", !core.lookup("<img src=x onerror=alert(1)>")],
 ];
 
