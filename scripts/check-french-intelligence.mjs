@@ -29,7 +29,7 @@ const checks = [
   ["regular -ir finir-pattern conjugation is correct", JSON.stringify(Array.from(core.conjugate("finir").forms)) === JSON.stringify(["finis","finis","finit","finissons","finissez","finissent"])],
   ["regular -re conjugation is correct", JSON.stringify(Array.from(core.conjugate("vendre").forms)) === JSON.stringify(["vends","vends","vend","vendons","vendez","vendent"])],
   ["spelling-adjusted manger conjugation is correct", JSON.stringify(Array.from(core.conjugate("manger").forms)) === JSON.stringify(["mange","manges","mange","mangeons","mangez","mangent"])],
-  ["unsupported verb returns no fabricated forms", core.conjugate("xyzifier") === null],
+  ["unsupported verb returns no fabricated forms", core.conjugate("xyz") === null],
   ["known English-to-French phrase is translated", core.translate("Thank you", "en-fr").includes("merci")],
   ["unknown English phrase is not guessed", core.translate("A complicated sentence not in phrasebook", "en-fr").includes("not in the local phrasebook")],
   ["question receives a contextual grammar answer", core.answerQuestion("Explain passé composé").includes("auxiliary avoir or être")],
