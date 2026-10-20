@@ -297,7 +297,6 @@
       [/\bbonjor\b/gi,()=>"bonjour","Spelling: bonjour."],
       [/\bmerçi\b/gi,()=>"merci","Merci is written without a cedilla."],
       [/\bje ne comprends pas pas\b/gi,()=>"je ne comprends pas","Avoid repeating pas in this standard negation."],
-      [/\bune livre\b/gi,()=>"un livre","Un livre means a book; une livre can mean a pound, so context matters."]
     ];
     for(const [re,rep,why] of checks){if(re.test(corrected)){re.lastIndex=0;const before=corrected;corrected=corrected.replace(re,rep);suggestions.push({before,why});}}
     if(!suggestions.length)return `<div class="fi-answer"><b>Text received</b><p>${esc(q)}</p><p>No issue from the small built-in check list was detected. That does not prove the sentence is fully correct; this is not a full grammar checker.</p></div>`;
