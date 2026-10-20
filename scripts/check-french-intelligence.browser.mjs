@@ -159,6 +159,10 @@ try {
     await page.evaluate(() => window.FATutorView());
     await page.getByRole("heading", { name: /AI French tutor/i }).waitFor();
     await page.locator("#faSignIn").waitFor();
+    await page.locator("#faHome").click();
+    await page.locator("#hdict").waitFor({ state: "visible" });
+    await page.locator("#hdict").click();
+    await page.locator("#app").getByText(/sign in/i).first().waitFor();
     await page.evaluate(() => window.FADictionaryView());
     await page.getByRole("heading", { name: /French reference dictionary/i }).waitFor();
     await page.locator("#faSignIn").waitFor();
