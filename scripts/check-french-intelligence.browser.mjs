@@ -128,7 +128,7 @@ try {
       for (const value of ["", "a".repeat(5000), "😀🧑🏽‍🎓✨"]) {
         await field.fill(value);
         if (item.action) await page.locator(item.action).click();
-        else await page.locator("#fiRules").waitFor({ state: "visible" });
+        else await page.locator("#fiRuleSearch").waitFor({ state: "visible" });
         await page.waitForTimeout(20);
         assert.equal(await page.locator("#fiAnswer img, #fiAnswer script").count(), 0,
           `${profile.name} ${item.tab}: edge input must not create markup`);
