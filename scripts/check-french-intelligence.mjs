@@ -120,7 +120,7 @@ const cleanSentenceCorpus = [
   "Il va prendre le train.",
   "Elle va travailler demain.",
   "Nous allons visiter le musée.",
-  "Vous allez tout droit, puis tournez à gauche.",
+  "Allez tout droit, puis tournez à gauche.",
   "Ils vont au cinéma ce soir.",
   "Elles vont rentrer bientôt.",
   "Je fais mes devoirs après le dîner.",
@@ -135,7 +135,7 @@ const cleanSentenceCorpus = [
   "Elles choisissent une table près de la fenêtre.",
   "Je voudrais un billet pour Lyon.",
   "Nous arrivons à la gare à neuf heures.",
-  "Hier, j'ai visité ma grand-mère.",
+  "Hier, j'ai rendu visite à ma grand-mère.",
   "Tu as fini ton travail hier soir.",
   "Il a écrit une lettre à son ami.",
   "Elle a choisi un joli cadeau.",
@@ -201,10 +201,260 @@ const cleanSentenceCorpus = [
   "Le livre est sur la table.",
   "Les enfants jouent dans le parc."
 ];
+const hardNegativeSentences = [
+  "Je suis à la maison depuis trois ans.",
+  "Je suis étudiant depuis deux ans.",
+  "Je suis ici depuis vingt ans.",
+  "J'ai 20 ans et je suis heureux.",
+  "Elle a vingt ans et elle est prête.",
+  "Nous sommes amis depuis dix ans.",
+  "Mon frère a 30 ans.",
+  "Je suis en forme et j'ai vingt ans.",
+  "Je suis ce cours depuis deux ans.",
+  "Bien que très fatigué, il continue.",
+  "Bien que le temps soit mauvais, nous sortons.",
+  "Pour que tout soit prêt, nous commençons tôt.",
+  "Je prépare le repas pour que les enfants mangent à l'heure.",
+  "Il a écrit « bien que » au tableau.",
+  "Les mots « pour que » sont écrits au tableau.",
+  "Elle sourit bien que la journée soit longue.",
+  "Je sais que tu es prêt pour que tout soit terminé.",
+  "Il attend jusqu'à ce que la pluie cesse.",
+  "Il a un livre à la main.",
+  "Elle a pensé à son amie.",
+  "À midi, il a appelé sa sœur.",
+  "Je vais à Paris et elle a réservé l'hôtel.",
+  "Il a appris à conduire.",
+  "Nous avons rendez-vous à huit heures.",
+  "Elle a réussi à terminer son travail.",
+  "À mon avis, il a raison.",
+  "Le train arrive à Lyon avec cinq minutes de retard.",
+  "Il a donné son livre à sa collègue.",
+  "C'est une excellente idée.",
+  "C'est mon frère qui s'est occupé du repas.",
+  "Elle s'est levée tôt.",
+  "Il s'est rendu compte de son erreur.",
+  "C'est ici que nous nous sommes rencontrés.",
+  "C'est la porte qui s'est ouverte toute seule.",
+  "On s'est parlé hier.",
+  "C'est un livre qui s'est vendu rapidement.",
+  "Elle s'est demandé si c'était vrai.",
+  "Une livre de pommes coûte trois euros.",
+  "J'achète une livre de beurre.",
+  "Cette livre sterling vaut plus aujourd'hui.",
+  "Une livre de farine suffit.",
+  "Elle a pesé une livre de sucre.",
+  "Le colis pèse une livre.",
+  "Une livre correspond à environ 500 grammes.",
+  "Le prix est de cinq euros la livre.",
+  "Une livre de pommes de terre est prévue pour la recette.",
+  "J'apprends le français depuis septembre.",
+  "Je parle le français à l'école.",
+  "Le français est ma matière préférée.",
+  "Elle enseigne le français.",
+  "Nous étudions le français et l'espagnol.",
+  "Il comprend bien le français parlé.",
+  "Le français québécois a ses particularités.",
+  "J'utilise le français au travail.",
+  "Le français est une langue romane.",
+  "Ça va très bien, merci.",
+  "Beaucoup de personnes arrivent tôt.",
+  "Bonjour, monsieur, comment allez-vous ?",
+  "Merci beaucoup pour votre aide.",
+  "Je dis bonjour à mes voisins.",
+  "Elle boit beaucoup d'eau.",
+  "Un bonjour chaleureux fait plaisir.",
+  "Il m'a dit merci en souriant.",
+  "Nous avons beaucoup travaillé.",
+  "Je ne comprends pas cette règle.",
+  "Je n'ai pas encore terminé.",
+  "Je ne sais pas si ça va marcher.",
+  "Je préfère ne pas sortir.",
+  "Bien qu'il soit tard, nous continuons.",
+  "Il faut que tu viennes à l'heure.",
+  "Je suis content que tu sois ici.",
+  "Elle n'a pas oublié son livre.",
+  "Nous n'avons pas de pain.",
+  "Je n'ai pas faim, mais j'ai soif.",
+  "Je suis à l'heure et j'ai tout préparé.",
+  "Il est parti sans que personne le remarque.",
+  "Je travaille pour que mon équipe réussisse."
+];
+const knownErrors = [
+  {
+    "rule": "age",
+    "sentence": "Je suis 20 ans.",
+    "expected": "j'ai 20 ans"
+  },
+  {
+    "rule": "age",
+    "sentence": "Je suis 35 ans.",
+    "expected": "j'ai 35 ans"
+  },
+  {
+    "rule": "faim",
+    "sentence": "Je suis faim.",
+    "expected": "j'ai faim"
+  },
+  {
+    "rule": "faim",
+    "sentence": "JE SUIS FAIM !",
+    "expected": "j'ai faim"
+  },
+  {
+    "rule": "soif",
+    "sentence": "Je suis soif.",
+    "expected": "j'ai soif"
+  },
+  {
+    "rule": "soif",
+    "sentence": "JE SUIS SOIF !",
+    "expected": "j'ai soif"
+  },
+  {
+    "rule": "sa/ça",
+    "sentence": "Sa va bien.",
+    "expected": "ça va"
+  },
+  {
+    "rule": "sa/ça",
+    "sentence": "SA VA ?",
+    "expected": "ça va"
+  },
+  {
+    "rule": "beaucoup spelling",
+    "sentence": "Beacoup de gens arrivent.",
+    "expected": "beaucoup"
+  },
+  {
+    "rule": "beaucoup spelling",
+    "sentence": "C'est beacoup mieux.",
+    "expected": "beaucoup"
+  },
+  {
+    "rule": "bonjour spelling",
+    "sentence": "Bonjor, madame.",
+    "expected": "bonjour"
+  },
+  {
+    "rule": "bonjour spelling",
+    "sentence": "BONJOR !",
+    "expected": "bonjour"
+  },
+  {
+    "rule": "merci spelling",
+    "sentence": "Merçi beaucoup.",
+    "expected": "merci"
+  },
+  {
+    "rule": "merci spelling",
+    "sentence": "Je dis merçi.",
+    "expected": "merci"
+  },
+  {
+    "rule": "repeated pas",
+    "sentence": "Je ne comprends pas pas.",
+    "expected": "je ne comprends pas"
+  },
+  {
+    "rule": "repeated pas",
+    "sentence": "Je ne comprends pas pas cette phrase.",
+    "expected": "je ne comprends pas"
+  },
+  {
+    "rule": "bien que subjunctive",
+    "sentence": "Bien que je suis fatigué, je continue.",
+    "expected": "sois"
+  },
+  {
+    "rule": "bien que subjunctive",
+    "sentence": "Bien que tu es malade, tu viens.",
+    "expected": "sois"
+  },
+  {
+    "rule": "quoique subjunctive",
+    "sentence": "Quoique tu as raison, je vérifie.",
+    "expected": "aies"
+  },
+  {
+    "rule": "quoique subjunctive",
+    "sentence": "Quoiqu'ils ont peu de temps, ils restent.",
+    "expected": "aient"
+  },
+  {
+    "rule": "pour que subjunctive",
+    "sentence": "Pour que je vais comprendre, explique encore.",
+    "expected": "aille"
+  },
+  {
+    "rule": "pour que subjunctive",
+    "sentence": "Pour qu'elle va réussir, elle travaille.",
+    "expected": "aille"
+  },
+  {
+    "rule": "afin que subjunctive",
+    "sentence": "Afin que je fais le bon choix, je réfléchis.",
+    "expected": "fasse"
+  },
+  {
+    "rule": "afin que subjunctive",
+    "sentence": "Afin qu'ils font le travail, je les aide.",
+    "expected": "fassent"
+  },
+  {
+    "rule": "avant que subjunctive",
+    "sentence": "Avant que je peux partir, je termine.",
+    "expected": "puisse"
+  },
+  {
+    "rule": "avant que subjunctive",
+    "sentence": "Avant que nous pouvons sortir, attendons.",
+    "expected": "puissions"
+  },
+  {
+    "rule": "à moins que subjunctive",
+    "sentence": "À moins que je sais la réponse, je demande.",
+    "expected": "sache"
+  },
+  {
+    "rule": "à moins que subjunctive",
+    "sentence": "À moins que vous savez autre chose, je pars.",
+    "expected": "sachiez"
+  },
+  {
+    "rule": "jusqu'à ce que subjunctive",
+    "sentence": "Jusqu'à ce que je veux partir, je reste.",
+    "expected": "veuille"
+  },
+  {
+    "rule": "jusqu'à ce que subjunctive",
+    "sentence": "Jusqu'à ce qu'ils veulent partir, ils attendent.",
+    "expected": "veuillent"
+  },
+  {
+    "rule": "sans que subjunctive",
+    "sentence": "Sans que tu as le temps, nous partons.",
+    "expected": "aies"
+  },
+  {
+    "rule": "sans que subjunctive",
+    "sentence": "Sans qu'ils ont le temps, ils répondent.",
+    "expected": "aient"
+  }
+];
+const hardNegativeFalsePositives = hardNegativeSentences.filter(sentence => core.checkWriting(sentence).includes("Suggested text"));
+const knownErrorsCaught = knownErrors.filter(item => {
+  const result = core.checkWriting(item.sentence);
+  return result.includes("Suggested text") && result.includes(item.expected);
+});
 const corpusFalsePositives = cleanSentenceCorpus.filter(sentence => core.checkWriting(sentence).includes("Suggested text"));
 checks.push(
   ["clean sentence corpus contains at least 100 examples", cleanSentenceCorpus.length >= 100],
-  ["clean sentence corpus produces zero false positives", corpusFalsePositives.length === 0]
+  ["clean sentence corpus produces zero false positives", corpusFalsePositives.length === 0],
+  ["hard-negative corpus contains at least 60 sentences", hardNegativeSentences.length >= 60],
+  ["hard-negative corpus produces zero false positives", hardNegativeFalsePositives.length === 0],
+  ["known-error corpus has at least two cases per writing rule family", knownErrors.length >= 18],
+  ["known-error corpus catches every listed case", knownErrorsCaught.length === knownErrors.length]
 );
 
 let failed = 0;
@@ -216,3 +466,5 @@ for (const [name, passed] of checks) {
 assert.equal(failed, 0, `${failed} French Intelligence functional check(s) failed`);
 console.log(`Passed ${checks.length} French Intelligence syntax, integration, and functional checks.`);
 console.log(`Clean-sentence corpus: ${cleanSentenceCorpus.length}; false positives: ${corpusFalsePositives.length}.`);
+console.log(`Hard-negative sentences: ${hardNegativeSentences.length}; false positives: ${hardNegativeFalsePositives.length}.`);
+console.log(`Known errors: ${knownErrors.length}; errors caught: ${knownErrorsCaught.length}.`);

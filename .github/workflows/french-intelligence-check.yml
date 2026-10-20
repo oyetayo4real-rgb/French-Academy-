@@ -1,10 +1,13 @@
 name: French Intelligence checks
 
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - "features/french-intelligence.js"
       - "index.html"
+      - "sw.js"
+      - "docs/french-intelligence-linguistic-matrix.md"
       - "scripts/check-french-intelligence.mjs"
       - "scripts/check-french-intelligence.browser.mjs"
       - ".github/workflows/french-intelligence-check.yml"
@@ -14,6 +17,8 @@ on:
     paths:
       - "features/french-intelligence.js"
       - "index.html"
+      - "sw.js"
+      - "docs/french-intelligence-linguistic-matrix.md"
       - "scripts/check-french-intelligence.mjs"
       - "scripts/check-french-intelligence.browser.mjs"
       - ".github/workflows/french-intelligence-check.yml"
@@ -36,7 +41,7 @@ jobs:
       - name: Check engine integration contract
         run: node scripts/check-french-intelligence.mjs
       - name: Install Playwright
-        run: npm install --no-save playwright
+        run: npm install --no-save playwright@1.56.1
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Start local static server
