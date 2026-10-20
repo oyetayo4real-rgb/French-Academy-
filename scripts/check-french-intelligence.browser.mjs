@@ -14,7 +14,11 @@ try {
     page.on("pageerror", error => failures.push(`${profile.name} pageerror: ${error.message}`));
     await page.goto(baseURL, { waitUntil: "networkidle", timeout: 30000 });
     await page.locator("#app").waitFor({ state: "visible" });
-    await page.locator("#hfrenchint").click();
+    // A fresh browser context starts on the public landing page; enter guest mode first.
+    if (await page.locator("#hfrenchint").count() === 0) {
+      await page.locator("#lgo").click();
+    }
+    await page.locator("#hfrenchint").first().click();
     await page.getByRole("heading", { name: /French Intelligence/ }).waitFor();
     assert.match(await page.locator(".fi-note").first().innerText(), /do not call Gemini|do not require an AI API key/i);
 
