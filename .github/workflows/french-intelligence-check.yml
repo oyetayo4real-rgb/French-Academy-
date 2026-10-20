@@ -1,0 +1,35 @@
+name: French Intelligence checks
+
+on:
+  pull_request:
+    paths:
+      - "features/french-intelligence.js"
+      - "index.html"
+      - "scripts/check-french-intelligence.mjs"
+      - ".github/workflows/french-intelligence-check.yml"
+  push:
+    branches:
+      - feat/french-intelligence-engine
+    paths:
+      - "features/french-intelligence.js"
+      - "index.html"
+      - "scripts/check-french-intelligence.mjs"
+      - ".github/workflows/french-intelligence-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  syntax-and-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check engine JavaScript syntax
+        run: node --check features/french-intelligence.js
+      - name: Check engine integration contract
+        run: node scripts/check-french-intelligence.mjs
