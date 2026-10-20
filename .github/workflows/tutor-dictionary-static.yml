@@ -14,7 +14,9 @@ on:
       - "features/ai-classroom.js"
       - "scripts/check-tutor-dictionary.mjs"
       - "scripts/check-schema-snapshot.mjs"
+      - "scripts/check-reconstructed-baseline.mjs"
       - "docs/schema-snapshot/**"
+      - "supabase/reconstructed-local-only/**"
       - ".github/workflows/tutor-dictionary-static.yml"
 
 permissions:
@@ -35,6 +37,8 @@ jobs:
         run: node scripts/check-tutor-dictionary.mjs
       - name: Validate captured schema snapshot
         run: node scripts/check-schema-snapshot.mjs
+      - name: Audit reconstructed baseline table grants
+        run: node scripts/check-reconstructed-baseline.mjs
       - name: Set up Deno
         uses: denoland/setup-deno@v2
         with:
