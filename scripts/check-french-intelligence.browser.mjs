@@ -46,7 +46,8 @@ try {
     await page.locator("#fiRules").getByText(/Negation/i).first().waitFor();
 
     await page.locator("#fiHome").click();
-    await page.locator("#hfrenchint").waitFor({ state: "visible" });
+    await page.locator("#hfrenchint").first().waitFor({ state: "visible" });
+    assert.equal(await page.locator("#hfrenchint").count(), 1, "Home screen must render exactly one French Intelligence entry point");
     console.log(`PASS ${profile.name}: open, dictionary, translation, conjugation, grammar filter, return navigation`);
     await context.close();
   }
