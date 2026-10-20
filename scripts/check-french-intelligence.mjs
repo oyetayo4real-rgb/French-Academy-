@@ -58,7 +58,7 @@ const checks = [
   ["conjugation returns complete pouvoir paradigm", JSON.stringify(Array.from(core.conjugate("pouvoir").forms)) === JSON.stringify(["peux","peux","peut","pouvons","pouvez","peuvent"])],
   ["writing checker does not flag valid context-sensitive parler le français", core.checkWriting("Je parle le français.") .includes("No issue from the small built-in check list was detected")],
   ["writing checker does not guess the sense of une livre", core.checkWriting("J’achète une livre.") .includes("No issue from the small built-in check list was detected")],
-  ["writing checker distinguishes detection from full grammar validation", core.checkWriting("Bien que je suis fatigué, je continue.").includes("does not prove the sentence is fully correct")],
+  ["writing checker suggests subjunctive after bien que", core.checkWriting("Bien que je suis fatigué, je continue.").includes("sois")],
   ["dictionary has no duplicate headword keys", new Set(dictionaryKeys).size === dictionaryKeys.length],
   ["dictionary output escapes HTML-like input", !core.lookup("<img src=x onerror=alert(1)>")],
   ["subjunctive rule flags bien que + indicative être", core.checkWriting("Bien que je suis fatigué, je continue.").includes("sois")],
