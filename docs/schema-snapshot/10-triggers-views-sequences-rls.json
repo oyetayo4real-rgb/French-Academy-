@@ -1,0 +1,164 @@
+{
+    "views": [
+    ],
+    "triggers": [
+    ],
+    "sequences": [
+    ],
+    "table_rls": [
+        {
+            "owner": "postgres",
+            "table": "ai_usage",
+            "schema": "public",
+            "rls_forced": false,
+            "rls_enabled": true
+        },
+        {
+            "owner": "postgres",
+            "table": "app_secrets",
+            "schema": "public",
+            "rls_forced": false,
+            "rls_enabled": true
+        },
+        {
+            "owner": "postgres",
+            "table": "assignments",
+            "schema": "public",
+            "rls_forced": false,
+            "rls_enabled": true
+        },
+        {
+            "owner": "postgres",
+            "table": "attempts",
+            "schema": "public",
+            "rls_forced": false,
+            "rls_enabled": true
+        },
+        {
+            "owner": "postgres",
+            "table": "attendance",
+            "schema": "public",
+            "rls_forced": false,
+            "rls_enabled": true
+        },
+        {
+            "owner": "postgres",
+            "table": "audio_clips",
+            "schema": "public",
+            "rls_forced": false,
+            "rls_enabled": true
+        },
+        {
+            "owner": "postgres",
+            "table": "classes",
+            "schema": "public",
+            "rls_forced": false,
+            "rls_enabled": true
+        },
+        {
+            "owner": "postgres",
+            "table": "custom_keys",
+            "schema": "public",
+            "rls_forced": false,
+            "rls_enabled": true
+        },
+        {
+            "owner": "postgres",
+            "table": "custom_lessons",
+            "schema": "public",
+            "rls_forced": false,
+            "rls_enabled": true
+        },
+        {
+            "owner": "postgres",
+            "table": "dict_cache",
+            "schema": "public",
+            "rls_forced": false,
+            "rls_enabled": true
+        },
+        {
+            "owner": "postgres",
+            "table": "enrollments",
+            "schema": "public",
+            "rls_forced": false,
+            "rls_enabled": true
+        },
+        {
+            "owner": "postgres",
+            "table": "exam_crit",
+            "schema": "public",
+            "rls_forced": false,
+            "rls_enabled": true
+        },
+        {
+            "owner": "postgres",
+            "table": "exam_keys",
+            "schema": "public",
+            "rls_forced": false,
+            "rls_enabled": true
+        },
+        {
+            "owner": "postgres",
+            "table": "lesson_media",
+            "schema": "public",
+            "rls_forced": false,
+            "rls_enabled": true
+        },
+        {
+            "owner": "postgres",
+            "table": "live_sessions",
+            "schema": "public",
+            "rls_forced": false,
+            "rls_enabled": true
+        },
+        {
+            "owner": "postgres",
+            "table": "profiles",
+            "schema": "public",
+            "rls_forced": false,
+            "rls_enabled": true
+        },
+        {
+            "owner": "postgres",
+            "table": "progress",
+            "schema": "public",
+            "rls_forced": false,
+            "rls_enabled": true
+        },
+        {
+            "owner": "postgres",
+            "table": "quiz_keys",
+            "schema": "public",
+            "rls_forced": false,
+            "rls_enabled": true
+        },
+        {
+            "owner": "postgres",
+            "table": "recordings",
+            "schema": "public",
+            "rls_forced": false,
+            "rls_enabled": true
+        },
+        {
+            "owner": "postgres",
+            "table": "signals",
+            "schema": "public",
+            "rls_forced": false,
+            "rls_enabled": true
+        },
+        {
+            "owner": "postgres",
+            "table": "submissions",
+            "schema": "public",
+            "rls_forced": false,
+            "rls_enabled": true
+        },
+        {
+            "owner": "postgres",
+            "table": "user_state",
+            "schema": "public",
+            "rls_forced": false,
+            "rls_enabled": true
+        }
+    ]
+}
