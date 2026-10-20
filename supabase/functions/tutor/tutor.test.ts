@@ -1,4 +1,14 @@
-import { callAI, parseFrenchWikitext, translateFrenchToEnglish } from "./index.ts";
+import { callAI, parseFrenchWikitext, translateFrenchToEnglish, applyDefinitionTranslations } from "./index.ts";
+
+type TestDictionaryEntry = {
+  language: string;
+  partOfSpeech: string;
+  definitions: {
+    definition: string;
+    examples: string[];
+    translationEn?: string;
+  }[];
+};
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
@@ -35,6 +45,130 @@ async function withFetchMock<T>(mock: typeof fetch, run: () => Promise<T>): Prom
   }
 }
 
+Deno.test("definition translations reject mismatched groups and malformed values", () => {
+  const entries: TestDictionaryEntry[] = [
+    {
+      language: "fr",
+      partOfSpeech: "Nom",
+      definitions: [
+        { definition: "Un lieu d’apprentissage.", examples: [] },
+      ],
+    },
+    {
+      language: "fr",
+      partOfSpeech: "Verbe",
+      definitions: [
+        { definition: "Acquérir un savoir.", examples: [] },
+      ],
+    },
+  ];
+
+  applyDefinitionTranslations(entries, [
+    { partOfSpeech: "Verbe", translations: ["wrong sense"] },
+    { partOfSpeech: "Verbe", translations: [42, "to learn"] },
+  ]);
+
+  assert(
+    entries[0].definitions[0].translationEn === undefined,
+    "mismatched part of speech must not attach a translation",
+  );
+  assert(
+    entries[1].definitions[0].translationEn === undefined,
+    "non-string translation must be ignored",
+  );
+
+  applyDefinitionTranslations(entries, [
+    { partOfSpeech: "Nom", translations: [" school "] },
+    { partOfSpeech: "Verbe", translations: ["to learn"] },
+  ]);
+
+  assert(
+    entries[0].definitions[0].translationEn === "school",
+    "valid noun translation should be trimmed",
+  );
+  assert(
+    entries[1].definitions[0].translationEn === "to learn",
+    "valid verb translation should be preserved",
+  );
+
+  applyDefinitionTranslations(entries, null);
+  applyDefinitionTranslations(entries, "malformed");
+});
+
+Deno.test("definition translations reject ambiguous duplicate part-of-speech groups", () => {
+  const entries: TestDictionaryEntry[] = [
+    {
+      language: "fr",
+      partOfSpeech: "Nom",
+      definitions: [
+        { definition: "A place where students learn.", examples: [] },
+      ],
+    },
+    {
+      language: "fr",
+      partOfSpeech: "Nom",
+      definitions: [
+        { definition: "A physical school building.", examples: [] },
+      ],
+    },
+  ];
+
+  // Both groups have the same part of speech, so positional matching
+  // cannot safely identify which source definition each translation belongs to.
+  applyDefinitionTranslations(entries, [
+    { partOfSpeech: "Nom", translations: ["bâtiment scolaire"] },
+    { partOfSpeech: "Nom", translations: ["établissement d’apprentissage"] },
+  ]);
+
+  assert(
+    entries.every((entry) => entry.definitions.every((sense) => sense.translationEn === undefined)),
+    "ambiguous duplicate part-of-speech groups must not receive potentially misaligned translations",
+  );
+});
+
+Deno.test("definition translations reject incomplete translation groups", () => {
+  const entries: TestDictionaryEntry[] = [
+    {
+      language: "fr",
+      partOfSpeech: "Nom",
+      definitions: [
+        { definition: "Premier sens.", examples: [] },
+        { definition: "Deuxième sens.", examples: [] },
+      ],
+    },
+  ];
+
+  applyDefinitionTranslations(entries, [
+    { partOfSpeech: "Nom", translations: ["first meaning"] },
+  ]);
+
+  assert(
+    entries[0].definitions.every((sense) => sense.translationEn === undefined),
+    "incomplete translation groups must not partially modify source entries",
+  );
+});
+
+Deno.test("definition translations reject excess translations", () => {
+  const entries: TestDictionaryEntry[] = [
+    {
+      language: "fr",
+      partOfSpeech: "Nom",
+      definitions: [
+        { definition: "Premier sens.", examples: [] },
+      ],
+    },
+  ];
+
+  applyDefinitionTranslations(entries, [
+    { partOfSpeech: "Nom", translations: ["first meaning", "unmatched meaning"] },
+  ]);
+
+  assert(
+    entries[0].definitions[0].translationEn === undefined,
+    "translation groups with extra unmatched senses must be rejected",
+  );
+});
+
 Deno.test("French parser extracts accented French definitions", () => {
   const entries = parseFrenchWikitext("== français ==\n=== {{S|nom|fr}} ===\n# Établissement où l'on apprend.");
   assert(entries.length === 1, "expected one French entry");
@@ -53,6 +187,7 @@ Deno.test("French parser returns no entries for missing/non-French content", () 
 });
 
 Deno.test("translation returns English text for a valid mocked response", async () => {
+// deno-lint-ignore require-await -- fetch mocks must preserve Promise<Response> typing.
   await withFetchMock(async () => new Response(JSON.stringify({
     responseStatus: 200, responseData: { translatedText: "school" },
   }), { status: 200, headers: { "Content-Type": "application/json" } }), async () => {
@@ -61,20 +196,64 @@ Deno.test("translation returns English text for a valid mocked response", async 
 });
 
 Deno.test("translation rejects quota warnings and tolerates HTTP/source outages", async () => {
+// deno-lint-ignore require-await -- fetch mocks must preserve Promise<Response> typing.
   await withFetchMock(async () => new Response(JSON.stringify({
     responseStatus: 200, responseData: { translatedText: "MYMEMORY WARNING: quota" },
   }), { status: 200, headers: { "Content-Type": "application/json" } }), async () => {
     assert(await translateFrenchToEnglish("école") === "", "quota warning must not be shown as a translation");
   });
+// deno-lint-ignore require-await -- fetch mocks must preserve Promise<Response> typing.
   await withFetchMock(async () => new Response("unavailable", { status: 503 }), async () => {
     assert(await translateFrenchToEnglish("école") === "", "HTTP failure should return empty translation");
   });
+// deno-lint-ignore require-await -- fetch mocks must preserve Promise<Response> typing.
   await withFetchMock(async () => { throw new Error("simulated source outage"); }, async () => {
     assert(await translateFrenchToEnglish("école") === "", "network failure should return empty translation");
   });
 });
 
+Deno.test("Gemini catalogue ignores malformed model records and falls back safely", async () => {
+  // deno-lint-ignore require-await -- fetch mocks must preserve Promise<Response> typing.
+  await withFetchMock(async (input) => {
+    const url = String(input);
+    if (url.includes("/models?pageSize")) {
+      return new Response(JSON.stringify({
+        models: [
+          null,
+          "not-a-model-record",
+          { name: 42, supportedGenerationMethods: ["generateContent"] },
+          { name: "models/gemini-invalid", supportedGenerationMethods: "generateContent" },
+          { name: "models/gemini-3.1-flash-lite", supportedGenerationMethods: ["generateContent"] },
+        ],
+      }), { status: 200, headers: { "Content-Type": "application/json" } });
+    }
+    if (url.includes("gemini-3.5-flash-lite:generateContent")) {
+      return new Response(
+        JSON.stringify({ error: { message: "temporary test failure" } }),
+        { status: 503, headers: { "Content-Type": "application/json" } },
+      );
+    }
+    if (url.includes("gemini-3.1-flash-lite:generateContent")) {
+      return generation("safe fallback answer");
+    }
+    if (url.includes(":generateContent")) {
+      throw new Error("Unexpected model candidate: " + url);
+    }
+    throw new Error("Unexpected mocked URL: " + url);
+  }, async () => {
+    const answer = await callAI(
+      "system",
+      [{ role: "user", content: "hello" }],
+      128,
+      4800,
+      2,
+    );
+    assert(answer === "safe fallback answer", "malformed catalogue records should be ignored");
+  });
+});
+
 Deno.test("Gemini empty first response falls back to the next candidate", async () => {
+// deno-lint-ignore require-await -- fetch mocks must preserve Promise<Response> typing.
   await withFetchMock(async (input) => {
     const url = String(input);
     if (url.includes("/models?pageSize")) return catalog.clone();
@@ -88,6 +267,7 @@ Deno.test("Gemini empty first response falls back to the next candidate", async 
 });
 
 Deno.test("Gemini transient HTTP 503 falls back to the next candidate", async () => {
+// deno-lint-ignore require-await -- fetch mocks must preserve Promise<Response> typing.
   await withFetchMock(async (input) => {
     const url = String(input);
     if (url.includes("/models?pageSize")) return catalog.clone();
@@ -101,6 +281,7 @@ Deno.test("Gemini transient HTTP 503 falls back to the next candidate", async ()
 });
 
 Deno.test("Gemini timeout falls back; exhausted timeouts return provider_http_504", async () => {
+// deno-lint-ignore require-await -- fetch mocks must preserve Promise<Response> typing.
   await withFetchMock(async (input) => {
     const url = String(input);
     if (url.includes("/models?pageSize")) return catalog.clone();
@@ -112,6 +293,7 @@ Deno.test("Gemini timeout falls back; exhausted timeouts return provider_http_50
     assert(answer === "after timeout", "expected second candidate after first times out");
   });
 
+// deno-lint-ignore require-await -- fetch mocks must preserve Promise<Response> typing.
   await withFetchMock(async (input) => {
     const url = String(input);
     if (url.includes("/models?pageSize")) return catalog.clone();

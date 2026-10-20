@@ -59,10 +59,34 @@ async function callAI(system: string, messages: { role: string; content: string 
         signal: AbortSignal.timeout(1000)
       });
       if (catalog.ok) {
-        const json = await catalog.json();
-        const available = (Array.isArray(json?.models) ? json.models : [])
-          .filter((item: any) => Array.isArray(item.supportedGenerationMethods) && item.supportedGenerationMethods.includes("generateContent"))
-          .map((item: any) => String(item.name || "").replace(/^models\//, ""))
+        const catalogPayload: unknown = await catalog.json();
+        type GeminiModelRecord = {
+          name: string;
+          supportedGenerationMethods: string[];
+        };
+        const rawModels: unknown =
+          catalogPayload !== null &&
+          typeof catalogPayload === "object" &&
+          !Array.isArray(catalogPayload) &&
+          "models" in catalogPayload
+            ? catalogPayload.models
+            : [];
+        const modelRecords: GeminiModelRecord[] = Array.isArray(rawModels)
+          ? rawModels.filter((item: unknown): item is GeminiModelRecord => {
+              if (item === null || typeof item !== "object" || Array.isArray(item)) {
+                return false;
+              }
+              const record = item as Record<string, unknown>;
+              return typeof record.name === "string" &&
+                Array.isArray(record.supportedGenerationMethods) &&
+                record.supportedGenerationMethods.every(
+                  (method: unknown) => typeof method === "string",
+                );
+            })
+          : [];
+        const available = modelRecords
+          .filter((item) => Array.isArray(item.supportedGenerationMethods) && item.supportedGenerationMethods.includes("generateContent"))
+          .map((item) => String(item.name || "").replace(/^models\//, ""))
           .filter((name: string) => /^gemini-/.test(name) && !/(embedding|aqa|robotics|tts|image|audio|live|computer-use)/i.test(name) && !/^gemini-2\./.test(name));
         const preferred = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.8-flash", "gemini-3.6-flash"];
         candidates = [...new Set([
@@ -73,7 +97,9 @@ async function callAI(system: string, messages: { role: string; content: string 
       } else {
         console.error("[tutor] Gemini model catalog failed", JSON.stringify({ status: catalog.status }));
       }
-    } catch (_) {}
+    } catch (_) {
+      // Model discovery is best-effort; use configured fallback candidates.
+    }
     if (config.model && !candidates.includes(config.model)) candidates.unshift(config.model);
     if (!candidates.length) candidates = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.8-flash", "gemini-3.6-flash"];
     candidates = [...new Set(candidates)].slice(0, Math.max(1, Math.min(maxCandidates, 3)));
@@ -128,7 +154,9 @@ async function callAI(system: string, messages: { role: string; content: string 
       try {
         const parsed = JSON.parse(rawError);
         reason = String(parsed?.error?.message || parsed?.error?.status || "");
-      } catch (_) {}
+      } catch (_) {
+        // The provider may return a non-JSON error body.
+      }
       console.error("[tutor] provider request failed", JSON.stringify({
         provider: "gemini",
         model,
@@ -175,21 +203,20 @@ async function callAI(system: string, messages: { role: string; content: string 
   return String(json?.choices?.[0]?.message?.content || "").trim();
 }
 
-function grabJson(text: string) {
+type JsonObject = Record<string, unknown>;
+
+function grabJson(text: string): JsonObject | null {
   const start = text.indexOf("{"), end = text.lastIndexOf("}");
   if (start < 0 || end <= start) return null;
-  try { return JSON.parse(text.slice(start, end + 1)); } catch (_) { return null; }
-}
-function wikiText(value: unknown, max = 1800): string {
-  return clip(String(value ?? "")
-    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
-    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, " ")
-    .replace(/<\/a\s*>/gi, "").replace(/<a\b[^>]*>/gi, "")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&nbsp;|&#160;/gi, " ").replace(/&amp;/gi, "&")
-    .replace(/&quot;/gi, '"').replace(/&#39;|&apos;/gi, "'")
-    .replace(/&lt;/gi, "<").replace(/&gt;/gi, ">")
-    .replace(/\s+/g, " ").trim(), max);
+  try {
+    const parsed: unknown = JSON.parse(text.slice(start, end + 1));
+    if (parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return parsed as JsonObject;
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 function wikiMarkupText(value: unknown, max = 1800): string {
   let text = String(value ?? "").replace(/<!--([\s\S]*?)-->/g, " ");
@@ -206,9 +233,22 @@ function wikiMarkupText(value: unknown, max = 1800): string {
     .replace(/\s+/g, " ").trim();
   return clip(text, max);
 }
-function parseFrenchWikitext(raw: string) {
+type FrenchDictionarySense = {
+  definition: string;
+  examples: string[];
+  translationEn?: string;
+  translationSource?: string;
+};
+
+type FrenchDictionaryEntry = {
+  language: string;
+  partOfSpeech: string;
+  definitions: FrenchDictionarySense[];
+};
+
+function parseFrenchWikitext(raw: string): FrenchDictionaryEntry[] {
   const lines = raw.split(/\r?\n/);
-  const byPos = new Map<string, any>();
+  const byPos = new Map<string, FrenchDictionaryEntry>();
   const knownPos = new Set([
     "nom", "verbe", "adjectif", "adverbe", "interjection", "pronom", "préposition",
     "conjonction", "déterminant", "article défini", "article indéfini", "numéral",
@@ -237,12 +277,12 @@ function parseFrenchWikitext(raw: string) {
     if (!sense) continue;
     const definition = wikiMarkupText(sense[1], 1800);
     const target = byPos.get(currentPos);
-    if (definition.length < 2) continue;
-    if (!target.definitions.some((item: any) => item.definition.toLowerCase() === definition.toLowerCase())) {
+    if (!target || definition.length < 2) continue;
+    if (!target.definitions.some((item) => item.definition.toLowerCase() === definition.toLowerCase())) {
       target.definitions.push({ definition, examples: [] });
     }
   }
-  return [...byPos.values()].filter((group: any) => group.definitions.length).map((group: any) => ({
+  return [...byPos.values()].filter((group) => group.definitions.length > 0).map((group) => ({
     ...group, partOfSpeech: group.partOfSpeech.charAt(0).toUpperCase() + group.partOfSpeech.slice(1),
     definitions: group.definitions.slice(0, 20)
   }));
@@ -267,7 +307,7 @@ async function translateFrenchToEnglish(text: string) {
     return "";
   }
 }
-async function addEnglishSenseTranslations(entries: any[]) {
+async function addEnglishSenseTranslations(entries: FrenchDictionaryEntry[]): Promise<void> {
   const pending: { groupIndex: number; senseIndex: number; definition: string }[] = [];
   for (let groupIndex = 0; groupIndex < entries.length; groupIndex++) {
     const senses = Array.isArray(entries[groupIndex]?.definitions) ? entries[groupIndex].definitions : [];
@@ -305,10 +345,16 @@ async function lookupReferenceSources(query: string) {
       });
       if (!response.ok) return [];
       const json = await response.json();
-      const results = Array.isArray(json?.result) ? json.result : [];
+      type AcademieSearchRecord = {
+        label?: string;
+        url?: string;
+        nature?: string;
+      };
+      const results: AcademieSearchRecord[] =
+        Array.isArray(json?.result) ? json.result : [];
       const fold = (value: string) => value.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLocaleLowerCase("fr").trim();
-      const exact = results.filter((item: any) => fold(String(item?.label || "")) === fold(term));
-      return (exact.length ? exact : results.slice(0, 3)).slice(0, 4).map((item: any) => {
+      const exact = results.filter((item) => fold(String(item.label || "")) === fold(term));
+      return (exact.length ? exact : results.slice(0, 3)).slice(0, 4).map((item) => {
         const url = String(item?.url || "");
         if (!url.startsWith("https://www.dictionnaire-academie.fr/article/")) return null;
         const label = clip(item?.label || term, 120);
@@ -318,7 +364,7 @@ async function lookupReferenceSources(query: string) {
           url,
           licence: "Entrée officielle trouvée en direct. Le texte éditorial reste sur le site de l’Académie et n’est pas recopié dans l’application."
         };
-      }).filter(Boolean);
+      }).filter((item): item is DictionarySource => item !== null);
     } catch (_) { return []; }
   })();
   const cnrtlPromise = (async () => {
@@ -328,14 +374,28 @@ async function lookupReferenceSources(query: string) {
         signal: AbortSignal.timeout(3500)
       });
       const available = response.ok;
-      try { await response.body?.cancel(); } catch (_) {}
+      try {
+        await response.body?.cancel();
+      } catch (_) {
+        // Releasing an optional response body is best-effort.
+      }
       return available;
     } catch (_) { return false; }
   })();
   const [academie, cnrtlAvailable] = await Promise.all([academyPromise, cnrtlPromise]);
   return { academie, cnrtlAvailable };
 }
-function dictionarySources(query: string, academie: any[] = [], cnrtlAvailable: boolean | null = null) {
+type DictionarySource = {
+  name: string;
+  url: string;
+  licence: string;
+};
+
+function dictionarySources(
+  query: string,
+  academie: DictionarySource[] = [],
+  cnrtlAvailable: boolean | null = null,
+): DictionarySource[] {
   const term = encodeURIComponent(query);
   const slug = term.replace(/%20/g, "_");
   const academySources = academie.length ? academie : [{
@@ -374,7 +434,58 @@ async function takeAiAllowance(uid: string) {
   }
 }
 
-export { callAI, parseFrenchWikitext, translateFrenchToEnglish };
+function applyDefinitionTranslations(
+  entries: FrenchDictionaryEntry[],
+  value: unknown,
+): void {
+  if (!Array.isArray(value)) return;
+
+  // If source groups share a part of speech, positional matching is ambiguous.
+  const partOfSpeechCounts = new Map<string, number>();
+  for (const entry of entries) {
+    partOfSpeechCounts.set(
+      entry.partOfSpeech,
+      (partOfSpeechCounts.get(entry.partOfSpeech) ?? 0) + 1,
+    );
+  }
+  if ([...partOfSpeechCounts.values()].some((count) => count > 1)) return;
+
+  for (let groupIndex = 0; groupIndex < entries.length; groupIndex++) {
+    const translatedGroup: unknown = value[groupIndex];
+
+    if (
+      translatedGroup === null ||
+      typeof translatedGroup !== "object" ||
+      Array.isArray(translatedGroup) ||
+      !("partOfSpeech" in translatedGroup) ||
+      translatedGroup.partOfSpeech !== entries[groupIndex].partOfSpeech ||
+      !("translations" in translatedGroup) ||
+      !Array.isArray(translatedGroup.translations)
+    ) {
+      continue;
+    }
+
+    const translations: unknown[] = translatedGroup.translations;
+
+    // Reject incomplete or excess translations instead of partially aligning senses.
+    if (translations.length !== entries[groupIndex].definitions.length) {
+      continue;
+    }
+
+    for (
+      let senseIndex = 0;
+      senseIndex < entries[groupIndex].definitions.length;
+      senseIndex++
+    ) {
+      const translation: unknown = translations[senseIndex];
+      if (typeof translation === "string" && translation.trim()) {
+        entries[groupIndex].definitions[senseIndex].translationEn =
+          clip(translation.trim(), 700);
+      }
+    }
+  }
+}
+export { callAI, parseFrenchWikitext, translateFrenchToEnglish, applyDefinitionTranslations };
 
 if (import.meta.main) Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
@@ -388,7 +499,18 @@ if (import.meta.main) Deno.serve(async (req: Request) => {
 
     // Dictionary: use French Wiktionnaire source entries first. Never use English-written definitions as the French dictionary source.
     if (mode === "dict" || mode === "sources") {
-      let wiki: Record<string, any> | null = null;
+      type WikiParseResponse = {
+  parse?: {
+    title?: string;
+    wikitext?: string | { "*": string };
+  };
+  error?: {
+    info?: string;
+    code?: string;
+  };
+};
+
+let wiki: WikiParseResponse | null = null;
       let wikiTextSource = "";
       let sourceError = "";
       try {
@@ -410,7 +532,13 @@ if (import.meta.main) Deno.serve(async (req: Request) => {
         });
         if (response.ok) {
           wiki = await response.json();
-          wikiTextSource = String(wiki?.parse?.wikitext?.["*"] || (typeof wiki?.parse?.wikitext === "string" ? wiki.parse.wikitext : ""));
+          const wikitext = wiki?.parse?.wikitext;
+          wikiTextSource = typeof wikitext === "string"
+            ? wikitext
+            : typeof wikitext === "object" && wikitext !== null &&
+                typeof wikitext["*"] === "string"
+              ? wikitext["*"]
+              : "";
           if (!wikiTextSource) sourceError = String(wiki?.error?.info || "Wiktionnaire returned no article text.");
         } else sourceError = "Wiktionnaire API returned HTTP " + response.status + ".";
       } catch (error) {
@@ -441,7 +569,7 @@ if (import.meta.main) Deno.serve(async (req: Request) => {
             const searchData = await searchResponse.json();
             const fold = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("fr").trim();
             const candidates = (Array.isArray(searchData?.query?.search) ? searchData.query.search : [])
-              .map((item: any) => String(item?.title || ""))
+              .map((item: { title?: unknown }) => String(item.title || ""))
               .filter((title: string) => title && fold(title) === fold(text) && title.toLocaleLowerCase("fr") !== text.toLocaleLowerCase("fr"))
               .slice(0, 6);
             for (const candidateTitle of candidates) {
@@ -483,13 +611,13 @@ if (import.meta.main) Deno.serve(async (req: Request) => {
       });
 
       if (entries.length) {
-        const definitions = entries.flatMap((group: any) => group.definitions.map((definition: any) => definition.definition)).slice(0, 30);
+        const definitions = entries.flatMap((group) => group.definitions.map((definition) => definition.definition)).slice(0, 30);
         // Source definitions stay authoritative for the source-backed part of the entry.
         // Enrichment adds useful dictionary metadata, but failure never hides the source entry.
-        const data: Record<string, any> = {
+        const data: Record<string, unknown> = {
           headword: resolvedTitle,
           searchedAs: text,
-          pos: [...new Set(entries.map((group: any) => group.partOfSpeech).filter(Boolean))].join(", "),
+          pos: [...new Set(entries.map((group) => group.partOfSpeech).filter(Boolean))].join(", "),
           entries,
           meanings: definitions,
           examples: [],
@@ -501,7 +629,7 @@ if (import.meta.main) Deno.serve(async (req: Request) => {
           if (allowance.ok) {
             const lexical = await callAI(
               "You are a rigorous modern French-English lexicographer. Return valid JSON only. The input includes a French headword and source-backed French definitions. Do NOT rewrite or replace those source definitions. Add concise, accurate metadata: headwordTranslation (the most useful English equivalent or short list of equivalents as a string), definitionTranslations (an array aligned positionally with sourceDefinitions; each item must have the same partOfSpeech and a translations array with one concise, faithful English translation for each definition in exactly the same order), gender (string or empty), ipa (IPA string or empty), grammar (short part-of-speech/form note), forms (array of useful inflected forms as strings), synonyms (array), antonyms (array), collocations (array), related (array of expressions), etymology (short string only if reliably known, otherwise empty), notes (usage/register/region notes; do not overclaim), and examples (array of 2-4 objects {fr,en} with natural contemporary French and faithful English translations). Translate each sense according to its actual meaning and part of speech; preserve ambiguity when an English equivalent depends on context. Do not fabricate citations or pretend examples are source quotations. Return JSON only.",
-              [{ role: "user", content: JSON.stringify({ headword: resolvedTitle, sourceDefinitions: entries.map((group: any) => ({ partOfSpeech: group.partOfSpeech, definitions: group.definitions.map((item: any) => item.definition).slice(0, 8) })) }) }],
+              [{ role: "user", content: JSON.stringify({ headword: resolvedTitle, sourceDefinitions: entries.map((group) => ({ partOfSpeech: group.partOfSpeech, definitions: group.definitions.map((item) => item.definition).slice(0, 8) })) }) }],
               1400,
               5000,
               1
@@ -511,24 +639,23 @@ if (import.meta.main) Deno.serve(async (req: Request) => {
               for (const key of ["headwordTranslation", "gender", "ipa", "grammar", "etymology", "notes"]) {
                 if (typeof extra[key] === "string" && extra[key].trim()) data[key] = clip(extra[key], key === "notes" ? 1200 : 500);
               }
-              if (Array.isArray(extra.definitionTranslations)) {
-                for (let groupIndex = 0; groupIndex < entries.length; groupIndex++) {
-                  const translatedGroup = extra.definitionTranslations[groupIndex];
-                  const translations = Array.isArray(translatedGroup?.translations) ? translatedGroup.translations : [];
-                  for (let senseIndex = 0; senseIndex < entries[groupIndex].definitions.length; senseIndex++) {
-                    const translation = translations[senseIndex];
-                    if (typeof translation === "string" && translation.trim()) {
-                      entries[groupIndex].definitions[senseIndex].translationEn = clip(translation, 700);
-                    }
-                  }
-                }
-              }
+              applyDefinitionTranslations(entries, extra.definitionTranslations);
               for (const key of ["forms", "synonyms", "antonyms", "collocations", "related"]) {
-                if (Array.isArray(extra[key])) data[key] = extra[key].slice(0, 12).map((item: any) => clip(item, 180)).filter(Boolean);
+                if (Array.isArray(extra[key])) data[key] = extra[key]
+                  .filter((item: unknown): item is string => typeof item === "string")
+                  .slice(0, 12).map((item) => clip(item, 180)).filter(Boolean);
               }
               if (Array.isArray(extra.examples)) {
-                data.examples = extra.examples.slice(0, 4).filter((item: any) => item && typeof item.fr === "string" && typeof item.en === "string")
-                  .map((item: any) => ({ fr: clip(item.fr, 400), en: clip(item.en, 400), source: "AI-generated example" }));
+                data.examples = extra.examples.slice(0, 4)
+                  .filter((item: unknown): item is { fr: string; en: string } =>
+                    item !== null && typeof item === "object" &&
+                    "fr" in item && typeof item.fr === "string" &&
+                    "en" in item && typeof item.en === "string")
+                  .map((item) => ({
+                    fr: clip(item.fr, 400),
+                    en: clip(item.en, 400),
+                    source: "AI-generated example",
+                  }));
               }
               data.enriched = true;
             }
@@ -540,7 +667,9 @@ if (import.meta.main) Deno.serve(async (req: Request) => {
         // These are explicitly labelled as machine-assisted, not official dictionary text.
         try {
           await addEnglishSenseTranslations(entries);
-        } catch (_) {}
+        } catch (_) {
+          // Keep the source-backed dictionary result if translation is unavailable.
+        }
         return J({ ok: true, data });
       }
 
@@ -555,8 +684,7 @@ if (import.meta.main) Deno.serve(async (req: Request) => {
 
       // If the source has no French entry, optionally generate a clearly-labelled explanation.
       // It consumes the normal per-user AI quota and is never represented as an official entry.
-      let config;
-      try { config = providerConfig(); }
+      try { providerConfig(); }
       catch (error) {
         if (error instanceof Error && error.message === "bad_provider") {
           return J({ error: "bad_provider", message: "AI_PROVIDER must be gemini, groq, mistral or openrouter." }, 503);
@@ -622,8 +750,7 @@ if (import.meta.main) Deno.serve(async (req: Request) => {
       }
     }
 
-    let config;
-    try { config = providerConfig(); }
+    try { providerConfig(); }
     catch (error) {
       if (error instanceof Error && error.message === "bad_provider") return J({ error: "bad_provider", message: "AI_PROVIDER must be gemini, groq, mistral or openrouter." }, 503);
       return J({ error: "not_configured", message: "No key is configured for the selected AI provider. Check the server-side secret names." }, 503);
