@@ -20,6 +20,7 @@
     },
     {
       id: "SP-002", category: "spelling", confidence: 0.99,
+      source: "https://www.dictionnaire-academie.fr/article/A9B0705",
       pattern: /(?<![\p{L}\p{N}_'’])beacoup(?![\p{L}\p{N}_'’])/giu,
       replace: (s) => s.replace(/beacoup/giu, (m) => matchCase(m, "beaucoup")),
       explanation: "L’orthographe standard est « beaucoup ».",
@@ -28,6 +29,7 @@
     },
     {
       id: "SP-003", category: "spelling", confidence: 0.99,
+      source: "https://www.dictionnaire-academie.fr/article/A9R1901",
       pattern: /(?<![\p{L}\p{N}_'’])reponse(?![\p{L}\p{N}_'’])/giu,
       replace: (s) => s.replace(/reponse/giu, (m) => matchCase(m, "réponse")),
       explanation: "Le nom s’écrit « réponse », avec un accent aigu.",
@@ -52,6 +54,7 @@
     },
     {
       id: "WR-002", category: "usage", confidence: 0.99,
+      source: "https://www.dictionnaire-academie.fr/article/A9F0107",
       pattern: /(?<![\p{L}\p{N}_'’])je\s+suis\s+faim(?![\p{L}\p{N}_'’])/giu,
       replace: (s) => s.replace(/(?<![\p{L}\p{N}_'’])je\s+suis\s+faim(?![\p{L}\p{N}_'’])/giu, (m) => matchCase(m, "j'ai faim")),
       explanation: "L’expression idiomatique est « avoir faim », et non « être faim ».",
@@ -60,6 +63,7 @@
     },
     {
       id: "WR-003", category: "usage", confidence: 0.99,
+      source: "https://www.dictionnaire-academie.fr/article/A9S1939",
       pattern: /(?<![\p{L}\p{N}_'’])je\s+suis\s+soif(?![\p{L}\p{N}_'’])/giu,
       replace: (s) => s.replace(/(?<![\p{L}\p{N}_'’])je\s+suis\s+soif(?![\p{L}\p{N}_'’])/giu, (m) => matchCase(m, "j'ai soif")),
       explanation: "L’expression idiomatique est « avoir soif », et non « être soif ».",
