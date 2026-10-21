@@ -12,6 +12,7 @@ on:
       - "scripts/check-french-intelligence.mjs"
       - "scripts/check-french-intelligence.browser.mjs"
       - "scripts/check-french-reasoning-v2.mjs"
+      - "scripts/check-french-reasoning-v2-expanded.mjs"
       - ".github/workflows/french-intelligence-check.yml"
   push:
     branches:
@@ -49,6 +50,7 @@ jobs:
         run: |
           node scripts/check-french-intelligence.mjs
           node scripts/check-french-reasoning-v2.mjs
+          node scripts/check-french-reasoning-v2-expanded.mjs
       - name: Install Playwright
         run: npm install --no-save playwright@1.56.1
       - name: Install Chromium
