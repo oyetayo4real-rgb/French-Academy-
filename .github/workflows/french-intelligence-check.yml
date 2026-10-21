@@ -5,22 +5,28 @@ on:
   pull_request:
     paths:
       - "features/french-intelligence.js"
+      - "features/french-reasoning-v2.js"
       - "index.html"
       - "sw.js"
       - "docs/french-intelligence-linguistic-matrix.md"
       - "scripts/check-french-intelligence.mjs"
       - "scripts/check-french-intelligence.browser.mjs"
+      - "scripts/check-french-reasoning-v2.mjs"
+      - "scripts/check-french-reasoning-v2-expanded.mjs"
       - ".github/workflows/french-intelligence-check.yml"
   push:
     branches:
       - feat/french-intelligence-engine
+      - feat/french-intelligence-phase-2
     paths:
       - "features/french-intelligence.js"
+      - "features/french-reasoning-v2.js"
       - "index.html"
       - "sw.js"
       - "docs/french-intelligence-linguistic-matrix.md"
       - "scripts/check-french-intelligence.mjs"
       - "scripts/check-french-intelligence.browser.mjs"
+      - "scripts/check-french-reasoning-v2.mjs"
       - ".github/workflows/french-intelligence-check.yml"
 
 permissions:
@@ -37,9 +43,14 @@ jobs:
         with:
           node-version: "22"
       - name: Check engine JavaScript syntax
-        run: node --check features/french-intelligence.js
+        run: |
+          node --check features/french-intelligence.js
+          node --check features/french-reasoning-v2.js
       - name: Check engine integration contract
-        run: node scripts/check-french-intelligence.mjs
+        run: |
+          node scripts/check-french-intelligence.mjs
+          node scripts/check-french-reasoning-v2.mjs
+          node scripts/check-french-reasoning-v2-expanded.mjs
       - name: Install Playwright
         run: npm install --no-save playwright@1.56.1
       - name: Install Chromium
