@@ -35,7 +35,7 @@ const noFlag = [
 ];
 
 const ambiguous = [
-  "J'achète une livre de beurre.",
+  "J'achète une livre.",
   "Je parle le français à l'école."
 ];
 
@@ -70,6 +70,7 @@ for (const input of ambiguous) {
     assert.equal(result.status, "not_sure");
     assert.equal(result.correction, null);
     assert.ok(result.findings.length > 0);
+    assert.ok(result.alternatives.length > 0);
   });
 }
 
