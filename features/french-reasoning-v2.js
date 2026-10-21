@@ -45,7 +45,7 @@
     {
       id: "WR-001", category: "usage", confidence: 0.99,
       pattern: /(?<![\p{L}\p{N}_'’])je\s+suis\s+(\d+)\s+ans(?![\p{L}\p{N}_'’])/giu,
-      replace: (s) => s.replace(/(?<![\p{L}\p{N}_'’])je\s+suis\s+(\d+)\s+ans(?![\p{L}\p{N}_'’])/giu, (_, n) => "j'ai " + n + " ans"),
+      replace: (s) => s.replace(/(?<![\p{L}\p{N}_'’])je\s+suis\s+(\d+)\s+ans(?![\p{L}\p{N}_'’])/giu, (m, n) => matchCase(m, "j'ai " + n + " ans")),
       explanation: "En français, on exprime l’âge avec « avoir » : « j’ai vingt ans ».",
       example: { incorrect: "Je suis 20 ans.", correct: "J'ai 20 ans." },
       source: null
@@ -53,7 +53,7 @@
     {
       id: "WR-002", category: "usage", confidence: 0.99,
       pattern: /(?<![\p{L}\p{N}_'’])je\s+suis\s+faim(?![\p{L}\p{N}_'’])/giu,
-      replace: (s) => s.replace(/(?<![\p{L}\p{N}_'’])je\s+suis\s+faim(?![\p{L}\p{N}_'’])/giu, "j'ai faim"),
+      replace: (s) => s.replace(/(?<![\p{L}\p{N}_'’])je\s+suis\s+faim(?![\p{L}\p{N}_'’])/giu, (m) => matchCase(m, "j'ai faim")),
       explanation: "L’expression idiomatique est « avoir faim », et non « être faim ».",
       example: { incorrect: "Je suis faim.", correct: "J'ai faim." },
       source: null
@@ -61,7 +61,7 @@
     {
       id: "WR-003", category: "usage", confidence: 0.99,
       pattern: /(?<![\p{L}\p{N}_'’])je\s+suis\s+soif(?![\p{L}\p{N}_'’])/giu,
-      replace: (s) => s.replace(/(?<![\p{L}\p{N}_'’])je\s+suis\s+soif(?![\p{L}\p{N}_'’])/giu, "j'ai soif"),
+      replace: (s) => s.replace(/(?<![\p{L}\p{N}_'’])je\s+suis\s+soif(?![\p{L}\p{N}_'’])/giu, (m) => matchCase(m, "j'ai soif")),
       explanation: "L’expression idiomatique est « avoir soif », et non « être soif ».",
       example: { incorrect: "Je suis soif.", correct: "J'ai soif." },
       source: null
@@ -77,7 +77,7 @@
     {
       id: "WR-005", category: "syntax", confidence: 0.98,
       pattern: /(?<![\p{L}\p{N}_'’])je\s+ne\s+comprends\s+pas\s+pas(?![\p{L}\p{N}_'’])/giu,
-      replace: (s) => s.replace(/(?<![\p{L}\p{N}_'’])je\s+ne\s+comprends\s+pas\s+pas(?![\p{L}\p{N}_'’])/giu, "je ne comprends pas"),
+      replace: (s) => s.replace(/(?<![\p{L}\p{N}_'’])je\s+ne\s+comprends\s+pas\s+pas(?![\p{L}\p{N}_'’])/giu, (m) => matchCase(m, "je ne comprends pas")),
       explanation: "Dans la négation standard de cette phrase, un seul « pas » suffit.",
       example: { incorrect: "Je ne comprends pas pas.", correct: "Je ne comprends pas." },
       source: null
