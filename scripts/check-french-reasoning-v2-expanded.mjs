@@ -129,6 +129,19 @@ check("repeated-pas heuristic does not flag a comma-separated phrase outside its
   assert.deepEqual(result.findings, []);
 });
 
+for (const input of [
+  "Le mot « merçi » est cité comme exemple.",
+  "La phrase « Bien qu\u2019il a tort » apparaît dans le devoir."
+]) {
+  check("quoted language is preserved for manual review: " + input, () => {
+    const result = engine.check(input);
+    assert.equal(result.status, "needs_review");
+    assert.equal(result.correction, null);
+    assert.equal(result.input, input);
+    assert.equal(result.findings[0].severity, "quoted-text-preservation");
+  });
+}
+
 check("every automatic rule exposes an HTTPS source", () => {
   assert.ok(engine.rules.length > 0);
   for (const rule of engine.rules) {
