@@ -5,6 +5,9 @@ on:
   pull_request:
     paths:
       - "features/french-intelligence.js"
+      - "features/french-intelligence-core-v1.js"
+      - "ARCHITECTURE.md"
+      - "scripts/check-french-intelligence-core-v1.cjs"
       - "index.html"
       - "sw.js"
       - "docs/french-intelligence-linguistic-matrix.md"
@@ -14,6 +17,7 @@ on:
   push:
     branches:
       - feat/french-intelligence-engine
+      - feat/french-intelligence-core-v1
     paths:
       - "features/french-intelligence.js"
       - "index.html"
@@ -38,6 +42,8 @@ jobs:
           node-version: "22"
       - name: Check engine JavaScript syntax
         run: node --check features/french-intelligence.js
+      - name: Check pure v1 result contract
+        run: node scripts/check-french-intelligence-core-v1.cjs
       - name: Check engine integration contract
         run: node scripts/check-french-intelligence.mjs
       - name: Install Playwright
