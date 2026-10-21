@@ -298,28 +298,45 @@
     ];
     const subjunctiveTriggers = "(?:bien\\s+que|bien\\s+qu['’]|quoique|quoiqu['’]|pour\\s+que|pour\\s+qu['’]|afin\\s+que|afin\\s+qu['’]|avant\\s+que|avant\\s+qu['’]|à\\s+moins\\s+que|à\\s+moins\\s+qu['’]|jusqu['’]à\\s+ce\\s+que|jusqu['’]à\\s+ce\\s+qu['’]|sans\\s+que|sans\\s+qu['’])";
     const indicativeForms = [...new Set(subjunctiveVerbs.flatMap(v => v.indicative))].sort((a,b) => b.length-a.length).join("|");
-    const subjunctivePattern = new RegExp("(^|[^\\p{L}])(" + subjunctiveTriggers + ")\\s*(je|tu|il|elle|nous|vous|ils|elles)\\s+(" + indicativeForms + ")\\b", "giu");
-    corrected = corrected.replace(subjunctivePattern, (match, prefix, trigger, subject, verb) => {
-      const subjectIndex = ({je:0,tu:1,il:2,elle:2,nous:3,vous:4,ils:5,elles:5})[subject.toLocaleLowerCase("fr")];
+    // Unicode-aware word boundaries; apostrophes remain part of French elisions.
+    const writingPattern = (source, flags = "gi") => new RegExp("(?<![\\p{L}\\p{N}_'’])(?:" + source + ")(?![\\p{L}\\p{N}_'’])", flags.includes("u") ? flags : flags + "u");
+    const subjunctivePattern = new RegExp("(?<![\\p{L}\\p{N}_'’])(" + subjunctiveTriggers + ")\\s*(j['’]|je|tu|il|elle|nous|vous|ils|elles)\\s*(" + indicativeForms + ")(?![\\p{L}\\p{N}_'’])", "giu");
+    const infinitiveIrregulars = new Set(["être","avoir","faire","aller","venir","tenir","prendre","mettre","dire","lire","écrire","boire","voir","pouvoir","vouloir","devoir","savoir","connaître","comprendre","apprendre","sortir","partir","dormir","ouvrir","offrir","recevoir","courir","vivre","suivre","naître","mourir","croire","rire","sourire"]);
+    const isInfinitive = word => /(?:er|ir|re|oir)$/iu.test(word) || infinitiveIrregulars.has(word.toLocaleLowerCase("fr"));
+    corrected = corrected.replace(subjunctivePattern, (match, trigger, subject, verb, offset, source) => {
+      const subjectLower = subject.toLocaleLowerCase("fr");
+      const subjectIndex = ({je:0,"j'":0,"j’":0,tu:1,il:2,elle:2,nous:3,vous:4,ils:5,elles:5})[subjectLower];
       const verbRule = subjunctiveVerbs.find(v => v.indicative.includes(verb.toLocaleLowerCase("fr")));
       if (subjectIndex === undefined || !verbRule) return match;
+      const nextWord = source.slice(offset + match.length).match(/^\\s+([\\p{L}]+)(?![\\p{L}])/u)?.[1];
+      if (verbRule.name === "aller" && nextWord && isInfinitive(nextWord)) {
+        suggestions.push({before: match, why: "After this conjunction the subjunctive is required. Because aller is followed by an infinitive, do not change vais/vas/va/allons/allez/vont to aille. Rewrite using the infinitive verb's own subjunctive (for example, « pour que je comprenne »).", messageOnly: true});
+        return match;
+      }
       suggestions.push({before: match, why: "After this conjunction, use the subjunctive mood rather than the indicative in this clause."});
-      return prefix + match.slice(prefix.length, match.length - verb.length) + verbRule.subjunctive[subjectIndex];
+      const form = verbRule.subjunctive[subjectIndex];
+      const elided = subjectLower === "j'" || subjectLower === "j’";
+      const replacement = elided ? subject + form : subjectLower === "je" && /^[aeiouàâäéèêëîïôöùûüÿœ]/iu.test(form) ? "j'" + form : subject + " " + form;
+      return match.slice(0, match.length - subject.length - verb.length - (elided ? 0 : 1)) + replacement;
     });
     const checks=[
-      [/\bje suis (\d+) ans\b/gi,(m,n)=>"j'ai "+n+" ans","French uses avoir for age."],
-      [/\bje suis faim\b/gi,()=>"j'ai faim","French says avoir faim (to be hungry)."],
-      [/\bje suis soif\b/gi,()=>"j'ai soif","French says avoir soif (to be thirsty)."],
-      [/\bje suis 20 ans\b/gi,()=>"j'ai 20 ans","French uses avoir for age."],
-      [/\bsa va\b/gi,()=>"ça va","The expression is ça va, with ç."],
-      [/\bbeacoup\b/gi,()=>"beaucoup","Spelling: beaucoup."],
-      [/\bbonjor\b/gi,()=>"bonjour","Spelling: bonjour."],
-      [/\bmerçi\b/gi,()=>"merci","Merci is written without a cedilla."],
-      [/\bje ne comprends pas pas\b/gi,()=>"je ne comprends pas","Avoid repeating pas in this standard negation."],
+      [writingPattern("je suis (\\d+) ans"),(m,n)=>"j'ai "+n+" ans","French uses avoir for age."],
+      [writingPattern("je suis faim"),()=>"j'ai faim","French says avoir faim (to be hungry)."],
+      [writingPattern("je suis soif"),()=>"j'ai soif","French says avoir soif (to be thirsty)."],
+      [writingPattern("je suis 20 ans"),()=>"j'ai 20 ans","French uses avoir for age."],
+      [writingPattern("sa va"),()=>"ça va","The expression is ça va, with ç."],
+      [writingPattern("beacoup"),()=>"beaucoup","Spelling: beaucoup."],
+      [writingPattern("bonjor"),()=>"bonjour","Spelling: bonjour."],
+      [writingPattern("merçi"),()=>"merci","Merci is written without a cedilla."],
+      [writingPattern("je ne comprends pas pas"),()=>"je ne comprends pas","Avoid repeating pas in this standard negation."],
     ];
     for(const [re,rep,why] of checks){if(re.test(corrected)){re.lastIndex=0;const before=corrected;corrected=corrected.replace(re,rep);suggestions.push({before,why});}}
     if(!suggestions.length)return `<div class="fi-answer"><b>Text received</b><p>${esc(q)}</p><p>No issue from the small built-in check list was detected. That does not prove the sentence is fully correct; this is not a full grammar checker.</p></div>`;
-    return `<div class="fi-answer"><b>Suggested text</b><p class="fi-output">${esc(corrected)}</p><b>Why these changes?</b>${suggestions.map(s=>`<div class="fi-result">${esc(s.why)}<div class="fi-muted">Original: ${esc(s.before)}</div></div>`).join("")}<button id="fiUseCorrection" class="g">Use corrected text</button></div>`;
+    const hasCorrection = suggestions.some(s => !s.messageOnly);
+    const heading = hasCorrection ? "Suggested text" : "Grammar note";
+    const output = hasCorrection ? `<p class="fi-output">${esc(corrected)}</p>` : "";
+    const action = hasCorrection ? `<button id="fiUseCorrection" class="g">Use corrected text</button>` : "";
+    return `<div class="fi-answer"><b>${heading}</b>${output}<b>Why these changes?</b>${suggestions.map(s=>`<div class="fi-result">${esc(s.why)}<div class="fi-muted">Original: ${esc(s.before)}</div></div>`).join("")}${action}</div>`;
   }
   function runAction(id){
     if(id==="fiAsk"){const q=$("fiInput")?.value||"";showAnswer(answerQuestion(q));}

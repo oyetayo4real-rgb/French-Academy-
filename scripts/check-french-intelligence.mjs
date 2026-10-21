@@ -63,7 +63,8 @@ const checks = [
   ["dictionary output escapes HTML-like input", !core.lookup("<img src=x onerror=alert(1)>")],
   ["subjunctive rule flags bien que + indicative être", core.checkWriting("Bien que je suis fatigué, je continue.").includes("sois")],
   ["subjunctive rule flags quoique + indicative avoir", core.checkWriting("Quoique tu as raison, je préfère vérifier.").includes("aies")],
-  ["subjunctive rule flags pour que + indicative aller", core.checkWriting("Il parle lentement pour qu'il va comprendre.").includes("aille")],
+  ["subjunctive rule with aller + infinitive gives a message and does not replace aller", core.checkWriting("Il parle lentement pour qu'il va comprendre.").includes("Grammar note") && core.checkWriting("Il parle lentement pour qu'il va comprendre.").includes("Rewrite using the infinitive verb's own subjunctive") && !core.checkWriting("Il parle lentement pour qu'il va comprendre.").includes("Suggested text") && !core.checkWriting("Il parle lentement pour qu'il va comprendre.").includes("aille")],
+  ["subjunctive rule with aller not followed by an infinitive suggests j'aille", core.checkWriting("Pour que je vais à Paris.").includes("j'aille à Paris")],
   ["subjunctive rule flags afin que + indicative faire", core.checkWriting("Elle explique afin qu'elle fait le bon choix.").includes("fasse")],
   ["subjunctive rule flags avant que + indicative pouvoir", core.checkWriting("Partons avant que nous pouvons être en retard.").includes("puissions")],
   ["subjunctive rule flags à moins que + indicative savoir", core.checkWriting("Je viendrai à moins que vous savez autre chose.").includes("sachiez")],
@@ -218,7 +219,7 @@ const hardNegativeSentences = [
   "Il a écrit « bien que » au tableau.",
   "Les mots « pour que » sont écrits au tableau.",
   "Elle sourit bien que la journée soit longue.",
-  "Je sais que tu es prêt pour que tout soit terminé.",
+  "Je sais que tu es prêt, et je veux que tout soit terminé.",
   "Il attend jusqu'à ce que la pluie cesse.",
   "Il a un livre à la main.",
   "Elle a pensé à son amie.",
@@ -278,7 +279,12 @@ const hardNegativeSentences = [
   "Je n'ai pas faim, mais j'ai soif.",
   "Je suis à l'heure et j'ai tout préparé.",
   "Il est parti sans que personne le remarque.",
-  "Je travaille pour que mon équipe réussisse."
+  "Je travaille pour que mon équipe réussisse.",
+  "Sa vache est dans le pré.",
+  "Sa valise est lourde.",
+  "Sa vaisselle est propre.",
+  "Sa mère va bien.",
+  "Il avance pas à pas."
 ];
 const knownErrors = [
   {
@@ -384,7 +390,8 @@ const knownErrors = [
   {
     "rule": "pour que subjunctive",
     "sentence": "Pour que je vais comprendre, explique encore.",
-    "expected": "aille"
+    "expected": "After this conjunction the subjunctive is required",
+    "messageOnly": true
   },
   {
     "rule": "pour que subjunctive",
@@ -440,12 +447,17 @@ const knownErrors = [
     "rule": "sans que subjunctive",
     "sentence": "Sans qu'ils ont le temps, ils répondent.",
     "expected": "aient"
-  }
+  },
+  {"rule":"bien que subjunctive avoir","sentence":"Bien que j'ai peur","expected":"j'aie peur"},
+  {"rule":"bien que subjunctive avoir","sentence":"Bien qu'il a tort","expected":"ait"},
+  {"rule":"bien que subjunctive avoir","sentence":"Bien que nous avons faim","expected":"ayons"},
+  {"rule":"bien que subjunctive être","sentence":"Bien que vous êtes prêts","expected":"soyez"},
+  {"rule":"bien que subjunctive être","sentence":"Bien qu'ils sont fatigués","expected":"soient"}
 ];
 const hardNegativeFalsePositives = hardNegativeSentences.filter(sentence => core.checkWriting(sentence).includes("Suggested text"));
 const knownErrorsCaught = knownErrors.filter(item => {
   const result = core.checkWriting(item.sentence);
-  return result.includes("Suggested text") && result.includes(item.expected);
+  return item.messageOnly ? result.includes("Grammar note") && result.includes(item.expected) && !result.includes("Suggested text") : result.includes("Suggested text") && result.includes(item.expected);
 });
 const corpusFalsePositives = cleanSentenceCorpus.filter(sentence => core.checkWriting(sentence).includes("Suggested text"));
 checks.push(
