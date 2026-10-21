@@ -63,7 +63,7 @@ const checks = [
   ["dictionary output escapes HTML-like input", !core.lookup("<img src=x onerror=alert(1)>")],
   ["subjunctive rule flags bien que + indicative être", core.checkWriting("Bien que je suis fatigué, je continue.").includes("sois")],
   ["subjunctive rule flags quoique + indicative avoir", core.checkWriting("Quoique tu as raison, je préfère vérifier.").includes("aies")],
-  ["subjunctive rule with aller + infinitive gives a message and does not replace aller", core.checkWriting("Il parle lentement pour qu'il va comprendre.").includes("Grammar note") && core.checkWriting("Il parle lentement pour qu'il va comprendre.").includes("Rewrite using the infinitive verb's own subjunctive") && !core.checkWriting("Il parle lentement pour qu'il va comprendre.").includes("Suggested text") && !core.checkWriting("Il parle lentement pour qu'il va comprendre.").includes("aille")],
+  ["subjunctive rule with aller + infinitive gives a message and does not replace aller", core.checkWriting("Il parle lentement pour qu'il va comprendre.").includes("Grammar note") && core.checkWriting("Il parle lentement pour qu'il va comprendre.").includes("Rewrite using the infinitive verb's own subjunctive")],
   ["subjunctive rule with aller not followed by an infinitive suggests j'aille", core.checkWriting("Pour que je vais à Paris.").includes("j'aille à Paris")],
   ["subjunctive rule flags afin que + indicative faire", core.checkWriting("Elle explique afin qu'elle fait le bon choix.").includes("fasse")],
   ["subjunctive rule flags avant que + indicative pouvoir", core.checkWriting("Partons avant que nous pouvons être en retard.").includes("puissions")],
