@@ -8,7 +8,7 @@
     age: "https://www.dictionnaire-academie.fr/article/QR_0319",
     participle: "https://www.academie-francaise.fr/questions-de-langue",
     faireInfinitive: "https://www.dictionnaire-academie.fr/article/DNP0145",
-    punctuation: "https://www.dictionnaire-academie.fr/article/A9V0914",
+    punctuation: "https://vitrinelinguistique.oqlf.gouv.qc.ca/23323/la-ponctuation/ponctuation-principes-generaux",
     subjunctivePurpose: "https://www.dictionnaire-academie.fr/article/A9P3767"
   };
 
@@ -75,7 +75,7 @@
       replace: (s) => s.replace(/(?<![\p{L}\p{N}_'’])sa\s+va(?![\p{L}\p{N}_'’])/giu, (m) => matchCase(m, "ça va")),
       explanation: "Dans l’expression « ça va », on emploie le pronom démonstratif « ça », pas le possessif « sa ».",
       example: { incorrect: "Sa va bien.", correct: "Ça va bien." },
-      source: "https://www.dictionnaire-academie.fr/article/DNP0881"
+      source: "https://www.dictionnaire-academie.fr/article/A9C0002"
     },
     {
       id: "WR-005", category: "syntax", confidence: 0.98,
