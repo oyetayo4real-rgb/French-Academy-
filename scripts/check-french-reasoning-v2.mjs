@@ -1,6 +1,7 @@
 "use strict";
-const assert = require("node:assert/strict");
-const engine = require("../features/french-reasoning-v2.js");
+import assert from "node:assert/strict";
+import "../features/french-reasoning-v2.js";
+const engine = globalThis.FrenchReasoningV2;
 
 const exactCorrections = [
   ["spelling", "Merçi beaucoup.", "Merci beaucoup.", "SP-001"],
