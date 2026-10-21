@@ -308,7 +308,7 @@
       const subjectIndex = ({je:0,"j'":0,"j’":0,tu:1,il:2,elle:2,nous:3,vous:4,ils:5,elles:5})[subjectLower];
       const verbRule = subjunctiveVerbs.find(v => v.indicative.includes(verb.toLocaleLowerCase("fr")));
       if (subjectIndex === undefined || !verbRule) return match;
-      const nextWord = source.slice(offset + match.length).match(/^\\s+([\\p{L}]+)(?![\\p{L}])/u)?.[1];
+      const nextWord = source.slice(offset + match.length).match(/^\s+([\p{L}]+)(?![\p{L}])/u)?.[1];
       if (verbRule.name === "aller" && nextWord && isInfinitive(nextWord)) {
         suggestions.push({before: match, why: "After this conjunction the subjunctive is required. Because aller is followed by an infinitive, do not change vais/vas/va/allons/allez/vont to aille. Rewrite using the infinitive verb's own subjunctive (for example, « pour que je comprenne »).", messageOnly: true});
         return match;

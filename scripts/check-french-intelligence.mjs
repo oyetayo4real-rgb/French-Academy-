@@ -396,7 +396,8 @@ const knownErrors = [
   {
     "rule": "pour que subjunctive",
     "sentence": "Pour qu'elle va réussir, elle travaille.",
-    "expected": "aille"
+    "expected": "After this conjunction the subjunctive is required",
+    "messageOnly": true
   },
   {
     "rule": "afin que subjunctive",

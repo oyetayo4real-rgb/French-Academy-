@@ -32,12 +32,14 @@ Scope: local dictionary, phrasebook, present-tense conjugation, selected grammar
 | WR-03 | Writing | `J’achète une livre.` | Do not silently change to `un livre` | Added; CI pending | NEEDS REVIEW | `une livre` can denote a pound; the intended meaning is unknown | `check-french-intelligence.mjs` |
 | WR-04 | Writing | Correct but unrecognized sentence | Say no listed issue was detected; do not claim full correctness | Covered by core test | NEEDS REVIEW | Pattern checker is not a full grammar parser | `check-french-intelligence.mjs` |
 | WR-05 | Writing | `Bien que je suis fatigué, je continue.` | suggests sois | Added; CI pending | PASS | expected answer checked by an AI assistant; human French teacher sign-off pending | `check-french-intelligence.mjs` |
+| WR-06 | Writing | `Pour que je vais comprendre, explique encore.` | grammar note; do not change vais to aille before infinitive | Added; CI pending | NEEDS REVIEW | subjunctive is required; rewrite the infinitive verb with its own subjunctive (e.g. `pour que je comprenne`) | `check-french-intelligence.mjs` |
+| WR-07 | Writing | `Pour que je vais à Paris.` | suggests `j'aille à Paris` | Added; CI pending | NEEDS REVIEW | aller is corrected only when no infinitive follows | `check-french-intelligence.mjs` |
 | SEC-01 | Input handling | HTML/script-looking dictionary input | Return unknown; do not render user-controlled markup | Covered by core test | NEEDS REVIEW | Browser-level injection checks still required | `check-french-intelligence.mjs` |
 | SEC-02 | Network | Local phrasebook lookup | No automatic inference API call | Source inspection only | NEEDS REVIEW | Verify in browser/network instrumentation before release | Follow-up required |
 
 ## Current regression evidence
 
-- The CI corpus includes 125 baseline clean sentences, 77 hard-negative sentences containing rule trigger words in valid contexts, and 32 deliberately incorrect examples across the writing-rule families.
+- The CI corpus includes 125 baseline clean sentences, 82 hard-negative sentences containing rule trigger words in valid contexts, and 37 deliberately incorrect examples across the writing-rule families.
 - The test reports clean-corpus false positives, hard-negative false positives, and the number of known errors caught. A passing software assertion is not a substitute for independent review of unmarked matrix rows.
 - Browser checks block every non-local request and fail if any is attempted. They report local app-load requests separately and inject script/image-shaped text into every input across all six tabs.
 

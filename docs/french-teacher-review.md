@@ -393,19 +393,23 @@ These are the special answer branches in `answerQuestion`; the source text is co
 
 ### 8.1 Pattern-based writing checks
 
+Compiled regexes below use Unicode-aware, apostrophe-aware boundaries. Shared source helper: `new RegExp("(?<![\\p{L}\\p{N}_'’])(?:" + source + ")(?![\\p{L}\\p{N}_'’])", flags.includes("u") ? flags : flags + "u")`.
+
 | Rule family | Regex (exact source) | Suggested replacement (exact source behavior) | Explanation (exact source) | OK / Wrong / Fix |
 |---|---|---|---|---|
-| Age: Je suis (number) ans | `/\bje suis (\d+) ans\b/gi` | `j'ai $1 ans` | French uses avoir for age. | |
-| Hunger | `/\bje suis faim\b/gi` | `j'ai faim` | French says avoir faim (to be hungry). | |
-| Thirst | `/\bje suis soif\b/gi` | `j'ai soif` | French says avoir soif (to be thirsty). | |
-| Age: exact 20-year pattern | `/\bje suis 20 ans\b/gi` | `j'ai 20 ans` | French uses avoir for age. | |
-| sa / ça | `/\bsa va\b/gi` | `ça va` | The expression is ça va, with ç. | |
-| beaucoup spelling | `/\bbeacoup\b/gi` | `beaucoup` | Spelling: beaucoup. | |
-| bonjour spelling | `/\bbonjor\b/gi` | `bonjour` | Spelling: bonjour. | |
-| merci spelling | `/\bmerçi\b/gi` | `merci` | Merci is written without a cedilla. | |
-| Repeated pas | `/\bje ne comprends pas pas\b/gi` | `je ne comprends pas` | Avoid repeating pas in this standard negation. | |
+| Age: Je suis (number) ans | `/(?<![\p{L}\p{N}_'’])(?:je suis (\d+) ans)(?![\p{L}\p{N}_'’])/giu` | `j'ai $1 ans` | French uses avoir for age. | |
+| Hunger | `/(?<![\p{L}\p{N}_'’])(?:je suis faim)(?![\p{L}\p{N}_'’])/giu` | `j'ai faim` | French says avoir faim (to be hungry). | |
+| Thirst | `/(?<![\p{L}\p{N}_'’])(?:je suis soif)(?![\p{L}\p{N}_'’])/giu` | `j'ai soif` | French says avoir soif (to be thirsty). | |
+| Age: exact 20-year pattern | `/(?<![\p{L}\p{N}_'’])(?:je suis 20 ans)(?![\p{L}\p{N}_'’])/giu` | `j'ai 20 ans` | French uses avoir for age. | |
+| sa / ça | `/(?<![\p{L}\p{N}_'’])(?:sa va)(?![\p{L}\p{N}_'’])/giu` | `ça va` | The expression is ça va, with ç. | |
+| beaucoup spelling | `/(?<![\p{L}\p{N}_'’])(?:beacoup)(?![\p{L}\p{N}_'’])/giu` | `beaucoup` | Spelling: beaucoup. | |
+| bonjour spelling | `/(?<![\p{L}\p{N}_'’])(?:bonjor)(?![\p{L}\p{N}_'’])/giu` | `bonjour` | Spelling: bonjour. | |
+| merci spelling | `/(?<![\p{L}\p{N}_'’])(?:merçi)(?![\p{L}\p{N}_'’])/giu` | `merci` | Merci is written without a cedilla. | |
+| Repeated pas | `/(?<![\p{L}\p{N}_'’])(?:je ne comprends pas pas)(?![\p{L}\p{N}_'’])/giu` | `je ne comprends pas` | Avoid repeating pas in this standard negation. | |
 
 ### 8.2 Subjunctive trigger rule
+
+Compiled source expression: `new RegExp("(?<![\\p{L}\\p{N}_'’])(" + subjunctiveTriggers + ")\\s*(j['’]|je|tu|il|elle|nous|vous|ils|elles)\\s*(" + indicativeForms + ")(?![\\p{L}\\p{N}_'’])", "giu")`. The eight trigger alternatives share this combined regex.
 
 | Trigger family (source pattern) | Explanation (exact source callback text) | OK / Wrong / Fix |
 |---|---|---|
@@ -417,6 +421,14 @@ These are the special answer branches in `answerQuestion`; the source text is co
 | à moins que / à moins qu' | After this conjunction, use the subjunctive mood rather than the indicative in this clause. | |
 | jusqu'à ce que / jusqu'à ce qu' | After this conjunction, use the subjunctive mood rather than the indicative in this clause. | |
 | sans que / sans qu' | After this conjunction, use the subjunctive mood rather than the indicative in this clause. | |
+
+### 8.2.1 Infinitive-following aller handling
+
+| Input | Expected behavior | OK / Wrong / Fix |
+|---|---|---|
+| `Pour que je vais comprendre, explique encore.` | Grammar note; do not replace `vais` with `aille`; rewrite the infinitive verb with its own subjunctive, e.g. `pour que je comprenne`. | |
+| `Pour qu'elle va réussir, elle travaille.` | Grammar note; do not replace `va` with `aille` before `réussir`. | |
+| `Pour que je vais à Paris.` | Suggest `Pour que j'aille à Paris.` because no infinitive follows `vais`. | |
 
 ### 8.3 Exact no-flag response
 
@@ -448,6 +460,6 @@ ________________________________________________________________
 - Explicit spelling-adjusted present-indicative tables extracted: 2.
 - Subjunctive paradigms used by the writing checker extracted: 7.
 - Grammar guide rules extracted: 19.
-- Pattern-based writing checks documented: 9; subjunctive trigger families documented: 8.
+- Pattern-based writing checks documented: 9; subjunctive trigger families documented: 8. The exact compiled regex patterns and shared boundaries are documented in section 8.
 
-All review cells are intentionally blank. The extraction verified the exact WR-02 and WR-05 expectations in the linguistic matrix before preparing this document.
+All review cells are intentionally blank. The extraction verified the exact WR-02 and WR-05 expectations in the linguistic matrix before preparing this document. Current regression corpus: 82 hard-negative sentences and 37 known-error cases.
