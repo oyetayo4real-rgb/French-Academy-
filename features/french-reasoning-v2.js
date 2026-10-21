@@ -43,6 +43,46 @@
       source: null
     },
     {
+      id: "WR-001", category: "usage", confidence: 0.99,
+      pattern: /(?<![\p{L}\p{N}_'’])je\s+suis\s+(\d+)\s+ans(?![\p{L}\p{N}_'’])/giu,
+      replace: (s) => s.replace(/(?<![\p{L}\p{N}_'’])je\s+suis\s+(\d+)\s+ans(?![\p{L}\p{N}_'’])/giu, (_, n) => "j'ai " + n + " ans"),
+      explanation: "En français, on exprime l’âge avec « avoir » : « j’ai vingt ans ».",
+      example: { incorrect: "Je suis 20 ans.", correct: "J'ai 20 ans." },
+      source: null
+    },
+    {
+      id: "WR-002", category: "usage", confidence: 0.99,
+      pattern: /(?<![\p{L}\p{N}_'’])je\s+suis\s+faim(?![\p{L}\p{N}_'’])/giu,
+      replace: (s) => s.replace(/(?<![\p{L}\p{N}_'’])je\s+suis\s+faim(?![\p{L}\p{N}_'’])/giu, "j'ai faim"),
+      explanation: "L’expression idiomatique est « avoir faim », et non « être faim ».",
+      example: { incorrect: "Je suis faim.", correct: "J'ai faim." },
+      source: null
+    },
+    {
+      id: "WR-003", category: "usage", confidence: 0.99,
+      pattern: /(?<![\p{L}\p{N}_'’])je\s+suis\s+soif(?![\p{L}\p{N}_'’])/giu,
+      replace: (s) => s.replace(/(?<![\p{L}\p{N}_'’])je\s+suis\s+soif(?![\p{L}\p{N}_'’])/giu, "j'ai soif"),
+      explanation: "L’expression idiomatique est « avoir soif », et non « être soif ».",
+      example: { incorrect: "Je suis soif.", correct: "J'ai soif." },
+      source: null
+    },
+    {
+      id: "WR-004", category: "spelling", confidence: 0.99,
+      pattern: /(?<![\p{L}\p{N}_'’])sa\s+va(?![\p{L}\p{N}_'’])/giu,
+      replace: (s) => s.replace(/(?<![\p{L}\p{N}_'’])sa\s+va(?![\p{L}\p{N}_'’])/giu, (m) => matchCase(m, "ça va")),
+      explanation: "Dans l’expression « ça va », on emploie le pronom démonstratif « ça », pas le possessif « sa ».",
+      example: { incorrect: "Sa va bien.", correct: "Ça va bien." },
+      source: "https://www.dictionnaire-academie.fr/article/DNP0881"
+    },
+    {
+      id: "WR-005", category: "syntax", confidence: 0.98,
+      pattern: /(?<![\p{L}\p{N}_'’])je\s+ne\s+comprends\s+pas\s+pas(?![\p{L}\p{N}_'’])/giu,
+      replace: (s) => s.replace(/(?<![\p{L}\p{N}_'’])je\s+ne\s+comprends\s+pas\s+pas(?![\p{L}\p{N}_'’])/giu, "je ne comprends pas"),
+      explanation: "Dans la négation standard de cette phrase, un seul « pas » suffit.",
+      example: { incorrect: "Je ne comprends pas pas.", correct: "Je ne comprends pas." },
+      source: null
+    },
+    {
       id: "GR-001", category: "conjugation", confidence: 0.99,
       pattern: /(?<![\p{L}\p{N}_'’])bien\s+qu['’]il\s+a(?![\p{L}\p{N}_'’])/iu,
       replace: (s) => s.replace(/(bien\s+qu['’]il\s+)a(?![\p{L}\p{N}_'’])/iu, "$1ait"),
@@ -110,7 +150,6 @@
 
   const AMBIGUOUS_PATTERNS = [
     { id: "SEM-001", pattern: /\bune\s+livre\b/iu, reason: "« Une livre » peut désigner une unité de poids. Le contexte ne permet pas de conclure qu’il faut écrire « un livre »." },
-    { id: "SEM-002", pattern: /\bsa\s+(?:vache|valise|vaisselle|mère|réponse)\b/iu, reason: "« Sa » est un déterminant possessif valide devant un nom. Ne pas le remplacer par « ça » sans preuve contextuelle." },
     { id: "SEM-003", pattern: /\bje parle le français\b/iu, reason: "L’emploi de l’article peut dépendre de la construction et du contexte ; cette règle limitée ne doit pas imposer une correction automatique." }
   ];
 
@@ -203,6 +242,20 @@
       return { status: "not_sure", input: text, correction: null, confidence: 0, findings: [], alternatives: [], analysis: null, reason: "Provide a non-empty French sentence to analyze." };
     }
     const analysis = analyze(text);
+    const allerInfinitive = /(?<![\p{L}\p{N}_'’])(?:pour\s+que|afin\s+que|bien\s+que|avant\s+que)\s+(?:j['’]|je|tu|il|elle|nous|vous|ils|elles)\s+(?:vais|vas|va|allons|allez|vont)\s+([\p{L}]+)(?![\p{L}])/iu.exec(text);
+    if (allerInfinitive && /(?:er|ir|re|oir)$/iu.test(allerInfinitive[1])) {
+      return {
+        status: "needs_review", input: text, correction: null, confidence: 0.91,
+        findings: [{
+          ruleId: "GR-006", category: "syntax", severity: "grammar-note",
+          message: "Le subjonctif est attendu après cette locution. Comme « aller » est suivi d’un infinitif, ne remplacez pas automatiquement « vais/va/etc. » par « aille ». Reformulez la proposition avec le subjonctif du verbe voulu, par exemple « pour que je comprenne ».",
+          explanation: "La correction dépend du verbe que l’auteur veut employer ; une substitution locale risquerait de changer le sens.",
+          source: SOURCES.subjunctivePurpose, confidence: 0.91
+        }],
+        alternatives: [], analysis,
+        reason: "A grammar note is safer than an automatic rewrite when the intended infinitive and sentence meaning must be preserved."
+      };
+    }
     for (const ambiguous of AMBIGUOUS_PATTERNS) {
       if (ambiguous.pattern.test(text)) {
         return {
