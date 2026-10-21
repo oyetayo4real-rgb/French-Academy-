@@ -9,6 +9,7 @@ on:
       - "sw.js"
       - "docs/french-intelligence-linguistic-matrix.md"
       - "scripts/check-french-intelligence.mjs"
+      - "scripts/characterize-french-intelligence.mjs"
       - "scripts/check-french-intelligence.browser.mjs"
       - ".github/workflows/french-intelligence-check.yml"
   push:
@@ -40,6 +41,8 @@ jobs:
         run: node --check features/french-intelligence.js
       - name: Check engine integration contract
         run: node scripts/check-french-intelligence.mjs
+      - name: Check legacy method characterization
+        run: node scripts/characterize-french-intelligence.mjs
       - name: Install Playwright
         run: npm install --no-save playwright@1.56.1
       - name: Install Chromium
