@@ -276,6 +276,30 @@
         };
       }
     }
+    // Do not silently rewrite a rule match when it appears inside quoted text.
+    // Quoted examples, citations, and metalinguistic discussion may need preservation.
+    const quoteRanges = Array.from(text.matchAll(/«[^»]*»|“[^”]*”|"[^"]*"/gu), (m) => ({ start: m.index, end: m.index + m[0].length }));
+    if (quoteRanges.length) {
+      for (const rule of RULES) {
+        const flags = rule.pattern.flags.includes("g") ? rule.pattern.flags : rule.pattern.flags + "g";
+        const matcher = new RegExp(rule.pattern.source, flags);
+        for (const match of text.matchAll(matcher)) {
+          const range = quoteRanges.find((q) => match.index >= q.start && match.index + match[0].length <= q.end);
+          if (range) {
+            return {
+              status: "needs_review", input: text, correction: null, confidence: Math.min(rule.confidence, 0.68),
+              findings: [{ ruleId: rule.id, category: rule.category, severity: "quoted-text-preservation",
+                message: "Une forme à corriger semble se trouver dans un passage cité. Vérifiez si la citation doit être conservée exactement avant toute modification.",
+                explanation: "Le moteur préserve le texte cité au lieu de modifier automatiquement un exemple, une citation ou une mention linguistique.",
+                source: rule.source, confidence: Math.min(rule.confidence, 0.68) }],
+              alternatives: [], analysis,
+              reason: "A possible correction occurs inside quoted text; manual review is required to preserve quotation fidelity."
+            };
+          }
+        }
+      }
+    }
+
     const findings = [];
     let corrected = text;
     for (const rule of RULES) {
