@@ -8,6 +8,7 @@ on:
       - "features/french-intelligence-core-v1.mjs"
       - "features/french-intelligence-compat.mjs"
       - "scripts/check-french-intelligence-core.mjs"
+      - "scripts/check-french-intelligence-parity.mjs"
       - "index.html"
       - "sw.js"
       - "docs/french-intelligence-linguistic-matrix.md"
@@ -51,6 +52,8 @@ jobs:
         run: node scripts/check-french-intelligence-core.mjs
       - name: Check engine integration contract
         run: node scripts/check-french-intelligence.mjs
+      - name: Check exact legacy parity
+        run: node scripts/check-french-intelligence-parity.mjs
       - name: Check legacy method characterization
         run: node scripts/characterize-french-intelligence.mjs
       - name: Install Playwright
