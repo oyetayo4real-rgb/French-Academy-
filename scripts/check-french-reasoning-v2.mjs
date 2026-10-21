@@ -12,7 +12,6 @@ const exactCorrections = [
   ["usage", "Je suis faim.", "J'ai faim.", "WR-002"],
   ["usage", "Je suis soif.", "J'ai soif.", "WR-003"],
   ["spelling", "Sa va bien.", "Ça va bien.", "WR-004"],
-  ["syntax", "Je ne comprends pas pas.", "Je ne comprends pas.", "WR-005"],
   ["conjugation", "Bien qu'il a tort.", "Bien qu'il ait tort.", "GR-001"],
   ["conjugation", "Bien que j'ai peur.", "Bien que j'aie peur.", "GR-002"],
   ["conjugation", "Bien que nous avons faim.", "Bien que nous ayons faim.", "GR-003"],
@@ -56,6 +55,14 @@ for (const [category, input, expected, ruleId] of exactCorrections) {
     assert.ok(result.findings.every((finding) => finding.confidence >= 0.9));
   });
 }
+
+check("repeated pas is flagged for review, never auto-deleted", () => {
+  const result = engine.check("Je ne comprends pas pas.");
+  assert.equal(result.status, "needs_review");
+  assert.equal(result.correction, null);
+  assert.equal(result.findings[0].ruleId, "WR-005");
+  assert.ok(result.findings[0].source.startsWith("https://"));
+});
 
 for (const input of noFlag) {
   check("no automatic correction: " + input, () => {
