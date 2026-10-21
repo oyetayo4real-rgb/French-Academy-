@@ -149,8 +149,8 @@
   ];
 
   const AMBIGUOUS_PATTERNS = [
-    { id: "SEM-001", pattern: /\bune\s+livre\b/iu, reason: "« Une livre » peut désigner une unité de poids. Le contexte ne permet pas de conclure qu’il faut écrire « un livre »." },
-    { id: "SEM-003", pattern: /\bje parle le français\b/iu, reason: "L’emploi de l’article peut dépendre de la construction et du contexte ; cette règle limitée ne doit pas imposer une correction automatique." }
+    { id: "SEM-001", pattern: /\bune\s+livre\b/iu, reason: "« Une livre » peut désigner une unité de poids ou, dans un autre contexte, être une confusion avec « un livre » (ouvrage). Il faut connaître le sens voulu.", alternatives: [{ interpretation: "unité de poids", correction: null, explanation: "Garder « une livre » si vous parlez d’une quantité de poids." }, { interpretation: "ouvrage", correction: text => text.replace(/\bune\s+livre\b/iu, "un livre"), explanation: "Employer « un livre » si vous parlez d’un ouvrage ; la suite de la phrase doit rester compatible avec ce sens." }] },
+    { id: "SEM-003", pattern: /\bje parle le français\b/iu, reason: "L’emploi de l’article peut dépendre de la construction et du contexte ; cette règle limitée ne doit pas imposer une correction automatique.", alternatives: [{ interpretation: "phrase acceptable dans son contexte", correction: null, explanation: "Ne rien changer sans contexte montrant une erreur." }, { interpretation: "formulation plus générale", correction: text => text.replace(/\ble français\b/iu, "français"), explanation: "« Je parle français » est également une formulation courante." }] }
   ];
 
   const ELISIONS = new Set(["j", "c", "ç", "d", "l", "m", "n", "s", "t", "qu", "jusqu", "lorsqu", "puisqu"]);
@@ -261,7 +261,8 @@
         return {
           status: "not_sure", input: text, correction: null, confidence: 0.42,
           findings: [{ ruleId: ambiguous.id, category: "meaning", severity: "context-dependent", message: ambiguous.reason, evidence: [] }],
-          alternatives: [], analysis,
+          alternatives: (ambiguous.alternatives || []).map((alternative) => ({ interpretation: alternative.interpretation, correction: typeof alternative.correction === "function" ? alternative.correction(text) : alternative.correction, explanation: alternative.explanation })),
+          analysis,
           reason: "The sentence may be valid under a plausible interpretation. Ask the writer what they mean before proposing a correction."
         };
       }
