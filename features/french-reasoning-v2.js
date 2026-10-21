@@ -242,7 +242,7 @@
       return { status: "not_sure", input: text, correction: null, confidence: 0, findings: [], alternatives: [], analysis: null, reason: "Provide a non-empty French sentence to analyze." };
     }
     const analysis = analyze(text);
-    const allerInfinitive = /(?<![\p{L}\p{N}_'’])(?:pour\s+que|afin\s+que|bien\s+que|avant\s+que)\s+(?:j['’]|je|tu|il|elle|nous|vous|ils|elles)\s+(?:vais|vas|va|allons|allez|vont)\s+([\p{L}]+)(?![\p{L}])/iu.exec(text);
+    const allerInfinitive = /(?<![\p{L}\p{N}_'’])(?:(?:pour|afin|bien|avant)\s+que\s+(?:j['’]|je|tu|il|elle|nous|vous|ils|elles)\s+|(?:pour|bien|avant|afin)\s+qu['’](?:il|elle|ils|elles)\s+)(?:vais|vas|va|allons|allez|vont)\s+([\p{L}]+)(?![\p{L}])/iu.exec(text);
     if (allerInfinitive && /(?:er|ir|re|oir)$/iu.test(allerInfinitive[1])) {
       return {
         status: "needs_review", input: text, correction: null, confidence: 0.91,
