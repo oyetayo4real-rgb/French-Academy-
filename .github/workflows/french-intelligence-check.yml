@@ -20,6 +20,9 @@ on:
       - feat/french-intelligence-engine
     paths:
       - "features/french-intelligence.js"
+      - "features/french-intelligence-core-v1.mjs"
+      - "features/french-intelligence-compat.mjs"
+      - "scripts/check-french-intelligence-core.mjs"
       - "index.html"
       - "sw.js"
       - "docs/french-intelligence-linguistic-matrix.md"
