@@ -68,7 +68,7 @@ const checks = [
   ["age rule does not flag plus-age comparison", !core.checkWriting("Je suis 5 ans plus âgé que mon frère.").includes("Suggested text")],
   ["age rule does not flag moins-age comparison", !core.checkWriting("Je suis 3 ans plus jeune que ma sœur.").includes("Suggested text")],
   ["age rule does not flag comparison after another subject", !core.checkWriting("Il a 20 ans et je suis 2 ans plus âgé.").includes("Suggested text")],
-  ["hyphen is a writing-pattern word boundary", core.checkWriting("x-Je suis 5 ans-y").includes("j'ai 5 ans")],
+  ["hyphenated tokens do not create writing-pattern boundaries", !core.checkWriting("x-Je suis 5 ans-y").includes("Suggested text")],
   ["son va-et-vient is a hard negative", !core.checkWriting("Son va-et-vient constant m'inquiète.").includes("Suggested text")],
   ["repeated adjacent pas pas is review-only in an independent sentence", core.checkWriting("Je ne veux pas pas partir.").includes("Grammar note") && !core.checkWriting("Je ne veux pas pas partir.").includes("Suggested text")],
   ["repeated adjacent pas pas is review-only at sentence start", core.checkWriting("Pas pas maintenant.").includes("Grammar note") && !core.checkWriting("Pas pas maintenant.").includes("Suggested text")],
