@@ -71,8 +71,10 @@ const doNotRewrite = [
 for (const input of doNotRewrite) {
   check("hard negative is not auto-corrected: " + input, () => {
     const result = engine.check(input);
-    assert.notEqual(result.status, "corrected");
+    assert.equal(result.status, "no_issue_detected");
     assert.equal(result.correction, null);
+    assert.deepEqual(result.findings, []);
+    assert.ok(result.analysis, "analysis should still be returned");
   });
 }
 
@@ -104,13 +106,34 @@ for (const input of grammarNotes) {
   });
 }
 
-check("repeated pas is review-only and preserves original text", () => {
-  const result = engine.check("Je ne comprends pas pas.");
-  assert.equal(result.status, "needs_review");
+for (const input of [
+  "Je ne comprends pas pas.",
+  "JE NE COMPRENDS PAS PAS !",
+  "Je   ne comprends pas pas."
+]) {
+  check("repeated pas is review-only and preserves exact input: " + input, () => {
+    const result = engine.check(input);
+    assert.equal(result.status, "needs_review");
+    assert.equal(result.correction, null);
+    assert.equal(result.input, input);
+    assert.equal(result.findings[0].ruleId, "WR-005");
+    assert.ok(result.findings[0].source.includes("dictionnaire-academie.fr"));
+  });
+}
+
+check("repeated-pas heuristic does not flag a comma-separated phrase outside its narrow pattern", () => {
+  const input = "Je ne comprends pas, pas aujourd'hui.";
+  const result = engine.check(input);
+  assert.equal(result.status, "no_issue_detected");
   assert.equal(result.correction, null);
-  assert.equal(result.input, "Je ne comprends pas pas.");
-  assert.equal(result.findings[0].ruleId, "WR-005");
-  assert.ok(result.findings[0].source.includes("dictionnaire-academie.fr"));
+  assert.deepEqual(result.findings, []);
+});
+
+check("every automatic rule exposes an HTTPS source", () => {
+  assert.ok(engine.rules.length > 0);
+  for (const rule of engine.rules) {
+    assert.ok(typeof rule.source === "string" && rule.source.startsWith("https://"), "missing source for " + rule.id);
+  }
 });
 
 check("source-backed corrections include a source URL", () => {
