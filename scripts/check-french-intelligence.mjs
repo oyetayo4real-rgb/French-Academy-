@@ -65,6 +65,15 @@ const checks = [
   ["subjunctive rule flags quoique + indicative avoir", core.checkWriting("Quoique tu as raison, je préfère vérifier.").includes("aies")],
   ["subjunctive rule with aller + infinitive gives a message and does not replace aller", core.checkWriting("Il parle lentement pour qu'il va comprendre.").includes("Grammar note") && core.checkWriting("Il parle lentement pour qu'il va comprendre.").includes("Rewrite using the infinitive verb's own subjunctive")],
   ["subjunctive rule with aller not followed by an infinitive suggests j'aille", core.checkWriting("Pour que je vais à Paris.").includes("j'aille à Paris")],
+  ["age rule does not flag plus-age comparison", !core.checkWriting("Je suis 5 ans plus âgé que mon frère.").includes("Suggested text")],
+  ["age rule does not flag moins-age comparison", !core.checkWriting("Je suis 3 ans plus jeune que ma sœur.").includes("Suggested text")],
+  ["age rule does not flag comparison after another subject", !core.checkWriting("Il a 20 ans et je suis 2 ans plus âgé.").includes("Suggested text")],
+  ["hyphen is a writing-pattern word boundary", core.checkWriting("x-Je suis 5 ans-y").includes("j'ai 5 ans")],
+  ["sa va-et-vient is a hard negative", !core.checkWriting("Sa va-et-vient constant m'inquiète.").includes("Suggested text")],
+  ["pas à pas is not flagged", !core.checkWriting("Pas à pas, nous avançons.").includes("Suggested text")],
+  ["repeated adjacent pas is review-only", core.checkWriting("Je ne comprends pas pas.").includes("Grammar note") && !core.checkWriting("Je ne comprends pas pas.").includes("Suggested text")],
+  ["age 5 known error is caught", core.checkWriting("Je suis 5 ans.").includes("j'ai 5 ans")],
+  ["age 12 known error is caught", core.checkWriting("Je suis 12 ans.").includes("j'ai 12 ans")],
   ["subjunctive rule flags afin que + indicative faire", core.checkWriting("Elle explique afin qu'elle fait le bon choix.").includes("fasse")],
   ["subjunctive rule flags avant que + indicative pouvoir", core.checkWriting("Partons avant que nous pouvons être en retard.").includes("puissions")],
   ["subjunctive rule flags à moins que + indicative savoir", core.checkWriting("Je viendrai à moins que vous savez autre chose.").includes("sachiez")],
@@ -231,6 +240,11 @@ const hardNegativeSentences = [
   "À mon avis, il a raison.",
   "Le train arrive à Lyon avec cinq minutes de retard.",
   "Il a donné son livre à sa collègue.",
+  "Je suis 5 ans plus âgé que mon frère.",
+  "Je suis 3 ans plus jeune que ma sœur.",
+  "Il a 20 ans et je suis 2 ans plus âgé.",
+  "Pas à pas, nous avançons.",
+  "Sa va-et-vient constant m'inquiète.",
   "C'est une excellente idée.",
   "C'est mon frère qui s'est occupé du repas.",
   "Elle s'est levée tôt.",
@@ -298,6 +312,16 @@ const knownErrors = [
     "expected": "j'ai 35 ans"
   },
   {
+    "rule": "age",
+    "sentence": "Je suis 5 ans.",
+    "expected": "j'ai 5 ans"
+  },
+  {
+    "rule": "age",
+    "sentence": "Je suis 12 ans.",
+    "expected": "j'ai 12 ans"
+  },
+  {
     "rule": "faim",
     "sentence": "Je suis faim.",
     "expected": "j'ai faim"
@@ -360,12 +384,14 @@ const knownErrors = [
   {
     "rule": "repeated pas",
     "sentence": "Je ne comprends pas pas.",
-    "expected": "je ne comprends pas"
+    "expected": "Repeated adjacent pas",
+    "messageOnly": true
   },
   {
     "rule": "repeated pas",
     "sentence": "Je ne comprends pas pas cette phrase.",
-    "expected": "je ne comprends pas"
+    "expected": "Repeated adjacent pas",
+    "messageOnly": true
   },
   {
     "rule": "bien que subjunctive",

@@ -299,6 +299,7 @@
     const subjunctiveTriggers = "(?:bien\\s+que|bien\\s+qu['’]|quoique|quoiqu['’]|pour\\s+que|pour\\s+qu['’]|afin\\s+que|afin\\s+qu['’]|avant\\s+que|avant\\s+qu['’]|à\\s+moins\\s+que|à\\s+moins\\s+qu['’]|jusqu['’]à\\s+ce\\s+que|jusqu['’]à\\s+ce\\s+qu['’]|sans\\s+que|sans\\s+qu['’])";
     const indicativeForms = [...new Set(subjunctiveVerbs.flatMap(v => v.indicative))].sort((a,b) => b.length-a.length).join("|");
     // Unicode-aware word boundaries; apostrophes remain part of French elisions.
+    // Hyphen is intentionally omitted from the blocked boundary class, so it separates words.
     const writingPattern = (source, flags = "gi") => new RegExp("(?<![\\p{L}\\p{N}_'’])(?:" + source + ")(?![\\p{L}\\p{N}_'’])", flags.includes("u") ? flags : flags + "u");
     const subjunctivePattern = new RegExp("(?<![\\p{L}\\p{N}_'’])(" + subjunctiveTriggers + ")\\s*(j['’]|je|tu|il|elle|nous|vous|ils|elles)\\s*(" + indicativeForms + ")(?![\\p{L}\\p{N}_'’])", "giu");
     const infinitiveIrregulars = new Set(["être","avoir","faire","aller","venir","tenir","prendre","mettre","dire","lire","écrire","boire","voir","pouvoir","vouloir","devoir","savoir","connaître","comprendre","apprendre","sortir","partir","dormir","ouvrir","offrir","recevoir","courir","vivre","suivre","naître","mourir","croire","rire","sourire"]);
@@ -320,17 +321,16 @@
       return match.slice(0, match.length - subject.length - verb.length - (elided ? 0 : 1)) + replacement;
     });
     const checks=[
-      [writingPattern("je suis (\\d+) ans"),(m,n)=>"j'ai "+n+" ans","French uses avoir for age."],
+      [writingPattern("je suis (\\d+) ans(?!\\s+(?:plus|moins)\\b)"),(m,n)=>"j'ai "+n+" ans","French uses avoir for age."],
       [writingPattern("je suis faim"),()=>"j'ai faim","French says avoir faim (to be hungry)."],
       [writingPattern("je suis soif"),()=>"j'ai soif","French says avoir soif (to be thirsty)."],
-      [writingPattern("je suis 20 ans"),()=>"j'ai 20 ans","French uses avoir for age."],
-      [writingPattern("sa va"),()=>"ça va","The expression is ça va, with ç."],
+      [writingPattern("sa va(?!-et-vient)"),()=>"ça va","The expression is ça va, with ç; preserve the compound va-et-vient."],
       [writingPattern("beacoup"),()=>"beaucoup","Spelling: beaucoup."],
       [writingPattern("bonjor"),()=>"bonjour","Spelling: bonjour."],
       [writingPattern("merçi"),()=>"merci","Merci is written without a cedilla."],
-      [writingPattern("je ne comprends pas pas"),()=>"je ne comprends pas","Avoid repeating pas in this standard negation."],
+      [writingPattern("je ne comprends pas pas"),null,"Repeated adjacent pas is flagged for review; no automatic correction.",true],
     ];
-    for(const [re,rep,why] of checks){if(re.test(corrected)){re.lastIndex=0;const before=corrected;corrected=corrected.replace(re,rep);suggestions.push({before,why});}}
+    for(const [re,rep,why,messageOnly=false] of checks){if(re.test(corrected)){re.lastIndex=0;const before=corrected;if(!messageOnly)corrected=corrected.replace(re,rep);suggestions.push({before,why,messageOnly});}}
     if(!suggestions.length)return `<div class="fi-answer"><b>Text received</b><p>${esc(q)}</p><p>No issue from the small built-in check list was detected. That does not prove the sentence is fully correct; this is not a full grammar checker.</p></div>`;
     const hasCorrection = suggestions.some(s => !s.messageOnly);
     const heading = hasCorrection ? "Suggested text" : "Grammar note";
