@@ -5,6 +5,9 @@ on:
   pull_request:
     paths:
       - "features/french-intelligence.js"
+      - "features/french-intelligence-core-v1.mjs"
+      - "features/french-intelligence-compat.mjs"
+      - "scripts/check-french-intelligence-core.mjs"
       - "index.html"
       - "sw.js"
       - "docs/french-intelligence-linguistic-matrix.md"
@@ -39,6 +42,10 @@ jobs:
           node-version: "22"
       - name: Check engine JavaScript syntax
         run: node --check features/french-intelligence.js
+      - name: Check pure core syntax
+        run: node --check features/french-intelligence-core-v1.mjs
+      - name: Check DOM-free core
+        run: node scripts/check-french-intelligence-core.mjs
       - name: Check engine integration contract
         run: node scripts/check-french-intelligence.mjs
       - name: Check legacy method characterization
