@@ -3,10 +3,10 @@
 
   const SOURCES = {
     bienQue: "https://www.academie-francaise.fr/laurence-d-france",
-    participle: "https://www.dictionnaire-academie.fr/article/QDL063",
+    participle: "https://www.academie-francaise.fr/questions-de-langue",
     faireInfinitive: "https://www.dictionnaire-academie.fr/article/DNP0145",
     punctuation: "https://www.dictionnaire-academie.fr/article/A9V0914",
-    subjunctivePurpose: "https://www.academie-francaise.fr/pour-pas-que-au-lieu-de-pour-que-ne-pas"
+    subjunctivePurpose: "https://www.dictionnaire-academie.fr/article/A9P3767"
   };
 
   const RULES = [
