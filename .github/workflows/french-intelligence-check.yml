@@ -20,6 +20,9 @@ on:
       - feat/french-intelligence-core-v1
     paths:
       - "features/french-intelligence.js"
+      - "features/french-intelligence-core-v1.js"
+      - "ARCHITECTURE.md"
+      - "scripts/check-french-intelligence-core-v1.cjs"
       - "index.html"
       - "sw.js"
       - "docs/french-intelligence-linguistic-matrix.md"
