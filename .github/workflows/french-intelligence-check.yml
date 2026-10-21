@@ -37,9 +37,13 @@ jobs:
         with:
           node-version: "22"
       - name: Check engine JavaScript syntax
-        run: node --check features/french-intelligence.js
+        run: |
+          node --check features/french-intelligence.js
+          node --check features/french-reasoning-v2.js
       - name: Check engine integration contract
-        run: node scripts/check-french-intelligence.mjs
+        run: |
+          node scripts/check-french-intelligence.mjs
+          node scripts/check-french-reasoning-v2.mjs
       - name: Install Playwright
         run: npm install --no-save playwright@1.56.1
       - name: Install Chromium
