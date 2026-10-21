@@ -104,6 +104,15 @@ for (const input of grammarNotes) {
   });
 }
 
+check("repeated pas is review-only and preserves original text", () => {
+  const result = engine.check("Je ne comprends pas pas.");
+  assert.equal(result.status, "needs_review");
+  assert.equal(result.correction, null);
+  assert.equal(result.input, "Je ne comprends pas pas.");
+  assert.equal(result.findings[0].ruleId, "WR-005");
+  assert.ok(result.findings[0].source.includes("dictionnaire-academie.fr"));
+});
+
 check("source-backed corrections include a source URL", () => {
   for (const [input, ruleId] of [
     ["Beacoup de gens arrivent.", "SP-002"],
