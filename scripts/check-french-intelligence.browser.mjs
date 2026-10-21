@@ -69,6 +69,28 @@ try {
     }
     await page.locator("#hfrenchint").first().click();
     await page.getByRole("heading", { name: /French Intelligence/ }).waitFor();
+    await page.waitForFunction(() => {
+      const api = window.FrenchIntelligenceCore;
+      return api && ["lookup", "translate", "conjugate", "answerQuestion", "checkWriting"].every(name => typeof api[name] === "function");
+    });
+    const runtimeContract = await page.evaluate(() => {
+      const api = window.FrenchIntelligenceCore;
+      return {
+        names: Object.keys(api).sort(),
+        lookup: api.lookup("bonjour"),
+        translate: api.translate("Thank you", "en-fr"),
+        conjugate: api.conjugate("être"),
+        answerQuestion: api.answerQuestion(""),
+        checkWriting: api.checkWriting("")
+      };
+    });
+    assert.deepEqual(runtimeContract.names, ["answerQuestion", "checkWriting", "conjugate", "lookup", "translate"]);
+    assert.equal(runtimeContract.lookup.word, "bonjour", "runtime adapter exposes structured lookup results");
+    assert.match(runtimeContract.translate, /Known phrasebook match/, "runtime adapter preserves HTML-string translation output");
+    assert.deepEqual(runtimeContract.conjugate.forms, ["suis", "es", "est", "sommes", "êtes", "sont"]);
+    assert.equal(runtimeContract.answerQuestion, "Type a question first.");
+    assert.match(runtimeContract.checkWriting, /Text received/);
+    console.log(`PASS ${profile.name}: runtime compatibility adapter exposes all five legacy methods and preserves representative return shapes`);
     assert.match(await page.locator(".fi-note").first().innerText(), /do not call Gemini|do not require an AI API key/i);
 
     const cases = [
@@ -198,7 +220,9 @@ try {
     const required = [
       "/index.html",
       "/features/french-intelligence.js?v=20261020-2",
-      "/features/ai-classroom.js?v=20261017-2"
+      "/features/ai-classroom.js?v=20261017-2",
+      "/features/french-intelligence-compat.mjs",
+      "/features/french-intelligence-core-v1.mjs"
     ];
     for (const path of required) {
       if (!await cache.match(new URL(path, location.origin).href)) throw new Error("Required offline cache entry missing: " + path);
