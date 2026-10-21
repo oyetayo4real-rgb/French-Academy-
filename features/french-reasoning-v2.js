@@ -3,6 +3,9 @@
 
   const SOURCES = {
     bienQue: "https://www.academie-francaise.fr/laurence-d-france",
+    merci: "https://www.dictionnaire-academie.fr/article/A9M1766",
+    bonjour: "https://www.dictionnaire-academie.fr/article/A9B1554",
+    age: "https://www.dictionnaire-academie.fr/article/QR_0319",
     participle: "https://www.academie-francaise.fr/questions-de-langue",
     faireInfinitive: "https://www.dictionnaire-academie.fr/article/DNP0145",
     punctuation: "https://www.dictionnaire-academie.fr/article/A9V0914",
@@ -16,7 +19,7 @@
       replace: (s) => s.replace(/merçi/giu, (m) => matchCase(m, "merci")),
       explanation: "« Merci » s’écrit sans cédille.",
       example: { incorrect: "Merçi beaucoup.", correct: "Merci beaucoup." },
-      source: null
+      source: SOURCES.merci
     },
     {
       id: "SP-002", category: "spelling", confidence: 0.99,
@@ -40,7 +43,7 @@
       replace: (s) => s.replace(/bonjor/giu, (m) => matchCase(m, "bonjour")),
       explanation: "L’orthographe standard est « bonjour ».",
       example: { incorrect: "Bonjor, madame.", correct: "Bonjour, madame." },
-      source: null
+      source: SOURCES.bonjour
     },
     {
       id: "WR-001", category: "usage", confidence: 0.99,
@@ -48,7 +51,7 @@
       replace: (s) => s.replace(/(?<![\p{L}\p{N}_'’])je\s+suis\s+(\d+)\s+ans(?![\p{L}\p{N}_'’])/giu, (m, n) => matchCase(m, "j'ai " + n + " ans")),
       explanation: "En français, on exprime l’âge avec « avoir » : « j’ai vingt ans ».",
       example: { incorrect: "Je suis 20 ans.", correct: "J'ai 20 ans." },
-      source: null
+      source: SOURCES.age
     },
     {
       id: "WR-002", category: "usage", confidence: 0.99,
