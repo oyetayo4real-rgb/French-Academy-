@@ -6,6 +6,7 @@
   "use strict";
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const writingPattern = (source, flags = "gi") => new RegExp("(?<![\\p{L}\\p{N}_'’\\-])(?:" + source + ")(?![\\p{L}\\p{N}_'’\\-])", flags.includes("u") ? flags : flags + "u");
   const dictionary = {
     bonjour:["hello; good morning","interjection","Bonjour, comment allez-vous ?","A standard greeting; use bonsoir in the evening."],
     bonsoir:["good evening","interjection","Bonsoir, madame.","Used as a greeting in the evening."],
@@ -300,7 +301,6 @@
     const indicativeForms = [...new Set(subjunctiveVerbs.flatMap(v => v.indicative))].sort((a,b) => b.length-a.length).join("|");
     // Unicode-aware word boundaries; apostrophes remain part of French elisions.
     // Hyphen is intentionally omitted from the blocked boundary class, so it separates words.
-    const writingPattern = (source, flags = "gi") => new RegExp("(?<![\\p{L}\\p{N}_'’])(?:" + source + ")(?![\\p{L}\\p{N}_'’])", flags.includes("u") ? flags : flags + "u");
     const subjunctivePattern = new RegExp("(?<![\\p{L}\\p{N}_'’])(" + subjunctiveTriggers + ")\\s*(j['’]|je|tu|il|elle|nous|vous|ils|elles)\\s*(" + indicativeForms + ")(?![\\p{L}\\p{N}_'’])", "giu");
     const infinitiveIrregulars = new Set(["être","avoir","faire","aller","venir","tenir","prendre","mettre","dire","lire","écrire","boire","voir","pouvoir","vouloir","devoir","savoir","connaître","comprendre","apprendre","sortir","partir","dormir","ouvrir","offrir","recevoir","courir","vivre","suivre","naître","mourir","croire","rire","sourire"]);
     const isInfinitive = word => /(?:er|ir|re|oir)$/iu.test(word) || infinitiveIrregulars.has(word.toLocaleLowerCase("fr"));
@@ -324,11 +324,11 @@
       [writingPattern("je suis (\\d+) ans(?!\\s+(?:plus|moins)\\b)"),(m,n)=>"j'ai "+n+" ans","French uses avoir for age."],
       [writingPattern("je suis faim"),()=>"j'ai faim","French says avoir faim (to be hungry)."],
       [writingPattern("je suis soif"),()=>"j'ai soif","French says avoir soif (to be thirsty)."],
-      [writingPattern("sa va(?!-et-vient)"),()=>"ça va","The expression is ça va, with ç; preserve the compound va-et-vient."],
+      [writingPattern("sa va"),()=>"ça va","The expression is ça va, with ç; preserve the compound va-et-vient."],
       [writingPattern("beacoup"),()=>"beaucoup","Spelling: beaucoup."],
       [writingPattern("bonjor"),()=>"bonjour","Spelling: bonjour."],
       [writingPattern("merçi"),()=>"merci","Merci is written without a cedilla."],
-      [writingPattern("je ne comprends pas pas"),null,"Repeated adjacent pas is flagged for review; no automatic correction.",true],
+      [writingPattern("pas\\s+pas"),null,"Repeated adjacent pas is flagged for review; no automatic correction.",true],
     ];
     for(const [re,rep,why,messageOnly=false] of checks){if(re.test(corrected)){re.lastIndex=0;const before=corrected;if(!messageOnly)corrected=corrected.replace(re,rep);suggestions.push({before,why,messageOnly});}}
     if(!suggestions.length)return `<div class="fi-answer"><b>Text received</b><p>${esc(q)}</p><p>No issue from the small built-in check list was detected. That does not prove the sentence is fully correct; this is not a full grammar checker.</p></div>`;
