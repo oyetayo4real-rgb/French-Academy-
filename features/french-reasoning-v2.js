@@ -78,14 +78,6 @@
       source: "https://www.dictionnaire-academie.fr/article/A9C0002"
     },
     {
-      id: "WR-005", category: "syntax", confidence: 0.98,
-      pattern: /(?<![\p{L}\p{N}_'’])je\s+ne\s+comprends\s+pas\s+pas(?![\p{L}\p{N}_'’])/giu,
-      replace: (s) => s.replace(/(?<![\p{L}\p{N}_'’])je\s+ne\s+comprends\s+pas\s+pas(?![\p{L}\p{N}_'’])/giu, (m) => matchCase(m, "je ne comprends pas")),
-      explanation: "Dans la négation standard de cette phrase, un seul « pas » suffit.",
-      example: { incorrect: "Je ne comprends pas pas.", correct: "Je ne comprends pas." },
-      source: null
-    },
-    {
       id: "GR-001", category: "conjugation", confidence: 0.99,
       pattern: /(?<![\p{L}\p{N}_'’])bien\s+qu['’]il\s+a(?![\p{L}\p{N}_'’])/iu,
       replace: (s) => s.replace(/(bien\s+qu['’]il\s+)a(?![\p{L}\p{N}_'’])/iu, "$1ait"),
@@ -245,6 +237,20 @@
       return { status: "not_sure", input: text, correction: null, confidence: 0, findings: [], alternatives: [], analysis: null, reason: "Provide a non-empty French sentence to analyze." };
     }
     const analysis = analyze(text);
+    const repeatedPas = /(?<![\\p{L}\\p{N}_'’])je\\s+ne\\s+comprends\\s+pas\\s+pas(?![\\p{L}\\p{N}_'’])/iu.exec(text);
+    if (repeatedPas) {
+      return {
+        status: "needs_review", input: text, correction: null, confidence: 0.68,
+        findings: [{
+          ruleId: "WR-005", category: "syntax", severity: "possible-duplicate",
+          message: "Cette phrase contient deux occurrences successives de « pas ». La négation standard se construit avec « ne… pas », mais vérifiez le contexte avant de supprimer un mot.",
+          explanation: "Une répétition peut être une faute de frappe, une hésitation ou un effet de discours. Le moteur ne supprime donc pas automatiquement le second « pas ».",
+          source: "https://www.dictionnaire-academie.fr/article/A9P0804", confidence: 0.68
+        }],
+        alternatives: [], analysis,
+        reason: "A possible repeated word needs contextual review; no automatic deletion is applied."
+      };
+    }
     const allerInfinitive = /(?<![\p{L}\p{N}_'’])(?:(?:pour|afin|bien|avant)\s+que\s+(?:j['’]|je|tu|il|elle|nous|vous|ils|elles)\s+|(?:pour|bien|avant|afin)\s+qu['’](?:il|elle|ils|elles)\s+)(?:vais|vas|va|allons|allez|vont)\s+([\p{L}]+)(?![\p{L}])/iu.exec(text);
     if (allerInfinitive && /(?:er|ir|re|oir)$/iu.test(allerInfinitive[1])) {
       return {
