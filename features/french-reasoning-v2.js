@@ -237,7 +237,7 @@
       return { status: "not_sure", input: text, correction: null, confidence: 0, findings: [], alternatives: [], analysis: null, reason: "Provide a non-empty French sentence to analyze." };
     }
     const analysis = analyze(text);
-    const repeatedPas = /(?<![\\p{L}\\p{N}_'’])je\\s+ne\\s+comprends\\s+pas\\s+pas(?![\\p{L}\\p{N}_'’])/iu.exec(text);
+    const repeatedPas = /(?<![\p{L}\p{N}_'’])je\s+ne\s+comprends\s+pas\s+pas(?![\p{L}\p{N}_'’])/iu.exec(text);
     if (repeatedPas) {
       return {
         status: "needs_review", input: text, correction: null, confidence: 0.68,
