@@ -39,11 +39,49 @@ input.inp,select.inp{width:100%;font:inherit;padding:11px;margin:6px 0;border-ra
 .top{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0}.top2{display:flex;gap:6px;margin-bottom:6px}.top2 button{padding:6px 10px;font-size:14px}
 .pill{background:var(--ac);color:#fff;border-radius:99px;padding:2px 8px;font-size:12px}.asg{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bd);cursor:pointer}.err{color:var(--bad);font-size:14px;min-height:18px}
 .vgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px}.vt{position:relative;background:#000;border-radius:10px;overflow:hidden;aspect-ratio:4/3}.vt video{width:100%;height:100%;object-fit:cover}.vl{position:absolute;left:6px;bottom:4px;color:#fff;font-size:12px;text-shadow:0 0 3px #000}
-.lhero{background:linear-gradient(160deg,#1d4ed8,#4f46e5 62%,#7c3aed);color:#fff;border-radius:22px;padding:26px 18px 20px;text-align:center;margin-top:6px}.lhero h1{font:700 34px Georgia,serif;margin:4px 0 2px}.lsub{font-size:17px;opacity:.95;margin:6px 8px 14px}.lflag{display:flex;height:6px;border-radius:6px;overflow:hidden;max-width:140px;margin:0 auto 12px}.lflag i{flex:1}.lflag i:nth-child(1){background:#fff}.lflag i:nth-child(2){background:#f7f5f0;opacity:.8}.lflag i:nth-child(3){background:#ef4444}
-.lbtn{display:block;width:100%;padding:15px;font-size:17px;border-radius:14px;margin:10px 0;font-weight:600}.lbtn.w{background:#fff;color:#1d4ed8}.lbtn.lo{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.7)}.lnote{font-size:13px;opacity:.9}
-.lh{margin:22px 0 8px;font:700 21px Georgia,serif}.lsteps{display:grid;gap:10px}.lst{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px}.lst span{flex:none;width:32px;height:32px;border-radius:50%;background:var(--ac);color:#fff;display:grid;place-items:center;font-weight:700}
-.lfeat{display:grid;grid-template-columns:1fr 1fr;gap:10px}.lf{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px 10px;text-align:center}.lf .e{font-size:30px}.lf b{display:block;margin:2px 0}.lf .mu{font-size:13px}
-.lroad{display:flex;gap:8px;overflow-x:auto;padding:8px 0}.lr{flex:none;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:10px 14px;text-align:center;min-width:104px}.lr b{display:block;font-size:22px;color:var(--ac)}
+/* Landing and onboarding — aligned with the approved French Academy visual */
+#app:has(.lhero){background:#faf7f0;color:#101a31;min-height:100vh;padding:0 0 24px}
+.lhero{position:relative;isolation:isolate;overflow:hidden;background:#091226;color:#fff;border-radius:0;padding:30px 20px 0;text-align:left;margin:0 -1px 0;min-height:610px}
+.lhero:before,.lhero:after{content:"";position:absolute;z-index:-1;border-radius:50%;pointer-events:none}
+.lhero:before{width:210px;height:210px;right:-48px;top:30px;background:#2348e5}
+.lhero:after{width:122px;height:122px;right:-12px;top:69px;background:#4c6cff}
+.lhero .lflag{display:flex;height:30px;width:74px;border-radius:30px;overflow:hidden;max-width:none;margin:0 0 25px;background:#fff;align-items:center;justify-content:center;gap:14px}
+.lhero .lflag i{flex:none;width:14px;height:10px;background:#244ce8}.lhero .lflag i:nth-child(2){background:#e52b38}.lhero .lflag i:nth-child(3){display:none}
+.lhero .hero-kicker{font-size:11px;color:#b7c7ff;text-transform:uppercase;font-weight:850;margin:0 0 15px}
+.lhero h1{font:800 39px/1.12 Inter,ui-sans-serif,system-ui,sans-serif;letter-spacing:-.045em;margin:0 0 14px;max-width:420px;color:#fff}
+.lhero .lsub{font-size:14px;line-height:1.45;color:#cbd3e4;opacity:1;margin:0 0 28px;max-width:440px}
+.lbtn{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;max-width:420px;min-height:53px;padding:0 14px;font-size:14px;border-radius:14px;margin:10px 0;font-weight:750;border:0;cursor:pointer;transition:transform .18s,background .18s}
+.lbtn:hover{transform:translateY(-1px)}.lbtn.w{background:#4b69ff;color:#fff}.lbtn.lo{background:transparent;color:#fff;border:1px solid #65708b;justify-content:center}
+.lhero .lnote{font-size:9px;line-height:1.5;color:#cbd4e9;opacity:1;margin:12px 0 0 5px;max-width:420px}
+.onboard-preview-wrap{position:relative;z-index:2;width:min(100%,440px);margin:31px auto -36px;padding:0 15px;perspective:1100px;touch-action:pan-y}
+.onboard-tilt{position:relative;transform-style:preserve-3d;transform:rotateX(0deg) rotateY(0deg);transition:transform .16s ease-out;will-change:transform;cursor:grab;outline:none}
+.onboard-tilt:active{cursor:grabbing}.onboard-tilt:focus-visible{outline:3px solid #ffca66;outline-offset:5px;border-radius:24px}
+.onboard-card{position:relative;background:#fff;color:#101a31;border:1px solid #d2defa;border-radius:23px;padding:0 11px 12px;min-height:222px;box-shadow:0 18px 44px #03091a30;transform:translateZ(24px)}
+.onboard-card-head{height:38px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #edf0f8;font-size:10px;font-weight:750}
+.onboard-mark{width:32px;height:32px;border-radius:8px;background:#244ce8;color:white;display:grid;place-items:center;font-weight:850;font-size:20px;position:relative}
+.onboard-mark:after{content:"";position:absolute;bottom:-4px;left:0;width:32px;height:3px;background:linear-gradient(90deg,#244ce8 0 50%,#ed3348 50%)}
+.onboard-streak{position:absolute;right:-12px;top:25px;z-index:3;background:#fff;color:#66738e;padding:10px 13px;border-radius:17px;box-shadow:0 8px 18px #0b153022;font-size:10px;transform:translateZ(40px) rotate(-5deg)}
+.onboard-streak b{display:block;color:#101a31;font-size:13px;margin-bottom:2px}
+.onboard-greeting{font-size:17px;font-weight:850;letter-spacing:-.035em;margin:8px 3px 0}.onboard-caption{font-size:9px;color:#74809a;margin:0 3px 11px}
+.onboard-next{background:#e6edff;border-radius:13px;padding:10px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.onboard-next small{display:block;color:#244ce8;font-size:8px;font-weight:850;margin-bottom:4px}.onboard-next strong{font-size:12px}.onboard-next p{margin:3px 0 0;font-size:9px;color:#71809b}
+.onboard-arrow{width:35px;height:35px;flex:none;display:grid;place-items:center;border-radius:50%;background:#244ce8;color:white;font-size:21px}
+.onboard-tools{display:flex;gap:16px;justify-content:space-between;padding:19px 12px 0;max-width:145px}.onboard-tool{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;font-size:16px;font-weight:800}.onboard-tool.mint{background:#c9f0dc}.onboard-tool.lilac{background:#eee4ff}
+.tilt-hint{text-align:center;font-size:10px;color:#7b879d;margin:44px 0 0}
+.lh{margin:28px 0 8px;font:800 29px/1.18 Inter,ui-sans-serif,system-ui,sans-serif;letter-spacing:-.04em;color:#101a31}
+.lsteps{display:grid;gap:12px}.lst{display:flex;gap:12px;align-items:flex-start;background:#fff;color:#101a31;border:0;border-radius:18px;padding:17px 16px;box-shadow:none}
+.lst span{flex:none;width:46px;height:46px;border-radius:14px;background:#e5ecff;color:#244ce8;display:grid;place-items:center;font-weight:850;font-size:17px}
+.lst b{display:block;font-size:15px;margin:3px 0 7px}.lst .mu{font-size:12px;line-height:1.45;color:#63708a}
+.lfeat{display:grid;grid-template-columns:1fr;gap:12px}.lf{background:#fff;color:#101a31;border:0;border-radius:18px;padding:18px 16px;text-align:left;box-shadow:none}.lf .e{font-size:26px;margin-bottom:8px}.lf b{display:block;margin:2px 0 7px;font-size:15px}.lf .mu{font-size:12px;line-height:1.45;color:#63708a}
+.lroad{display:flex;gap:8px;overflow-x:auto;padding:8px 0}.lr{flex:none;background:#fff;color:#101a31;border:0;border-radius:14px;padding:12px 14px;text-align:center;min-width:104px}.lr b{display:block;font-size:22px;color:#244ce8}
+#app>.lh,#app>.lsteps,#app>.lfeat,#app>.lroad,#app>details,#app>.mu{margin-left:20px;margin-right:20px}
+#app>.lh{margin-top:60px}#app>.lh:first-of-type{margin-top:67px}
+#app>details.card{background:#fff;color:#101a31;border:0;border-radius:14px;padding:15px;margin-top:10px}
+#app .lhero+.lh{margin-top:66px}
+@media(min-width:700px){.lhero{padding:58px max(32px,calc((100% - 1080px)/2)) 0;min-height:650px;display:grid;grid-template-columns:1fr .9fr;column-gap:30px;align-items:center}.lhero:before{width:370px;height:370px;right:8%;top:100px}.lhero:after{width:215px;height:215px;right:calc(8% + 78px);top:178px}.lhero .hero-copy{padding-bottom:55px}.lhero h1{font-size:clamp(46px,5vw,64px)}.lhero .lsub{font-size:16px}.onboard-preview-wrap{width:100%;max-width:440px;margin:0 auto 55px}.onboard-card{min-height:255px;padding:0 14px 15px}.onboard-tools{max-width:100%;gap:0}.lhero .lbtn{max-width:420px}.lhero .lnote{font-size:10px}.lfeat{grid-template-columns:repeat(3,minmax(0,1fr))}.lf{min-height:180px;padding:22px}.lf b{font-size:16px}.lf .mu{font-size:13px}.lsteps{grid-template-columns:repeat(3,minmax(0,1fr));margin-left:20px;margin-right:20px}.lst{flex-direction:column}.lh{font-size:38px}.tilt-hint{margin-top:56px}}
+@media(max-width:699px){.lhero{min-height:0;padding-top:30px;padding-bottom:0}.lhero h1{font-size:38px}.onboard-preview-wrap{margin-top:31px}.lh{font-size:29px}.lhero .lbtn{max-width:none}.lhero .lbtn.lo{margin-top:10px}.lhero .lbtn.w:after{content:"↗";margin-left:auto}.lfeat{grid-template-columns:1fr}#app>.lh{margin-top:55px}}
+@media(max-width:360px){.lhero h1{font-size:34px}.lhero{padding-left:18px;padding-right:18px}.onboard-preview-wrap{padding:0 8px}}
+@media(prefers-reduced-motion:reduce){.onboard-tilt,.lbtn{transition:none!important}}
 .big{font-size:42px;font-weight:700;text-align:center}
 </style></head><body><header></header>
 <div class="w" id="app"></div>
@@ -791,25 +829,58 @@ const isStandalone=()=>{try{return matchMedia("(display-mode: standalone)").matc
 const installCard=()=>isStandalone()?"":`<div class="card"><b>📲 Install on your home screen</b><div class="mu">Opens like a normal app with no browser bar, and keeps working offline.</div>${deferred?`<button id="tinst2" style="width:100%;margin-top:8px">Install app</button>`:`<div class="mu" style="margin-top:6px;line-height:1.5"><b>Android (Chrome):</b> tap ⋮ then <b>Install app</b> (not “Add shortcut”). <b>iPhone (Safari):</b> tap Share, then <b>Add to Home Screen</b>.</div>`}</div>`;
 /* ===================== LANDING PAGE ===================== */
 function landingView(){const nL=L.reduce((n,l)=>n+LS(l).length,0),nV=V.length;
-  const feat=[["🎬","Lessons you can hear","Short, friendly lessons with the French voice, subtitles and English translation."],["🗣️","Speaking lab","Say it out loud, hear yourself, and see which words you got right."],["🔤",nV+" verbs","Conjugate in six tenses with audio, then practise with quick drills."],["🃏","Flashcards","Words come back just before you forget them."],["🎓","Level exams","Pass the tests to unlock each level, from A1 to C2."],["👩‍🏫","Live classes","Join your lecturer's class, hear their voice and watch recordings."]];
-  $.innerHTML=`<div class="lhero"><div class="lflag"><i></i><i></i><i></i></div><div style="font-size:54px;line-height:1.1">🥐🗼</div><h1>Bienvenue !</h1><p class="lsub">Learn French step by step, at your own pace, right on your phone.</p>
-  <button class="lbtn w" id="lgo">Start learning</button><button class="lbtn lo" id="lin">Sign in / Create account</button><div class="lnote">No account needed to try. Make one later to save your progress on every phone.</div></div>
-  <h2 class="lh">How it works</h2>
-  <div class="lsteps"><div class="lst"><span>1</span><div><b>Watch &amp; listen</b><div class="mu">Each lesson shows the French, says it for you, and translates it into English.</div></div></div><div class="lst"><span>2</span><div><b>Practise a little every day</b><div class="mu">Flashcards, verbs and speaking practice, just a few minutes at a time.</div></div></div><div class="lst"><span>3</span><div><b>Prove what you learned</b><div class="mu">Short tests unlock the next lesson. Level exams unlock the next level.</div></div></div></div>
-  <h2 class="lh">Everything in one place</h2><div class="lfeat">${feat.map(f=>`<div class="lf"><div class="e">${f[0]}</div><b>${esc(f[1])}</b><div class="mu">${esc(f[2])}</div></div>`).join("")}</div>
+  const feat=[["01","A clear learning path","CEFR-aligned lessons with goals, milestones, and a next step that always makes sense."],["✦","An AI tutor that teaches","Ask questions, practise conversations, and understand why a correction works."],["Aa","Understand every word","French meanings, real usage, grammar notes, and English translations in one place."],["🎙️","Speaking lab","Practise pronunciation and build confidence one conversation at a time."],["🃏","Flashcards & mistakes","Review vocabulary and learn from your mistakes in focused sessions."],["🎓","Learn with your class","Keep classroom and live-learning tools together in your academy."]];
+  $.innerHTML=`<div class="lhero">
+    <div class="hero-copy">
+      <div class="lflag" aria-label="French flag motif"><i></i><i></i><i></i></div>
+      <p class="hero-kicker">French, made personal.</p>
+      <h1>Speak French<br>with confidence.</h1>
+      <p class="lsub">A clear path from your first bonjour to real conversations—with guided lessons, an AI tutor, and a dictionary that makes French click.</p>
+      <button class="lbtn w" id="lgo">Start your learning journey <span aria-hidden="true">↗</span></button>
+      <button class="lbtn lo" id="lin">Sign in / Create account</button>
+      <div class="lnote">CEFR A1–C2 · LEARN AT YOUR OWN PACE</div>
+    </div>
+    <div class="onboard-preview-wrap" id="onboardPreviewWrap">
+      <div class="onboard-tilt" id="onboardTilt" tabindex="0" role="group" aria-label="Movable 3D preview of the French Academy learning dashboard. Move your pointer or swipe to tilt. Press arrow keys to rotate.">
+        <div class="onboard-streak"><b>✦ 3 jours</b>Votre rythme</div>
+        <div class="onboard-card">
+          <div class="onboard-card-head"><span class="onboard-mark">F</span><span>Mon espace</span></div>
+          <div class="onboard-greeting">Bonjour, Alex ! ✨</div><p class="onboard-caption">On progresse un peu aujourd'hui ?</p>
+          <div class="onboard-next"><div><small>VOTRE PROCHAINE LEÇON</small><strong>Les conversations</strong><p>A1 · 8 minutes</p></div><span class="onboard-arrow" aria-hidden="true">→</span></div>
+          <div class="onboard-tools"><span class="onboard-tool mint" aria-hidden="true">✦</span><span class="onboard-tool lilac" aria-hidden="true">Aa</span></div>
+        </div>
+      </div>
+      <p class="tilt-hint">↔ Move your finger or pointer to explore the 3D preview</p>
+    </div>
+  </div>
+  <h2 class="lh">Your next step, made clear.</h2>
+  <h2 class="lh" style="margin-top:0">One platform.<br>Three ways to grow.</h2>
+  <p class="mu" style="margin-top:0">Every tool is designed to help you understand, practise, and remember.</p>
+  <div class="lfeat">${feat.slice(0,3).map(f=>`<div class="lf"><div class="e">${f[0]}</div><b>${esc(f[1])}</b><div class="mu">${esc(f[2])}</div></div>`).join("")}</div>
+  <h2 class="lh">More ways to make progress</h2>
+  <div class="lfeat">${feat.slice(3).map(f=>`<div class="lf"><div class="e">${f[0]}</div><b>${esc(f[1])}</b><div class="mu">${esc(f[2])}</div></div>`).join("")}</div>
   <h2 class="lh">Your path, A1 to C2</h2><div class="mu">${nL} lessons across six levels, following the European CEFR scale used by French diplomas.</div>
   <div class="lroad">${L.map(l=>`<div class="lr"><b>${l.id}</b><div>${esc(l.name)}</div><div class="mu">${LS(l).length} lessons</div></div>`).join("")}</div>
   <h2 class="lh">Students and lecturers</h2>
   <div class="lfeat"><div class="lf"><div class="e">🎓</div><b>Students</b><div class="mu">Join your class with a code from your lecturer and track your scores.</div></div><div class="lf"><div class="e">📊</div><b>Lecturers</b><div class="mu">Create classes, set assignments, see scores and record your own voice for the lessons.</div></div></div>
   <h2 class="lh">Good to know</h2>
-  <details class="card"><summary><b>Can I try it without signing up?</b></summary><div class="mu" style="margin-top:6px">Yes. Tap “Start learning”. Your progress is saved on this phone until you create an account.</div></details>
+  <details class="card"><summary><b>Can I try it without signing up?</b></summary><div class="mu" style="margin-top:6px">Yes. Tap “Start your learning journey”. Your progress is saved on this phone until you create an account.</div></details>
   <details class="card"><summary><b>Does it work offline?</b></summary><div class="mu" style="margin-top:6px">Install it on your home screen and the lessons keep working without internet. Exams and live classes need a connection.</div></details>
   <details class="card"><summary><b>I cannot hear the French</b></summary><div class="mu" style="margin-top:6px">Turn up your media volume, then open “Sound check” on the home screen. It tests your phone voice and an online voice and tells you what to do.</div></details>
   <details class="card"><summary><b>Is the certificate official?</b></summary><div class="mu" style="margin-top:6px">No. It is a practice certificate that shows what you achieved here. Official DELF/DALF diplomas are taken at an approved centre.</div></details>
-  <div style="text-align:center;margin:18px 0"><button class="lbtn" id="lgo2" style="max-width:420px;margin:0 auto">Commencer ! · Let's start</button><p class="mu"><a id="lpv" style="color:var(--ac);cursor:pointer">Privacy &amp; terms</a></p></div>`;
+  <div style="text-align:center;margin:22px 20px"><button class="lbtn w" id="lgo2" style="max-width:420px;margin:0 auto;justify-content:center">Commencer ! · Let's start ↗</button><p class="mu"><a id="lpv" style="color:#244ce8;cursor:pointer">Privacy &amp; terms</a></p></div>`;
   const go=()=>{try{localStorage.setItem("fa_guest","1");localStorage.setItem("fa_seen","1")}catch(e){}view="home";render()};
-  el("lgo").onclick=go;el("lgo2").onclick=go;el("lin").onclick=()=>{try{localStorage.setItem("fa_seen","1")}catch(e){}view="auth";render()};el("lpv").onclick=()=>{view="privacy";render()}}
-
+  el("lgo").onclick=go;el("lgo2").onclick=go;el("lin").onclick=()=>{try{localStorage.setItem("fa_seen","1")}catch(e){}view="auth";render()};el("lpv").onclick=()=>{view="privacy";render()};
+  const card=el("onboardTilt"),wrap=el("onboardPreviewWrap");if(card&&wrap){
+    let rect=null,active=false;
+    const reset=()=>{card.style.transform="rotateX(0deg) rotateY(0deg)";};
+    const tilt=(clientX,clientY)=>{rect=wrap.getBoundingClientRect();const x=(clientX-rect.left)/rect.width-.5,y=(clientY-rect.top)/rect.height-.5;card.style.transform="rotateX("+(-y*13).toFixed(2)+"deg) rotateY("+(x*15).toFixed(2)+"deg)";};
+    wrap.addEventListener("pointermove",e=>{if(e.pointerType==="mouse"||active)tilt(e.clientX,e.clientY)});
+    wrap.addEventListener("pointerdown",e=>{if(e.pointerType!=="mouse"){active=true;wrap.setPointerCapture?.(e.pointerId);tilt(e.clientX,e.clientY)}});
+    wrap.addEventListener("pointerup",()=>{active=false;reset()});wrap.addEventListener("pointercancel",()=>{active=false;reset()});wrap.addEventListener("pointerleave",()=>{active=false;reset()});
+    card.addEventListener("keydown",e=>{let x=0,y=0;if(e.key==="ArrowLeft")y=-10;else if(e.key==="ArrowRight")y=10;else if(e.key==="ArrowUp")x=8;else if(e.key==="ArrowDown")x=-8;else if(e.key==="Home"){reset();return}else return;e.preventDefault();card.style.transform="rotateX("+x+"deg) rotateY("+y+"deg)"});
+  }
+}
 /* ===================== BOOT ===================== */
 async function refreshAll(){try{const p=await api("/rest/v1/profiles?id=eq."+AUTH.user.id+"&select=*");if(p[0]){PROF=p[0];store("fa_prof",PROF)}}catch(e){}
   await pullState();await Promise.all([loadClips(),loadMine()]);dirty=true;syncNow()}
