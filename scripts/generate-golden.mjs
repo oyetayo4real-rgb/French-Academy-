@@ -244,6 +244,10 @@ function main() {
     }
   };
   const jsonText = JSON.stringify(payload, null, 2) + "\n";
+  if (process.argv.includes("--stdout")) {
+    process.stdout.write(jsonText);
+    return;
+  }
   mkdirSync(dirname(OUTPUT_PATH), { recursive: true });
   writeFileSync(OUTPUT_PATH, jsonText, "utf8");
   const digest = createHash("sha256").update(jsonText, "utf8").digest("hex");

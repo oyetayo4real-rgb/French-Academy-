@@ -8,6 +8,9 @@ on:
       - "tests/golden/legacy-v1.json"
       - "tests/golden/legacy-v1.sha256"
       - "scripts/check-golden-integrity.mjs"
+      - "scripts/generate-golden.mjs"
+      - "scripts/characterize-french-intelligence.mjs"
+      - ".github/workflows/french-intelligence-check.yml"
       - ".github/workflows/legacy-golden-integrity.yml"
   pull_request:
     paths:

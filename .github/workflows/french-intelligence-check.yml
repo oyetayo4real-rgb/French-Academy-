@@ -15,6 +15,11 @@ on:
       - "scripts/check-french-intelligence.mjs"
       - "scripts/characterize-french-intelligence.mjs"
       - "scripts/check-french-intelligence.browser.mjs"
+      - "scripts/generate-golden.mjs"
+      - "scripts/check-golden-integrity.mjs"
+      - "tests/golden/legacy-v1.json"
+      - "tests/golden/legacy-v1.sha256"
+      - ".github/workflows/legacy-golden-integrity.yml"
       - ".github/workflows/french-intelligence-check.yml"
   push:
     branches:
@@ -29,6 +34,11 @@ on:
       - "docs/french-intelligence-linguistic-matrix.md"
       - "scripts/check-french-intelligence.mjs"
       - "scripts/check-french-intelligence.browser.mjs"
+      - "scripts/generate-golden.mjs"
+      - "scripts/check-golden-integrity.mjs"
+      - "tests/golden/legacy-v1.json"
+      - "tests/golden/legacy-v1.sha256"
+      - ".github/workflows/legacy-golden-integrity.yml"
       - ".github/workflows/french-intelligence-check.yml"
 
 permissions:
@@ -71,3 +81,22 @@ jobs:
           exit 1
       - name: Verify the app in desktop and mobile Chromium
         run: node scripts/check-french-intelligence.browser.mjs
+
+  golden-reproducibility:
+    name: Reproduce legacy golden in memory
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out complete history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Regenerate and compare exact bytes without writing files
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/generate-golden.mjs --stdout | cmp - tests/golden/legacy-v1.json
+          echo "PASS: in-memory legacy golden is byte-identical to tests/golden/legacy-v1.json; no generated files were written."
