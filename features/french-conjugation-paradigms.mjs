@@ -52,7 +52,7 @@ export const VERB_PARADIGMS = {
   "descendre":["descends","descends","descend","descendons","descendez","descendent"]
 };
 export const LEGACY_IRREGULARS = new Set(Object.keys(VERB_PARADIGMS).slice(0,21));
-export const VERIFIED_PARADIGMS = new Set(["connaître","comprendre","apprendre","tenir","voir","vivre","suivre","acheter","préférer","appeler","voyager","changer","lancer","envoyer","mourir","promettre","conduire"]);
+export const VERIFIED_PARADIGMS = new Set([...LEGACY_IRREGULARS, "connaître","comprendre","apprendre","tenir","voir","vivre","suivre","acheter","préférer","appeler","voyager","changer","lancer","envoyer","mourir","promettre","conduire"]);
 export const PARADIGM_STATUS = Object.freeze(Object.fromEntries(Object.keys(VERB_PARADIGMS).map(v => [v, VERIFIED_PARADIGMS.has(v) ? "verified" : "needs_review"])));
 export const REGULAR_ER_CLASS = Object.freeze({ id:"regular-er", status:"needs_review", type:"Regular -er verb · present tense" });
 export const REGULAR_ER_VERBS = new Set(["parler","aimer","travailler","habiter","étudier","jouer","regarder","écouter","demander","chercher","donner","arriver","rester","tomber","porter","penser","trouver","utiliser","visiter","aider","marcher","terminer","continuer","montrer","monter","passer","entrer","garder","oublier","présenter","expliquer","organiser","préparer","fermer","toucher","chanter","danser","cuisiner","déjeuner","dîner"]);

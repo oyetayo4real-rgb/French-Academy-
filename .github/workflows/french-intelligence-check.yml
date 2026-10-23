@@ -9,6 +9,7 @@ on:
       - "features/french-conjugation-paradigms.mjs"
       - "features/french-intelligence-compat.mjs"
       - "scripts/check-french-intelligence-core.mjs"
+      - "scripts/check-french-intelligence-correctness.mjs"
       - "scripts/check-french-intelligence-parity.mjs"
       - "index.html"
       - "sw.js"
@@ -34,6 +35,7 @@ on:
       - "features/french-conjugation-paradigms.mjs"
       - "features/french-intelligence-compat.mjs"
       - "scripts/check-french-intelligence-core.mjs"
+      - "scripts/check-french-intelligence-correctness.mjs"
       - "scripts/check-french-intelligence-parity.mjs"
       - "index.html"
       - "sw.js"
@@ -69,6 +71,8 @@ jobs:
         run: node --check features/french-intelligence-core-v1.mjs
       - name: Check DOM-free core
         run: node scripts/check-french-intelligence-core.mjs
+      - name: Check Section 14a correctness
+        run: node scripts/check-french-intelligence-correctness.mjs
       - name: Check engine integration contract
         run: node scripts/check-french-intelligence.mjs
       - name: Check exact legacy parity

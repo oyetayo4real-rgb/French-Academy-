@@ -21,7 +21,10 @@ const groups = [
   ["clean writing", () => golden.inventory.checkWriting.clean.length],
   ["hard-negative writing", () => golden.inventory.checkWriting.hardNegative.length],
   ["known-error writing", () => golden.inventory.checkWriting.knownErrors.length],
-  ["edge-method outputs", () => golden.inventory.edgeInputs.length * 6]
+  ["edge-method outputs", () => golden.inventory.edgeInputs.length * 6],
+  ["question regressions", () => (golden.inventory.answerQuestions || []).length],
+  ["translation coverage regressions", () => (golden.inventory.translateCoverage || []).length],
+  ["writing regressions", () => (golden.inventory.checkWritingCases || []).length]
 ].map(([name, count]) => ({ name, entries: count(), compared: 0, matched: 0, differences: [] }));
 const byName = new Map(groups.map(group => [group.name, group]));
 function compare(groupName, label, invoke, expected) {
@@ -48,6 +51,9 @@ for (const row of inv.grammar) compare("grammar topics", "grammar:" + row.title,
 for (const row of inv.checkWriting.clean) compare("clean writing", "clean:" + row.index, () => api.checkWriting(row.sentence), row.output);
 for (const row of inv.checkWriting.hardNegative) compare("hard-negative writing", "hard-negative:" + row.index, () => api.checkWriting(row.sentence), row.output);
 for (const row of inv.checkWriting.knownErrors) compare("known-error writing", "known-error:" + row.index, () => api.checkWriting(row.sentence), row.output);
+for (const row of inv.answerQuestions || []) compare("question regressions", "answer:" + row.input, () => api.answerQuestion(row.input), row.output);
+for (const row of inv.translateCoverage || []) compare("translation coverage regressions", "translate:" + row.direction + ":" + row.input, () => api.translate(row.input, row.direction), row.output);
+for (const row of inv.checkWritingCases || []) compare("writing regressions", "writing:" + row.input, () => api.checkWriting(row.input), row.output);
 for (const row of inv.edgeInputs) {
   const i = row.input, o = row.outputs, n = row.label;
   compare("edge-method outputs", "edge-lookup:" + n, () => api.lookup(i), o.lookup);
@@ -68,7 +74,7 @@ for (const g of groups) {
   assert.equal(g.compared, g.entries, g.name + ": compared count must equal the number of golden expected-output entries");
 }
 console.log("| TOTAL | " + groups.reduce((n, g) => n + g.entries, 0) + " | " + totalCompared + " | " + totalMatched + " |");
-assert.equal(totalCompared, 1000, "golden comparison inventory must remain at 1,000 expected-output entries");
+assert.equal(totalCompared, groups.reduce((sum, group) => sum + group.entries, 0), "all v2 golden entries must be compared");
 if (totalDifferences) {
   console.error("FAIL exact golden parity: compared=" + totalCompared + " matched=" + totalMatched + " differences=" + totalDifferences);
   for (const g of groups) if (g.differences.length) console.error(g.name + ": " + JSON.stringify(g.differences.slice(0, 10), null, 2));

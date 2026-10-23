@@ -1,7 +1,7 @@
 import * as structuredCore from "./french-intelligence-core-v1.mjs";
 /* Exact legacy HTML renderer extracted from the golden source. Keep its output byte-stable. */
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const writingPattern = (source, flags = "gi") => new RegExp("(?<![\p{L}\p{N}_'’\-])(?:" + source + ")(?![\p{L}\p{N}_'’\-])", flags.includes("u") ? flags : flags + "u");
+const writingPattern = (source, flags = "gi") => new RegExp("(?<![\\p{L}\\p{N}_'’\\-])(?:" + source + ")(?![\\p{L}\\p{N}_'’\\-])", flags.includes("u") ? flags : flags + "u");
 const preserveInitialCase = (match, replacement) => match && /^\p{Lu}/u.test(match) ? replacement.charAt(0).toLocaleUpperCase("fr") + replacement.slice(1) : replacement;
 const $ = (id) => document.getElementById(id);
 let tab = "ask", history = [], busy = false;
@@ -251,7 +251,7 @@ function answerQuestion(q){
   const matched=rules.find(r=>n.includes(norm(r.title).replace("ne ... pas","ne"))|| (n.includes("negation")&&r.title.startsWith("Negation")) || (n.includes("tu")&&n.includes("vous")&&r.title==="Tu and vous"));
   if(matched)return `<b>${esc(matched.title)}</b><p>${esc(matched.body)}</p>`;
   if(/maison/.test(n)&&/(feminin|gender|genre|why|pourquoi)/.test(n))return "<b>Why is “maison” feminine?</b><p>In French, grammatical gender is a property of each noun and is not always predictable from meaning. Learn it together with its article: <i>la maison</i>. The ending -on does not reliably tell you a noun's gender.</p>";
-  if(/\b(?:âge|age|ans|years old)\b/u.test(n)&&(/[?？]/u.test(String(q))||/^(?:how|what|quel(?:le)?|comment|à quel|at what)\b/u.test(n))&&/(?:how old|what age|quel(?:le)? age|à quel(?:le)? âge|years old|\b(?:âge|age|ans)\b)/u.test(n))return "<b>Talking about age</b><p>French uses <i>avoir</i> (to have), not <i>être</i> (to be): <i>J'ai vingt ans</i> literally means “I have twenty years.”</p>";
+  if(/\b(?:âge|age|ans|years old)\b/u.test(n)&&(/[?？]/u.test(String(q))||/^(?:how|what|quel(?:le)?|comment|à quel|at what)\b/u.test(n))&&/(?:\bhow old\b|\bwhat (?:is|was) (?:my|your|his|her) age\b|\b(?:my|your|his|her) age\b|\bquel(?:le)? (?:âge|age)\b|\bà quel(?:le)? (?:âge|age)\b|\bat what age\b|\bsay (?:my|your|his|her) age\b|\bask about age\b|\bexpress age\b|\bhow many years old\b)/u.test(n))return "<b>Talking about age</b><p>French uses <i>avoir</i> (to have), not <i>être</i> (to be): <i>J'ai vingt ans</i> literally means “I have twenty years.”</p>";
   if(/translate|translation|tradui|meaning|signif/.test(n)){const d=lookup(q.replace(/^(what does|meaning of|translate)\s+/i,"").replace(/[?!.]$/,""));if(d)return dictionaryHtml(d);}
   if(/grammar|grammaire|tense|temps verbal/.test(n))return "Choose the Grammar Guide to browse ten core rules, or ask about a specific structure (for example, “Explain passé composé”).";
   if(/bonjour|salut|merci|au revoir/.test(n)){const d=lookup(q.replace(/[?!.]$/,""));if(d)return dictionaryHtml(d);}
