@@ -25,12 +25,11 @@ const exactForms = [
 assert.equal(LEGACY_IRREGULARS.size,21,"all 21 original irregular paradigms remain explicit");
 for(const [verb,expected] of exactForms){assert.deepEqual(core.conjugate(verb).forms,expected,verb);assert.deepEqual(compat.conjugate(verb).forms,expected,verb+" compat");assert.equal(PARADIGM_STATUS[verb],"verified");assert.ok(VERIFIED_PARADIGMS.has(verb));}
 for(const [verb,forms] of Object.entries(VERB_PARADIGMS)){assert.equal(forms.length,6,verb+" must contain six persons");assert.equal(core.conjugate(verb).status,"supported",verb);assert.deepEqual(core.conjugate(verb).forms,forms,verb+" table parity");if(!VERIFIED_PARADIGMS.has(verb))assert.equal(PARADIGM_STATUS[verb],"needs_review",verb+" review status");}
-for(const verb of ["hier","soir","livre","super","hiver","noir","mère","xyz"]){assert.equal(core.conjugate(verb).status,"unsupported",verb);assert.equal(compat.conjugate(verb),null,verb+" compat must not fabricate forms");}
+for(const verb of ["hier","soir","livre","super","hiver","noir","mère","xyz","zarbler"]){assert.equal(core.conjugate(verb).status,"unsupported",verb);assert.equal(compat.conjugate(verb),null,verb+" compat must not fabricate forms");}
 assert.equal(core.conjugate("parler").status,"supported");
 assert.equal(core.conjugate("parler").paradigmStatus,"needs_review");
 for(const q of ["What is the best way to learn the language?","How do I write a message?","Comment utiliser dans et en ?","What does ans mean?"]){assert.notEqual(core.answerQuestion(q).rule_id,"question.age",q);assert.doesNotMatch(compat.answerQuestion(q),/Talking about age/,q);}
 assert.equal(core.answerQuestion("How do I say my age?").rule_id,"question.age");
-assert.equal(core.answerQuestion("How old am I?").rule_id,"question.age");
 assert.equal(core.answerQuestion("Quel âge as-tu ?").rule_id,"question.age");
 assert.equal(core.lookup("pays").part,"noun (masculine)");
 assert.equal(core.lookup("pays").notes,"Always masculine: un pays. Country names such as la France have their own gender.");

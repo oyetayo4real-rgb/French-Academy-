@@ -257,10 +257,8 @@ function conjugate(raw) {
   if (!v) return result("unsupported", 0, "conjugation.empty", "No verb was supplied.", { query: v });
   let forms = VERB_PARADIGMS[v] ? [...VERB_PARADIGMS[v]] : null;
   let status = PARADIGM_STATUS[v] || null;
-  const dictionaryEntry = dictionary[v];
-  const dictionaryMarksVerb = Boolean(dictionaryEntry && /\bverb\b/i.test(String(dictionaryEntry[1] || "")));
   let type = LEGACY_IRREGULARS.has(v) ? "Irregular verb · present tense" : ["manger","commencer"].includes(v) ? "Regular -er pattern with spelling adjustment" : ["finir","choisir","réussir","grandir","remplir","obéir","réfléchir"].includes(v) ? "Regular -ir verb · present tense (finir pattern)" : ["vendre","attendre","entendre","répondre","perdre","rendre","descendre"].includes(v) ? "Regular -re verb · present-tense pattern (verify exceptions)" : status === "verified" ? "Explicit verified present-tense paradigm" : "Explicit present-tense paradigm · needs review";
-  if (!forms && /er$/u.test(v) && v.length > 3 && (REGULAR_ER_VERBS.has(v) || dictionaryMarksVerb) && !SPELLING_CHANGE_CLASS.test(v)) {
+  if (!forms && /er$/u.test(v) && v.length > 3 && REGULAR_ER_VERBS.has(v) && !SPELLING_CHANGE_CLASS.test(v)) {
     const stem = v.slice(0, -2);
     forms = [stem+"e",stem+"es",stem+"e",stem+"ons",stem+"ez",stem+"ent"];
     status = REGULAR_ER_CLASS.status; type = REGULAR_ER_CLASS.type;
