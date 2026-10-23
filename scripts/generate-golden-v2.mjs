@@ -6,6 +6,7 @@ import * as core from "../features/french-intelligence-core-v1.mjs";
 import { VERB_PARADIGMS, REGULAR_ER_VERBS, PERSONS } from "../features/french-conjugation-paradigms.mjs";
 import { renderGoldenChanges } from "./golden-v2-utils.mjs";
 assert.ok(process.argv.includes("--write"),"Pass --write to explicitly create the approved v2 golden.");
+const exact=(fn,label)=>{try{return fn();}catch(error){return {__threw:true,name:error&&error.name||"Error",message:String(error&&error.message||error),label};}};
 const v1=JSON.parse(readFileSync("tests/golden/legacy-v1.json","utf8"));
 const v2=JSON.parse(JSON.stringify(v1));
 v2.schemaVersion=2;
@@ -28,7 +29,7 @@ for(const row of inv.grammar)row.output=api.answerQuestion(row.title);
 for(const row of inv.checkWriting.clean)row.output=api.checkWriting(row.sentence);
 for(const row of inv.checkWriting.hardNegative)row.output=api.checkWriting(row.sentence);
 for(const row of inv.checkWriting.knownErrors)row.output=api.checkWriting(row.sentence);
-for(const row of inv.edgeInputs){const i=row.input;row.outputs={lookup:api.lookup(i),translateEnFr:api.translate(i,"en-fr"),translateFrEn:api.translate(i,"fr-en"),conjugate:api.conjugate(i),answerQuestion:api.answerQuestion(i),checkWriting:api.checkWriting(i)};}
+for(const row of inv.edgeInputs){const i=row.input,n=row.label;row.outputs={lookup:exact(()=>api.lookup(i),"edge-lookup:"+n),translateEnFr:exact(()=>api.translate(i,"en-fr"),"edge-en-fr:"+n),translateFrEn:exact(()=>api.translate(i,"fr-en"),"edge-fr-en:"+n),conjugate:exact(()=>api.conjugate(i),"edge-conjugate:"+n),answerQuestion:exact(()=>api.answerQuestion(i),"edge-answer:"+n),checkWriting:exact(()=>api.checkWriting(i),"edge-writing:"+n)};}
 inv.answerQuestions=["What is the best way to learn the language?","How do I write a message?","Comment utiliser dans et en ?","What does ans mean?","How do I say my age?","How old am I?","Quel âge as-tu ?"].map(input=>({input,output:api.answerQuestion(input)}));
 inv.translateCoverage=[{input:"Je suis étudiant",direction:"fr-en"},{input:"Je suis fatiguée.",direction:"fr-en"},{input:"J’ai besoin d’aide",direction:"fr-en"},{input:"Bonjour",direction:"fr-en"},{input:"Bonjour madame",direction:"fr-en"},{input:"Comment utiliser dans et en ?",direction:"fr-en"}].map(row=>({...row,output:api.translate(row.input,row.direction)}));
 inv.checkWritingCases=["Je suis 20 ans","Sa va bien","Son va-et-vient constant m'inquiète."].map(input=>({input,output:api.checkWriting(input)}));
