@@ -2,6 +2,11 @@ name: Generate legacy French Intelligence golden baseline
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - feat/french-intelligence-engine
+    paths:
+      - .github/golden-run-request.txt
 
 permissions:
   contents: write
@@ -14,18 +19,35 @@ jobs:
   generate:
     runs-on: ubuntu-latest
     steps:
+      - name: Guard existing golden baseline
+        id: guard
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if gh api "repos/${GITHUB_REPOSITORY}/contents/tests/golden/legacy-v1.json?ref=${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            echo "Golden baseline already exists; refusing to regenerate"
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Check out complete history
+        if: steps.guard.outputs.exists != 'true'
         uses: actions/checkout@v4
         with:
           ref: ${{ github.ref_name }}
           fetch-depth: 0
       - name: Set up Node.js
+        if: steps.guard.outputs.exists != 'true'
         uses: actions/setup-node@v4
         with:
           node-version: "22"
       - name: Generate golden baseline from immutable legacy source
+        if: steps.guard.outputs.exists != 'true'
         run: node scripts/generate-golden.mjs
       - name: Commit golden JSON and SHA together
+        if: steps.guard.outputs.exists != 'true'
         shell: bash
         run: |
           set -euo pipefail
