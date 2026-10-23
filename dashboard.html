@@ -144,7 +144,10 @@ input.inp,select.inp{border:1px solid #e0e4ef;border-radius:12px;background:#fff
 @media(max-width:560px){.w{padding:15px 16px 26px}h1{font-size:25px}.card{padding:16px;border-radius:17px}.tabs button{min-width:calc(50% - 6px)}}
 
 </style></head><body><header></header>
-<div class="w" id="app"></div>
+<div class="w" id="app"><noscript><section class="daily-french"><h2>Bonjour !</h2><p>Qu’est-ce qu’on fait aujourd’hui ?</p><p>JavaScript must be enabled to use your learning dashboard.</p></section></noscript><section id="faBootFallback" style="background:#091226;color:#fff;border-radius:22px;padding:24px;margin:12px 0"><p style="color:#b7c7ff;font-size:11px;font-weight:800;text-transform:uppercase">French Academy · A1—C2</p><h1 style="color:#fff;font:800 30px/1.15 system-ui;margin:10px 0">Bonjour ! 👋</h1><p style="color:#d4dced">Qu’est-ce qu’on fait aujourd’hui ?</p><p style="color:#d4dced">The learning space is taking longer than expected to start.</p><button type="button" onclick="location.reload()" style="background:#4b69ff;color:#fff;border:0;border-radius:12px;padding:13px 18px;font-weight:700">Reload learning space ↻</button><p style="font-size:12px;color:#b9c4d9;margin-top:12px">If this message remains, the app script failed to start. Refresh once or open the landing page.</p><a href="/" style="color:#fff;text-decoration:underline">Back to landing page</a><pre id="faBootError" style="white-space:pre-wrap;color:#ffd2d2;font-size:11px;display:none"></pre></section></div>
+<script>
+(function(){window.addEventListener("error",function(e){var box=document.getElementById("faBootFallback"),out=document.getElementById("faBootError");if(box&&out){box.style.display="block";out.style.display="block";out.textContent="Startup error: "+(e.message||"JavaScript failed to start")+(e.filename?"\\n"+e.filename.split("/").pop()+":"+e.lineno:"");}});window.addEventListener("unhandledrejection",function(e){var box=document.getElementById("faBootFallback"),out=document.getElementById("faBootError");if(box&&out){box.style.display="block";out.style.display="block";out.textContent="Startup error: "+String(e.reason&&e.reason.message||e.reason||"unhandled promise rejection");}});})();
+</script>
 <script>
 const PASS=70;
 const L=[
