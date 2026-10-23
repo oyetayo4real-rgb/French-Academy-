@@ -15,6 +15,9 @@ on:
       - "scripts/check-french-intelligence.mjs"
       - "scripts/characterize-french-intelligence.mjs"
       - "scripts/check-french-intelligence.browser.mjs"
+      - "scripts/check-french-intelligence.ui-parity.mjs"
+      - "tests/fixtures/french-intelligence-legacy.html"
+      - "tests/fixtures/french-intelligence-compat.html"
       - "scripts/generate-golden.mjs"
       - "scripts/check-golden-integrity.mjs"
       - "tests/golden/legacy-v1.json"
@@ -35,6 +38,9 @@ on:
       - "docs/french-intelligence-linguistic-matrix.md"
       - "scripts/check-french-intelligence.mjs"
       - "scripts/check-french-intelligence.browser.mjs"
+      - "scripts/check-french-intelligence.ui-parity.mjs"
+      - "tests/fixtures/french-intelligence-legacy.html"
+      - "tests/fixtures/french-intelligence-compat.html"
       - "scripts/generate-golden.mjs"
       - "scripts/check-golden-integrity.mjs"
       - "tests/golden/legacy-v1.json"
@@ -82,6 +88,8 @@ jobs:
           exit 1
       - name: Verify the app in desktop and mobile Chromium
         run: node scripts/check-french-intelligence.browser.mjs
+      - name: Compare legacy and compatibility browser UI
+        run: node scripts/check-french-intelligence.ui-parity.mjs
 
   golden-reproducibility:
     name: Reproduce legacy golden in memory
