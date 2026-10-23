@@ -1,8 +1,7 @@
-/* French Intelligence pure core extracted from the legacy engine.
- * No DOM, window, network, or storage access is performed in this module.
- */
-const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+/* Pure structured French Intelligence core. No DOM, browser globals, network, storage, or HTML rendering. */
+
 const writingPattern = (source, flags = "gi") => new RegExp("(?<![\\p{L}\\p{N}_'’\\-])(?:" + source + ")(?![\\p{L}\\p{N}_'’\\-])", flags.includes("u") ? flags : flags + "u");
+
 const dictionary = {
     bonjour:["hello; good morning","interjection","Bonjour, comment allez-vous ?","A standard greeting; use bonsoir in the evening."],
     bonsoir:["good evening","interjection","Bonsoir, madame.","Used as a greeting in the evening."],
@@ -208,20 +207,10 @@ const rules = [
     {title:"Imparfait endings",body:"For most verbs, take the nous form of the present, remove -ons, and add -ais, -ais, -ait, -ions, -iez, -aient: nous parlons → je parlais. Être is irregular: j'étais, tu étais, il était, nous étions, vous étiez, ils étaient. Use the imparfait for background, habits and ongoing past states."},
     {title:"Conditional politeness",body:"The conditionnel présent often softens a request: Je voudrais un café; Pourriez-vous m'aider ? It can also express a hypothetical result: Si j'avais le temps, je voyagerais. In the common si + imparfait pattern, do not put the conditional directly after si."},
     {title:"Negation with an infinitive",body:"When the infinitive is negated, ne pas usually comes directly before it: Je préfère ne pas sortir; Il faut ne pas oublier. With a conjugated verb, ne surrounds the verb: Je ne sors pas. In everyday speech ne is often dropped, but formal writing usually retains it."}  ];
+
+const phrasebookPairs={"hello":"bonjour","good morning":"bonjour","good evening":"bonsoir","goodbye":"au revoir","thank you":"merci","thank you very much":"merci beaucoup","please":"s'il vous plaît","yes":"oui","no":"non","i am":"je suis","i have":"j'ai","i would like":"je voudrais","i don't understand":"je ne comprends pas","where is the station":"où est la gare","how are you":"comment allez-vous","my name is":"je m'appelle","i love you":"je t'aime","see you tomorrow":"à demain","see you soon":"à bientôt","i speak french":"je parle français","i am learning french":"j'apprends le français","i need help":"j'ai besoin d'aide","i am hungry":"j'ai faim","i am thirsty":"j'ai soif","i am tired":"je suis fatigué(e)","i am happy":"je suis heureux/heureuse","where is the bathroom":"où sont les toilettes","how much does it cost":"combien ça coûte","i don't know":"je ne sais pas","i understand":"je comprends","i am sorry":"je suis désolé(e)","excuse me":"excusez-moi","see you later":"à plus tard","have a nice day":"bonne journée","good night":"bonne nuit","what time is it":"quelle heure est-il","i need a doctor":"j'ai besoin d'un médecin","can you help me":"pouvez-vous m'aider","i would like water":"je voudrais de l'eau","i agree":"je suis d'accord"};
+
 function norm(s){return String(s||"").replace(/[’‘‛ʼ＇]/g,"'").replace(/[＂“”„]/g,'"').toLocaleLowerCase("fr").normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim().replace(/\s+/g," ");}
-
-function lookup(word){
-    const q=String(word||"").trim();if(!q)return null;
-    let foundKey=q.toLocaleLowerCase("fr");
-    let found=dictionary[foundKey];
-    if(!found){const key=Object.keys(dictionary).find(k=>norm(k)===norm(q));if(key){foundKey=key;found=dictionary[key];}}
-    if(found)return {word:foundKey,meaning:found[0],part:found[1],example:found[2],notes:found[3],builtIn:true};
-    const rev=Object.keys(dictionary).find(k=>norm(dictionary[k][0].split(";")[0])===norm(q));
-    if(rev)return {word:rev,meaning:dictionary[rev][0],part:dictionary[rev][1],example:dictionary[rev][2],notes:dictionary[rev][3],builtIn:true};
-    return null;
-  }
-
-function dictionaryHtml(d){return `<div class="fi-answer"><h3 style="margin:0 0 6px">${esc(d.word)}</h3><div><b>Meaning:</b> ${esc(d.meaning)}</div><div class="fi-muted">Part of speech: ${esc(d.part)}</div><p><b>Example:</b> <i>${esc(d.example)}</i></p><p><b>Usage:</b> ${esc(d.notes)}</p><span class="fi-tag">Built-in entry</span></div>`;}
 
 function phraseMatcher(re){
     let source=re.source;
@@ -232,102 +221,142 @@ function phraseMatcher(re){
     return new RegExp(source,re.flags.includes("u")?re.flags:re.flags+"u");
   }
 
-function translate(text,direction){
-    const q=String(text||"").trim();if(!q)return "Enter some text first.";
-    if(direction==="en-fr"){
-      const pairs={"hello":"bonjour","good morning":"bonjour","good evening":"bonsoir","goodbye":"au revoir","thank you":"merci","thank you very much":"merci beaucoup","please":"s'il vous plaît","yes":"oui","no":"non","i am":"je suis","i have":"j'ai","i would like":"je voudrais","i don't understand":"je ne comprends pas","where is the station":"où est la gare","how are you":"comment allez-vous","my name is":"je m'appelle","i love you":"je t'aime","see you tomorrow":"à demain","see you soon":"à bientôt","i speak french":"je parle français","i am learning french":"j'apprends le français","i need help":"j'ai besoin d'aide","i am hungry":"j'ai faim","i am thirsty":"j'ai soif","i am tired":"je suis fatigué(e)","i am happy":"je suis heureux/heureuse","where is the bathroom":"où sont les toilettes","how much does it cost":"combien ça coûte","i don't know":"je ne sais pas","i understand":"je comprends","i am sorry":"je suis désolé(e)","excuse me":"excusez-moi","see you later":"à plus tard","have a nice day":"bonne journée","good night":"bonne nuit","what time is it":"quelle heure est-il","i need a doctor":"j'ai besoin d'un médecin","can you help me":"pouvez-vous m'aider","i would like water":"je voudrais de l'eau","i agree":"je suis d'accord"};
-      const exact=Object.keys(pairs).find(k=>norm(k)===norm(q));if(exact)return `<div class="fi-answer"><b>French:</b> ${esc(pairs[exact])}<p class="fi-muted">Known phrasebook match.</p></div>`;
-      return `<div class="fi-answer">This phrase is not in the local phrasebook yet. I won't guess a full translation. Try a shorter phrase, or use <a href="https://www.deepl.com/translator#en/fr/${encodeURIComponent(q)}" target="_blank" rel="noopener noreferrer">DeepL</a> or <a href="https://translate.google.com/?sl=en&tl=fr&text=${encodeURIComponent(q)}" target="_blank" rel="noopener noreferrer">Google Translate</a> and review the result.</div>`;
-    }
-    let result=q;let matches=[];
-    for(const [re,en] of phraseMap){const matcher=phraseMatcher(re);if(matcher.test(result)){matches.push(en);result=result.replace(matcher,en);}}
-    if(matches.length)return `<div class="fi-answer"><b>Approximate English:</b><div class="fi-output">${esc(result)}</div><p class="fi-muted">Matched local phrases: ${esc([...new Set(matches)].join("; "))}. This is a word/phrase substitution, not a full semantic translation; verify grammar and context.</p></div>`;
-    const words=q.match(/[\p{L}’'-]+/gu)||[];const found=words.map(w=>({w,d:lookup(w)})).filter(x=>x.d);
-    if(found.length)return `<div class="fi-answer"><b>Vocabulary hints (not a complete translation)</b>${found.map(x=>`<div class="fi-result"><b>${esc(x.w)}</b> — ${esc(x.d.meaning)}</div>`).join("")}</div>`;
-    return `<div class="fi-answer">No reliable local match was found. Try a known phrase or open <a href="https://www.deepl.com/translator#fr/en/${encodeURIComponent(q)}" target="_blank" rel="noopener noreferrer">DeepL</a> or <a href="https://translate.google.com/?sl=fr&tl=en&text=${encodeURIComponent(q)}" target="_blank" rel="noopener noreferrer">Google Translate</a>. The app does not send this text to those services automatically.</div>`;
+function result(status, confidence, rule_id, explanation, fields = {}) {
+  return { status, confidence, rule_id, explanation, sources: ["built-in French reference set"], ...fields };
+}
+function findDictionaryEntry(word) {
+  const q = String(word || "").trim();
+  if (!q) return null;
+  let foundKey = q.toLocaleLowerCase("fr");
+  let found = dictionary[foundKey];
+  if (!found) {
+    const key = Object.keys(dictionary).find(k => norm(k) === norm(q));
+    if (key) { foundKey = key; found = dictionary[key]; }
   }
-
-function conjugate(raw){
-    let v=String(raw||"").toLocaleLowerCase("fr").trim().replace(/^to /,"");if(!v)return null;
-    if(irregular[v])return {v,forms:irregular[v],type:"Irregular verb · present tense"};
-    if(v==="manger")return {v,forms:["mange","manges","mange","mangeons","mangez","mangent"],type:"Regular -er pattern with spelling adjustment"};
-    if(v==="commencer")return {v,forms:["commence","commences","commence","commençons","commencez","commencent"],type:"Regular -er pattern with spelling adjustment"};
-    if(/er$/.test(v)&&v.length>3){const stem=v.slice(0,-2);return {v,forms:[stem+"e",stem+"es",stem+"e",stem+"ons",stem+"ez",stem+"ent"],type:"Regular -er verb · present tense"};}
-    if(/ir$/.test(v)&&v.length>3&&!["partir","sortir","dormir","servir","sentir","mentir","courir","ouvrir","offrir","cueillir"].includes(v)){const stem=v.slice(0,-2);return {v,forms:[stem+"is",stem+"is",stem+"it",stem+"issons",stem+"issez",stem+"issent"],type:"Regular -ir verb · present tense (finir pattern)"};}
-    if(/re$/.test(v)&&v.length>3){const stem=v.slice(0,-2);return {v,forms:[stem+"s",stem+"s",stem,""+stem+"ons",stem+"ez",stem+"ent"],type:"Regular -re verb · present-tense pattern (verify exceptions)"};}
-    return null;
+  if (found) return { word: foundKey, meaning: found[0], part: found[1], example: found[2], notes: found[3], builtIn: true };
+  const rev = Object.keys(dictionary).find(k => norm(dictionary[k][0].split(";")[0]) === norm(q));
+  if (rev) return { word: rev, meaning: dictionary[rev][0], part: dictionary[rev][1], example: dictionary[rev][2], notes: dictionary[rev][3], builtIn: true };
+  return null;
+}
+function lookup(word) {
+  const entry = findDictionaryEntry(word);
+  if (entry) return result("supported", 1, "dictionary." + entry.word, entry.notes, entry);
+  return result("unsupported", 0, "dictionary.no-match", "No built-in dictionary entry matched this input.", { query: String(word || "").trim() });
+}
+function translate(text, direction) {
+  const q = String(text || "").trim();
+  if (!q) return result("unsupported", 0, "translation.empty", "Enter some text first.", { kind: "empty", input: q });
+  if (direction === "en-fr") {
+    const exact = Object.keys(phrasebookPairs).find(k => norm(k) === norm(q));
+    if (exact) return result("supported", 1, "phrasebook.en-fr.exact", "Known phrasebook match.", { kind: "en-fr-exact", input: q, translation: phrasebookPairs[exact], matchedKey: exact });
+    return result("unsupported", 0, "phrasebook.en-fr.no-match", "This phrase is not in the local phrasebook yet. I won't guess a full translation.", { kind: "en-fr-unsupported", input: q });
   }
-
-function answerQuestion(q){
-    const n=norm(q);
-    if(!q.trim())return "Type a question first.";
-    if(/depuis/.test(n)&&/pendant/.test(n))return "<b>Depuis vs pendant</b><p><i>Depuis</i> usually links a past starting point to a situation continuing now: <i>J'habite ici depuis trois ans</i> (I've lived here for three years). <i>Pendant</i> frames a duration: <i>J'ai étudié pendant deux heures</i> (I studied for two hours). Context and tense determine the best translation.</p>";
-    if(/savoir/.test(n)&&/connaitre|connaître/.test(n))return "<b>Savoir vs connaître</b><p>Use <i>savoir</i> for facts or skills: <i>Je sais la réponse</i>; <i>Je sais nager</i>. Use <i>connaître</i> for familiarity: <i>Je connais cette ville</i>; <i>Je connais Marie</i>.</p>";
-    if(/y\b/.test(n)&&/en\b/.test(n)&&/(pronoun|pronom|difference|différence|use|utilis)/.test(n))return "<b>Y vs en</b><p><i>Y</i> often replaces <i>à</i> + thing/place: <i>Je vais à Paris → J'y vais</i>. <i>En</i> often replaces <i>de</i> + thing or a quantity: <i>Je parle de ce livre → J'en parle</i>; <i>J'en veux deux</i>. Pronoun choice depends on the verb's construction and meaning.</p>";
-    if(/conditionnel|conditional/.test(n))return "<b>Conditional for polite requests and hypotheses</b><p><i>Je voudrais un café</i> is a polite request; <i>Pourriez-vous m'aider ?</i> means “Could you help me?” In a common hypothesis: <i>Si j'avais le temps, je voyagerais</i>. Do not put the conditional directly after <i>si</i> in this pattern.</p>";
-
-    const matched=rules.find(r=>n.includes(norm(r.title).replace("ne ... pas","ne"))|| (n.includes("negation")&&r.title.startsWith("Negation")) || (n.includes("tu")&&n.includes("vous")&&r.title==="Tu and vous"));
-    if(matched)return `<b>${esc(matched.title)}</b><p>${esc(matched.body)}</p>`;
-    if(/maison/.test(n)&&/(feminin|gender|genre|why|pourquoi)/.test(n))return "<b>Why is “maison” feminine?</b><p>In French, grammatical gender is a property of each noun and is not always predictable from meaning. Learn it together with its article: <i>la maison</i>. The ending -on does not reliably tell you a noun's gender.</p>";
-    if(/age|ans|vingt ans/.test(n))return "<b>Talking about age</b><p>French uses <i>avoir</i> (to have), not <i>être</i> (to be): <i>J'ai vingt ans</i> literally means “I have twenty years.”</p>";
-    if(/translate|translation|tradui|meaning|signif/.test(n)){const d=lookup(q.replace(/^(what does|meaning of|translate)\s+/i,"").replace(/[?!.]$/,""));if(d)return dictionaryHtml(d);}
-    if(/grammar|grammaire|tense|temps verbal/.test(n))return "Choose the Grammar Guide to browse ten core rules, or ask about a specific structure (for example, “Explain passé composé”).";
-    if(/bonjour|salut|merci|au revoir/.test(n)){const d=lookup(q.replace(/[?!.]$/,""));if(d)return dictionaryHtml(d);}
-    return "I can answer from the built-in French reference set, grammar guide, common phrases and conjugation rules. I couldn't match this question confidently yet, so I won't invent an answer. Try asking about ne…pas, tu/vous, passé composé, adjective agreement, or a word in the dictionary. For deeper open-ended questions, this no-key version currently needs an optional on-device language model.";
+  let translated = q;
+  const matches = [];
+  for (const [re, english] of phraseMap) {
+    const matcher = phraseMatcher(re);
+    if (matcher.test(translated)) { matches.push(english); translated = translated.replace(matcher, english); }
   }
+  if (matches.length) return result("supported", 0.8, "phrasebook.fr-en.pattern", "This is a word/phrase substitution, not a full semantic translation; verify grammar and context.", { kind: "fr-en-pattern", input: q, translation: translated, matches: [...new Set(matches)] });
+  const words = q.match(/[\p{L}’'-]+/gu) || [];
+  const hints = words.map(w => ({ word: w, entry: findDictionaryEntry(w) })).filter(x => x.entry).map(x => ({ word: x.word, meaning: x.entry.meaning }));
+  if (hints.length) return result("ambiguous", 0.45, "phrasebook.fr-en.vocabulary-hints", "Vocabulary hints are not a complete translation.", { kind: "fr-en-vocabulary", input: q, vocabularyHints: hints });
+  return result("unsupported", 0, "phrasebook.fr-en.no-match", "No reliable local match was found.", { kind: "fr-en-unsupported", input: q });
+}
+function conjugate(raw) {
+  let v = String(raw || "").toLocaleLowerCase("fr").trim().replace(/^to /, "");
+  if (!v) return result("unsupported", 0, "conjugation.empty", "No verb was supplied.", { query: v });
+  let entry = null;
+  if (irregular[v]) entry = { v, forms: irregular[v], type: "Irregular verb · present tense" };
+  else if (v === "manger") entry = { v, forms: ["mange","manges","mange","mangeons","mangez","mangent"], type: "Regular -er pattern with spelling adjustment" };
+  else if (v === "commencer") entry = { v, forms: ["commence","commences","commence","commençons","commencez","commencent"], type: "Regular -er pattern with spelling adjustment" };
+  else if (/er$/.test(v) && v.length > 3) { const stem = v.slice(0, -2); entry = { v, forms: [stem+"e",stem+"es",stem+"e",stem+"ons",stem+"ez",stem+"ent"], type: "Regular -er verb · present tense" }; }
+  else if (/ir$/.test(v) && v.length > 3 && !["partir","sortir","dormir","servir","sentir","mentir","courir","ouvrir","offrir","cueillir"].includes(v)) { const stem = v.slice(0, -2); entry = { v, forms: [stem+"is",stem+"is",stem+"it",stem+"issons",stem+"issez",stem+"issent"], type: "Regular -ir verb · present tense (finir pattern)" }; }
+  else if (/re$/.test(v) && v.length > 3) { const stem = v.slice(0, -2); entry = { v, forms: [stem+"s",stem+"s",stem,""+stem+"ons",stem+"ez",stem+"ent"], type: "Regular -re verb · present-tense pattern (verify exceptions)" }; }
+  if (!entry) return result("unsupported", 0, "conjugation.no-pattern", "No conjugation pattern is available for this verb.", { query: v });
+  return result("supported", 0.95, "conjugation.present." + (irregular[v] ? "irregular" : "pattern"), entry.type, { ...entry, persons: [...persons] });
+}
+function answerQuestion(q) {
+  const n = norm(q);
+  if (!q.trim()) return result("unsupported", 0, "question.empty", "Type a question first.", { kind: "empty", input: q });
+  if (/depuis/.test(n) && /pendant/.test(n)) return result("supported", 0.9, "question.depuis-pendant", "Depuis links a past starting point to a situation continuing now; pendant frames a duration.", { kind: "depuis-pendant", title: "Depuis vs pendant" });
+  if (/savoir/.test(n) && /connaitre|connaître/.test(n)) return result("supported", 0.9, "question.savoir-connaitre", "Savoir is used for facts or skills; connaître is used for familiarity.", { kind: "savoir-connaitre", title: "Savoir vs connaître" });
+  if (/\by\b/.test(n) && /\ben\b/.test(n) && /(pronoun|pronom|difference|différence|use|utilis)/.test(n)) return result("supported", 0.9, "question.y-en", "Y often replaces à plus a thing or place; en often replaces de plus a thing or a quantity.", { kind: "y-en", title: "Y vs en" });
+  if (/conditionnel|conditional/.test(n)) return result("supported", 0.9, "question.conditional", "The conditional is used for polite requests and hypotheses.", { kind: "conditional", title: "Conditional for polite requests and hypotheses" });
+  const matched = rules.find(r => n.includes(norm(r.title).replace("ne ... pas", "ne")) || (n.includes("negation") && r.title.startsWith("Negation")) || (n.includes("tu") && n.includes("vous") && r.title === "Tu and vous"));
+  if (matched) return result("supported", 0.9, "grammar." + matched.title, matched.body, { kind: "grammar-rule", title: matched.title, body: matched.body });
+  if (/maison/.test(n) && /(feminin|gender|genre|why|pourquoi)/.test(n)) return result("supported", 0.85, "question.maison-gender", "Grammatical gender is a property of each noun and is not always predictable from meaning. Learn the noun with its article: la maison. The ending -on does not reliably indicate gender.", { kind: "maison-gender" });
+  if (/age|ans|vingt ans/.test(n)) return result("supported", 0.9, "question.age", "French uses avoir, not être, to express age.", { kind: "age" });
+  if (/translate|translation|tradui|meaning|signif/.test(n)) {
+    const entry = findDictionaryEntry(q.replace(/^(what does|meaning of|translate)\s+/i, "").replace(/[?!.]$/, ""));
+    if (entry) return result("supported", 0.9, "question.dictionary." + entry.word, entry.notes, { kind: "dictionary", entry });
+  }
+  if (/grammar|grammaire|tense|temps verbal/.test(n)) return result("unsupported", 0.2, "question.grammar-guide", "Choose the Grammar Guide to browse ten core rules, or ask about a specific structure.", { kind: "grammar-guide" });
+  if (/bonjour|salut|merci|au revoir/.test(n)) {
+    const entry = findDictionaryEntry(q.replace(/[?!.]$/, ""));
+    if (entry) return result("supported", 0.85, "question.dictionary." + entry.word, entry.notes, { kind: "dictionary", entry });
+  }
+  return result("unsupported", 0.1, "question.no-confident-match", "I couldn't match this question confidently yet, so I won't invent an answer.", { kind: "fallback", input: q });
+}
 
 function checkWriting(q){
-    let suggestions=[],corrected=q;
-    const subjunctiveVerbs = [
-      { name: "être", indicative: ["suis","es","est","sommes","êtes","sont"], subjunctive: ["sois","sois","soit","soyons","soyez","soient"] },
-      { name: "avoir", indicative: ["ai","as","a","avons","avez","ont"], subjunctive: ["aie","aies","ait","ayons","ayez","aient"] },
-      { name: "aller", indicative: ["vais","vas","va","allons","allez","vont"], subjunctive: ["aille","ailles","aille","allions","alliez","aillent"] },
-      { name: "faire", indicative: ["fais","fais","fait","faisons","faites","font"], subjunctive: ["fasse","fasses","fasse","fassions","fassiez","fassent"] },
-      { name: "pouvoir", indicative: ["peux","peux","peut","pouvons","pouvez","peuvent"], subjunctive: ["puisse","puisses","puisse","puissions","puissiez","puissent"] },
-      { name: "savoir", indicative: ["sais","sais","sait","savons","savez","savent"], subjunctive: ["sache","saches","sache","sachions","sachiez","sachent"] },
-      { name: "vouloir", indicative: ["veux","veux","veut","voulons","voulez","veulent"], subjunctive: ["veuille","veuilles","veuille","voulions","vouliez","veuillent"] }
-    ];
-    const subjunctiveTriggers = "(?:bien\\s+que|bien\\s+qu['’]|quoique|quoiqu['’]|pour\\s+que|pour\\s+qu['’]|afin\\s+que|afin\\s+qu['’]|avant\\s+que|avant\\s+qu['’]|à\\s+moins\\s+que|à\\s+moins\\s+qu['’]|jusqu['’]à\\s+ce\\s+que|jusqu['’]à\\s+ce\\s+qu['’]|sans\\s+que|sans\\s+qu['’])";
-    const indicativeForms = [...new Set(subjunctiveVerbs.flatMap(v => v.indicative))].sort((a,b) => b.length-a.length).join("|");
-    // Unicode-aware word boundaries; apostrophes remain part of French elisions.
-    // Hyphen is intentionally omitted from the blocked boundary class, so it separates words.
-    const subjunctivePattern = new RegExp("(?<![\\p{L}\\p{N}_'’])(" + subjunctiveTriggers + ")\\s*(j['’]|je|tu|il|elle|nous|vous|ils|elles)\\s*(" + indicativeForms + ")(?![\\p{L}\\p{N}_'’])", "giu");
-    const infinitiveIrregulars = new Set(["être","avoir","faire","aller","venir","tenir","prendre","mettre","dire","lire","écrire","boire","voir","pouvoir","vouloir","devoir","savoir","connaître","comprendre","apprendre","sortir","partir","dormir","ouvrir","offrir","recevoir","courir","vivre","suivre","naître","mourir","croire","rire","sourire"]);
-    const isInfinitive = word => /(?:er|ir|re|oir)$/iu.test(word) || infinitiveIrregulars.has(word.toLocaleLowerCase("fr"));
-    corrected = corrected.replace(subjunctivePattern, (match, trigger, subject, verb, offset, source) => {
-      const subjectLower = subject.toLocaleLowerCase("fr");
-      const subjectIndex = ({je:0,"j'":0,"j’":0,tu:1,il:2,elle:2,nous:3,vous:4,ils:5,elles:5})[subjectLower];
-      const verbRule = subjunctiveVerbs.find(v => v.indicative.includes(verb.toLocaleLowerCase("fr")));
-      if (subjectIndex === undefined || !verbRule) return match;
-      const nextWord = source.slice(offset + match.length).match(/^\s+([\p{L}]+)(?![\p{L}])/u)?.[1];
-      if (verbRule.name === "aller" && nextWord && isInfinitive(nextWord)) {
-        suggestions.push({before: match, why: "After this conjunction the subjunctive is required. Because aller is followed by an infinitive, do not change vais/vas/va/allons/allez/vont to aille. Rewrite using the infinitive verb's own subjunctive (for example, « pour que je comprenne »).", messageOnly: true});
-        return match;
-      }
-      suggestions.push({before: match, why: "After this conjunction, use the subjunctive mood rather than the indicative in this clause."});
-      const form = verbRule.subjunctive[subjectIndex];
-      const elided = subjectLower === "j'" || subjectLower === "j’";
-      const replacement = elided ? subject + form : subjectLower === "je" && /^[aeiouàâäéèêëîïôöùûüÿœ]/iu.test(form) ? "j'" + form : subject + " " + form;
-      return match.slice(0, match.length - subject.length - verb.length - (elided ? 0 : 1)) + replacement;
+  let suggestions=[],corrected=q;
+  const subjunctiveVerbs = [
+    { name: "être", indicative: ["suis","es","est","sommes","êtes","sont"], subjunctive: ["sois","sois","soit","soyons","soyez","soient"] },
+    { name: "avoir", indicative: ["ai","as","a","avons","avez","ont"], subjunctive: ["aie","aies","ait","ayons","ayez","aient"] },
+    { name: "aller", indicative: ["vais","vas","va","allons","allez","vont"], subjunctive: ["aille","ailles","aille","allions","alliez","aillent"] },
+    { name: "faire", indicative: ["fais","fais","fait","faisons","faites","font"], subjunctive: ["fasse","fasses","fasse","fassions","fassiez","fassent"] },
+    { name: "pouvoir", indicative: ["peux","peux","peut","pouvons","pouvez","peuvent"], subjunctive: ["puisse","puisses","puisse","puissions","puissiez","puissent"] },
+    { name: "savoir", indicative: ["sais","sais","sait","savons","savez","savent"], subjunctive: ["sache","saches","sache","sachions","sachiez","sachent"] },
+    { name: "vouloir", indicative: ["veux","veux","veut","voulons","voulez","veulent"], subjunctive: ["veuille","veuilles","veuille","voulions","vouliez","veuillent"] }
+  ];
+  const subjunctiveTriggers = "(?:bien\\s+que|bien\\s+qu['’]|quoique|quoiqu['’]|pour\\s+que|pour\\s+qu['’]|afin\\s+que|afin\\s+qu['’]|avant\\s+que|avant\\s+qu['’]|à\\s+moins\\s+que|à\\s+moins\\s+qu['’]|jusqu['’]à\\s+ce\\s+que|jusqu['’]à\\s+ce\\s+qu['’]|sans\\s+que|sans\\s+qu['’])";
+  const indicativeForms = [...new Set(subjunctiveVerbs.flatMap(v => v.indicative))].sort((a,b) => b.length-a.length).join("|");
+  // Unicode-aware word boundaries; apostrophes remain part of French elisions.
+  // Hyphen is intentionally omitted from the blocked boundary class, so it separates words.
+  const writingPattern = (source, flags = "gi") => new RegExp("(?<![\\p{L}\\p{N}_'’])(?:" + source + ")(?![\\p{L}\\p{N}_'’])", flags.includes("u") ? flags : flags + "u");
+  const subjunctivePattern = new RegExp("(?<![\\p{L}\\p{N}_'’])(" + subjunctiveTriggers + ")\\s*(j['’]|je|tu|il|elle|nous|vous|ils|elles)\\s*(" + indicativeForms + ")(?![\\p{L}\\p{N}_'’])", "giu");
+  const infinitiveIrregulars = new Set(["être","avoir","faire","aller","venir","tenir","prendre","mettre","dire","lire","écrire","boire","voir","pouvoir","vouloir","devoir","savoir","connaître","comprendre","apprendre","sortir","partir","dormir","ouvrir","offrir","recevoir","courir","vivre","suivre","naître","mourir","croire","rire","sourire"]);
+  const isInfinitive = word => /(?:er|ir|re|oir)$/iu.test(word) || infinitiveIrregulars.has(word.toLocaleLowerCase("fr"));
+  corrected = corrected.replace(subjunctivePattern, (match, trigger, subject, verb, offset, source) => {
+    const subjectLower = subject.toLocaleLowerCase("fr");
+    const subjectIndex = ({je:0,"j'":0,"j’":0,tu:1,il:2,elle:2,nous:3,vous:4,ils:5,elles:5})[subjectLower];
+    const verbRule = subjunctiveVerbs.find(v => v.indicative.includes(verb.toLocaleLowerCase("fr")));
+    if (subjectIndex === undefined || !verbRule) return match;
+    const nextWord = source.slice(offset + match.length).match(/^\s+([\p{L}]+)(?![\p{L}])/u)?.[1];
+    if (verbRule.name === "aller" && nextWord && isInfinitive(nextWord)) {
+      suggestions.push({before: match, why: "After this conjunction the subjunctive is required. Because aller is followed by an infinitive, do not change vais/vas/va/allons/allez/vont to aille. Rewrite using the infinitive verb's own subjunctive (for example, « pour que je comprenne »).", messageOnly: true});
+      return match;
+    }
+    suggestions.push({before: match, why: "After this conjunction, use the subjunctive mood rather than the indicative in this clause."});
+    const form = verbRule.subjunctive[subjectIndex];
+    const elided = subjectLower === "j'" || subjectLower === "j’";
+    const replacement = elided ? subject + form : subjectLower === "je" && /^[aeiouàâäéèêëîïôöùûüÿœ]/iu.test(form) ? "j'" + form : subject + " " + form;
+    return match.slice(0, match.length - subject.length - verb.length - (elided ? 0 : 1)) + replacement;
+  });
+  const checks=[
+    [writingPattern("je suis (\\d+) ans(?!\\s+(?:plus|moins)\\b)"),(m,n)=>"j'ai "+n+" ans","French uses avoir for age."],
+    [writingPattern("je suis faim"),()=>"j'ai faim","French says avoir faim (to be hungry)."],
+    [writingPattern("je suis soif"),()=>"j'ai soif","French says avoir soif (to be thirsty)."],
+    [writingPattern("sa va(?!-et-vient)"),()=>"ça va","The expression is ça va, with ç; preserve the compound va-et-vient."],
+    [writingPattern("beacoup"),()=>"beaucoup","Spelling: beaucoup."],
+    [writingPattern("bonjor"),()=>"bonjour","Spelling: bonjour."],
+    [writingPattern("merçi"),()=>"merci","Merci is written without a cedilla."],
+    [writingPattern("je ne comprends pas pas"),null,"Repeated adjacent pas is flagged for review; no automatic correction.",true],
+  ];
+  for(const [re,rep,why,messageOnly=false] of checks){if(re.test(corrected)){re.lastIndex=0;const before=corrected;if(!messageOnly)corrected=corrected.replace(re,rep);suggestions.push({before,why,messageOnly});}}
+  if (!suggestions.length) {
+    return result("supported", 0.72, "writing.no-listed-issue", "No issue from the small built-in check list was detected. That does not prove the sentence is fully correct; this is not a full grammar checker.", {
+      kind: "no-issues", input: q, corrected: q, suggestions: [], hasCorrection: false
     });
-    const checks=[
-      [writingPattern("je suis (\\d+) ans(?!\\s+(?:plus|moins)\\b)"),(m,n)=>"j'ai "+n+" ans","French uses avoir for age."],
-      [writingPattern("je suis faim"),()=>"j'ai faim","French says avoir faim (to be hungry)."],
-      [writingPattern("je suis soif"),()=>"j'ai soif","French says avoir soif (to be thirsty)."],
-      [writingPattern("sa va"),()=>"ça va","The expression is ça va, with ç; preserve the compound va-et-vient."],
-      [writingPattern("beacoup"),()=>"beaucoup","Spelling: beaucoup."],
-      [writingPattern("bonjor"),()=>"bonjour","Spelling: bonjour."],
-      [writingPattern("merçi"),()=>"merci","Merci is written without a cedilla."],
-      [writingPattern("pas\\s+pas"),null,"Repeated adjacent pas is flagged for review; no automatic correction.",true],
-    ];
-    for(const [re,rep,why,messageOnly=false] of checks){if(re.test(corrected)){re.lastIndex=0;const before=corrected;if(!messageOnly)corrected=corrected.replace(re,rep);suggestions.push({before,why,messageOnly});}}
-    if(!suggestions.length)return `<div class="fi-answer"><b>Text received</b><p>${esc(q)}</p><p>No issue from the small built-in check list was detected. That does not prove the sentence is fully correct; this is not a full grammar checker.</p></div>`;
-    const hasCorrection = suggestions.some(s => !s.messageOnly);
-    const heading = hasCorrection ? "Suggested text" : "Grammar note";
-    const output = hasCorrection ? `<p class="fi-output">${esc(corrected)}</p>` : "";
-    const action = hasCorrection ? `<button id="fiUseCorrection" class="g">Use corrected text</button>` : "";
-    return `<div class="fi-answer"><b>${heading}</b>${output}<b>Why these changes?</b>${suggestions.map(s=>`<div class="fi-result">${esc(s.why)}<div class="fi-muted">Original: ${esc(s.before)}</div></div>`).join("")}${action}</div>`;
   }
+  const hasCorrection = suggestions.some(s => !s.messageOnly);
+  return result(hasCorrection ? "supported" : "ambiguous", hasCorrection ? 0.82 : 0.55,
+    hasCorrection ? "writing.correction" : "writing.review-only",
+    suggestions.map(s => s.why).join(" "),
+    { kind: "suggestions", input: q, corrected, suggestions, hasCorrection });
+}
 
 export { lookup, translate, conjugate, answerQuestion, checkWriting, writingPattern };
+
 export const FrenchIntelligenceCoreV1 = Object.freeze({ lookup, translate, conjugate, answerQuestion, checkWriting });

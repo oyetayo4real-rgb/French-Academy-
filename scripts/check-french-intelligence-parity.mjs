@@ -1,108 +1,53 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import vm from "node:vm";
-import * as extracted from "../features/french-intelligence-core-v1.mjs";
+import * as api from "../features/french-intelligence-compat.mjs";
 
-// Import the pure module before constructing any legacy/browser test harness.
-assert.equal(typeof globalThis.window, "undefined");
-assert.equal(typeof globalThis.document, "undefined");
-for (const method of ["lookup", "translate", "conjugate", "answerQuestion", "checkWriting"]) {
-  assert.equal(typeof extracted[method], "function", `pure core exports ${method}`);
+const golden = JSON.parse(readFileSync("tests/golden/legacy-v1.json", "utf8"));
+function exact(fn, label) {
+  try { return fn(); }
+  catch (error) { return { __threw: true, name: error && error.name || "Error", message: String(error && error.message || error), label }; }
 }
-
-// The old implementation is loaded in an isolated VM only as a parity oracle.
-// This stub is not available to, and is never passed into, the extracted core.
-const listeners = {};
-const legacyWindow = {};
-const legacyDocument = {
-  addEventListener(name, fn) { (listeners[name] ||= []).push(fn); },
-  getElementById() { return null; }
-};
-vm.runInNewContext(readFileSync("features/french-intelligence.js", "utf8"), {
-  window: legacyWindow,
-  document: legacyDocument,
-  console,
-  URL,
-  encodeURIComponent,
-  location: { reload() {} }
-});
-const legacy = legacyWindow.FrenchIntelligenceCore;
-assert.ok(legacy, "legacy baseline exposes its public API");
-
-const cases = {
-  lookup: [
-    ["bonjour"],
-    ["ecole"],
-    ["école"],
-    ["S’il vous plaît"],
-    ["hello"],
-    ["xqz-not-a-word"],
-    [""],
-    [null]
-  ],
-  translate: [
-    ["Thank you", "en-fr"],
-    ["J'ai besoin d'aide", "fr-en"],
-    ["J’ai besoin d’aide", "fr-en"],
-    ["Bonjour", "fr-en"],
-    ["unfamiliar sentence", "en-fr"],
-    ["  ", "en-fr"],
-    ["<script>alert(1)</script>", "en-fr"]
-  ],
-  conjugate: [
-    ["être"],
-    ["parler"],
-    ["manger"],
-    ["xyz"],
-    [""],
-    [null]
-  ],
-  answerQuestion: [
-    ["What is the difference between depuis and pendant?"],
-    ["Why is maison feminine?"],
-    ["Explain ne pas"],
-    ["an obscure unsupported question"],
-    [""],
-    [null]
-  ],
-  checkWriting: [
-    ["Je suis 20 ans."],
-    ["Bien que je suis fatigué, je continue."],
-    ["Bonjour, je m'appelle Léa."],
-    ["J’ai faim."],
-    ["<img src=x onerror=alert(1)>"],
-    [""],
-    [null]
-  ]
-};
-
-function comparable(value) {
-  return value === undefined ? { __undefined: true } : JSON.parse(JSON.stringify(value));
+let compared = 0;
+let matched = 0;
+const differences = [];
+function compare(label, invoke, expected) {
+  const actual = exact(invoke, label);
+  compared++;
+  if (JSON.stringify(actual) === JSON.stringify(expected)) matched++;
+  else differences.push({ label, expected, actual });
 }
-
-let count = 0;
-for (const method of Object.keys(cases)) {
-  for (const args of cases[method]) {
-    let expected;
-    let actual;
-    let legacyError;
-    let coreError;
-    try { expected = legacy[method](...args); } catch (error) { legacyError = error; }
-    try { actual = extracted[method](...args); } catch (error) { coreError = error; }
-    assert.equal(Boolean(coreError), Boolean(legacyError),
-      `${method}(${JSON.stringify(args)}): thrown-error parity`);
-    if (legacyError) {
-      assert.equal(coreError.name, legacyError.name,
-        `${method}(${JSON.stringify(args)}): error type parity`);
-    } else {
-      assert.deepEqual(comparable(actual), comparable(expected),
-        `${method}(${JSON.stringify(args)}): return-shape/value/HTML parity`);
-      if (["translate", "answerQuestion", "checkWriting"].includes(method)) {
-        assert.equal(typeof actual, "string", `${method} preserves its HTML-string return type`);
-        assert.equal(actual, expected, `${method} preserves exact HTML string`);
-      }
-    }
-    count++;
-  }
+const inv = golden.inventory;
+for (const row of inv.dictionary) for (const item of row.variants) compare("lookup:" + item.input, () => api.lookup(item.input), item.output);
+for (const row of inv.phrasebook.englishToFrench) compare("translate:en-fr:" + row.key, () => api.translate(row.key, "en-fr"), row.output);
+for (const row of inv.phrasebook.frenchToEnglish) compare("translate:fr-en:" + row.key, () => api.translate(row.key, "fr-en"), row.output);
+for (const row of inv.phrasebook.regexPatterns) {
+  compare("phrase-pattern-fr-en:" + row.index, () => api.translate(row.sample, "fr-en"), row.frEnOutput);
+  compare("phrase-pattern-en-fr:" + row.index, () => api.translate(row.englishHint, "en-fr"), row.enFrOutput);
 }
-console.log(`PASS exact legacy parity: ${count} cases across lookup, translate, conjugate, answerQuestion, and checkWriting`);
+for (const row of inv.phrasebook.unsupported) {
+  compare("unsupported-en-fr:" + row.input, () => api.translate(row.input, "en-fr"), row.enFrOutput);
+  compare("unsupported-fr-en:" + row.input, () => api.translate(row.input, "fr-en"), row.frEnOutput);
+}
+for (const row of inv.conjugation.verbs) compare("conjugate:" + row.verb, () => api.conjugate(row.verb), row.output);
+for (const row of inv.conjugation.unsupported) compare("unsupported-conjugate:" + row.verb, () => api.conjugate(row.verb), row.output);
+for (const row of inv.grammar) compare("grammar:" + row.title, () => api.answerQuestion(row.title), row.output);
+for (const row of inv.checkWriting.clean) compare("clean:" + row.index, () => api.checkWriting(row.sentence), row.output);
+for (const row of inv.checkWriting.hardNegative) compare("hard-negative:" + row.index, () => api.checkWriting(row.sentence), row.output);
+for (const row of inv.checkWriting.knownErrors) compare("known-error:" + row.index, () => api.checkWriting(row.sentence), row.output);
+for (const row of inv.edgeInputs) {
+  const i = row.input, o = row.outputs, n = row.label;
+  compare("edge-lookup:" + n, () => api.lookup(i), o.lookup);
+  compare("edge-en-fr:" + n, () => api.translate(i, "en-fr"), o.translateEnFr);
+  compare("edge-fr-en:" + n, () => api.translate(i, "fr-en"), o.translateFrEn);
+  compare("edge-conjugate:" + n, () => api.conjugate(i), o.conjugate);
+  compare("edge-answer:" + n, () => api.answerQuestion(i), o.answerQuestion);
+  compare("edge-writing:" + n, () => api.checkWriting(i), o.checkWriting);
+}
+if (differences.length) {
+  console.error("FAIL exact golden parity: compared=" + compared + " matched=" + matched + " differences=" + differences.length);
+  console.error(JSON.stringify(differences.slice(0, 25), null, 2));
+  process.exitCode = 1;
+} else {
+  assert.equal(compared, 1000, "golden inventory size must remain unchanged");
+  console.log("PASS exact golden parity: compared=" + compared + " matched=" + matched + " differences=0");
+}
