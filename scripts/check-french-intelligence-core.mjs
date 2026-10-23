@@ -29,5 +29,5 @@ assert.equal(core.lookup("bonjour").word, "bonjour");
 assert.equal(core.lookup("not-a-word").status, "unsupported");
 assert.deepEqual(core.conjugate("être").forms, ["suis", "es", "est", "sommes", "êtes", "sont"]);
 assert.equal(core.translate("Thank you", "en-fr").translation, "merci");
-assert.equal(core.checkWriting("Je suis 20 ans.").corrected, "j'ai 20 ans.");
+assert.equal(core.checkWriting("Je suis 20 ans.").corrected, "J'ai 20 ans.");
 console.log("PASS DOM-free structured core and forbidden-string static check");

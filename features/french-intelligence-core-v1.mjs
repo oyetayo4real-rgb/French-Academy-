@@ -1,6 +1,8 @@
+import { VERB_PARADIGMS, LEGACY_IRREGULARS, PARADIGM_STATUS, REGULAR_ER_CLASS, REGULAR_ER_VERBS, SPELLING_CHANGE_CLASS, PERSONS } from "./french-conjugation-paradigms.mjs";
 /* Pure structured French Intelligence core. No DOM, browser globals, network, storage, or HTML rendering. */
 
 const writingPattern = (source, flags = "gi") => new RegExp("(?<![\\p{L}\\p{N}_'’\\-])(?:" + source + ")(?![\\p{L}\\p{N}_'’\\-])", flags.includes("u") ? flags : flags + "u");
+const preserveInitialCase = (match, replacement) => match && /^\p{Lu}/u.test(match) ? replacement.charAt(0).toLocaleUpperCase("fr") + replacement.slice(1) : replacement;
 
 const dictionary = {
     bonjour:["hello; good morning","interjection","Bonjour, comment allez-vous ?","A standard greeting; use bonsoir in the evening."],
@@ -28,9 +30,9 @@ const dictionary = {
     grande:["big; tall","adjective","Une grande maison.","Feminine form of grand."],
     "travail":["work; job","noun (masculine)","Je cherche du travail.","Usually masculine: un travail; plural travaux in many contexts."],
     famille:["family","noun (feminine)","Ma famille habite ici.","Usually feminine: une famille."],
-    enfant:["child","noun (masculine or feminine by person)","L'enfant joue dehors.","The noun is grammatically masculine; the person's sex is contextual."],
+    enfant:["child","noun (masculine or feminine; same form)","L'enfant joue dehors.","The form is the same for boys and girls; the article follows the child (un enfant, une enfant); un enfant is the usual generic form."],
     ville:["city; town","noun (feminine)","Paris est une grande ville.","Usually feminine: une ville."],
-    pays:["country","noun (masculine, usually)","La France est un pays européen.","Usually masculine; some country names use articles of other genders."],
+    pays:["country","noun (masculine)","La France est un pays européen.","Always masculine: un pays. Country names such as la France have their own gender."],
     nuit:["night","noun (feminine)","Bonne nuit !","Usually feminine: la nuit."],
     matin:["morning","noun (masculine)","Je travaille le matin.","Bonjour is used as a greeting during the day."],
     soir:["evening","noun (masculine)","Je rentre ce soir.","Bonsoir is the usual evening greeting."],
@@ -144,30 +146,7 @@ const dictionary = {
     ensemble:["together","adverb","Nous étudions ensemble.","Often follows the verb or object."],
   };
 
-const irregular = {
-    être:["suis","es","est","sommes","êtes","sont"],
-    avoir:["ai","as","a","avons","avez","ont"],
-    aller:["vais","vas","va","allons","allez","vont"],
-    faire:["fais","fais","fait","faisons","faites","font"],
-    venir:["viens","viens","vient","venons","venez","viennent"],
-    prendre:["prends","prends","prend","prenons","prenez","prennent"],
-    pouvoir:["peux","peux","peut","pouvons","pouvez","peuvent"],
-    vouloir:["veux","veux","veut","voulons","voulez","veulent"],
-    devoir:["dois","dois","doit","devons","devez","doivent"],
-    savoir:["sais","sais","sait","savons","savez","savent"],
-    dire:["dis","dis","dit","disons","dites","disent"],
-    écrire:["écris","écris","écrit","écrivons","écrivez","écrivent"],
-    lire:["lis","lis","lit","lisons","lisez","lisent"],
-    boire:["bois","bois","boit","buvons","buvez","boivent"],
-    dormir:["dors","dors","dort","dormons","dormez","dorment"],
-    partir:["pars","pars","part","partons","partez","partent"],
-    sortir:["sors","sors","sort","sortons","sortez","sortent"],
-    mettre:["mets","mets","met","mettons","mettez","mettent"],
-    recevoir:["reçois","reçois","reçoit","recevons","recevez","reçoivent"],
-    ouvrir:["ouvre","ouvres","ouvre","ouvrons","ouvrez","ouvrent"],
-    croire:["crois","crois","croit","croyons","croyez","croient"],
-    courir:["cours","cours","court","courons","courez","courent"]
-  };
+
 
 const persons = ["je / j'","tu","il / elle / on","nous","vous","ils / elles"];
   const examples = [
@@ -206,7 +185,7 @@ const rules = [
     {title:"Agreement with être in passé composé",body:"With many verbs that take être in the passé composé, the past participle agrees with the subject: Elle est arrivée; Ils sont partis; Elles sont parties. Most verbs take avoir, and agreement with a preceding direct object is a separate rule. Check the verb and sentence structure."},
     {title:"Imparfait endings",body:"For most verbs, take the nous form of the present, remove -ons, and add -ais, -ais, -ait, -ions, -iez, -aient: nous parlons → je parlais. Être is irregular: j'étais, tu étais, il était, nous étions, vous étiez, ils étaient. Use the imparfait for background, habits and ongoing past states."},
     {title:"Conditional politeness",body:"The conditionnel présent often softens a request: Je voudrais un café; Pourriez-vous m'aider ? It can also express a hypothetical result: Si j'avais le temps, je voyagerais. In the common si + imparfait pattern, do not put the conditional directly after si."},
-    {title:"Negation with an infinitive",body:"When the infinitive is negated, ne pas usually comes directly before it: Je préfère ne pas sortir; Il faut ne pas oublier. With a conjugated verb, ne surrounds the verb: Je ne sors pas. In everyday speech ne is often dropped, but formal writing usually retains it."}  ];
+    {title:"Negation with an infinitive",body:"When the infinitive is negated, ne pas usually comes directly before it: Je préfère ne pas sortir; J'ai décidé de ne pas partir. With a conjugated verb, ne surrounds the verb: Je ne sors pas. In everyday speech ne is often dropped, but formal writing usually retains it."}  ];
 
 const phrasebookPairs={"hello":"bonjour","good morning":"bonjour","good evening":"bonsoir","goodbye":"au revoir","thank you":"merci","thank you very much":"merci beaucoup","please":"s'il vous plaît","yes":"oui","no":"non","i am":"je suis","i have":"j'ai","i would like":"je voudrais","i don't understand":"je ne comprends pas","where is the station":"où est la gare","how are you":"comment allez-vous","my name is":"je m'appelle","i love you":"je t'aime","see you tomorrow":"à demain","see you soon":"à bientôt","i speak french":"je parle français","i am learning french":"j'apprends le français","i need help":"j'ai besoin d'aide","i am hungry":"j'ai faim","i am thirsty":"j'ai soif","i am tired":"je suis fatigué(e)","i am happy":"je suis heureux/heureuse","where is the bathroom":"où sont les toilettes","how much does it cost":"combien ça coûte","i don't know":"je ne sais pas","i understand":"je comprends","i am sorry":"je suis désolé(e)","excuse me":"excusez-moi","see you later":"à plus tard","have a nice day":"bonne journée","good night":"bonne nuit","what time is it":"quelle heure est-il","i need a doctor":"j'ai besoin d'un médecin","can you help me":"pouvez-vous m'aider","i would like water":"je voudrais de l'eau","i agree":"je suis d'accord"};
 
@@ -251,30 +230,43 @@ function translate(text, direction) {
     if (exact) return result("supported", 1, "phrasebook.en-fr.exact", "Known phrasebook match.", { kind: "en-fr-exact", input: q, translation: phrasebookPairs[exact], matchedKey: exact });
     return result("unsupported", 0, "phrasebook.en-fr.no-match", "This phrase is not in the local phrasebook yet. I won't guess a full translation.", { kind: "en-fr-unsupported", input: q });
   }
-  let translated = q;
-  const matches = [];
+  const candidates = [];
   for (const [re, english] of phraseMap) {
-    const matcher = phraseMatcher(re);
-    if (matcher.test(translated)) { matches.push(english); translated = translated.replace(matcher, english); }
+    const matcher = phraseMatcher(re); matcher.lastIndex = 0; let match;
+    while ((match = matcher.exec(q))) { candidates.push({ start: match.index, end: match.index + match[0].length, english }); if (!match[0].length) matcher.lastIndex++; }
   }
-  if (matches.length) return result("supported", 0.8, "phrasebook.fr-en.pattern", "This is a word/phrase substitution, not a full semantic translation; verify grammar and context.", { kind: "fr-en-pattern", input: q, translation: translated, matches: [...new Set(matches)] });
+  candidates.sort((a,b) => a.start - b.start || (b.end-b.start) - (a.end-a.start));
+  const selected = []; let cursor = -1;
+  for (const candidate of candidates) { if (candidate.start < cursor) continue; selected.push(candidate); cursor = candidate.end; }
+  const covered = new Array(q.length).fill(false);
+  for (const match of selected) for (let i=match.start;i<match.end;i++) covered[i]=true;
+  let uncoveredToken = false;
+  for (let i=0;i<q.length;i++) if (/[\p{L}\p{N}]/u.test(q[i]) && !covered[i]) uncoveredToken = true;
   const words = q.match(/[\p{L}’'-]+/gu) || [];
   const hints = words.map(w => ({ word: w, entry: findDictionaryEntry(w) })).filter(x => x.entry).map(x => ({ word: x.word, meaning: x.entry.meaning }));
-  if (hints.length) return result("ambiguous", 0.45, "phrasebook.fr-en.vocabulary-hints", "Vocabulary hints are not a complete translation.", { kind: "fr-en-vocabulary", input: q, vocabularyHints: hints });
-  return result("unsupported", 0, "phrasebook.fr-en.no-match", "No reliable local match was found.", { kind: "fr-en-unsupported", input: q });
+  if (selected.length && !uncoveredToken) {
+    let translation = "", last = 0;
+    for (const match of selected) { translation += q.slice(last,match.start) + match.english; last=match.end; }
+    translation += q.slice(last);
+    return result("supported", 0.9, "phrasebook.fr-en.covered", "Every word in the input is covered by a local phrase pattern.", { kind: "fr-en-covered", input: q, translation, matches: [...new Set(selected.map(x=>x.english))] });
+  }
+  return result("ambiguous", 0.45, "phrasebook.fr-en.incomplete-coverage", "Local phrase patterns do not cover the whole input. Vocabulary hints are not a complete translation.", { kind: "fr-en-vocabulary", input: q, vocabularyHints: hints, matchedPhrases: [...new Set(selected.map(x=>x.english))] });
 }
 function conjugate(raw) {
-  let v = String(raw || "").toLocaleLowerCase("fr").trim().replace(/^to /, "");
+  const v = String(raw || "").toLocaleLowerCase("fr").trim().replace(/^to /, "");
   if (!v) return result("unsupported", 0, "conjugation.empty", "No verb was supplied.", { query: v });
-  let entry = null;
-  if (irregular[v]) entry = { v, forms: irregular[v], type: "Irregular verb · present tense" };
-  else if (v === "manger") entry = { v, forms: ["mange","manges","mange","mangeons","mangez","mangent"], type: "Regular -er pattern with spelling adjustment" };
-  else if (v === "commencer") entry = { v, forms: ["commence","commences","commence","commençons","commencez","commencent"], type: "Regular -er pattern with spelling adjustment" };
-  else if (/er$/.test(v) && v.length > 3) { const stem = v.slice(0, -2); entry = { v, forms: [stem+"e",stem+"es",stem+"e",stem+"ons",stem+"ez",stem+"ent"], type: "Regular -er verb · present tense" }; }
-  else if (/ir$/.test(v) && v.length > 3 && !["partir","sortir","dormir","servir","sentir","mentir","courir","ouvrir","offrir","cueillir"].includes(v)) { const stem = v.slice(0, -2); entry = { v, forms: [stem+"is",stem+"is",stem+"it",stem+"issons",stem+"issez",stem+"issent"], type: "Regular -ir verb · present tense (finir pattern)" }; }
-  else if (/re$/.test(v) && v.length > 3) { const stem = v.slice(0, -2); entry = { v, forms: [stem+"s",stem+"s",stem,""+stem+"ons",stem+"ez",stem+"ent"], type: "Regular -re verb · present-tense pattern (verify exceptions)" }; }
-  if (!entry) return result("unsupported", 0, "conjugation.no-pattern", "No conjugation pattern is available for this verb.", { query: v });
-  return result("supported", 0.95, "conjugation.present." + (irregular[v] ? "irregular" : "pattern"), entry.type, { ...entry, persons: [...persons] });
+  let forms = VERB_PARADIGMS[v] ? [...VERB_PARADIGMS[v]] : null;
+  let status = PARADIGM_STATUS[v] || null;
+  const dictionaryEntry = dictionary[v];
+  const dictionaryMarksVerb = Boolean(dictionaryEntry && /verb/i.test(String(dictionaryEntry[1] || "")));
+  let type = LEGACY_IRREGULARS.has(v) ? "Irregular verb · present tense" : ["manger","commencer"].includes(v) ? "Regular -er pattern with spelling adjustment" : ["finir","choisir","réussir","grandir","remplir","obéir","réfléchir"].includes(v) ? "Regular -ir verb · present tense (finir pattern)" : ["vendre","attendre","entendre","répondre","perdre","rendre","descendre"].includes(v) ? "Regular -re verb · present-tense pattern (verify exceptions)" : status === "verified" ? "Explicit verified present-tense paradigm" : "Explicit present-tense paradigm · needs review";
+  if (!forms && /er$/u.test(v) && v.length > 3 && (REGULAR_ER_VERBS.has(v) || dictionaryMarksVerb) && !SPELLING_CHANGE_CLASS.test(v)) {
+    const stem = v.slice(0, -2);
+    forms = [stem+"e",stem+"es",stem+"e",stem+"ons",stem+"ez",stem+"ent"];
+    status = REGULAR_ER_CLASS.status; type = REGULAR_ER_CLASS.type;
+  }
+  if (!forms) return result("unsupported", 0, "conjugation.no-paradigm", "No explicit present-tense paradigm is available for this verb.", { query: v });
+  return result("supported", status === "verified" ? 0.99 : 0.75, "conjugation.present." + status, type, { v, forms, type, paradigmStatus: status, persons: [...PERSONS] });
 }
 function answerQuestion(q) {
   const n = norm(q);
@@ -286,7 +278,7 @@ function answerQuestion(q) {
   const matched = rules.find(r => n.includes(norm(r.title).replace("ne ... pas", "ne")) || (n.includes("negation") && r.title.startsWith("Negation")) || (n.includes("tu") && n.includes("vous") && r.title === "Tu and vous"));
   if (matched) return result("supported", 0.9, "grammar." + matched.title, matched.body, { kind: "grammar-rule", title: matched.title, body: matched.body });
   if (/maison/.test(n) && /(feminin|gender|genre|why|pourquoi)/.test(n)) return result("supported", 0.85, "question.maison-gender", "Grammatical gender is a property of each noun and is not always predictable from meaning. Learn the noun with its article: la maison. The ending -on does not reliably indicate gender.", { kind: "maison-gender" });
-  if (/age|ans|vingt ans/.test(n)) return result("supported", 0.9, "question.age", "French uses avoir, not être, to express age.", { kind: "age" });
+  if (/\b(?:âge|age|ans|years old)\b/u.test(n) && (/[?？]/u.test(String(q)) || /^(?:how|what|quel(?:le)?|comment|à quel|at what)\b/u.test(n)) && /(?:how old|what age|quel(?:le)? age|à quel(?:le)? âge|years old|\b(?:âge|age|ans)\b)/u.test(n)) return result("supported", 0.9, "question.age", "French uses avoir, not être, to express age.", { kind: "age" });
   if (/translate|translation|tradui|meaning|signif/.test(n)) {
     const entry = findDictionaryEntry(q.replace(/^(what does|meaning of|translate)\s+/i, "").replace(/[?!.]$/, ""));
     if (entry) return result("supported", 0.9, "question.dictionary." + entry.word, entry.notes, { kind: "dictionary", entry });
@@ -314,7 +306,6 @@ function checkWriting(q){
   const indicativeForms = [...new Set(subjunctiveVerbs.flatMap(v => v.indicative))].sort((a,b) => b.length-a.length).join("|");
   // Unicode-aware word boundaries; apostrophes remain part of French elisions.
   // Hyphen is intentionally omitted from the blocked boundary class, so it separates words.
-  const writingPattern = (source, flags = "gi") => new RegExp("(?<![\\p{L}\\p{N}_'’])(?:" + source + ")(?![\\p{L}\\p{N}_'’])", flags.includes("u") ? flags : flags + "u");
   const subjunctivePattern = new RegExp("(?<![\\p{L}\\p{N}_'’])(" + subjunctiveTriggers + ")\\s*(j['’]|je|tu|il|elle|nous|vous|ils|elles)\\s*(" + indicativeForms + ")(?![\\p{L}\\p{N}_'’])", "giu");
   const infinitiveIrregulars = new Set(["être","avoir","faire","aller","venir","tenir","prendre","mettre","dire","lire","écrire","boire","voir","pouvoir","vouloir","devoir","savoir","connaître","comprendre","apprendre","sortir","partir","dormir","ouvrir","offrir","recevoir","courir","vivre","suivre","naître","mourir","croire","rire","sourire"]);
   const isInfinitive = word => /(?:er|ir|re|oir)$/iu.test(word) || infinitiveIrregulars.has(word.toLocaleLowerCase("fr"));
@@ -335,10 +326,10 @@ function checkWriting(q){
     return match.slice(0, match.length - subject.length - verb.length - (elided ? 0 : 1)) + replacement;
   });
   const checks=[
-    [writingPattern("je suis (\\d+) ans(?!\\s+(?:plus|moins)\\b)"),(m,n)=>"j'ai "+n+" ans","French uses avoir for age."],
-    [writingPattern("je suis faim"),()=>"j'ai faim","French says avoir faim (to be hungry)."],
-    [writingPattern("je suis soif"),()=>"j'ai soif","French says avoir soif (to be thirsty)."],
-    [writingPattern("sa va(?!-et-vient)"),()=>"ça va","The expression is ça va, with ç; preserve the compound va-et-vient."],
+    [writingPattern("je suis (\\d+) ans(?!\\s+(?:plus|moins)\\b)"),(m,n)=>preserveInitialCase(m,"j'ai "+n+" ans"),"French uses avoir for age."],
+    [writingPattern("je suis faim"),(m)=>preserveInitialCase(m,"j'ai faim"),"French says avoir faim (to be hungry)."],
+    [writingPattern("je suis soif"),(m)=>preserveInitialCase(m,"j'ai soif"),"French says avoir soif (to be thirsty)."],
+    [writingPattern("sa va(?!-et-vient)"),(m)=>preserveInitialCase(m,"ça va"),"The expression is ça va, with ç; preserve the compound va-et-vient."],
     [writingPattern("beacoup"),()=>"beaucoup","Spelling: beaucoup."],
     [writingPattern("bonjor"),()=>"bonjour","Spelling: bonjour."],
     [writingPattern("merçi"),()=>"merci","Merci is written without a cedilla."],

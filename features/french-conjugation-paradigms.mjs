@@ -1,0 +1,60 @@
+/* Table-driven present-tense data. All added forms not explicitly specified by Section 14a are marked needs_review. */
+export const VERB_PARADIGMS = {
+    être:["suis","es","est","sommes","êtes","sont"],
+    avoir:["ai","as","a","avons","avez","ont"],
+    aller:["vais","vas","va","allons","allez","vont"],
+    faire:["fais","fais","fait","faisons","faites","font"],
+    venir:["viens","viens","vient","venons","venez","viennent"],
+    prendre:["prends","prends","prend","prenons","prenez","prennent"],
+    pouvoir:["peux","peux","peut","pouvons","pouvez","peuvent"],
+    vouloir:["veux","veux","veut","voulons","voulez","veulent"],
+    devoir:["dois","dois","doit","devons","devez","doivent"],
+    savoir:["sais","sais","sait","savons","savez","savent"],
+    dire:["dis","dis","dit","disons","dites","disent"],
+    écrire:["écris","écris","écrit","écrivons","écrivez","écrivent"],
+    lire:["lis","lis","lit","lisons","lisez","lisent"],
+    boire:["bois","bois","boit","buvons","buvez","boivent"],
+    dormir:["dors","dors","dort","dormons","dormez","dorment"],
+    partir:["pars","pars","part","partons","partez","partent"],
+    sortir:["sors","sors","sort","sortons","sortez","sortent"],
+    mettre:["mets","mets","met","mettons","mettez","mettent"],
+    recevoir:["reçois","reçois","reçoit","recevons","recevez","reçoivent"],
+    ouvrir:["ouvre","ouvres","ouvre","ouvrons","ouvrez","ouvrent"],
+    croire:["crois","crois","croit","croyons","croyez","croient"],
+    courir:["cours","cours","court","courons","courez","courent"],
+  "connaître":["connais","connais","connaît","connaissons","connaissez","connaissent"],
+  "comprendre":["comprends","comprends","comprend","comprenons","comprenez","comprennent"],
+  "apprendre":["apprends","apprends","apprend","apprenons","apprenez","apprennent"],
+  "surprendre":["surprends","surprends","surprend","surprenons","surprenez","surprennent"],
+  "reprendre":["reprends","reprends","reprend","reprenons","reprenez","reprennent"],
+  "voir":["vois","vois","voit","voyons","voyez","voient"], "vivre":["vis","vis","vit","vivons","vivez","vivent"],
+  "suivre":["suis","suis","suit","suivons","suivez","suivent"], "tenir":["tiens","tiens","tient","tenons","tenez","tiennent"],
+  "obtenir":["obtiens","obtiens","obtient","obtenons","obtenez","obtiennent"], "devenir":["deviens","deviens","devient","devenons","devenez","deviennent"],
+  "revenir":["reviens","reviens","revient","revenons","revenez","reviennent"], "retenir":["retiens","retiens","retient","retenons","retenez","retiennent"],
+  "mourir":["meurs","meurs","meurt","mourons","mourez","meurent"], "promettre":["promets","promets","promet","promettons","promettez","promettent"],
+  "permettre":["permets","permets","permet","permettons","permettez","permettent"], "remettre":["remets","remets","remet","remettons","remettez","remettent"],
+  "conduire":["conduis","conduis","conduit","conduisons","conduisez","conduisent"], "envoyer":["envoie","envoies","envoie","envoyons","envoyez","envoient"],
+  "acheter":["achète","achètes","achète","achetons","achetez","achètent"], "lever":["lève","lèves","lève","levons","levez","lèvent"],
+  "préférer":["préfère","préfères","préfère","préférons","préférez","préfèrent"], "espérer":["espère","espères","espère","espérons","espérez","espèrent"],
+  "appeler":["appelle","appelles","appelle","appelons","appelez","appellent"], "jeter":["jette","jettes","jette","jetons","jetez","jettent"],
+  "payer":["paie","paies","paie","payons","payez","paient"], "voyager":["voyage","voyages","voyage","voyageons","voyagez","voyagent"],
+  "changer":["change","changes","change","changeons","changez","changent"], "partager":["partage","partages","partage","partageons","partagez","partagent"],
+  "ranger":["range","ranges","range","rangeons","rangez","rangent"], "lancer":["lance","lances","lance","lançons","lancez","lancent"],
+  "placer":["place","places","place","plaçons","placez","placent"], "avancer":["avance","avances","avance","avançons","avancez","avancent"],
+  "manger":["mange","manges","mange","mangeons","mangez","mangent"], "commencer":["commence","commences","commence","commençons","commencez","commencent"],
+  "finir":["finis","finis","finit","finissons","finissez","finissent"], "choisir":["choisis","choisis","choisit","choisissons","choisissez","choisissent"],
+  "réussir":["réussis","réussis","réussit","réussissons","réussissez","réussissent"], "grandir":["grandis","grandis","grandit","grandissons","grandissez","grandissent"],
+  "remplir":["remplis","remplis","remplit","remplissons","remplissez","remplissent"], "obéir":["obéis","obéis","obéit","obéissons","obéissez","obéissent"],
+  "réfléchir":["réfléchis","réfléchis","réfléchit","réfléchissons","réfléchissez","réfléchissent"],
+  "vendre":["vends","vends","vend","vendons","vendez","vendent"], "attendre":["attends","attends","attend","attendons","attendez","attendent"],
+  "entendre":["entends","entends","entend","entendons","entendez","entendent"], "répondre":["réponds","réponds","répond","répondons","répondez","répondent"],
+  "perdre":["perds","perds","perd","perdons","perdez","perdent"], "rendre":["rends","rends","rend","rendons","rendez","rendent"],
+  "descendre":["descends","descends","descend","descendons","descendez","descendent"]
+};
+export const LEGACY_IRREGULARS = new Set(Object.keys(VERB_PARADIGMS).slice(0,21));
+export const VERIFIED_PARADIGMS = new Set(["connaître","comprendre","apprendre","tenir","voir","vivre","suivre","acheter","préférer","appeler","voyager","changer","lancer","envoyer","mourir","promettre","conduire"]);
+export const PARADIGM_STATUS = Object.freeze(Object.fromEntries(Object.keys(VERB_PARADIGMS).map(v => [v, VERIFIED_PARADIGMS.has(v) ? "verified" : "needs_review"])));
+export const REGULAR_ER_CLASS = Object.freeze({ id:"regular-er", status:"needs_review", type:"Regular -er verb · present tense" });
+export const REGULAR_ER_VERBS = new Set(["parler","aimer","travailler","habiter","étudier","jouer","regarder","écouter","demander","chercher","donner","arriver","rester","tomber","porter","penser","trouver","utiliser","visiter","aider","marcher","terminer","continuer","montrer","monter","passer","entrer","garder","oublier","présenter","expliquer","organiser","préparer","fermer","toucher","chanter","danser","cuisiner","déjeuner","dîner"]);
+export const SPELLING_CHANGE_CLASS = /(?:ger|cer|yer|eler|eter|é[^aeiouy]*er|e[^aeiouy]*er)$/u;
+export const PERSONS = Object.freeze(["je / j'","tu","il / elle / on","nous","vous","ils / elles"]);
