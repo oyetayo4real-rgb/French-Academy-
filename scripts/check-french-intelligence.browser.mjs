@@ -2,10 +2,16 @@ import { chromium, devices } from "playwright";
 import assert from "node:assert/strict";
 import { readFileSync, statSync } from "node:fs";
 
-const engineSizeBytes = statSync("features/french-intelligence.js").size;
+const engineSizeBytes = statSync("features/french-intelligence-compat.mjs").size;
 const swSource = readFileSync("sw.js", "utf8");
+const htmlSource = readFileSync("index.html", "utf8");
 const swCacheVersion = swSource.match(/const V="([^"]+)"/)?.[1];
-assert.ok(swCacheVersion && swCacheVersion !== "fa-v14", "Service-worker cache version must be bumped from fa-v14");
+assert.equal(swCacheVersion, "fa-v16", "Service-worker cache must be fa-v16 for the split modules");
+const compatTag = htmlSource.indexOf('src="/features/french-intelligence-compat.mjs"');
+const classroomTag = htmlSource.indexOf('src="/features/ai-classroom.js');
+assert.ok(compatTag >= 0 && classroomTag > compatTag, "Compat module must be declared before AI classroom");
+assert.equal(htmlSource.includes('<script src="/features/french-intelligence.js'), false, "Legacy engine remains a reference file, not a runtime script");
+assert.ok(swSource.includes('"/features/french-intelligence-core-v1.mjs"') && swSource.includes('"/features/french-intelligence-compat.mjs"'), "Both split modules must be precached");
 console.log(`ENGINE SIZE BYTES: ${engineSizeBytes}`);
 console.log(`SERVICE WORKER CACHE VERSION: ${swCacheVersion}`);
 
@@ -52,10 +58,11 @@ try {
     });
 
     await page.goto(baseURL, { waitUntil: "networkidle", timeout: 30000 });
+    await page.waitForFunction(() => { const api = window.FrenchIntelligenceCore; return !!api && ["lookup", "translate", "conjugate", "answerQuestion", "checkWriting"].every(name => typeof api[name] === "function"); }, null, { timeout: 15000 });
     await page.locator("#app").waitFor({ state: "visible" });
     await page.waitForTimeout(500);
     const engineLoadMs = await page.evaluate(() => {
-      const entry = performance.getEntriesByType("resource").find(item => new URL(item.name).pathname === "/features/french-intelligence.js");
+      const entry = performance.getEntriesByType("resource").find(item => new URL(item.name).pathname === "/features/french-intelligence-compat.mjs");
       return entry ? Math.round(entry.duration * 100) / 100 : null;
     });
     assert.ok(engineLoadMs !== null, `${profile.name}: engine resource timing must be available`);
@@ -215,11 +222,10 @@ try {
   await offlinePage.waitForFunction(() => !!navigator.serviceWorker.controller, null, { timeout: 15000 });
   await offlinePage.evaluate(async () => {
     const cacheNames = await caches.keys();
-    if (!cacheNames.includes("fa-v15")) throw new Error("Expected service-worker cache fa-v15");
-    const cache = await caches.open("fa-v15");
+    if (!cacheNames.includes("fa-v16")) throw new Error("Expected service-worker cache fa-v16");
+    const cache = await caches.open("fa-v16");
     const required = [
       "/index.html",
-      "/features/french-intelligence.js?v=20261020-2",
       "/features/ai-classroom.js?v=20261017-2",
       "/features/french-intelligence-compat.mjs",
       "/features/french-intelligence-core-v1.mjs"
@@ -268,7 +274,7 @@ try {
   await offlinePage.locator("#fiRuleSearch").fill("negation");
   await offlinePage.locator("#fiRules").getByText(/Negation/i).first().waitFor();
   assert.deepEqual(offlineErrors, [], "Offline browser console/page errors were detected");
-  console.log("PASS offline: service worker controlled the page; fa-v15 cached index and both feature scripts; dictionary, translation, conjugation and grammar work offline");
+  console.log("PASS offline: service worker controlled the page; fa-v16 precached the index and both split modules; dictionary, translation, conjugation and grammar work offline");
   await offlineContext.close();
 
   assert.deepEqual(failures, [], "Browser console/page errors were detected");

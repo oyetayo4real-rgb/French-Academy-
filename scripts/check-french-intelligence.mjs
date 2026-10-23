@@ -20,7 +20,7 @@ const dictionaryKeys = [...dictionarySource.matchAll(/^\s*(?:"([^"]+)"|([\p{L}_$
 const checks = [
   ["engine is a strict-mode module", /["']use strict["']/.test(engine)],
   ["home screen links to French Intelligence", /id=["']hfrenchint["']/.test(html)],
-  ["engine script is loaded before AI classroom", html.indexOf("features/french-intelligence.js") >= 0 && html.indexOf("features/french-intelligence.js") < html.indexOf("features/ai-classroom.js")],
+  ["compat module is declared before AI classroom", html.indexOf("features/french-intelligence-compat.mjs") >= 0 && html.indexOf("features/french-intelligence-compat.mjs") < html.indexOf("features/ai-classroom.js") && !html.includes('<script src="/features/french-intelligence.js')],
   ["navigation hook exists", /FAExitFrenchIntelligence/.test(html)],
   ["dictionary finds an exact French word", core.lookup("bonjour")?.meaning.includes("hello")],
   ["dictionary matches accents flexibly", core.lookup("ecole")?.word === "école"],

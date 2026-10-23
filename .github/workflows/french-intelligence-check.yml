@@ -29,6 +29,7 @@ on:
       - "features/french-intelligence-core-v1.mjs"
       - "features/french-intelligence-compat.mjs"
       - "scripts/check-french-intelligence-core.mjs"
+      - "scripts/check-french-intelligence-parity.mjs"
       - "index.html"
       - "sw.js"
       - "docs/french-intelligence-linguistic-matrix.md"
