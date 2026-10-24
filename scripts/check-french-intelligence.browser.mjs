@@ -6,7 +6,31 @@ const engineSizeBytes = statSync("features/french-intelligence-compat.mjs").size
 const swSource = readFileSync("sw.js", "utf8");
 const htmlSource = readFileSync("index.html", "utf8");
 const swCacheVersion = swSource.match(/const V="([^"]+)"/)?.[1];
-assert.equal(swCacheVersion, "fa-v16", "Service-worker cache must be fa-v16 for the split modules");
+assert.ok(swCacheVersion, "Service-worker cache version V must be declared in sw.js");
+assert.notEqual(swCacheVersion, "fa-v13", "Service-worker cache version must differ from production fa-v13");
+const coreMatch = swSource.match(/CORE=\[(.*?)\];/);
+assert.ok(coreMatch, "Service-worker CORE precache list must be declared");
+const corePaths = [...coreMatch[1].matchAll(/"([^"]+)"/g)].map(match => match[1]);
+const reachable = new Set();
+const pending = ["/features/french-intelligence-compat.mjs"];
+while (pending.length) {
+  const route = pending.pop();
+  if (reachable.has(route)) continue;
+  reachable.add(route);
+  const source = readFileSync(route.slice(1), "utf8");
+  const imports = [
+    ...source.matchAll(/^\s*import\s+(?:[^'"\n]*?\s+from\s+)?["']([^"']+)["']/gm),
+    ...source.matchAll(/^\s*export\s+[^'"\n]*?\s+from\s+["']([^"']+)["']/gm)
+  ];
+  for (const match of imports) {
+    const specifier = match[1];
+    if (!specifier.startsWith(".")) continue;
+    const pathname = new URL(specifier, "https://local.invalid" + route).pathname;
+    if (pathname.endsWith(".mjs") || pathname.endsWith(".js")) pending.push(pathname);
+  }
+}
+const missingCore = [...reachable].filter(path => !corePaths.includes(path)).sort();
+assert.deepEqual(missingCore, [], "Static imports reachable from french-intelligence-compat.mjs missing from sw.js CORE: " + missingCore.join(", "));
 const compatTag = htmlSource.indexOf('src="/features/french-intelligence-compat.mjs"');
 const classroomTag = htmlSource.indexOf('src="/features/ai-classroom.js');
 assert.ok(compatTag >= 0 && classroomTag > compatTag, "Compat module must be declared before AI classroom");
@@ -220,20 +244,25 @@ try {
   await offlinePage.evaluate(async () => { await navigator.serviceWorker.ready; });
   await offlinePage.reload({ waitUntil: "networkidle", timeout: 30000 });
   await offlinePage.waitForFunction(() => !!navigator.serviceWorker.controller, null, { timeout: 15000 });
-  await offlinePage.evaluate(async () => {
+  await offlinePage.evaluate(async (expectedCacheVersion) => {
     const cacheNames = await caches.keys();
-    if (!cacheNames.includes("fa-v16")) throw new Error("Expected service-worker cache fa-v16");
-    const cache = await caches.open("fa-v16");
+    const versionedCaches = cacheNames.filter(name => /^fa-v\d+$/.test(name));
+    if (!versionedCaches.includes(expectedCacheVersion)) throw new Error("Active service-worker cache missing: " + expectedCacheVersion);
+    if (versionedCaches.some(name => name === "fa-v13")) throw new Error("Production cache fa-v13 must not be active in this test");
+    if (versionedCaches.length !== 1 || versionedCaches[0] !== expectedCacheVersion) throw new Error("Browser active cache name does not equal sw.js V: expected " + expectedCacheVersion + "; found " + versionedCaches.join(", "));
+    const cache = await caches.open(expectedCacheVersion);
     const required = [
       "/index.html",
       "/features/ai-classroom.js?v=20261017-2",
       "/features/french-intelligence-compat.mjs",
-      "/features/french-intelligence-core-v1.mjs"
+      "/features/french-intelligence-core-v1.mjs",
+      "/features/french-data.mjs",
+      "/features/french-conjugation-paradigms.mjs"
     ];
     for (const path of required) {
       if (!await cache.match(new URL(path, location.origin).href)) throw new Error("Required offline cache entry missing: " + path);
     }
-  });
+  }, swCacheVersion);
   if (await offlinePage.locator("#lgo").count()) await offlinePage.locator("#lgo").click();
   if (await offlinePage.locator("#hfrenchint").count() === 0) throw new Error("Could not enter home before offline test");
   await offlinePage.locator("#hfrenchint").first().click();
