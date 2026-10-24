@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import * as core from "../features/french-intelligence-core-v1.mjs";
 import * as compat from "../features/french-intelligence-compat.mjs";
+import { rules } from "../features/french-data.mjs";
 import { VERB_PARADIGMS, LEGACY_IRREGULARS, PARADIGM_STATUS, VERIFIED_PARADIGMS } from "../features/french-conjugation-paradigms.mjs";
 const exactForms = [
  ["connaître",["connais","connais","connaît","connaissons","connaissez","connaissent"]],
@@ -35,7 +36,7 @@ assert.equal(core.lookup("pays").part,"noun (masculine)");
 assert.equal(core.lookup("pays").notes,"Always masculine: un pays. Country names such as la France have their own gender.");
 assert.equal(core.lookup("enfant").part,"noun (masculine or feminine; same form)");
 assert.equal(core.lookup("enfant").notes,"The form is the same for boys and girls; the article follows the child (un enfant, une enfant); un enfant is the usual generic form.");
-assert.match(readFileSync("features/french-intelligence-core-v1.mjs","utf8"),/J'ai décidé de ne pas partir\./);
+assert.ok(rules.some(rule => rule.body.includes("J'ai décidé de ne pas partir.")), "infinitive-negation rule retains the expected example in shared French data");
 assert.equal(core.checkWriting("Je suis 20 ans").corrected,"J'ai 20 ans");
 assert.equal(core.checkWriting("Sa va bien").corrected,"Ça va bien");
 assert.equal(core.checkWriting("Son va-et-vient constant m'inquiète").corrected,"Son va-et-vient constant m'inquiète");
