@@ -3307,3 +3307,14 @@ Changed/added output entries: **292**.
         "category": "translation"
       }
     ]
+
+
+## Approved v2 to v3 correction: `courir`
+
+Version 3 preserves every version-2 inventory entry except the single expected output field for `conjugate("courir")`. The conjugation forms and person rows are unchanged; the explicit irregular-verb label is corrected after restoring `courir` to the verified 22-verb list.
+
+| JSON path | Input | legacy-v2 | legacy-v3 | Reason |
+|---|---|---|---|---|
+| `inventory.conjugation.verbs[18].output.type` | `conjugate("courir")` | `Explicit present-tense paradigm · needs review` | `Irregular verb · present tense` | `courir` is the 22nd explicitly verified irregular verb; the previous `slice(0,21)` accidentally excluded it. |
+
+The v3 parity guard compares the complete parsed JSON objects and fails if any other path differs from v2. `legacy-v2.json` and `legacy-v2.sha256` remain unchanged.
