@@ -1,4 +1,4 @@
-ID,Input,Current engine output,Row type,Headword,Part of speech,Gender,English meaning,Example sentence,Teacher notes,Teacher decision (Accept/Correct/Reject),Teacher correction
+ID,Input,Current engine output,Row type,Headword,Part of speech,Gender,English meaning,Example sentence,Teacher notes,Teacher decision (Accept / Correct / Reject),Teacher correction
 TR-001,je,unsupported (dictionary.no-match): No built-in dictionary entry matched this input.,add-missing,je,,,,,,,
 TR-002,ne,unsupported (dictionary.no-match): No built-in dictionary entry matched this input.,add-missing,ne,,,,,,,
 TR-003,me,unsupported (dictionary.no-match): No built-in dictionary entry matched this input.,add-missing,me,,,,,,,
