@@ -11,6 +11,8 @@ on:
       - "scripts/check-french-intelligence-core.mjs"
       - "scripts/check-french-intelligence-correctness.mjs"
       - "scripts/check-french-intelligence-parity.mjs"
+      - "scripts/check-golden-v3.mjs"
+      - "scripts/generate-golden-v3.mjs"
       - "index.html"
       - "sw.js"
       - "docs/french-intelligence-linguistic-matrix.md"
@@ -24,6 +26,8 @@ on:
       - "scripts/check-golden-integrity.mjs"
       - "tests/golden/legacy-v1.json"
       - "tests/golden/legacy-v1.sha256"
+      - "tests/golden/legacy-v3.json"
+      - "tests/golden/legacy-v3.sha256"
       - ".github/workflows/legacy-golden-integrity.yml"
       - ".github/workflows/french-intelligence-check.yml"
   push:
@@ -37,6 +41,8 @@ on:
       - "scripts/check-french-intelligence-core.mjs"
       - "scripts/check-french-intelligence-correctness.mjs"
       - "scripts/check-french-intelligence-parity.mjs"
+      - "scripts/check-golden-v3.mjs"
+      - "scripts/generate-golden-v3.mjs"
       - "index.html"
       - "sw.js"
       - "docs/french-intelligence-linguistic-matrix.md"
@@ -49,6 +55,8 @@ on:
       - "scripts/check-golden-integrity.mjs"
       - "tests/golden/legacy-v1.json"
       - "tests/golden/legacy-v1.sha256"
+      - "tests/golden/legacy-v3.json"
+      - "tests/golden/legacy-v3.sha256"
       - ".github/workflows/legacy-golden-integrity.yml"
       - ".github/workflows/french-intelligence-check.yml"
 
@@ -73,6 +81,8 @@ jobs:
         run: node scripts/check-french-intelligence-core.mjs
       - name: Check Section 14a correctness
         run: node scripts/check-french-intelligence-correctness.mjs
+      - name: Check approved golden v3 scope and checksum
+        run: node scripts/check-golden-v3.mjs
       - name: Check engine integration contract
         run: node scripts/check-french-intelligence.mjs
       - name: Check exact legacy parity

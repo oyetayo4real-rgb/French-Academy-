@@ -23,7 +23,10 @@ const exactForms = [
  ["promettre",["promets","promets","promet","promettons","promettez","promettent"]],
  ["conduire",["conduis","conduis","conduit","conduisons","conduisez","conduisent"]]
 ];
-assert.equal(LEGACY_IRREGULARS.size,21,"all 21 original irregular paradigms remain explicit");
+const legacyIrregulars=["être","avoir","aller","faire","venir","prendre","pouvoir","vouloir","devoir","savoir","dire","écrire","lire","boire","dormir","partir","sortir","mettre","recevoir","ouvrir","croire","courir"];
+assert.equal(LEGACY_IRREGULARS.size,22,"all 22 original irregular paradigms remain explicit");
+assert.deepEqual([...LEGACY_IRREGULARS],legacyIrregulars,"the verified irregular list is explicit and ordered");
+for(const verb of legacyIrregulars){assert.equal(PARADIGM_STATUS[verb],"verified",verb+" status");assert.equal(core.conjugate(verb).type,"Irregular verb · present tense",verb+" label");assert.ok(VERIFIED_PARADIGMS.has(verb),verb+" remains verified");}
 for(const [verb,expected] of exactForms){assert.deepEqual(core.conjugate(verb).forms,expected,verb);assert.deepEqual(compat.conjugate(verb).forms,expected,verb+" compat");assert.equal(PARADIGM_STATUS[verb],"verified");assert.ok(VERIFIED_PARADIGMS.has(verb));}
 for(const [verb,forms] of Object.entries(VERB_PARADIGMS)){assert.equal(forms.length,6,verb+" must contain six persons");assert.equal(core.conjugate(verb).status,"supported",verb);assert.deepEqual(core.conjugate(verb).forms,forms,verb+" table parity");if(!VERIFIED_PARADIGMS.has(verb))assert.equal(PARADIGM_STATUS[verb],"needs_review",verb+" review status");}
 for(const verb of ["hier","soir","livre","super","hiver","noir","mère","xyz","zarbler"]){assert.equal(core.conjugate(verb).status,"unsupported",verb);assert.equal(compat.conjugate(verb),null,verb+" compat must not fabricate forms");}

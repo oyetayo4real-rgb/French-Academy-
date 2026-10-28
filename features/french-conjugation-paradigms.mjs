@@ -51,7 +51,7 @@ export const VERB_PARADIGMS = {
   "perdre":["perds","perds","perd","perdons","perdez","perdent"], "rendre":["rends","rends","rend","rendons","rendez","rendent"],
   "descendre":["descends","descends","descend","descendons","descendez","descendent"]
 };
-export const LEGACY_IRREGULARS = new Set(Object.keys(VERB_PARADIGMS).slice(0,21));
+export const LEGACY_IRREGULARS = new Set(["être","avoir","aller","faire","venir","prendre","pouvoir","vouloir","devoir","savoir","dire","écrire","lire","boire","dormir","partir","sortir","mettre","recevoir","ouvrir","croire","courir"]);
 export const VERIFIED_PARADIGMS = new Set([...LEGACY_IRREGULARS, "connaître","comprendre","apprendre","tenir","voir","vivre","suivre","acheter","préférer","appeler","voyager","changer","lancer","envoyer","mourir","promettre","conduire"]);
 export const PARADIGM_STATUS = Object.freeze(Object.fromEntries(Object.keys(VERB_PARADIGMS).map(v => [v, VERIFIED_PARADIGMS.has(v) ? "verified" : "needs_review"])));
 export const REGULAR_ER_CLASS = Object.freeze({ id:"regular-er", status:"needs_review", type:"Regular -er verb · present tense" });
