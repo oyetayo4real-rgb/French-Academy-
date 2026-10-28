@@ -29,6 +29,13 @@ on:
       - "tests/golden/legacy-v3.json"
       - "tests/golden/legacy-v3.sha256"
       - ".github/workflows/legacy-golden-integrity.yml"
+      - "scripts/build-teacher-ledger.mjs"
+      - "scripts/check-teacher-ledger.mjs"
+      - "scripts/export-teacher-form.mjs"
+      - "tests/teacher-ledger.json"
+      - "docs/teacher-ledger.schema.md"
+      - "docs/teacher-review-form.csv"
+      - "docs/section-12-closeout.md"
       - ".github/workflows/french-intelligence-check.yml"
   push:
     branches:
@@ -58,6 +65,13 @@ on:
       - "tests/golden/legacy-v3.json"
       - "tests/golden/legacy-v3.sha256"
       - ".github/workflows/legacy-golden-integrity.yml"
+      - "scripts/build-teacher-ledger.mjs"
+      - "scripts/check-teacher-ledger.mjs"
+      - "scripts/export-teacher-form.mjs"
+      - "tests/teacher-ledger.json"
+      - "docs/teacher-ledger.schema.md"
+      - "docs/teacher-review-form.csv"
+      - "docs/section-12-closeout.md"
       - ".github/workflows/french-intelligence-check.yml"
 
 permissions:
@@ -89,6 +103,20 @@ jobs:
         run: node scripts/check-french-intelligence-parity.mjs
       - name: Check legacy method characterization
         run: node scripts/characterize-french-intelligence.mjs
+      - name: Teacher ledger validation and CSV export (report-only)
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          node scripts/build-teacher-ledger.mjs
+          build_status=$?
+          node scripts/check-teacher-ledger.mjs
+          check_status=$?
+          node scripts/export-teacher-form.mjs
+          export_status=$?
+          echo "Teacher ledger report-only exit codes: build=$build_status check=$check_status export=$export_status"
+          echo "Teacher review remains pending; this step does not block existing checks."
+          exit 0
       - name: Install Playwright
         run: npm install --no-save playwright@1.56.1
       - name: Install Chromium
