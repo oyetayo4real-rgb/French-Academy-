@@ -26,7 +26,8 @@ function genderOf(part) {
   if (/\bmasculine\b/i.test(part || "")) return "masculine";
   return "";
 }
-const header = ["ID", "Input", "Current engine output", "Row type", "Headword", "Part of speech", "Gender", "English meaning", "Example sentence", "Teacher notes", "Teacher decision (Accept/Correct/Reject)", "Teacher correction"];
+// Decision cells intentionally stay blank for the teacher; supported rows use correct-existing and may be marked Accept, Correct, or Reject. Unsupported rows use add-missing and leave proposed linguistic fields blank for teacher completion.
+const header = ["ID", "Input", "Current engine output", "Row type", "Headword", "Part of speech", "Gender", "English meaning", "Example sentence", "Teacher notes", "Teacher decision (Accept / Correct / Reject)", "Teacher correction"];
 const rows = [header];
 const unsupported = [];
 let nonEmptyOutputs = 0;
