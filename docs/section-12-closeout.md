@@ -24,7 +24,7 @@
 
 The recorded baseline French Intelligence checks passed exact legacy parity, characterization, desktop/mobile Chromium checks, and browser UI parity. The recorded Step 1f negation example assertion passed. These results predate the teacher-ledger workflow step; the ledger checker and CSV exporter must be evaluated from the new workflow run.
 
-## Golden review
+## Golden review (Section 12 Step 3 read-only audit)
 
 | Golden file | Commit SHA | What changed (from the commit diff) | Approval status |
 |---|---|---|---|
@@ -32,6 +32,16 @@ The recorded baseline French Intelligence checks passed exact legacy parity, cha
 | `tests/golden/legacy-v3.json` | [`c9535c5fb3e13f4818b2ac9d5407dbfac01b36fd`](https://github.com/oyetayo4real-rgb/French-Academy-/commit/c9535c5fb3e13f4818b2ac9d5407dbfac01b36fd) | One golden-output field differs from v2: `inventory.conjugation.verbs[18]` for `courir` changes `output.type` from `Explicit present-tense paradigm · needs review` to `Irregular verb · present tense`; forms and persons are unchanged. The v3 checksum was updated. | **PENDING OWNER** |
 
 These are historical golden changes, not Section 12 approvals. No golden file or checksum was modified by Section 12 Step 3. Explicit owner review is still required.
+
+## Step 3 read-only lookup reproduction
+
+The legacy lookup returns `null` for each of `oeil`, `œil`, `coeur`, and `cœur`. The structured core returns `status: unsupported`, `rule_id: dictionary.no-match`, and preserves each exact query. Current normalization lowercases and removes combining accent marks; it does not normalize `oe` to `œ`. No engine or golden file was changed for this reproduction.
+
+## Step 3 expected-unsupported cross-check
+
+The 37 unsupported teacher-ledger lookup inputs were checked against the expected-unsupported arrays in golden v1/v2/v3 and the explicit characterization/parity tests. No input is an expected-unsupported *dictionary lookup* case in those sources. The one exact ID overlap is **TR-046 (`noir`)** in golden v2 and v3's `inventory.conjugation.unsupported`; that is a conjugation case, not a dictionary lookup case. The characterization corpus and parity test source contain no exact teacher-ledger unsupported lookup input as a dedicated expected-unsupported lookup case.
+
+The golden review statuses above remain **PENDING OWNER**. No teacher decisions or golden approvals were inferred.
 
 # Linguistic sign-off
 
