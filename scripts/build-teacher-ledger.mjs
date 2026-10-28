@@ -1,7 +1,8 @@
+import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-
-const sourcePath = new URL("../tests/teacher-ledger.json", import.meta.url);
-const source = JSON.parse(await readFile(sourcePath, "utf8"));
-if (!Array.isArray(source.entries)) throw new Error("teacher ledger source must contain an entries array");
-if (source.entries.length !== 46) throw new Error("teacher ledger must contain exactly 46 rows; got " + source.entries.length);
-console.log("Canonical teacher ledger: tests/teacher-ledger.json (" + source.entries.length + " rows; " + source.entries.filter(row => row.status === "approved").length + " approved; " + source.entries.filter(row => row.status === "pending").length + " pending).");
+const path = new URL("../tests/source-verified-ledger.json", import.meta.url);
+const ledger = JSON.parse(await readFile(path, "utf8"));
+assert.ok(Array.isArray(ledger.rows), "canonical ledger rows must be an array");
+assert.equal(ledger.rows.length, 46, "canonical ledger must contain 46 rows");
+assert.equal(new Set(ledger.rows.map(row => row.id)).size, 46, "canonical ledger IDs must be unique");
+console.log("Canonical source-verified ledger: tests/source-verified-ledger.json (46 rows; 9 source-verified; 37 reference-pending; no teacher review).");

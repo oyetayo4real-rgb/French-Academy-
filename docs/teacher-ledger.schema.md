@@ -1,18 +1,10 @@
-# Teacher ledger schema (Section 12)
+# Source-verified ledger schema
 
-The ledger is a review queue, not an authority for linguistic decisions. Until the teacher's approved 46-item review is recovered, every entry must remain `pending`. The 46 inputs currently document 42 pilot override candidates plus four refill candidates; that set is explicitly provisional and must not be described as the teacher-approved list.
+Canonical path: `tests/source-verified-ledger.json`.
 
-## Record fields
+The ledger contains 46 rows with sequential IDs `TR-001` through `TR-046` and exactly these statuses:
 
-- `id`: stable unique string (currently `TR-001` … `TR-046`).
-- `input`: exact item presented to the teacher.
-- `lookup_input`: input passed to the current built-in lookup to capture the present output; it may differ from the display input where the latter includes POS annotations.
-- `candidate_change`: unapproved provenance note only; never treated as a decision.
-- `approved_output`: teacher-approved value; must be non-empty for `approved`, otherwise `null`.
-- `engine_location`: source/runtime location for the implemented behavior; required for `approved`.
-- `test_name`: named regression test for the approved behavior; required for `approved`.
-- `status`: `pending` or `approved`.
+- `source-verified`: checked against the row's listed source URL(s); every row must have at least one HTTP(S) source URL.
+- `reference-pending`: awaiting the automated Lexique/Dicollecte reference cross-check; a match is not a teacher approval.
 
-## Validation
-
-The checker requires exactly 46 records, unique non-empty IDs, and rejects any `approved` row missing `approved_output`, `engine_location`, or `test_name`. Pending rows are permitted and must be enumerated in the check output. No linguistic approval is inferred from a pilot override, generated worksheet, or data-import diagnostic.
+Top-level fields are `schema`, `generated`, `method`, `status_values`, `rows`, and `proposed_rules`. Rows preserve the reviewed headword/sense, part of speech, gender, English gloss, notes, examples, `engine_action`, status, and sources. The owner's decision is **no teacher**: this workflow has no teacher-approved state and does not infer teacher decisions.
