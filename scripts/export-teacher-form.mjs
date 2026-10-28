@@ -1,7 +1,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { lookup } from "../features/french-intelligence-core-v1.mjs";
 
-const ledgerPath = new URL("../docs/teacher-ledger.json", import.meta.url);
+const ledgerPath = new URL("../tests/teacher-ledger.json", import.meta.url);
 const outputPath = new URL("../docs/teacher-review-form.csv", import.meta.url);
 const ledger = JSON.parse(await readFile(ledgerPath, "utf8"));
 const csvCell = value => {
@@ -21,8 +21,18 @@ function currentOutput(row) {
   }
 }
 const rows = [["ID", "input", "current engine output", "Accept/Correct/Reject", "correction"]];
-for (const row of ledger.entries) rows.push([row.id, row.input, currentOutput(row), "", ""]);
+const unsupported = [];
+let nonEmptyOutputs = 0;
+for (const row of ledger.entries) {
+  const output = currentOutput(row);
+  if (output.trim()) nonEmptyOutputs += 1;
+  if (output.startsWith("unsupported (")) unsupported.push({ id: row.id, input: row.input, output });
+  rows.push([row.id, row.input, output, "", ""]);
+}
 const csv = rows.map(row => row.map(csvCell).join(",")).join("\r\n") + "\r\n";
 await writeFile(outputPath, csv, "utf8");
-console.log("Wrote docs/teacher-review-form.csv with " + ledger.entries.length + " review rows and current built-in lookup outputs.");
-console.log("Teacher decision and correction columns are intentionally blank.");
+console.log("Wrote docs/teacher-review-form.csv with " + ledger.entries.length + " review rows.");
+console.log("Rows with non-empty current engine output: " + nonEmptyOutputs + "/" + ledger.entries.length + ".");
+console.log("Rows with unsupported lookup: " + unsupported.length + ".");
+for (const row of unsupported) console.log("UNSUPPORTED " + row.id + " | " + row.input + " | " + row.output);
+console.log("Teacher decision and correction columns remain blank; no row was marked teacher-approved.");
