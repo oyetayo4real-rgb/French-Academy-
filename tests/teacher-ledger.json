@@ -1,0 +1,467 @@
+{
+  "schema_version": 1,
+  "description": "Section 12 teacher review ledger. All rows are pending because the authoritative teacher-approved 46-item decisions have not yet been recovered. Inputs originate from 42 pilot override operations plus four refill candidates; these are not treated as approved corrections.",
+  "source_note": "Do not promote candidate_change to approved_output without the teacher's explicit decision. The separate french-engine-data review sheet left Avis/Correction blank.",
+  "entries": [
+    {
+      "id": "TR-001",
+      "input": "je",
+      "lookup_input": "je",
+      "candidate_change": "Add form j'",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-002",
+      "input": "ne",
+      "lookup_input": "ne",
+      "candidate_change": "Remove form n; keep ne and n'",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-003",
+      "input": "me",
+      "lookup_input": "me",
+      "candidate_change": "Add form m'",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-004",
+      "input": "ce",
+      "lookup_input": "ce",
+      "candidate_change": "Add form c'",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-005",
+      "input": "que",
+      "lookup_input": "que",
+      "candidate_change": "Add form qu'",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-006",
+      "input": "que",
+      "lookup_input": "que",
+      "candidate_change": "Add form qu'",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-007",
+      "input": "tout [ADJ] + tout [ADJ:ind]",
+      "lookup_input": "tout",
+      "candidate_change": "Merge into tout [ADJ:ind] with forms tout, tous, toute, toutes",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-008",
+      "input": "tout",
+      "lookup_input": "tout",
+      "candidate_change": "Add form tous",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-009",
+      "input": "le",
+      "lookup_input": "le",
+      "candidate_change": "Add form l'",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-010",
+      "input": "la",
+      "lookup_input": "la",
+      "candidate_change": "Add form l'",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-011",
+      "input": "où",
+      "lookup_input": "où",
+      "candidate_change": "Change POS to ADV; retain relative PRO:rel row",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-012",
+      "input": "falloir",
+      "lookup_input": "falloir",
+      "candidate_change": "Add form faille",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-013",
+      "input": "si",
+      "lookup_input": "si",
+      "candidate_change": "Add form s'",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-014",
+      "input": "quoi",
+      "lookup_input": "quoi",
+      "candidate_change": "Delete this POS row; retain PRO:int and PRO:rel",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-015",
+      "input": "dont",
+      "lookup_input": "dont",
+      "candidate_change": "Delete this POS row; retain relative row",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-016",
+      "input": "comment",
+      "lookup_input": "comment",
+      "candidate_change": "Delete this POS row; retain ADV row",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-017",
+      "input": "est-ce que",
+      "lookup_input": "est-ce que",
+      "candidate_change": "Change POS to LOC:int; add est-ce qu'",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-018",
+      "input": "beau",
+      "lookup_input": "beau",
+      "candidate_change": "Add form bel",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-019",
+      "input": "autre",
+      "lookup_input": "autre",
+      "candidate_change": "Add form autres",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-020",
+      "input": "leurs",
+      "lookup_input": "leurs",
+      "candidate_change": "Display headword leur / leurs; add form leur",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-021",
+      "input": "leur",
+      "lookup_input": "leur",
+      "candidate_change": "Add form leurs",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-022",
+      "input": "quel",
+      "lookup_input": "quel",
+      "candidate_change": "Add forms quels and quelles",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-023",
+      "input": "un",
+      "lookup_input": "un",
+      "candidate_change": "Add forms une, uns, unes",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-024",
+      "input": "parce que",
+      "lookup_input": "parce que",
+      "candidate_change": "Add form parce qu'",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-025",
+      "input": "vieux",
+      "lookup_input": "vieux",
+      "candidate_change": "Set masculine gender; forms vieux, vieil, vieille, vieilles",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-026",
+      "input": "mort",
+      "lookup_input": "mort",
+      "candidate_change": "Set forms mort, morts; note morte/mortes belong to le mort/la morte",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-027",
+      "input": "oeil",
+      "lookup_input": "oeil",
+      "candidate_change": "Display headword l'œil; canonical forms œil and yeux; masculine",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-028",
+      "input": "homme",
+      "lookup_input": "homme",
+      "candidate_change": "Display headword l'homme",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-029",
+      "input": "heure",
+      "lookup_input": "heure",
+      "candidate_change": "Display headword l'heure",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-030",
+      "input": "an",
+      "lookup_input": "an",
+      "candidate_change": "Display headword l'an",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-031",
+      "input": "enfant",
+      "lookup_input": "enfant",
+      "candidate_change": "Display headword l'enfant; gender m/f",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-032",
+      "input": "air",
+      "lookup_input": "air",
+      "candidate_change": "Display headword l'air",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-033",
+      "input": "ami",
+      "lookup_input": "ami",
+      "candidate_change": "Display headword l'ami(e); forms ami, amie, amis, amies",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-034",
+      "input": "gens",
+      "lookup_input": "gens",
+      "candidate_change": "Display headword les gens; masculine plural-only; note preceding adjective agreement",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-035",
+      "input": "accord",
+      "lookup_input": "accord",
+      "candidate_change": "Display headword l'accord",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-036",
+      "input": "amour",
+      "lookup_input": "amour",
+      "candidate_change": "Display headword l'amour",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-037",
+      "input": "eau",
+      "lookup_input": "eau",
+      "candidate_change": "Display headword l'eau",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-038",
+      "input": "histoire",
+      "lookup_input": "histoire",
+      "candidate_change": "Display headword l'histoire",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-039",
+      "input": "idée",
+      "lookup_input": "idée",
+      "candidate_change": "Display headword l'idée",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-040",
+      "input": "argent",
+      "lookup_input": "argent",
+      "candidate_change": "Display headword l'argent; set form argent",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-041",
+      "input": "année",
+      "lookup_input": "année",
+      "candidate_change": "Display headword l'année",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-042",
+      "input": "affaire",
+      "lookup_input": "affaire",
+      "candidate_change": "Display headword l'affaire",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-043",
+      "input": "coeur",
+      "lookup_input": "coeur",
+      "candidate_change": "Refill candidate from Lexique rank 301; canonical display/form requires review",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-044",
+      "input": "bras",
+      "lookup_input": "bras",
+      "candidate_change": "Refill candidate from Lexique rank 302; canonical display/form requires review",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-045",
+      "input": "apprendre",
+      "lookup_input": "apprendre",
+      "candidate_change": "Refill candidate from Lexique rank 303; canonical display/form requires review",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    },
+    {
+      "id": "TR-046",
+      "input": "noir",
+      "lookup_input": "noir",
+      "candidate_change": "Refill candidate from Lexique rank 305; canonical display/form requires review",
+      "approved_output": null,
+      "engine_location": null,
+      "test_name": null,
+      "status": "pending"
+    }
+  ]
+}
