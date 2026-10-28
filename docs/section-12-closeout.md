@@ -24,9 +24,14 @@
 
 The recorded baseline French Intelligence checks passed exact legacy parity, characterization, desktop/mobile Chromium checks, and browser UI parity. The recorded Step 1f negation example assertion passed. These results predate the teacher-ledger workflow step; the ledger checker and CSV exporter must be evaluated from the new workflow run.
 
-## Golden-change review note
+## Golden review
 
-The golden v2 and v3 files and their approved update workflows predate Section 12 Step 1. They are not Section 12 deliverables. Their prior successful CI runs do not constitute approval for Section 12; the owner must explicitly review and approve those historical golden changes. This work does not edit golden files.
+| Golden file | Commit SHA | What changed (from the commit diff) | Approval status |
+|---|---|---|---|
+| `tests/golden/legacy-v2.json` | [`e631d482d47261019d9ceb615078752d18240130`](https://github.com/oyetayo4real-rgb/French-Academy-/commit/e631d482d47261019d9ceb615078752d18240130) | Regenerated v2 outputs and checksum from the compatibility/core behavior. The accompanying diff corrected apostrophe escaping in the unsupported-translation fallback, restricted phrase substitution to exactly one matched phrase, tightened the verb marker check to a word boundary, and wrapped edge-case generation in exception capture. | **PENDING OWNER** |
+| `tests/golden/legacy-v3.json` | [`c9535c5fb3e13f4818b2ac9d5407dbfac01b36fd`](https://github.com/oyetayo4real-rgb/French-Academy-/commit/c9535c5fb3e13f4818b2ac9d5407dbfac01b36fd) | One golden-output field differs from v2: `inventory.conjugation.verbs[18]` for `courir` changes `output.type` from `Explicit present-tense paradigm · needs review` to `Irregular verb · present tense`; forms and persons are unchanged. The v3 checksum was updated. | **PENDING OWNER** |
+
+These are historical golden changes, not Section 12 approvals. No golden file or checksum was modified by Section 12 Step 3. Explicit owner review is still required.
 
 # Linguistic sign-off
 
