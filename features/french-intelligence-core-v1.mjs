@@ -25,7 +25,7 @@ function findDictionaryEntry(word) {
   if (!q) return null;
   const exactInput = q.toLocaleLowerCase("fr");
   // These short homophones must not collapse into dictionary reverse-gloss matches.
-  if (exactInput === "a" || exactInput === "à" || exactInput === "ou") return null;
+  if (exactInput === "a" || exactInput === "à") return null;
   let foundKey = q.toLocaleLowerCase("fr");
   let found = dictionary[foundKey];
   if (!found) {

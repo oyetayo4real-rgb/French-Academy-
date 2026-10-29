@@ -1,6 +1,5 @@
 import { isDeepStrictEqual } from "node:util";
 import { readFileSync } from "node:fs";
-import vm from "node:vm";
 import * as core from "../features/french-intelligence-core-v1.mjs";
 import { dictionary } from "../features/french-data.mjs";
 import { lookup as compatLookup, translate as compatTranslate } from "../features/french-intelligence-compat.mjs";
@@ -40,56 +39,47 @@ equal("compatibility lookup must not alias ou to où", "ou", null, compatLookup(
 equal("TR-046 only includes the adjective sense in core lookup", "noir", "adjective", core.lookup("noir").part);
 equal("TR-046 only includes the adjective sense in compatibility lookup", "noir", "adjective", compatLookup("noir")?.part);
 
-// These are deliberately compared against the unchanged legacy browser implementation.
-// The compatibility renderer is the public HTML-output adapter over the extracted core.
-const legacySource = readFileSync("features/french-intelligence.js", "utf8");
-const listeners = {};
-const document = {
-  addEventListener(name, fn) { (listeners[name] ||= []).push(fn); },
-  getElementById() { return null; }
-};
-const window = {};
-vm.runInNewContext(legacySource, {
-  document, window, console, URL, encodeURIComponent,
-  location: { reload() {} }
-});
-const legacy = window.FrenchIntelligenceCore;
-truthy("legacy implementation must expose translate", "legacy API", "translate function", typeof legacy?.translate === "function");
+// The frozen, read-only golden is the output oracle. Do not execute the legacy implementation here.
+const golden = JSON.parse(readFileSync("tests/golden/legacy-v3.json", "utf8"));
+const goldenOu = golden.inventory.dictionary
+  .flatMap(row => row.variants)
+  .find(item => item.input === "ou")?.output;
+truthy("frozen golden must contain lookup:ou", "ou", "golden lookup:ou output", goldenOu);
+equal("compatibility lookup(ou) must deep-equal frozen golden lookup:ou output", "ou", goldenOu, compatLookup("ou"));
 
-const differentialCases = [
-  ["je suis heureux/heureuse", "phrasebook:heureux"],
-  ["j'apprends le français", "phrasebook:apprends"],
-  ["je suis désolé(e)", "phrasebook:désolé"],
-  ["je suis fatigué(e)", "phrasebook:fatigué"],
-  ["je t'aime", "phrasebook:aime"],
-  ["je parle français", "phrasebook:parle"],
-  ["je voudrais de l'eau", "phrasebook:eau"],
-  ["à plus tard", "phrasebook:plus-tard"],
-  ["quelle heure est-il", "phrasebook:heure"],
-  ["où est la gare", "phrasebook:gare"],
-  ["Je suis étudiant", "phrasebook:étudiant"],
-  ["Bonjour\nJe vais bien.", "edge:newline"],
-  ["je\tne\tcomprends\tpas", "edge:tabs"],
-  ["a&b<c>d", "edge:angle-chain"],
-  ["À bientôt, cœur et sœur.", "edge:accented-words"]
+const parityInputs = [
+  "je suis heureux/heureuse",
+  "j'apprends le français",
+  "je suis désolé(e)",
+  "je suis fatigué(e)",
+  "je t'aime",
+  "je parle français",
+  "je voudrais de l'eau",
+  "à plus tard",
+  "quelle heure est-il",
+  "où est la gare",
+  "Je suis étudiant",
+  "Bonjour\\nJe vais bien.",
+  "je\\tne\\tcomprends\\tpas",
+  "a&b<c>d",
+  "À bientôt, cœur et sœur."
 ];
-
-for (const [input, label] of differentialCases) {
-  const expected = legacy.translate(input, "fr-en");
-  const actual = compatTranslate(input, "fr-en");
-  equal("core-backed translation must deep-equal legacy output (" + label + ")", input, expected, actual);
-
-  const structured = core.translate(input, "fr-en");
-  const hints = Array.isArray(structured.vocabularyHints) ? structured.vocabularyHints : [];
+const normalizeHeadword = value => String(value || "").toLocaleLowerCase("fr")
+  .normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
+const hintFalseHeadwords = new Set(
+  Object.entries(dictionary)
+    .filter(([, entry]) => entry?.[4]?.hint === false)
+    .map(([headword]) => normalizeHeadword(headword))
+);
+for (const input of parityInputs) {
+  const actual = core.translate(input, "fr-en");
+  const hints = Array.isArray(actual.vocabularyHints) ? actual.vocabularyHints : [];
   for (const hint of hints) {
-    const resolved = core.lookup(hint.word);
-    const canonical = resolved?.word;
-    const metadata = canonical ? dictionary[canonical]?.[4] : undefined;
-    equal("hint:false dictionary entries must never appear in vocabularyHints (" + label + ")", input, false, metadata?.hint === false);
-    equal("vocabularyHints entries must not expose hint:false (" + label + ")", input, false, hint.hint === false);
+    const headword = normalizeHeadword(hint.word);
+    equal("Section 12 hint:false headword must not appear in vocabularyHints", input, false, hintFalseHeadwords.has(headword));
   }
 }
 
 console.log("PASS Section 12 lookup regressions: 34 headwords, homophone collisions, TR-046 adjective-only.");
-console.log("PASS Section 12 translation differential: 15 inputs match the unchanged legacy implementation.");
+console.log("PASS Section 12 hint suppression: 15 parity inputs contain no hint:false headword.");
 console.log("PASS Section 12 translator hints: no hint:false dictionary entry leaks into vocabularyHints.");

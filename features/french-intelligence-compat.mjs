@@ -27,7 +27,7 @@ function lookup(word){
   const q=String(word||"").trim();if(!q)return null;
   const exactInput=q.toLocaleLowerCase("fr");
   // Avoid accent-insensitive homophone collisions and reverse-gloss false positives.
-  if(exactInput==="a"||exactInput==="à"||exactInput==="ou")return null;
+  if(exactInput==="a"||exactInput==="à")return null;
   let foundKey=exactInput;
   let found=dictionary[foundKey];
   if(!found){const key=Object.keys(dictionary).find(k=>norm(k)===norm(q));if(key){foundKey=key;found=dictionary[key];}}
