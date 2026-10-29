@@ -16,6 +16,7 @@ on:
       - "index.html"
       - "sw.js"
       - "docs/french-intelligence-linguistic-matrix.md"
+      - "scripts/check-section12-regressions.mjs"
       - "scripts/check-french-intelligence.mjs"
       - "scripts/characterize-french-intelligence.mjs"
       - "scripts/check-french-intelligence.browser.mjs"
@@ -53,6 +54,7 @@ on:
       - "index.html"
       - "sw.js"
       - "docs/french-intelligence-linguistic-matrix.md"
+      - "scripts/check-section12-regressions.mjs"
       - "scripts/check-french-intelligence.mjs"
       - "scripts/check-french-intelligence.browser.mjs"
       - "scripts/check-french-intelligence.ui-parity.mjs"
@@ -99,6 +101,8 @@ jobs:
         run: node scripts/check-golden-v3.mjs
       - name: Check engine integration contract
         run: node scripts/check-french-intelligence.mjs
+      - name: Check Section 12 lookup and hint regressions
+        run: node scripts/check-section12-regressions.mjs
       - name: Check exact legacy parity
         run: node scripts/check-french-intelligence-parity.mjs
       - name: Check legacy method characterization

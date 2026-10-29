@@ -56,7 +56,14 @@ The golden review statuses above are approved by the repository owner on 2026-10
 ## Step 4 read-only Lexique/Dicollecte cross-check
 
 - Source repository: `oyetayo4real-rgb/french-engine-data`, branch `main`; pilot data is derived from Lexique 3.83. Its cross-check manifest reports Dicollecte/Grammalecte 7.7 matched 2,709 of 2,710 pilot forms, with `marchées` the sole unknown form.
-- Of the 37 reference-pending rows, **35 match Lexique pilot headword/POS/gender**, **1 POS mismatch** (TR-005, `que (conjunction)`: pilot has `PRO:int` and `PRO:rel`, no conjunction entry), and **1 POS/gender mismatch** (TR-026, `mort`: pilot entry is `NOM/f`, while the ledger describes adjective/noun and m./f.). All 37 row inputs occur in the pilot's Dicollecte-cross-checked form inventory. These are read-only findings; no ledger row was changed.
+- Of the 37 reference-pending rows, **34 match Lexique pilot headword/POS/gender**, and **3 have mismatches or partial coverage**: TR-005 (`que`, conjunction) because the pilot has pronoun entries but no conjunction entry; TR-026 (`mort`, adjective/noun) because the pilot entry is feminine noun only; and TR-046 (`noir`, adjective/noun) because the pilot confirms the adjective but not the noun sense. The Dicollecte pilot cross-check is form-level only and does not establish POS/gender. TR-005 and TR-026 remain skipped with the reason: **“Lexique pilot subset lacks the conjunction / adjective sense; cross-check against Wiktionnaire first”.** TR-046 includes only the adjective sense in the data module; the noun sense remains reference-pending. These are read-only findings; no ledger row was changed.
+
+
+## Section 12 Step 5 — Parity incident and frozen-golden repair
+
+- At commit `c3a39175b768e854ded98ed9503ba2c55ff5e9d4`, exact parity fell to **1,088/1,103**, with 15 unique affected outputs. The reported incident categories are **11 function-word-noise findings, 3 accent-collision findings, and 2 genuine improvements**; one case is shared between the function-word-noise and accent-collision categories, so these category counts describe 15 unique cases rather than 16 separate cases.
+- Repair: each of the 34 Section 12 dictionary additions is tagged `hint:false`; the French-to-English vocabulary-hint generator skips those entries while direct lookup remains available. Short ambiguous lookups `a`, `à`, and `ou` are prevented from reverse-gloss/accent-normalization collisions. TR-046 (`noir`) retains only the adjective sense; the noun sense remains reference-pending. TR-005 and TR-026 remain skipped pending a Wiktionnaire cross-check.
+- No golden files or checksums were changed. **Golden v4 is deferred and is not approved.** The required gate is exact parity **1,103/1,103** and legacy characterization **15/15** before the oe→œ whitelist or proposed-rule regression suite can be added.
 
 # Linguistic sign-off
 

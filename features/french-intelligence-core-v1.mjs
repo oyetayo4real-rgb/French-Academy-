@@ -23,6 +23,9 @@ function result(status, confidence, rule_id, explanation, fields = {}) {
 function findDictionaryEntry(word) {
   const q = String(word || "").trim();
   if (!q) return null;
+  const exactInput = q.toLocaleLowerCase("fr");
+  // These short homophones must not collapse into dictionary reverse-gloss matches.
+  if (exactInput === "a" || exactInput === "à" || exactInput === "ou") return null;
   let foundKey = q.toLocaleLowerCase("fr");
   let found = dictionary[foundKey];
   if (!found) {
@@ -60,7 +63,7 @@ function translate(text, direction) {
   let uncoveredToken = false;
   for (let i=0;i<q.length;i++) if (/[\p{L}\p{N}]/u.test(q[i]) && !covered[i]) uncoveredToken = true;
   const words = q.match(/[\p{L}’'-]+/gu) || [];
-  const hints = words.map(w => ({ word: w, entry: findDictionaryEntry(w) })).filter(x => x.entry).map(x => ({ word: x.word, meaning: x.entry.meaning }));
+  const hints = words.map(w => ({ word: w, entry: findDictionaryEntry(w) })).filter(x => x.entry && dictionary[x.entry.word]?.[4]?.hint !== false).map(x => ({ word: x.word, meaning: x.entry.meaning }));
   if (selected.length === 1 && !uncoveredToken) {
     let translation = "", last = 0;
     for (const match of selected) { translation += q.slice(last,match.start) + match.english; last=match.end; }

@@ -25,7 +25,10 @@ function rootStyle(){return `<style>
   function norm(s){return String(s||"").replace(/[’‘‛ʼ＇]/g,"'").replace(/[＂“”„]/g,'"').toLocaleLowerCase("fr").normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim().replace(/\s+/g," ");}
 function lookup(word){
   const q=String(word||"").trim();if(!q)return null;
-  let foundKey=q.toLocaleLowerCase("fr");
+  const exactInput=q.toLocaleLowerCase("fr");
+  // Avoid accent-insensitive homophone collisions and reverse-gloss false positives.
+  if(exactInput==="a"||exactInput==="à"||exactInput==="ou")return null;
+  let foundKey=exactInput;
   let found=dictionary[foundKey];
   if(!found){const key=Object.keys(dictionary).find(k=>norm(k)===norm(q));if(key){foundKey=key;found=dictionary[key];}}
   if(found)return {word:foundKey,meaning:found[0],part:found[1],example:found[2],notes:found[3],builtIn:true};
