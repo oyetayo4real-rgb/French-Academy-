@@ -63,6 +63,34 @@ for (const input of ["sœur", "œuf", "nœud", "vœu", "bœuf", "œuvre", "mœur
   equal("no dictionary entry should be invented for " + input, input, "unsupported", core.lookup(input).status);
 }
 
+
+const proposedRules = JSON.parse(readFileSync("tests/source-verified-ledger.json", "utf8")).proposed_rules;
+const proposedRuleCases = [
+  { id: "NR-01", kind: "positive", input: "oeil", expected: "œil", actual: core.normalizeOeLigature("oeil") },
+  { id: "NR-01", kind: "positive", input: "coeur", expected: "cœur", actual: core.normalizeOeLigature("coeur") },
+  { id: "NR-01", kind: "negative", input: "coexistence", expected: "coexistence", actual: core.normalizeOeLigature("coexistence") },
+  { id: "NR-02", kind: "positive", input: "les vieilles gens", expected: "les vieilles gens", actual: core.checkWriting("les vieilles gens").corrected },
+  { id: "NR-02", kind: "positive", input: "des gens intéressants", expected: "des gens intéressants", actual: core.checkWriting("des gens intéressants").corrected },
+  { id: "NR-02", kind: "negative", input: "des gens intéressantes", expected: "flagged for review", actual: core.checkWriting("des gens intéressantes").suggestions.length > 0 },
+  { id: "NR-03", kind: "positive", input: "Je leur ai dit.", expected: "Je leur ai dit.", actual: core.checkWriting("Je leur ai dit.").corrected },
+  { id: "NR-03", kind: "positive", input: "leurs enfants", expected: "leurs enfants", actual: core.checkWriting("leurs enfants").corrected },
+  { id: "NR-03", kind: "negative", input: "Je leurs ai dit.", expected: "Je leur ai dit.", actual: core.checkWriting("Je leurs ai dit.").corrected },
+  { id: "NR-04", kind: "positive", input: "Elle est toute contente.", expected: "Elle est toute contente.", actual: core.checkWriting("Elle est toute contente.").corrected },
+  { id: "NR-04", kind: "positive", input: "Elle est tout heureuse.", expected: "Elle est tout heureuse.", actual: core.checkWriting("Elle est tout heureuse.").corrected },
+  { id: "NR-04", kind: "negative", input: "Elle est tout contente.", expected: "Elle est toute contente.", actual: core.checkWriting("Elle est tout contente.").corrected },
+  { id: "NR-05", kind: "positive", input: "un bel arbre", expected: "un bel arbre", actual: core.checkWriting("un bel arbre").corrected },
+  { id: "NR-05", kind: "positive", input: "un vieil homme", expected: "un vieil homme", actual: core.checkWriting("un vieil homme").corrected },
+  { id: "NR-05", kind: "negative", input: "un beau arbre", expected: "un bel arbre", actual: core.checkWriting("un beau arbre").corrected },
+  { id: "NR-05", kind: "negative", input: "un vieux homme", expected: "un vieil homme", actual: core.checkWriting("un vieux homme").corrected },
+  { id: "NR-06", kind: "positive", input: "s'il pleut", expected: "s'il pleut", actual: core.checkWriting("s'il pleut").corrected },
+  { id: "NR-06", kind: "positive", input: "si elle vient", expected: "si elle vient", actual: core.checkWriting("si elle vient").corrected },
+  { id: "NR-06", kind: "negative", input: "s'elle vient", expected: "si elle vient", actual: core.checkWriting("s'elle vient").corrected }
+];
+for (const test of proposedRuleCases) {
+  truthy("proposed-rule regression must reference a ledger rule: " + test.id, test.id, true, proposedRules.some(rule => rule.id === test.id));
+  equal("proposed-rule " + test.id + " " + test.kind + ": " + test.input, test.input, test.expected, test.actual);
+}
+
 // The frozen, read-only golden is the output oracle. Do not execute the legacy implementation here.
 const golden = JSON.parse(readFileSync("tests/golden/legacy-v3.json", "utf8"));
 const goldenOu = golden.inventory.dictionary
