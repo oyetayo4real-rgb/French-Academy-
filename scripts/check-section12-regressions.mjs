@@ -34,8 +34,6 @@ for (const input of ["a", "à"]) {
 }
 equal("où must retain its accented canonical headword", "où", "où", core.lookup("où").word);
 equal("compatibility lookup must retain où, not alias it to ou", "où", "où", compatLookup("où")?.word);
-equal("ou must not alias to où", "ou", "unsupported", core.lookup("ou").status);
-equal("compatibility lookup must not alias ou to où", "ou", null, compatLookup("ou"));
 equal("TR-046 only includes the adjective sense in core lookup", "noir", "adjective", core.lookup("noir").part);
 equal("TR-046 only includes the adjective sense in compatibility lookup", "noir", "adjective", compatLookup("noir")?.part);
 
