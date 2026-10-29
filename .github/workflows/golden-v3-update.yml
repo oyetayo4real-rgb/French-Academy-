@@ -5,6 +5,8 @@ on:
       - feat/french-intelligence-engine
     paths:
       - "features/french-conjugation-paradigms.mjs"
+      - "features/french-section12-rules.mjs"
+      - "scripts/check-section12-regressions.mjs"
       - "scripts/generate-golden-v3.mjs"
       - "scripts/check-golden-v3.mjs"
       - "scripts/check-french-intelligence-parity.mjs"
@@ -16,6 +18,8 @@ on:
   pull_request:
     paths:
       - "features/french-conjugation-paradigms.mjs"
+      - "features/french-section12-rules.mjs"
+      - "scripts/check-section12-regressions.mjs"
       - "scripts/generate-golden-v3.mjs"
       - "scripts/check-golden-v3.mjs"
       - "scripts/check-french-intelligence-parity.mjs"

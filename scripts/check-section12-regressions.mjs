@@ -2,12 +2,13 @@ import { isDeepStrictEqual } from "node:util";
 import { readFileSync } from "node:fs";
 import * as core from "../features/french-intelligence-core-v1.mjs";
 import { dictionary } from "../features/french-data.mjs";
+import { checkSection12Rules } from "../features/french-section12-rules.mjs";
 import { lookup as compatLookup, translate as compatTranslate } from "../features/french-intelligence-compat.mjs";
 
+const failures = [];
 function reportFailure(message, input, expected, actual) {
-  const payload = { input, expected, actual };
-  console.error(JSON.stringify(payload, null, 2));
-  throw new Error(message);
+  const ruleId = message.match(/NR-\\d{2}/)?.[0] || "Section12";
+  failures.push({ ruleId, input, expected, actual });
 }
 function equal(message, input, expected, actual) {
   if (!isDeepStrictEqual(actual, expected)) reportFailure(message, input, expected, actual);
@@ -71,7 +72,7 @@ const proposedRuleCases = [
   { id: "NR-01", kind: "negative", input: "coexistence", expected: "coexistence", actual: core.normalizeOeLigature("coexistence") },
   { id: "NR-02", kind: "positive", input: "les vieilles gens", expected: "les vieilles gens", actual: core.checkWriting("les vieilles gens").corrected },
   { id: "NR-02", kind: "positive", input: "des gens intéressants", expected: "des gens intéressants", actual: core.checkWriting("des gens intéressants").corrected },
-  { id: "NR-02", kind: "negative", input: "des gens intéressantes", expected: "flagged for review", actual: core.checkWriting("des gens intéressantes").suggestions.length > 0 },
+  { id: "NR-02", kind: "negative", input: "des gens intéressantes", expected: "flagged for review", actual: core.checkWriting("des gens intéressantes").rule_id === "writing.review-only" ? "flagged for review" : false },
   { id: "NR-03", kind: "positive", input: "Je leur ai dit.", expected: "Je leur ai dit.", actual: core.checkWriting("Je leur ai dit.").corrected },
   { id: "NR-03", kind: "positive", input: "leurs enfants", expected: "leurs enfants", actual: core.checkWriting("leurs enfants").corrected },
   { id: "NR-03", kind: "negative", input: "Je leurs ai dit.", expected: "Je leur ai dit.", actual: core.checkWriting("Je leurs ai dit.").corrected },
@@ -132,6 +133,38 @@ for (const input of parityInputs) {
   }
 }
 
+
+const ruleCases = [
+ ["NR-02","des gens intéressantes","review","des gens intéressantes"],["NR-02","des gens gentilles","review","des gens gentilles"],["NR-02","des gens intéressants",null,"des gens intéressants"],["NR-02","les vieilles gens",null,"les vieilles gens"],["NR-02","toutes les vieilles gens",null,"toutes les vieilles gens"],["NR-02","jeunes gens",null,"jeunes gens"],["NR-02","les vieux gens","review","les vieux gens"],
+ ["NR-03","Je leurs ai dit.","correction","Je leur ai dit."],["NR-03","leurs enfants",null,"leurs enfants"],["NR-03","leurs clés",null,"leurs clés"],["NR-03","Ils ont leurs clés",null,"Ils ont leurs clés"],["NR-03","Je leur ai dit",null,"Je leur ai dit"],
+ ["NR-04","Elle est tout contente.","correction","Elle est toute contente."],["NR-04","Elles sont tout petites.","correction","Elles sont toutes petites."],["NR-04","Elle est toute contente.",null,"Elle est toute contente."],["NR-04","Ils sont tout contents.",null,"Ils sont tout contents."],["NR-04","Elle est tout heureuse.",null,"Elle est tout heureuse."],["NR-04","Il est tout petit.",null,"Il est tout petit."],["NR-04","tout seul",null,"tout seul"],
+ ["NR-05","un beau arbre","correction","un bel arbre"],["NR-05","un vieux homme","correction","un vieil homme"],["NR-05","un nouveau appartement","correction","un nouvel appartement"],["NR-05","un beau et grand arbre",null,"un beau et grand arbre"],["NR-05","un bel arbre",null,"un bel arbre"],["NR-05","un beau garçon",null,"un beau garçon"],["NR-05","un beau haricot",null,"un beau haricot"],
+ ["NR-06","s'elle vient","correction","si elle vient"],["NR-06","s’elles arrivent","correction","si elles arrivent"],["NR-06","s'il pleut",null,"s'il pleut"],["NR-06","s'ils viennent",null,"s'ils viennent"],["NR-06","si elle vient",null,"si elle vient"]
+];
+for(const [ruleId,input,expectedKind,expectedText] of ruleCases){
+ const findings=checkSection12Rules(input);
+ equal(ruleId+" closed-list kind: "+input,input,expectedKind,findings[0]?.kind||null);
+ let corrected=input;
+ for(const item of [...findings].filter(x=>x.kind==="correction").sort((a,b)=>b.span[0]-a.span[0])) corrected=corrected.slice(0,item.span[0])+item.suggestion+corrected.slice(item.span[1]);
+ equal(ruleId+" closed-list output: "+input,input,expectedText,corrected);
+ for(const item of findings) equal(ruleId+" finding span: "+input,input,item.found,input.slice(item.span[0],item.span[1]));
+}
+// Read-only safety net: frozen writing inputs whose legacy oracle reported no issue.
+const cleanLegacyText=value=>typeof value==="string"&&value.includes("No issue from the small built-in check list was detected");
+const safetyInputs=new Map();
+for(const path of ["tests/golden/legacy-v1.json","tests/golden/legacy-v2.json","tests/golden/legacy-v3.json"]){
+ const frozen=JSON.parse(readFileSync(path,"utf8")),groups=frozen.inventory?.checkWriting||{};
+ for(const groupName of ["clean","hardNegative","knownErrors"]) for(const row of groups[groupName]||[]) if(cleanLegacyText(row.output)) safetyInputs.set(path+":"+groupName+":"+row.index,row.sentence);
+ for(const row of frozen.inventory?.checkWritingCases||[]){const input=row.input??row.text??row.sentence,output=row.output??row.expected;if(typeof input==="string"&&(cleanLegacyText(output)||output?.rule_id==="writing.no-listed-issue"||output?.kind==="no-issues"))safetyInputs.set(path+":checkWritingCases:"+input,input);}
+}
+safetyInputs.set("characterization:clean sentence disclaimer","Bonjour, je m'appelle Léa.");
+const safetyFailures=[];
+for(const [source,input] of safetyInputs){const findings=checkSection12Rules(input);if(findings.length)safetyFailures.push({ruleId:findings[0].ruleId,input,expected:"zero findings (legacy reported no issue)",actual:findings,source});}
+if(safetyFailures.length) failures.push(...safetyFailures.map(({source,...item})=>item));
+console.log(JSON.stringify({safetyNetInputs:safetyInputs.size,safetyNetFailures:safetyFailures.length}));
+
 console.log("PASS Section 12 lookup regressions: 34 headwords, homophone collisions, TR-046 adjective-only.");
 console.log("PASS Section 12 hint suppression: 15 parity inputs contain no hint:false headword.");
 console.log("PASS Section 12 translator hints: no hint:false dictionary entry leaks into vocabularyHints.");
+
+if(failures.length){console.error(JSON.stringify(failures,null,2));process.exitCode=1;}else{console.log("PASS Section 12 regression suite: all assertions passed.");}

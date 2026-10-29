@@ -1,3 +1,4 @@
+import { checkSection12Rules } from "./french-section12-rules.mjs";
 import { VERB_PARADIGMS, LEGACY_IRREGULARS, PARADIGM_STATUS, REGULAR_ER_CLASS, REGULAR_ER_VERBS, SPELLING_CHANGE_CLASS, PERSONS } from "./french-conjugation-paradigms.mjs";
 /* Pure structured French Intelligence core. No DOM, browser globals, network, storage, or HTML rendering. */
 
@@ -163,6 +164,14 @@ function checkWriting(q){
   ];
   for(const [re,rep,why,messageOnly=false] of checks){if(re.test(corrected)){re.lastIndex=0;const before=corrected;if(!messageOnly)corrected=corrected.replace(re,rep);suggestions.push({before,why,messageOnly});}}
   if (!suggestions.length) {
+    const ruleFindings = checkSection12Rules(q);
+    if (ruleFindings.length) {
+      let ruleCorrected = q;
+      for (const item of [...ruleFindings].filter(x => x.kind === "correction").sort((a,b) => b.span[0] - a.span[0])) ruleCorrected = ruleCorrected.slice(0,item.span[0]) + item.suggestion + ruleCorrected.slice(item.span[1]);
+      const ruleSuggestions = ruleFindings.map(item => ({before:item.found,why:item.explanation,messageOnly:item.kind==="review",ruleId:item.ruleId,suggestion:item.suggestion}));
+      const hasRuleCorrection = ruleFindings.some(item => item.kind === "correction");
+      return result(hasRuleCorrection ? "supported" : "ambiguous",hasRuleCorrection ? 0.82 : 0.55,hasRuleCorrection ? "writing.correction" : "writing.review-only",ruleFindings.map(item=>item.explanation).join(" "),{kind:"suggestions",input:q,corrected:ruleCorrected,suggestions:ruleSuggestions,hasCorrection:hasRuleCorrection});
+    }
     return result("supported", 0.72, "writing.no-listed-issue", "No issue from the small built-in check list was detected. That does not prove the sentence is fully correct; this is not a full grammar checker.", {
       kind: "no-issues", input: q, corrected: q, suggestions: [], hasCorrection: false
     });

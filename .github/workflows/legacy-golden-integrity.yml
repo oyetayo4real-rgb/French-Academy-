@@ -8,6 +8,8 @@ on:
       - "tests/golden/legacy-v1.json"
       - "tests/golden/legacy-v1.sha256"
       - "scripts/check-golden-integrity.mjs"
+      - "features/french-section12-rules.mjs"
+      - "scripts/check-section12-regressions.mjs"
       - "scripts/generate-golden.mjs"
       - "scripts/characterize-french-intelligence.mjs"
       - ".github/workflows/french-intelligence-check.yml"
@@ -17,6 +19,8 @@ on:
       - "tests/golden/legacy-v1.json"
       - "tests/golden/legacy-v1.sha256"
       - "scripts/check-golden-integrity.mjs"
+      - "features/french-section12-rules.mjs"
+      - "scripts/check-section12-regressions.mjs"
       - ".github/workflows/legacy-golden-integrity.yml"
 
 permissions:
