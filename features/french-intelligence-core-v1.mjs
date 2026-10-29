@@ -20,13 +20,28 @@ function phraseMatcher(re){
 function result(status, confidence, rule_id, explanation, fields = {}) {
   return { status, confidence, rule_id, explanation, sources: ["built-in French reference set"], ...fields };
 }
+const oeLigatureAliases = new Map([
+  ["oeil", "œil"],
+  ["coeur", "cœur"],
+  ["soeur", "sœur"],
+  ["oeuf", "œuf"],
+  ["noeud", "nœud"],
+  ["voeu", "vœu"],
+  ["boeuf", "bœuf"],
+  ["oeuvre", "œuvre"],
+  ["moeurs", "mœurs"],
+  ["manoeuvre", "manœuvre"],
+  ["choeur", "chœur"]
+]);
+
 function findDictionaryEntry(word) {
   const q = String(word || "").trim();
   if (!q) return null;
   const exactInput = q.toLocaleLowerCase("fr");
   // These short homophones must not collapse into dictionary reverse-gloss matches.
   if (exactInput === "a" || exactInput === "à") return null;
-  let foundKey = q.toLocaleLowerCase("fr");
+  // Only explicitly whitelisted French oe spellings map to their canonical ligature.
+  const foundKey = oeLigatureAliases.get(exactInput) || exactInput;
   let found = dictionary[foundKey];
   if (!found) {
     const key = Object.keys(dictionary).find(k => norm(k) === norm(q));

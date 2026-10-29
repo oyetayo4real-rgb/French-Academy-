@@ -37,6 +37,19 @@ equal("compatibility lookup must retain où, not alias it to ou", "où", "où", 
 equal("TR-046 only includes the adjective sense in core lookup", "noir", "adjective", core.lookup("noir").part);
 equal("TR-046 only includes the adjective sense in compatibility lookup", "noir", "adjective", compatLookup("noir")?.part);
 
+const oeLigatureCases = [
+  ["oeil", "œil"], ["coeur", "cœur"], ["soeur", "sœur"], ["oeuf", "œuf"],
+  ["noeud", "nœud"], ["voeu", "vœu"], ["boeuf", "bœuf"], ["oeuvre", "œuvre"],
+  ["moeurs", "mœurs"], ["manoeuvre", "manœuvre"], ["choeur", "chœur"]
+];
+for (const [input, canonical] of oeLigatureCases) {
+  equal("core oe-ligature whitelist must support " + input, input, "supported", core.lookup(input).status);
+  equal("core oe-ligature whitelist canonical headword for " + input, input, canonical, core.lookup(input).word);
+  equal("compatibility oe-ligature whitelist canonical headword for " + input, input, canonical, compatLookup(input)?.word);
+}
+equal("unlisted oe sequence must not be normalized by the whitelist", "coexister", "unsupported", core.lookup("coexister").status);
+equal("compatibility lookup must not normalize unlisted oe sequence", "coexister", null, compatLookup("coexister"));
+
 // The frozen, read-only golden is the output oracle. Do not execute the legacy implementation here.
 const golden = JSON.parse(readFileSync("tests/golden/legacy-v3.json", "utf8"));
 const goldenOu = golden.inventory.dictionary
