@@ -20,28 +20,13 @@ function phraseMatcher(re){
 function result(status, confidence, rule_id, explanation, fields = {}) {
   return { status, confidence, rule_id, explanation, sources: ["built-in French reference set"], ...fields };
 }
-const oeLigatureAliases = new Map([
-  ["oeil", "œil"],
-  ["coeur", "cœur"],
-  ["soeur", "sœur"],
-  ["oeuf", "œuf"],
-  ["noeud", "nœud"],
-  ["voeu", "vœu"],
-  ["boeuf", "bœuf"],
-  ["oeuvre", "œuvre"],
-  ["moeurs", "mœurs"],
-  ["manoeuvre", "manœuvre"],
-  ["choeur", "chœur"]
-]);
-
 function findDictionaryEntry(word) {
   const q = String(word || "").trim();
   if (!q) return null;
   const exactInput = q.toLocaleLowerCase("fr");
   // These short homophones must not collapse into dictionary reverse-gloss matches.
   if (exactInput === "a" || exactInput === "à") return null;
-  // Only explicitly whitelisted French oe spellings map to their canonical ligature.
-  const foundKey = oeLigatureAliases.get(exactInput) || exactInput;
+  let foundKey = q.toLocaleLowerCase("fr");
   let found = dictionary[foundKey];
   if (!found) {
     const key = Object.keys(dictionary).find(k => norm(k) === norm(q));
@@ -55,6 +40,14 @@ function findDictionaryEntry(word) {
 function lookup(word) {
   const entry = findDictionaryEntry(word);
   if (entry) return result("supported", 1, "dictionary." + entry.word, entry.notes, entry);
+  if (!entry) {
+    const input = String(word ?? "").trim();
+    const normalized = normalizeOeLigature(input);
+    if (normalized !== input) {
+      const normalizedEntry = findDictionaryEntry(normalized);
+      if (normalizedEntry) return result("supported", 1, "dictionary." + normalizedEntry.word, normalizedEntry.notes, normalizedEntry);
+    }
+  }
   return result("unsupported", 0, "dictionary.no-match", "No built-in dictionary entry matched this input.", { query: String(word || "").trim() });
 }
 function translate(text, direction) {
@@ -179,6 +172,27 @@ function checkWriting(q){
     hasCorrection ? "writing.correction" : "writing.review-only",
     suggestions.map(s => s.why).join(" "),
     { kind: "suggestions", input: q, corrected, suggestions, hasCorrection });
+}
+
+const oeLigatureTable = new Map([
+  ["oeil", "œil"], ["coeur", "cœur"], ["coeurs", "cœurs"], ["soeur", "sœur"], ["soeurs", "sœurs"],
+  ["oeuf", "œuf"], ["oeufs", "œufs"], ["noeud", "nœud"], ["noeuds", "nœuds"], ["voeu", "vœu"],
+  ["voeux", "vœux"], ["boeuf", "bœuf"], ["boeufs", "bœufs"], ["oeuvre", "œuvre"], ["oeuvres", "œuvres"],
+  ["moeurs", "mœurs"], ["manoeuvre", "manœuvre"], ["manoeuvres", "manœuvres"], ["choeur", "chœur"], ["choeurs", "chœurs"]
+]);
+
+export function normalizeOeLigature(word) {
+  const input = String(word ?? "");
+  const canonical = oeLigatureTable.get(input.toLocaleLowerCase("fr"));
+  if (!canonical) return input;
+  if (input === input.toLocaleUpperCase("fr")) return canonical.toLocaleUpperCase("fr");
+  const characters = Array.from(input);
+  const first = characters[0];
+  const rest = characters.slice(1).join("");
+  if (first === first.toLocaleUpperCase("fr") && rest === rest.toLocaleLowerCase("fr")) {
+    return canonical.charAt(0).toLocaleUpperCase("fr") + canonical.slice(1);
+  }
+  return canonical;
 }
 
 export { lookup, translate, conjugate, answerQuestion, checkWriting, writingPattern };

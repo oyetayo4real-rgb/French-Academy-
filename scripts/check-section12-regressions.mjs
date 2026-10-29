@@ -38,17 +38,30 @@ equal("TR-046 only includes the adjective sense in core lookup", "noir", "adject
 equal("TR-046 only includes the adjective sense in compatibility lookup", "noir", "adjective", compatLookup("noir")?.part);
 
 const oeLigatureCases = [
-  ["oeil", "œil"], ["coeur", "cœur"], ["soeur", "sœur"], ["oeuf", "œuf"],
-  ["noeud", "nœud"], ["voeu", "vœu"], ["boeuf", "bœuf"], ["oeuvre", "œuvre"],
-  ["moeurs", "mœurs"], ["manoeuvre", "manœuvre"], ["choeur", "chœur"]
+  ["oeil", "œil"], ["coeur", "cœur"], ["coeurs", "cœurs"], ["soeur", "sœur"], ["soeurs", "sœurs"],
+  ["oeuf", "œuf"], ["oeufs", "œufs"], ["noeud", "nœud"], ["noeuds", "nœuds"], ["voeu", "vœu"],
+  ["voeux", "vœux"], ["boeuf", "bœuf"], ["boeufs", "bœufs"], ["oeuvre", "œuvre"], ["oeuvres", "œuvres"],
+  ["moeurs", "mœurs"], ["manoeuvre", "manœuvre"], ["manoeuvres", "manœuvres"], ["choeur", "chœur"], ["choeurs", "chœurs"]
 ];
 for (const [input, canonical] of oeLigatureCases) {
-  equal("core oe-ligature whitelist must support " + input, input, "supported", core.lookup(input).status);
-  equal("core oe-ligature whitelist canonical headword for " + input, input, canonical, core.lookup(input).word);
-  equal("compatibility oe-ligature whitelist canonical headword for " + input, input, canonical, compatLookup(input)?.word);
+  equal("normalizeOeLigature maps " + input, input, canonical, core.normalizeOeLigature(input));
 }
-equal("unlisted oe sequence must not be normalized by the whitelist", "coexister", "unsupported", core.lookup("coexister").status);
-equal("compatibility lookup must not normalize unlisted oe sequence", "coexister", null, compatLookup("coexister"));
+for (const input of ["coexister", "coexiste", "moelle", "oeillet", "bonjour"]) {
+  equal("normalizeOeLigature leaves unlisted word unchanged", input, input, core.normalizeOeLigature(input));
+}
+equal("normalizeOeLigature preserves uppercase", "OEIL", "ŒIL", core.normalizeOeLigature("OEIL"));
+equal("normalizeOeLigature preserves titlecase", "Oeil", "Œil", core.normalizeOeLigature("Oeil"));
+
+for (const [plain, ligature] of [["oeil", "œil"], ["coeur", "cœur"]]) {
+  const plainResult = core.lookup(plain);
+  const ligatureResult = core.lookup(ligature);
+  equal("lookup supports " + plain, plain, "supported", plainResult.status);
+  equal("lookup supports " + ligature, ligature, "supported", ligatureResult.status);
+  equal("lookup result is identical for " + plain + "/" + ligature, plain, plainResult, ligatureResult);
+}
+for (const input of ["sœur", "œuf", "nœud", "vœu", "bœuf", "œuvre", "mœurs", "manœuvre", "chœur"]) {
+  equal("no dictionary entry should be invented for " + input, input, "unsupported", core.lookup(input).status);
+}
 
 // The frozen, read-only golden is the output oracle. Do not execute the legacy implementation here.
 const golden = JSON.parse(readFileSync("tests/golden/legacy-v3.json", "utf8"));

@@ -69,3 +69,10 @@ The golden review statuses above are approved by the repository owner on 2026-10
 
 **Linguistic sign-off: source-verified review, no teacher.** The canonical ledger contains 9 source-verified rows and 37 reference-pending rows. No teacher review or teacher approval was requested or inferred. The automated checker validates structure, statuses, unique row IDs, and source URLs only.
 
+
+
+## Step 6 incident
+
+- Root cause A: `foundKey` was changed to `const`, but the accent-insensitive fallback reassigns it. Restored the original lookup implementation from `79bfbc765334296c2ead7684b21667b629ac9eb6` and added the ligature normalization retry only after the existing lookup fails.
+- Root cause B: the prior regression test asserted that every whitelist word had a dictionary entry. Only `œil` and `cœur` have entries; no dictionary entries were added.
+- **ligature words awaiting entries (reference-pending):** `sœur`, `œuf`, `nœud`, `vœu`, `bœuf`, `œuvre`, `mœurs`, `manœuvre`, `chœur`.
