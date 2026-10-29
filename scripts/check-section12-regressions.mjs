@@ -1,37 +1,95 @@
-import assert from "node:assert/strict";
+import { isDeepStrictEqual } from "node:util";
+import { readFileSync } from "node:fs";
+import vm from "node:vm";
 import * as core from "../features/french-intelligence-core-v1.mjs";
-import { lookup as compatLookup } from "../features/french-intelligence-compat.mjs";
+import { dictionary } from "../features/french-data.mjs";
+import { lookup as compatLookup, translate as compatTranslate } from "../features/french-intelligence-compat.mjs";
+
+function reportFailure(message, input, expected, actual) {
+  const payload = { input, expected, actual };
+  console.error(JSON.stringify(payload, null, 2));
+  throw new Error(message);
+}
+function equal(message, input, expected, actual) {
+  if (!isDeepStrictEqual(actual, expected)) reportFailure(message, input, expected, actual);
+}
+function truthy(message, input, expected, actual) {
+  if (!actual) reportFailure(message, input, expected, actual);
+}
 
 const addedHeadwords = ["tout","beau","leurs","leur","vieux","œil","gens","cœur","je","ne","me","ce","que","le","la","falloir","si","quoi","dont","est-ce que","autre","quel","un","heure","an","air","accord","histoire","idée","argent","année","affaire","bras","noir"];
 for (const headword of addedHeadwords) {
   const result = core.lookup(headword);
-  assert.equal(result.status, "supported", "core lookup must support added headword: " + headword);
-  assert.equal(result.word, headword, "core lookup must preserve canonical headword: " + headword);
-  assert.ok(compatLookup(headword), "compatibility lookup must support added headword: " + headword);
+  equal("core lookup must support added headword: " + headword, headword, "supported", result.status);
+  equal("core lookup must preserve canonical headword: " + headword, headword, headword, result.word);
+  const compatibilityResult = compatLookup(headword);
+  truthy("compatibility lookup must support added headword: " + headword, headword, "non-null lookup result", compatibilityResult);
 }
+
 for (const input of ["a", "à"]) {
   const result = core.lookup(input);
-  assert.equal(result.status, "unsupported", "core lookup must not reverse-match " + input + " to un/a; an; one");
-  assert.notEqual(result.word, "un", input + " must not resolve to un");
-  assert.notEqual(result.meaning, "a; an; one", input + " must not resolve to the un gloss");
-  assert.equal(compatLookup(input), null, "compatibility lookup must not reverse-match " + input + " to un/a; an; one");
+  equal("core lookup must not reverse-match " + input + " to un/a; an; one", input, "unsupported", result.status);
+  equal(input + " must not resolve to un", input, false, result.word === "un");
+  equal(input + " must not resolve to the un gloss", input, false, result.meaning === "a; an; one");
+  equal("compatibility lookup must not reverse-match " + input + " to un/a; an; one", input, null, compatLookup(input));
 }
-assert.equal(core.lookup("où").word, "où", "où must retain its accented canonical headword");
-assert.equal(compatLookup("où")?.word, "où", "compatibility lookup must retain où, not alias it to ou");
-assert.equal(core.lookup("ou").status, "unsupported", "ou must not alias to où");
-assert.equal(compatLookup("ou"), null, "compatibility lookup must not alias ou to où");
-assert.equal(core.lookup("noir").part, "adjective", "TR-046 only includes the adjective sense");
-assert.equal(compatLookup("noir")?.part, "adjective", "compatibility TR-046 only includes the adjective sense");
-const hintCases = [
-  ["je suis heureux/heureuse", "je"],
-  ["j'apprends le français", "le"],
-  ["à plus tard", "à"],
-  ["à bientôt", "cœur"]
+equal("où must retain its accented canonical headword", "où", "où", core.lookup("où").word);
+equal("compatibility lookup must retain où, not alias it to ou", "où", "où", compatLookup("où")?.word);
+equal("ou must not alias to où", "ou", "unsupported", core.lookup("ou").status);
+equal("compatibility lookup must not alias ou to où", "ou", null, compatLookup("ou"));
+equal("TR-046 only includes the adjective sense in core lookup", "noir", "adjective", core.lookup("noir").part);
+equal("TR-046 only includes the adjective sense in compatibility lookup", "noir", "adjective", compatLookup("noir")?.part);
+
+// These are deliberately compared against the unchanged legacy browser implementation.
+// The compatibility renderer is the public HTML-output adapter over the extracted core.
+const legacySource = readFileSync("features/french-intelligence.js", "utf8");
+const listeners = {};
+const document = {
+  addEventListener(name, fn) { (listeners[name] ||= []).push(fn); },
+  getElementById() { return null; }
+};
+const window = {};
+vm.runInNewContext(legacySource, {
+  document, window, console, URL, encodeURIComponent,
+  location: { reload() {} }
+});
+const legacy = window.FrenchIntelligenceCore;
+truthy("legacy implementation must expose translate", "legacy API", "translate function", typeof legacy?.translate === "function");
+
+const differentialCases = [
+  ["je suis heureux/heureuse", "phrasebook:heureux"],
+  ["j'apprends le français", "phrasebook:apprends"],
+  ["je suis désolé(e)", "phrasebook:désolé"],
+  ["je suis fatigué(e)", "phrasebook:fatigué"],
+  ["je t'aime", "phrasebook:aime"],
+  ["je parle français", "phrasebook:parle"],
+  ["je voudrais de l'eau", "phrasebook:eau"],
+  ["à plus tard", "phrasebook:plus-tard"],
+  ["quelle heure est-il", "phrasebook:heure"],
+  ["où est la gare", "phrasebook:gare"],
+  ["Je suis étudiant", "phrasebook:étudiant"],
+  ["Bonjour\nJe vais bien.", "edge:newline"],
+  ["je\tne\tcomprends\tpas", "edge:tabs"],
+  ["a&b<c>d", "edge:angle-chain"],
+  ["À bientôt, cœur et sœur.", "edge:accented-words"]
 ];
-for (const [input, forbiddenWord] of hintCases) {
-  const result = core.translate(input, "fr-en");
-  assert.ok(Array.isArray(result.vocabularyHints), "expected ambiguous translation hints for " + input);
-  assert.equal(result.vocabularyHints.some(hint => hint.word.toLocaleLowerCase("fr") === forbiddenWord), false, "hint:false entry leaked into translation hints for " + input);
+
+for (const [input, label] of differentialCases) {
+  const expected = legacy.translate(input, "fr-en");
+  const actual = compatTranslate(input, "fr-en");
+  equal("core-backed translation must deep-equal legacy output (" + label + ")", input, expected, actual);
+
+  const structured = core.translate(input, "fr-en");
+  const hints = Array.isArray(structured.vocabularyHints) ? structured.vocabularyHints : [];
+  for (const hint of hints) {
+    const resolved = core.lookup(hint.word);
+    const canonical = resolved?.word;
+    const metadata = canonical ? dictionary[canonical]?.[4] : undefined;
+    equal("hint:false dictionary entries must never appear in vocabularyHints (" + label + ")", input, false, metadata?.hint === false);
+    equal("vocabularyHints entries must not expose hint:false (" + label + ")", input, false, hint.hint === false);
+  }
 }
+
 console.log("PASS Section 12 lookup regressions: 34 headwords, homophone collisions, TR-046 adjective-only.");
-console.log("PASS Section 12 translator hints: hint:false entries are suppressed without disabling direct lookup.");
+console.log("PASS Section 12 translation differential: 15 inputs match the unchanged legacy implementation.");
+console.log("PASS Section 12 translator hints: no hint:false dictionary entry leaks into vocabularyHints.");
