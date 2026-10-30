@@ -1,0 +1,44 @@
+name: Legacy golden integrity
+
+on:
+  push:
+    branches:
+      - feat/french-intelligence-engine
+    paths:
+      - "tests/golden/legacy-v1.json"
+      - "tests/golden/legacy-v1.sha256"
+      - "scripts/check-golden-integrity.mjs"
+      - "features/french-section12-rules.mjs"
+      - "scripts/check-section12-regressions.mjs"
+      - "scripts/generate-golden.mjs"
+      - "scripts/characterize-french-intelligence.mjs"
+      - ".github/workflows/french-intelligence-check.yml"
+      - ".github/workflows/legacy-golden-integrity.yml"
+  pull_request:
+    paths:
+      - "tests/golden/legacy-v1.json"
+      - "tests/golden/legacy-v1.sha256"
+      - "scripts/check-golden-integrity.mjs"
+      - "features/french-section12-rules.mjs"
+      - "scripts/check-section12-regressions.mjs"
+      - ".github/workflows/legacy-golden-integrity.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify-golden:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out complete history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify checksum and approved-update policy
+        env:
+          GOLDEN_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: node scripts/check-golden-integrity.mjs
