@@ -1,0 +1,13 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { renderGoldenChanges, computeGoldenDiffs } from "./golden-v2-utils.mjs";
+const v1=JSON.parse(readFileSync("tests/golden/legacy-v1.json","utf8"));
+const v2Text=readFileSync("tests/golden/legacy-v2.json","utf8"),v2=JSON.parse(v2Text);
+const digest=createHash("sha256").update(v2Text,"utf8").digest("hex");
+assert.equal(readFileSync("tests/golden/legacy-v2.sha256","utf8"),digest+"  tests/golden/legacy-v2.json\n","v2 SHA-256 must match exact golden bytes");
+const ledger=readFileSync("docs/golden-changes.md","utf8");
+assert.ok(ledger.startsWith(renderGoldenChanges(v1,v2)),"ledger must preserve the complete v1/v2 output-difference ledger");
+assert.ok(ledger.includes("## Approved v2 to v3 correction: `courir`"),"ledger must document the approved v3 courir correction");
+const diffs=computeGoldenDiffs(v1,v2),counts={};for(const d of diffs)counts[d.category]=(counts[d.category]||0)+1;
+console.log("PASS v1/v2 change ledger: differences="+diffs.length+" by_category="+JSON.stringify(counts));
