@@ -129,7 +129,7 @@ const parityInputs = [
   "À bientôt, cœur et sœur."
 ];
 const normalizeHeadword = value => String(value || "").toLocaleLowerCase("fr")
-  .normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
+  .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 const hintFalseHeadwords = new Set(
   Object.entries(dictionary)
     .filter(([, entry]) => entry?.[4]?.hint === false)
