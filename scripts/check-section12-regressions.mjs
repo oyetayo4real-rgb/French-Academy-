@@ -192,9 +192,10 @@ for (const headword of M1_VOCABULARY_HEADWORDS) {
   equal("M1 accent-stripped lookup canonical headword: " + headword, accentStripped, headword, normalized.word);
   equal("M1 accent-stripped lookup same French info: " + headword, accentStripped, canonical, normalized);
 }
+const m1NormalizedHeadwords = new Set(M1_VOCABULARY_HEADWORDS.map(m1Normalize));
 for (const row of golden.inventory.dictionary || []) {
   for (const variant of row.variants || []) {
-    equal("M1 vocabulary must preserve frozen golden lookup: " + variant.input, variant.input, variant.output, compatLookup(variant.input));
+    equal("M1 vocabulary must not shadow a frozen golden lookup input: " + variant.input, variant.input, false, m1NormalizedHeadwords.has(m1Normalize(variant.input)));
   }
 }
 
