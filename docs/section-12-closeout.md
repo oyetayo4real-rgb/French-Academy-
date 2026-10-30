@@ -1,78 +1,56 @@
-# Engineering closeout
+# Section 12 — final closeout
 
-- **Closeout code head before this documentation/workflow commit:** `bc63a6d5d4b8d1ad42d3549c338c807ba8c7df31`.
-- **Section 12 Step 1 audited baseline:** `0aff374df34c13c88d87e793e9538ffb2568d1c4`.
-- **Commit A, ledger and checker:** `bc7a475ee7ab8047ea7a8c98dd4ef1ae68ee99a7`.
-- **Commit B, teacher form exporter:** `f5b40cefc306f6f77ebca76169118d7eb5a97dcd`.
-- **Commit D, canonical ledger:** `bc63a6d5d4b8d1ad42d3549c338c807ba8c7df31`.
+## Final implementation head
 
-## Recorded CI runs for Commit A
+- **Step 9 implementation head SHA:** `5e2099882dd6c9ac71f8245d72c4938f4113ffcc`.
+- **Step 8c baseline SHA:** `34f119a155e3c478d630a4f5c1ed2e328e895b22`.
+- This closeout document is committed immediately after the implementation head; its documentation-only commit is the final repository head for this closeout.
+- Additive commits only. No force-push. No golden or checksum edits. No workflow changes. No PR #13, Vercel, or Sections 13–20 changes.
 
-- French Intelligence checks: [40722729367](https://github.com/oyetayo4real-rgb/French-Academy-/actions/runs/40722729367) — success.
-- Legacy golden integrity: [40722729763](https://github.com/oyetayo4real-rgb/French-Academy-/actions/runs/40722729763) — success.
-- Approved golden v2: [40722729254](https://github.com/oyetayo4real-rgb/French-Academy-/actions/runs/40722729254) — success.
-- Approved golden v3: [40722729252](https://github.com/oyetayo4real-rgb/French-Academy-/actions/runs/40722729252) — success.
+## CI evidence from the validated Step 8c baseline
 
-## Recorded CI runs for Commit B
+The following six runs were all completed successfully on Step 8c head `34f119a155e3c478d630a4f5c1ed2e328e895b22`:
 
-- French Intelligence checks: [40722794130](https://github.com/oyetayo4real-rgb/French-Academy-/actions/runs/40722794130) — success.
-- Legacy golden integrity: [40722794166](https://github.com/oyetayo4real-rgb/French-Academy-/actions/runs/40722794166) — success.
-- Approved golden v2: [40722793646](https://github.com/oyetayo4real-rgb/French-Academy-/actions/runs/40722793646) — success.
-- Approved golden v3: [40722793734](https://github.com/oyetayo4real-rgb/French-Academy-/actions/runs/40722793734) — success.
+| Workflow | Event | Run ID | Conclusion |
+|---|---|---:|---|
+| French Intelligence checks | push | [41048312431](https://github.com/oyetayo4real-rgb/French-Academy-/actions/runs/41048312431) | success |
+| French Intelligence checks | pull_request | [41048320066](https://github.com/oyetayo4real-rgb/French-Academy-/actions/runs/41048320066) | success |
+| Legacy golden integrity | push | [41048312453](https://github.com/oyetayo4real-rgb/French-Academy-/actions/runs/41048312453) | success |
+| Legacy golden integrity | pull_request | [41048320073](https://github.com/oyetayo4real-rgb/French-Academy-/actions/runs/41048320073) | success |
+| Approved French Intelligence golden v3 | pull_request | [41048320069](https://github.com/oyetayo4real-rgb/French-Academy-/actions/runs/41048320069) | success |
+| Section 14a approved golden v2 | pull_request | [41048320079](https://github.com/oyetayo4real-rgb/French-Academy-/actions/runs/41048320079) | success |
 
-## Parity results
+These six runs document the accepted pre-Step-9 baseline. Step 9 acceptance is separately gated on workflow runs for the exact final Step 9 head; these historical runs are not represented as Step 9 runs.
 
-The recorded baseline French Intelligence checks passed exact legacy parity, characterization, desktop/mobile Chromium checks, and browser UI parity. The recorded Step 1f negation example assertion passed. These results predate the teacher-ledger workflow step; the ledger checker and CSV exporter must be evaluated from the new workflow run.
+## Acceptance baseline
 
-## Golden review (Section 12 Step 3 read-only audit)
+- Exact legacy parity: **1,103 / 1,103**, zero differences.
+- Legacy characterization: **15 / 15** across all five methods.
+- Safety net: **639 inputs / 0 findings**.
+- Section 12 regression suite: passed on the validated baseline.
+- Golden v2 and v3 integrity and compatibility checks: passed.
+- Repository tree sanity check: passed; all required repository files present.
+- Desktop and mobile Chromium checks: passed.
+- Browser UI parity: **123 checkpoints / 0 unapproved differences**; 55 intentional differences.
 
-| Golden file | Commit SHA | What changed (from the commit diff) | Approval status |
-|---|---|---|---|
-| `tests/golden/legacy-v2.json` | [`e631d482d47261019d9ceb615078752d18240130`](https://github.com/oyetayo4real-rgb/French-Academy-/commit/e631d482d47261019d9ceb615078752d18240130) | Regenerated v2 outputs and checksum from the compatibility/core behavior. The accompanying diff corrected apostrophe escaping in the unsupported-translation fallback, restricted phrase substitution to exactly one matched phrase, tightened the verb marker check to a word boundary, and wrapped edge-case generation in exception capture. | APPROVED. Approved by Oyerinde Oyetayo, repository owner, 2026-10-28 |
-| `tests/golden/legacy-v3.json` | [`c9535c5fb3e13f4818b2ac9d5407dbfac01b36fd`](https://github.com/oyetayo4real-rgb/French-Academy-/commit/c9535c5fb3e13f4818b2ac9d5407dbfac01b36fd) | One golden-output field differs from v2: `inventory.conjugation.verbs[18]` for `courir` changes `output.type` from `Explicit present-tense paradigm · needs review` to `Irregular verb · present tense`; forms and persons are unchanged. The v3 checksum was updated. | APPROVED. Approved by Oyerinde Oyetayo, repository owner, 2026-10-28 |
+## Section 12 Step 9 dictionary and ledger closeout
 
-These are historical golden changes. The owner approvals below apply only to these two files at these exact commits; any golden v4 requires separate approval. No golden file or checksum was modified by Section 12 Step 4 retry 2.
+- Added nine dictionary entries with `hint:false`: sœur, œuf, nœud, vœu, bœuf, œuvre, mœurs, manœuvre, chœur.
+- Added positive canonical and unligatured lookup assertions. Unligatured forms must resolve to the same canonical entries through `normalizeOeLigature`.
+- Preserved the explicit whitelist behavior; **coexister remains unchanged**.
+- Ledger remains exactly **46 unique rows**:
+  - **9 source-verified**
+  - **34 lexique-confirmed**
+  - **3 reference-pending**: TR-005, TR-026, TR-046
+- Every source-verified and lexique-confirmed row carries a source/provenance value. Lexique provenance: `Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)`.
+- Added root `package.json` with private package metadata and only the pinned Playwright devDependency; no `type` field or scripts.
 
-## Step 3 read-only lookup reproduction
+## Open items
 
-The legacy lookup returns `null` for each of `oeil`, `œil`, `coeur`, and `cœur`. The structured core returns `status: unsupported`, `rule_id: dictionary.no-match`, and preserves each exact query. Current normalization lowercases and removes combining accent marks; it does not normalize `oe` to `œ`. No engine or golden file was changed for this reproduction.
+1. Three ledger rows remain reference-pending: TR-005, TR-026, and TR-046 (noun sense).
+2. Golden v4 for translator hints is deferred and requires separate owner approval.
+3. UI integration of the expanded dictionary and hint behavior has not started.
 
-## Step 3 expected-unsupported cross-check
+## Approval boundary
 
-The 37 reference-pending lookup inputs in the source-verified ledger were checked against the expected-unsupported arrays in golden v1/v2/v3 and the explicit characterization/parity tests. No input is an expected-unsupported *dictionary lookup* case in those sources. The one exact ID overlap is **TR-046 (`noir`)** in golden v2 and v3's `inventory.conjugation.unsupported`; that is a conjugation case, not a dictionary lookup case. The characterization corpus and parity test source contain no exact teacher-ledger unsupported lookup input as a dedicated expected-unsupported lookup case.
-
-The golden review statuses above are approved by the repository owner on 2026-10-28 for `tests/golden/legacy-v2.json` at commit `e631d482d47261019d9ceb615078752d18240130` and `tests/golden/legacy-v3.json` at commit `c9535c5fb3e13f4818b2ac9d5407dbfac01b36fd` only. Any golden v4 requires separate owner approval. No teacher decisions were inferred.
-
-
-## Section 12 Step 4 retry 2 — pre-change parity baseline
-
-- Branch head before Step 4 retry 2 changes: `3d3c6138951e5bdd98c095d3fe70b88357706408`.
-- Pre-change French Intelligence CI run: [40760967079](https://github.com/oyetayo4real-rgb/French-Academy-/actions/runs/40760967079) (PR merge checkout `4bc15e023f66c50266a60ce74e6335b2b14c46bb`, containing the branch head).
-- Exact legacy parity: **1,103 compared / 1,103 matched / 0 differences**.
-- Legacy characterization: **15 cases passed across all five methods**.
-- French Intelligence checks, legacy golden integrity, approved golden v2, and approved golden v3 all passed in the pre-change check.
-- This is the baseline only; post-addition parity is gated separately. No golden file or checksum is to be edited by this step.
-
-## Step 4 read-only Lexique/Dicollecte cross-check
-
-- Source repository: `oyetayo4real-rgb/french-engine-data`, branch `main`; pilot data is derived from Lexique 3.83. Its cross-check manifest reports Dicollecte/Grammalecte 7.7 matched 2,709 of 2,710 pilot forms, with `marchées` the sole unknown form.
-- Of the 37 reference-pending rows, **34 match Lexique pilot headword/POS/gender**, and **3 have mismatches or partial coverage**: TR-005 (`que`, conjunction) because the pilot has pronoun entries but no conjunction entry; TR-026 (`mort`, adjective/noun) because the pilot entry is feminine noun only; and TR-046 (`noir`, adjective/noun) because the pilot confirms the adjective but not the noun sense. The Dicollecte pilot cross-check is form-level only and does not establish POS/gender. TR-005 and TR-026 remain skipped with the reason: **“Lexique pilot subset lacks the conjunction / adjective sense; cross-check against Wiktionnaire first”.** TR-046 includes only the adjective sense in the data module; the noun sense remains reference-pending. These are read-only findings; no ledger row was changed.
-
-
-## Section 12 Step 5 — Parity incident and frozen-golden repair
-
-- At commit `c3a39175b768e854ded98ed9503ba2c55ff5e9d4`, exact parity fell to **1,088/1,103**, with 15 unique affected outputs. The reported incident categories are **11 function-word-noise findings, 3 accent-collision findings, and 2 genuine improvements**; one case is shared between the function-word-noise and accent-collision categories, so these category counts describe 15 unique cases rather than 16 separate cases.
-- Repair: each of the 34 Section 12 dictionary additions is tagged `hint:false`; the French-to-English vocabulary-hint generator skips those entries while direct lookup remains available. Short ambiguous lookups `a`, `à`, and `ou` are prevented from reverse-gloss/accent-normalization collisions. TR-046 (`noir`) retains only the adjective sense; the noun sense remains reference-pending. TR-005 and TR-026 remain skipped pending a Wiktionnaire cross-check.
-- No golden files or checksums were changed. **Golden v4 is deferred and is not approved.** The required gate is exact parity **1,103/1,103** and legacy characterization **15/15** before the oe→œ whitelist or proposed-rule regression suite can be added.
-
-# Linguistic sign-off
-
-**Linguistic sign-off: source-verified review, no teacher.** The canonical ledger contains 9 source-verified rows and 37 reference-pending rows. No teacher review or teacher approval was requested or inferred. The automated checker validates structure, statuses, unique row IDs, and source URLs only.
-
-
-
-## Step 6 incident
-
-- Root cause A: `foundKey` was changed to `const`, but the accent-insensitive fallback reassigns it. Restored the original lookup implementation from `79bfbc765334296c2ead7684b21667b629ac9eb6` and added the ligature normalization retry only after the existing lookup fails.
-- Root cause B: the prior regression test asserted that every whitelist word had a dictionary entry. Only `œil` and `cœur` have entries; no dictionary entries were added.
-- **ligature words awaiting entries (reference-pending):** `sœur`, `œuf`, `nœud`, `vœu`, `bœuf`, `œuvre`, `mœurs`, `manœuvre`, `chœur`.
+Golden v2 and golden v3 were approved by **Oyerinde Oyetayo on 2026-10-28**. This approval applies only to the reviewed v2/v3 golden artifacts and does not authorize golden v4. No teacher approval is inferred or claimed.
