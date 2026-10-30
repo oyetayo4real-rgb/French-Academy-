@@ -87,6 +87,31 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v4
+      - name: Verify required repository tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          required=(
+            features/french-intelligence.js
+            features/french-intelligence-core-v1.mjs
+            features/french-intelligence-compat.mjs
+            features/french-data.mjs
+            features/french-section12-rules.mjs
+            scripts/generate-golden.mjs
+            scripts/check-golden-integrity.mjs
+            scripts/check-golden-v3.mjs
+            tests/golden/legacy-v1.json
+          )
+          missing=()
+          for path in "${required[@]}"; do
+            if [[ ! -f "$path" ]]; then missing+=("$path"); fi
+          done
+          if (( ${#missing[@]} )); then
+            printf 'Missing required repository files:\n'
+            printf ' - %s\n' "${missing[@]}"
+            exit 1
+          fi
+          echo "PASS: all required repository files are present."
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
