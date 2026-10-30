@@ -163,7 +163,7 @@ const legacyRenderer = Object.freeze({ lookup, translate, conjugate, answerQuest
 function publicLookup(word) {
   const value = structuredCore.lookup(word);
   if (value.status !== "supported") return null;
-  return { word: value.word, meaning: value.meaning, part: value.part, example: value.example, notes: value.notes, builtIn: value.builtIn };
+  return { word: value.word, meaning: value.meaning, part: value.part, example: value.example, notes: value.notes, builtIn: value.builtIn, ...(value.glossStatus === "pending" ? { glossStatus: value.glossStatus, gender: value.gender, lexiquePos: value.lexiquePos, lemmaFrequency: value.lemmaFrequency, source: value.source } : {}) };
 }
 function publicTranslate(text, direction) {
   const value = structuredCore.translate(text, direction);

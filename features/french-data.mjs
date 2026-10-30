@@ -1,3 +1,4 @@
+import { m1Vocabulary } from "./french-vocabulary-m1.mjs";
 export const dictionary = {
     bonjour:["hello; good morning","interjection","Bonjour, comment allez-vous ?","A standard greeting; use bonsoir in the evening."],
     bonsoir:["good evening","interjection","Bonsoir, madame.","Used as a greeting in the evening."],
@@ -181,7 +182,8 @@ export const dictionary = {
     "affaire":["matter; deal; business","noun (feminine)","C'est une bonne affaire.","Une bonne affaire means a bargain; les affaires can mean business or belongings; avoir affaire à means to deal with.",{"hint":false}],
     "bras":["arm","noun (masculine)","Elle porte l'enfant dans ses bras.","Same form in singular and plural.",{"hint":false}],
     "noir":["black","adjective","Un chat noir.","Adjective forms: noir, noire, noirs, noires. The noun sense “le noir” (darkness) remains reference-pending and is not included in this entry.",{"hint":false}],
-
+,
+    ...m1Vocabulary
   };
 
 export const persons = ["je / j'","tu","il / elle / on","nous","vous","ils / elles"];

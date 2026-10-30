@@ -2,6 +2,7 @@ import { isDeepStrictEqual } from "node:util";
 import { readFileSync } from "node:fs";
 import * as core from "../features/french-intelligence-core-v1.mjs";
 import { dictionary } from "../features/french-data.mjs";
+import { M1_VOCABULARY_HEADWORDS } from "../features/french-vocabulary-m1.mjs";
 import { checkSection12Rules } from "../features/french-section12-rules.mjs";
 import { lookup as compatLookup, translate as compatTranslate } from "../features/french-intelligence-compat.mjs";
 
@@ -175,6 +176,27 @@ const safetyFailures=[];
 for(const [source,input] of safetyInputs){const findings=checkSection12Rules(input);if(findings.length)safetyFailures.push({ruleId:findings[0].ruleId,input,expected:"zero findings (legacy reported no issue)",actual:findings,source});}
 if(safetyFailures.length) failures.push(...safetyFailures.map(({source,...item})=>item));
 console.log(JSON.stringify({safetyNetInputs:safetyInputs.size,safetyNetFailures:safetyFailures.length}));
+
+
+const m1Normalize = value => String(value).toLocaleLowerCase("fr").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
+for (const headword of M1_VOCABULARY_HEADWORDS) {
+  const canonical = core.lookup(headword);
+  equal("M1 vocabulary lookup supported: " + headword, headword, "supported", canonical.status);
+  equal("M1 vocabulary canonical headword: " + headword, headword, headword, canonical.word);
+  equal("M1 vocabulary gloss remains pending: " + headword, headword, "pending", canonical.glossStatus);
+  equal("M1 vocabulary explicit English-pending meaning: " + headword, headword, "English meaning not yet added", canonical.meaning);
+  equal("M1 vocabulary translator hint suppression: " + headword, headword, false, dictionary[headword]?.[4]?.hint);
+  const accentStripped = m1Normalize(headword);
+  const normalized = core.lookup(accentStripped);
+  equal("M1 accent-stripped lookup supported: " + headword, accentStripped, "supported", normalized.status);
+  equal("M1 accent-stripped lookup canonical headword: " + headword, accentStripped, headword, normalized.word);
+  equal("M1 accent-stripped lookup same French info: " + headword, accentStripped, canonical, normalized);
+}
+for (const row of golden.inventory.dictionary || []) {
+  for (const variant of row.variants || []) {
+    equal("M1 vocabulary must preserve frozen golden lookup: " + variant.input, variant.input, variant.output, compatLookup(variant.input));
+  }
+}
 
 console.log("PASS Section 12 lookup regressions: 34 headwords, homophone collisions, TR-046 adjective-only.");
 console.log("PASS Section 12 hint suppression: 15 parity inputs contain no hint:false headword.");
