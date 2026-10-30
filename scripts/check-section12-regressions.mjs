@@ -178,7 +178,7 @@ if(safetyFailures.length) failures.push(...safetyFailures.map(({source,...item})
 console.log(JSON.stringify({safetyNetInputs:safetyInputs.size,safetyNetFailures:safetyFailures.length}));
 
 
-const m1Normalize = value => String(value).toLocaleLowerCase("fr").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "");
+const m1Normalize = value => String(value).toLocaleLowerCase("fr").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 for (const headword of M1_VOCABULARY_HEADWORDS) {
   const canonical = core.lookup(headword);
   equal("M1 vocabulary lookup supported: " + headword, headword, "supported", canonical.status);
