@@ -60,8 +60,18 @@ for (const [plain, ligature] of [["oeil", "œil"], ["coeur", "cœur"]]) {
   equal("lookup supports " + ligature, ligature, "supported", ligatureResult.status);
   equal("lookup result is identical for " + plain + "/" + ligature, plain, plainResult, ligatureResult);
 }
-for (const input of ["sœur", "œuf", "nœud", "vœu", "bœuf", "œuvre", "mœurs", "manœuvre", "chœur"]) {
-  equal("no dictionary entry should be invented for " + input, input, "unsupported", core.lookup(input).status);
+const newLigatureHeadwords = ["sœur", "œuf", "nœud", "vœu", "bœuf", "œuvre", "mœurs", "manœuvre", "chœur"];
+const unligaturedLigatureHeadwords = ["soeur", "oeuf", "noeud", "voeu", "boeuf", "oeuvre", "moeurs", "manoeuvre", "choeur"];
+for (let index = 0; index < newLigatureHeadwords.length; index++) {
+  const canonical = newLigatureHeadwords[index];
+  const unligatured = unligaturedLigatureHeadwords[index];
+  const canonicalResult = core.lookup(canonical);
+  const unligaturedResult = core.lookup(unligatured);
+  equal("ligature lookup must be supported: " + canonical, canonical, "supported", canonicalResult.status);
+  equal("unligatured lookup must be supported: " + unligatured, unligatured, "supported", unligaturedResult.status);
+  equal("unligatured lookup must resolve to canonical headword: " + unligatured, unligatured, canonical, unligaturedResult.word);
+  equal("unligatured lookup must return the same dictionary entry: " + unligatured, unligatured, canonicalResult, unligaturedResult);
+  equal("new ligature dictionary entry must suppress translator hints: " + canonical, canonical, false, dictionary[canonical]?.[4]?.hint);
 }
 
 
@@ -124,6 +134,9 @@ const hintFalseHeadwords = new Set(
     .filter(([, entry]) => entry?.[4]?.hint === false)
     .map(([headword]) => normalizeHeadword(headword))
 );
+for (const headword of newLigatureHeadwords) {
+  truthy("new ligature headword must be included in hint:false set: " + headword, headword, true, hintFalseHeadwords.has(normalizeHeadword(headword)));
+}
 for (const input of parityInputs) {
   const actual = core.translate(input, "fr-en");
   const hints = Array.isArray(actual.vocabularyHints) ? actual.vocabularyHints : [];

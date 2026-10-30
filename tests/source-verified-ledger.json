@@ -4,6 +4,7 @@
   "method": "Review completed without a teacher at the owner's request. Rows marked source-verified were checked against the online sources listed. Rows marked reference-pending follow standard grammar references and must pass the automated cross-check (Lexique / Wiktionnaire via the data pipeline) before being promoted. Nothing here is teacher-approved.",
   "status_values": [
     "source-verified",
+    "lexique-confirmed",
     "reference-pending"
   ],
   "rows": [
@@ -17,8 +18,10 @@
       "example_fr": "J'aime le café.",
       "example_en": "I like coffee.",
       "engine_action": "add-missing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -31,8 +34,10 @@
       "example_fr": "Je ne sais pas.",
       "example_en": "I don't know.",
       "engine_action": "add-missing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -45,8 +50,10 @@
       "example_fr": "Il me voit.",
       "example_en": "He sees me.",
       "engine_action": "add-missing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -59,8 +66,10 @@
       "example_fr": "Cet homme est grand.",
       "example_en": "This man is tall.",
       "engine_action": "add-missing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -87,8 +96,10 @@
       "example_fr": "Il n'a qu'un frère.",
       "example_en": "He has only one brother.",
       "engine_action": "add-missing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -135,8 +146,10 @@
       "example_fr": "Le chat dort.",
       "example_en": "The cat is sleeping.",
       "engine_action": "add-missing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -149,8 +162,10 @@
       "example_fr": "La maison est grande.",
       "example_en": "The house is big.",
       "engine_action": "add-missing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -163,8 +178,10 @@
       "example_fr": "Le jour où je suis arrivé.",
       "example_en": "The day I arrived.",
       "engine_action": "verify-existing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -177,8 +194,10 @@
       "example_fr": "Il faut partir.",
       "example_en": "We must leave.",
       "engine_action": "add-missing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -191,8 +210,10 @@
       "example_fr": "S'il pleut, je reste.",
       "example_en": "If it rains, I stay.",
       "engine_action": "add-missing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -205,8 +226,10 @@
       "example_fr": "À quoi penses-tu ?",
       "example_en": "What are you thinking about?",
       "engine_action": "add-missing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -219,8 +242,10 @@
       "example_fr": "Le livre dont je parle.",
       "example_en": "The book I am talking about.",
       "engine_action": "add-missing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -233,8 +258,10 @@
       "example_fr": "Comment vas-tu ?",
       "example_en": "How are you?",
       "engine_action": "verify-existing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -247,8 +274,10 @@
       "example_fr": "Est-ce qu'il vient ?",
       "example_en": "Is he coming?",
       "engine_action": "add-missing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -277,8 +306,10 @@
       "example_fr": "Un autre jour.",
       "example_en": "Another day.",
       "engine_action": "add-missing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -323,8 +354,10 @@
       "example_fr": "Quelle heure est-il ?",
       "example_en": "What time is it?",
       "engine_action": "add-missing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -337,8 +370,10 @@
       "example_fr": "Un livre sur la table.",
       "example_en": "A book on the table.",
       "engine_action": "add-missing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -351,8 +386,10 @@
       "example_fr": "Je reste parce qu'il pleut.",
       "example_en": "I'm staying because it's raining.",
       "engine_action": "verify-existing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -413,8 +450,10 @@
       "example_fr": "Cet homme est gentil.",
       "example_en": "This man is kind.",
       "engine_action": "verify-existing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -427,8 +466,10 @@
       "example_fr": "Il est trois heures.",
       "example_en": "It is three o'clock.",
       "engine_action": "add-missing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -441,8 +482,10 @@
       "example_fr": "J'ai vingt ans.",
       "example_en": "I am twenty.",
       "engine_action": "add-missing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -455,8 +498,10 @@
       "example_fr": "Les enfants jouent.",
       "example_en": "The children are playing.",
       "engine_action": "verify-existing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -469,8 +514,10 @@
       "example_fr": "Il a l'air fatigué.",
       "example_en": "He looks tired.",
       "engine_action": "add-missing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -483,8 +530,10 @@
       "example_fr": "C'est mon ami.",
       "example_en": "He is my friend.",
       "engine_action": "verify-existing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -514,8 +563,10 @@
       "example_fr": "Je suis d'accord.",
       "example_en": "I agree.",
       "engine_action": "add-missing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -528,8 +579,10 @@
       "example_fr": "Un grand amour.",
       "example_en": "A great love.",
       "engine_action": "verify-existing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -542,8 +595,10 @@
       "example_fr": "Un verre d'eau.",
       "example_en": "A glass of water.",
       "engine_action": "verify-existing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -556,8 +611,10 @@
       "example_fr": "Elle raconte une histoire.",
       "example_en": "She tells a story.",
       "engine_action": "add-missing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -570,8 +627,10 @@
       "example_fr": "J'ai une bonne idée.",
       "example_en": "I have a good idea.",
       "engine_action": "add-missing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -584,8 +643,10 @@
       "example_fr": "Je n'ai pas d'argent.",
       "example_en": "I have no money.",
       "engine_action": "add-missing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -598,8 +659,10 @@
       "example_fr": "Bonne année !",
       "example_en": "Happy New Year!",
       "engine_action": "add-missing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -612,8 +675,10 @@
       "example_fr": "C'est une bonne affaire.",
       "example_en": "It's a bargain.",
       "engine_action": "add-missing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -643,8 +708,10 @@
       "example_fr": "Elle porte l'enfant dans ses bras.",
       "example_en": "She carries the child in her arms.",
       "engine_action": "add-missing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
@@ -657,8 +724,10 @@
       "example_fr": "J'apprends à nager.",
       "example_en": "I am learning to swim.",
       "engine_action": "verify-existing",
-      "status": "reference-pending",
-      "sources": [],
+      "status": "lexique-confirmed",
+      "sources": [
+        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+      ],
       "teacher_review": "not required (owner decision)"
     },
     {
