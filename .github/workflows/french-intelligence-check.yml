@@ -27,6 +27,7 @@ on:
       - "scripts/characterize-french-intelligence.mjs"
       - "scripts/check-french-intelligence.browser.mjs"
       - "scripts/check-french-intelligence.ui-parity.mjs"
+      - "scripts/check-writing-compat-parity.mjs"
       - "tests/fixtures/french-intelligence-legacy.html"
       - "tests/fixtures/french-intelligence-compat.html"
       - "scripts/generate-golden.mjs"
@@ -47,6 +48,7 @@ on:
   push:
     branches:
       - feat/french-intelligence-engine
+      - feat/wire-section12-writing
       - feat/m1-vocab-tenses
     paths:
       - "features/french-intelligence.js"
@@ -71,6 +73,7 @@ on:
       - "scripts/check-french-intelligence.mjs"
       - "scripts/check-french-intelligence.browser.mjs"
       - "scripts/check-french-intelligence.ui-parity.mjs"
+      - "scripts/check-writing-compat-parity.mjs"
       - "tests/fixtures/french-intelligence-legacy.html"
       - "tests/fixtures/french-intelligence-compat.html"
       - "scripts/generate-golden.mjs"
@@ -98,6 +101,8 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Verify required repository tree
         shell: bash
         run: |
@@ -115,6 +120,7 @@ jobs:
             scripts/generate-golden.mjs
             scripts/check-golden-integrity.mjs
             scripts/check-golden-v3.mjs
+            scripts/check-writing-compat-parity.mjs
             tests/golden/legacy-v1.json
           )
           missing=()
@@ -141,6 +147,8 @@ jobs:
         run: node scripts/check-french-intelligence-core.mjs
       - name: Check Section 14a correctness
         run: node scripts/check-french-intelligence-correctness.mjs
+      - name: Check approved golden v2 ledger and checksum
+        run: node scripts/check-golden-v2.mjs
       - name: Check approved golden v3 scope and checksum
         run: node scripts/check-golden-v3.mjs
       - name: Check engine integration contract
@@ -182,6 +190,8 @@ jobs:
         run: node scripts/check-french-intelligence.browser.mjs
       - name: Compare legacy and compatibility browser UI
         run: node scripts/check-french-intelligence.ui-parity.mjs
+      - name: Verify Writing API and UI parity against main golden and 639-input safety net
+        run: node scripts/check-writing-compat-parity.mjs
 
   golden-reproducibility:
     name: Reproduce legacy golden in memory

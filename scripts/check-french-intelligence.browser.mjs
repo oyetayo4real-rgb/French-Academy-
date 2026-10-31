@@ -164,6 +164,24 @@ try {
     await page.locator("#fiConjugate").click();
     await page.locator("#fiAnswer").getByText("suis", { exact: true }).waitFor();
 
+    await page.locator('[data-fitab="correct"]').click();
+    const section12WritingCases = [
+      { input: "Je leurs ai dit de partir", expected: "Je leur ai dit de partir" },
+      { input: "un vieux homme", expected: "un vieil homme" },
+      { input: "Je leur ai dit", noIssue: true }
+    ];
+    for (const item of section12WritingCases) {
+      await page.locator("#fiInput").fill(item.input);
+      await page.locator("#fiCheck").click();
+      if (item.noIssue) {
+        assert.match(await page.locator("#fiAnswer").innerText(), /No issue from the small built-in check list was detected/, `${profile.name}: clean NR-03 negative remains unchanged`);
+        assert.equal(await page.locator("#fiAnswer .fi-output").count(), 0);
+      } else {
+        assert.equal((await page.locator("#fiAnswer .fi-output").innerText()).trim(), item.expected, `${profile.name}: Section 12 correction`);
+      }
+    }
+    console.log(`PASS ${profile.name}: Writing tab applies NR-03 and NR-05 and preserves the NR-03 negative`);
+
     await page.locator('[data-fitab="grammar"]').click();
     await page.locator("#fiRuleSearch").fill("negation");
     await page.locator("#fiRules").getByText(/Negation/i).first().waitFor();
