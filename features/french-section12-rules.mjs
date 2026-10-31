@@ -43,18 +43,23 @@ export function checkSection12Rules(text) {
     const start=m.index+m[1].length+m[2].length;
     findings.push(finding("NR-07","correction",start,m[3],preserveCase(m[3],"à"),"This listed motion or state verb takes the preposition à before the listed place or destination."));
   }
+  const motionLocationElisionPattern=new RegExp(wordStart+"("+makeAlternation(motionStateVerbs)+")(\\s+)(a)(\\s+)(l['’])(?=\\s|$|[.,!?;:])","giu");
+  for(const m of input.matchAll(motionLocationElisionPattern)){
+    const start=m.index+m[1].length+m[2].length;
+    findings.push(finding("NR-07","correction",start,m[3],preserveCase(m[3],"à"),"This listed motion or state verb takes the preposition à before an elided place article."));
+  }
   // NR-08: only sentence-initial ou before the closed question-word list is corrected.
   const questionFollowers=["est","sont","habites","habitez","vas","vais","va","allez","étais","es","peux","puis-je","se trouve","est-ce"];
-  const initialOuPattern=new RegExp("(^\\\\s*|[.!?]\\\\s+)(ou)(?=\\\\s+(?:"+makeAlternation(questionFollowers)+")"+wordEnd+")","giu");
+  const initialOuPattern=new RegExp("(^\\s*|[.!?]\\s+)(ou)(?=\\s+(?:"+makeAlternation(questionFollowers)+")"+wordEnd+")","giu");
   for(const m of input.matchAll(initialOuPattern)){
     const start=m.index+m[1].length;
     findings.push(finding("NR-08","correction",start,m[2],preserveCase(m[2],"où"),"At the beginning of a question asking where, use où with a grave accent; ou means or."));
   }
   // NR-09: closed subject + adjective list; c' is handled without adding an extra space.
   const stateAdjectives=["content","contente","fatigué","fatiguée","grand","grande","petit","petite","malade","ici","là","prêt","prête","gentil","gentille","tard","tôt"];
-  const stateEtPattern=new RegExp(wordStart+"(il|elle|on|ce|c['’])(\\\\s*)(et)(\\\\s+)("+makeAlternation(stateAdjectives)+")"+wordEnd,"giu");
+  const stateEtPattern=new RegExp(wordStart+"(il|elle|on|ce|c['’])(\\s*)(et)(\\s+)("+makeAlternation(stateAdjectives)+")"+wordEnd,"giu");
   for(const m of input.matchAll(stateEtPattern)){
-    if(m[1].toLocaleLowerCase("fr")==="ce"){
+    if(m[1].toLocaleLowerCase("fr")==="ce"||m[1].toLocaleLowerCase("fr").startsWith("c")){
       const found=m[1]+m[2]+m[3],start=m.index;
       findings.push(finding("NR-09","correction",start,found,preserveCase(found,"c'est"),"Before this listed adjective, the verb is est; the demonstrative ce contracts to c'est."));
     }else{
@@ -64,14 +69,14 @@ export function checkSection12Rules(text) {
   }
   // NR-10: the plural subject forms require sont, never son.
   const pluralSubjects=["ils","elles","ceux","celles"];
-  const sonPattern=new RegExp(wordStart+"("+makeAlternation(pluralSubjects)+")(\\\\s+)(son)"+wordEnd,"giu");
+  const sonPattern=new RegExp(wordStart+"("+makeAlternation(pluralSubjects)+")(\\s+)(son)"+wordEnd,"giu");
   for(const m of input.matchAll(sonPattern)){
     const start=m.index+m[1].length+m[2].length;
     findings.push(finding("NR-10","correction",start,m[3],preserveCase(m[3],"sont"),"After these plural subjects, use sont (the plural form of être); son is a possessive determiner."));
   }
   // NR-11: only the specified impersonal expressions take ça.
   const caVerbs=["va","dépend","marche","fait","suffit","suffira","m'étonne","commence","existe"];
-  const saPattern=new RegExp(wordStart+"(sa)(\\\\s+)("+makeAlternation(caVerbs)+")"+wordEnd,"giu");
+  const saPattern=new RegExp(wordStart+"(sa)(\\s+)("+makeAlternation(caVerbs)+")"+wordEnd,"giu");
   for(const m of input.matchAll(saPattern)){
     findings.push(finding("NR-11","correction",m.index,m[1],preserveCase(m[1],"ça"),"In this listed impersonal expression, ça means that/it; sa is the feminine possessive determiner."));
   }
