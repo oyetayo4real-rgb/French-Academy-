@@ -172,7 +172,7 @@ try {
       { tense: "imparfait", cases: [{ verb: "trouver", expected: "trouvais" }, { verb: "être", expected: "étais" }] },
       { tense: "futur", cases: [{ verb: "trouver", expected: "trouverai" }, { verb: "être", expected: "serai" }] },
       { tense: "conditionnel", cases: [{ verb: "trouver", expected: "trouverais" }, { verb: "être", expected: "serais" }] },
-      { tense: "passé composé", cases: [{ verb: "arriver", expected: "suis arrivé / arrivée" }, { verb: "faire", expected: "ai fait" }] }
+      { tense: "passé composé", cases: [{ verb: "arriver", expected: "je suis arrivé(e)" }, { verb: "faire", expected: "ai fait" }] }
     ];
     for (const group of tenseCases) {
       for (const item of group.cases) {
