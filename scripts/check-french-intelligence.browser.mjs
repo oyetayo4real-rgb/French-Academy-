@@ -172,7 +172,7 @@ try {
       { tense: "imparfait", cases: [{ verb: "trouver", expected: "trouvais" }, { verb: "être", expected: "étais" }] },
       { tense: "futur", cases: [{ verb: "trouver", expected: "trouverai" }, { verb: "être", expected: "serai" }] },
       { tense: "conditionnel", cases: [{ verb: "trouver", expected: "trouverais" }, { verb: "être", expected: "serais" }] },
-      { tense: "passé composé", cases: [{ verb: "arriver", expected: "je suis arrivé(e)" }, { verb: "faire", expected: "ai fait" }] }
+      { tense: "passé composé", cases: [{ verb: "arriver", expected: "suis arrivé(e)", pronoun: "je" }, { verb: "faire", expected: "ai fait", pronoun: "j'" }] }
     ];
     for (const group of tenseCases) {
       for (const item of group.cases) {
@@ -180,7 +180,12 @@ try {
         await page.locator("#fiVerb").fill(item.verb);
         await page.locator("#fiConjugate").click();
         const output = await page.locator("#fiAnswer").innerText();
-        assert.ok(output.includes(item.expected), `${profile.name}: ${item.verb} ${group.tense} contains ${item.expected}; actual=${output}`);
+        if(item.pronoun){
+          assert.equal(await page.locator("#fiAnswer tbody th").first().innerText(),item.pronoun,`${profile.name}: ${item.verb} ${group.tense} pronoun`);
+          assert.equal(await page.locator("#fiAnswer tbody td").first().innerText(),item.expected,`${profile.name}: ${item.verb} ${group.tense} conjugated form`);
+        }else{
+          assert.ok(output.includes(item.expected), `${profile.name}: ${item.verb} ${group.tense} contains ${item.expected}; actual=${output}`);
+        }
       }
     }
     await page.locator("#fiTense").selectOption("present");
