@@ -33,8 +33,8 @@ function findDictionaryEntry(word) {
     const key = Object.keys(dictionary).find(k => norm(k) === norm(q));
     if (key) { foundKey = key; found = dictionary[key]; }
   }
-  if (found) { const metadata = found[4] && typeof found[4] === "object" ? found[4] : null; return { word: foundKey, meaning: found[0], part: found[1], example: found[2], notes: found[3], builtIn: true, ...(metadata?.gloss === "pending" ? { glossStatus: "pending", gender: metadata.gender, lexiquePos: metadata.lexiquePos, lemmaFrequency: metadata.lemmaFrequency, source: metadata.source } : {}) }; }
-  const rev = Object.keys(dictionary).find(k => dictionary[k]?.[4]?.gloss !== "pending" && norm(dictionary[k][0].split(";")[0]) === norm(q));
+  if (found) { const metadata = found[4] && typeof found[4] === "object" ? found[4] : null; const glossPending = metadata?.gloss === "pending" || metadata?.gloss === "drafted-pending-review"; return { word: foundKey, meaning: found[0], part: found[1], example: found[2], notes: found[3], builtIn: true, ...(glossPending ? { glossStatus: metadata.gloss, gender: metadata.gender, lexiquePos: metadata.lexiquePos, lemmaFrequency: metadata.lemmaFrequency, source: metadata.source, licence: metadata.licence } : {}) }; }
+  const rev = Object.keys(dictionary).find(k => dictionary[k]?.[4]?.gloss !== "pending" && dictionary[k]?.[4]?.gloss !== "drafted-pending-review" && norm(dictionary[k][0].split(";")[0]) === norm(q));
   if (rev) return { word: rev, meaning: dictionary[rev][0], part: dictionary[rev][1], example: dictionary[rev][2], notes: dictionary[rev][3], builtIn: true };
   return null;
 }

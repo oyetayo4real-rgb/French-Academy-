@@ -5,6 +5,8 @@ import { dictionary } from "../features/french-data.mjs";
 import { M1_VOCABULARY_HEADWORDS } from "../features/french-vocabulary-m1.mjs";
 import { checkSection12Rules } from "../features/french-section12-rules.mjs";
 import { lookup as compatLookup, translate as compatTranslate } from "../features/french-intelligence-compat.mjs";
+const m1GlossDraft = JSON.parse(readFileSync(new URL("../data/m1-glosses-draft.json", import.meta.url), "utf8"));
+const m1GlossByHeadword = new Map(m1GlossDraft.entries.map(entry => [entry.headword, entry]));
 
 const failures = [];
 function reportFailure(message, input, expected, actual) {
@@ -183,8 +185,12 @@ for (const headword of M1_VOCABULARY_HEADWORDS) {
   const canonical = core.lookup(headword);
   equal("M1 vocabulary lookup supported: " + headword, headword, "supported", canonical.status);
   equal("M1 vocabulary canonical headword: " + headword, headword, headword, canonical.word);
-  equal("M1 vocabulary gloss remains pending: " + headword, headword, "pending", canonical.glossStatus);
-  equal("M1 vocabulary explicit English-pending meaning: " + headword, headword, "English meaning not yet added", canonical.meaning);
+  const draft = m1GlossByHeadword.get(headword);
+  equal("M1 vocabulary draft gloss status: " + headword, headword, "drafted-pending-review", canonical.glossStatus);
+  equal("M1 vocabulary draft English meaning: " + headword, headword, draft?.gloss, canonical.meaning);
+  equal("M1 vocabulary draft POS label: " + headword, headword, draft?.pos_label, canonical.part);
+  equal("M1 vocabulary draft learner note: " + headword, headword, draft?.note, canonical.notes);
+  equal("M1 vocabulary metadata gloss status: " + headword, headword, "drafted-pending-review", dictionary[headword]?.[4]?.gloss);
   equal("M1 vocabulary translator hint suppression: " + headword, headword, false, dictionary[headword]?.[4]?.hint);
   const accentStripped = m1Normalize(headword);
   const normalized = core.lookup(accentStripped);
