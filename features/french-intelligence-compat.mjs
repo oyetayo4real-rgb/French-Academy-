@@ -133,12 +133,31 @@ function checkWriting(q){
   return `<div class="fi-answer"><b>${heading}</b>${output}<b>Why these changes?</b>${suggestions.map(s=>`<div class="fi-result">${esc(s.why)}<div class="fi-muted">Original: ${esc(s.before)}</div></div>`).join("")}${action}</div>`;
 }
 
+
+function unifiedCheckWriting(q){
+  const legacyOutput=checkWriting(q);
+  if(!legacyOutput.includes("No issue from the small built-in check list was detected"))return legacyOutput;
+  const coreResult=structuredCore.checkWriting(q);
+  const suggestions=Array.isArray(coreResult?.suggestions)?coreResult.suggestions:[];
+  if(!suggestions.length)return legacyOutput;
+  const hasCorrection=suggestions.some(item=>!item.messageOnly);
+  const corrected=typeof coreResult.corrected==="string"?coreResult.corrected:q;
+  const output=hasCorrection?'<p class="fi-output">'+esc(corrected)+'</p>':"";
+  const action=hasCorrection?'<button id="fiUseCorrection" class="g">Use corrected text</button>':"";
+  const notes=suggestions.map(item=>{
+    const before=item.before??item.found??"";
+    const why=item.why??item.explanation??"";
+    return '<div class="fi-result">'+esc(why)+'<div class="fi-muted">Original: '+esc(before)+'</div></div>';
+  }).join("");
+  return '<div class="fi-answer"><b>'+(hasCorrection?"Suggested text":"Grammar note")+'</b>'+output+'<b>Why these changes?</b>'+notes+action+'</div>';
+}
+
 function runAction(id){
     if(id==="fiAsk"){const q=$("fiInput")?.value||"";showAnswer(answerQuestion(q));}
     if(id==="fiLookup"){const q=$("fiWord")?.value||"";const d=lookup(q);showAnswer(d?dictionaryHtml(d):`<div class="fi-answer">No built-in entry for <b>${esc(q)}</b>. No definition has been fabricated. Check <a href="https://www.dictionnaire-academie.fr/" target="_blank" rel="noopener noreferrer">Académie française</a>, <a href="https://www.cnrtl.fr/definition/${encodeURIComponent(q)}" target="_blank" rel="noopener noreferrer">CNRTL/TLFi</a> or <a href="https://fr.wiktionary.org/wiki/${encodeURIComponent(q)}" target="_blank" rel="noopener noreferrer">Wiktionnaire</a>.</div>`);}
     if(id==="fiTranslate"){showAnswer(translate($("fiInput")?.value||"",$("fiDirection")?.value||"fr-en"));}
     if(id==="fiConjugate"){const r=conjugate($("fiVerb")?.value||"");showAnswer(r?`<div class="fi-answer"><h3>${esc(r.v)} — present tense</h3><div class="fi-muted">${esc(r.type)}</div><table><tbody>${r.forms.map((f,i)=>`<tr><td>${esc(persons[i])}</td><td><b>${esc(f)}</b></td></tr>`).join("")}</tbody></table></div>`:`<div class="fi-answer">No conjugation pattern is available for this verb. Try être, avoir, aller, faire, venir, prendre, pouvoir, vouloir, devoir, savoir, dire or a regular -er verb such as parler.</div>`);}
-    if(id==="fiCheck"){const q=$("fiInput")?.value||"";showAnswer(q.trim()?checkWriting(q):"Paste some text first.");}
+    if(id==="fiCheck"){const q=$("fiInput")?.value||"";showAnswer(q.trim()?unifiedCheckWriting(q):"Paste some text first.");}
   }
   function open(){tab="ask";history=[];const app=$("app");if(!app)return;app.innerHTML=header();renderBody();window.scrollTo(0,0);}
   if (typeof document !== "undefined" && typeof window !== "undefined") {
@@ -184,8 +203,7 @@ function publicAnswerQuestion(q) {
   return legacyRenderer.answerQuestion(q);
 }
 function publicCheckWriting(q) {
-  structuredCore.checkWriting(q);
-  return legacyRenderer.checkWriting(q);
+  return unifiedCheckWriting(q);
 }
 const api = Object.freeze({
   lookup: publicLookup,
