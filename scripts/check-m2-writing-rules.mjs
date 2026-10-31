@@ -95,6 +95,6 @@ if(failures.length){
   console.error(JSON.stringify(failures.map(({step,input,expected,actual})=>({step,input,expected,actual})),null,2));
   process.exitCode=1;
 }else{
-  console.log(JSON.stringify({rules:["NR-07","NR-08","NR-09","NR-10","NR-11","NR-12"],positiveCases:participles.length+motionVerbs.length+8+14+16+3+4+9+masculine.length*2+5+4,negativeCases:14,multiFindingCount:2,legacyCorrection:"preserved",negativeMessage:"preserved",failures:0}));
+  console.log(JSON.stringify({rules:["NR-07","NR-08","NR-09","NR-10","NR-11","NR-12"],positiveCases:participles.length+motionVerbs.length+8+14+17+3+4+9+masculine.length*2+5+4,negativeCases:14,multiFindingCount:2,legacyCorrection:"preserved",negativeMessage:"preserved",failures:0}));
   console.log("PASS M2 Writing rules, closed-list negatives, structured legacy flag and combined finding rendering.");
 }
