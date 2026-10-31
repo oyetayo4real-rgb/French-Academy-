@@ -8,7 +8,7 @@ const DELIBERATE_DIFFERENCES={
  "dictionary-notes":{reason:"The pays and enfant entries now state the specified grammatical gender and article usage.",examples:["pays","enfant"]},
  "writing-capitalization":{reason:"Sentence-initial capitalization is preserved in corrections and hyphenated compounds are protected.",examples:["Je suis 20 ans","Sa va bien","Son va-et-vient constant m'inquiète."]},
  "section12-writing":{reason:"The compatibility Writing checker now displays reviewed Section 12 findings from the structured core after the unchanged legacy first pass.",examples:["Je leurs ai dit de partir","un vieux homme","Elle est tout contente","s'elle vient","des gens intéressantes"]},
- "conjugate-selector":{reason:"The Conjugate panel now exposes Lexique-cross-checked imparfait, futur, conditionnel and passé composé choices; the default present output remains unchanged.",examples:["present","imparfait","futur","conditionnel","passé composé"]},
+ "conjugate-selector":{reason:"The Conjugate panel exposes Lexique-verified and rule-generated imparfait, futur, conditionnel and passé composé choices, labels rule-generated output, and preserves the default present output.",examples:["present","imparfait","futur","conditionnel","passé composé"]},
  "translation-coverage":{reason:"French-to-English output is emitted only when phrase patterns cover every word; incomplete coverage is ambiguous and does not assemble a sentence.",examples:["Je suis étudiant","Bonjour madame","J’ai besoin d’aide"]}
 };
 const browser=await chromium.launch({headless:true}),pages={};let compared=0,differences=0;const intentional=[],details=[];
