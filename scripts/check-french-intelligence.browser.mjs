@@ -192,6 +192,7 @@ try {
     const section12WritingCases = [
       { input: "Je leurs ai dit de partir", expected: "Je leur ai dit de partir" },
       { input: "un vieux homme", expected: "un vieil homme" },
+      { input: "Je suis 20 ans et il et fatigué.", expected: "J'ai 20 ans et il est fatigué.", multi: true },
       { input: "Il à mangé et elle et fatiguée.", expected: "Il a mangé et elle est fatiguée.", multi: true },
       { input: "thé ou café", noIssue: true },
       { input: "Je leur ai dit", noIssue: true }
