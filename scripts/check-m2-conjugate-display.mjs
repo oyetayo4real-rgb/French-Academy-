@@ -34,7 +34,8 @@ try{
         const rowPronouns=await answer.locator("tbody th").allTextContents();
         const rowForms=await answer.locator("tbody td").allTextContents();
         const expectedPronouns=["je","tu","il / elle / on","nous","vous","ils / elles"];
-        if(verb==="aimer"||verb==="habiter"||(tense==="passé composé"&&verb!=="aller"))expectedPronouns[0]="j'";
+        const firstForm=expected.forms[0].split(/\\s+/u)[0];
+        if(/^[aeiouyàâäéèêëîïôöùûüÿœ]/iu.test(firstForm)||(verb==="habiter"&&/^h/iu.test(firstForm)))expectedPronouns[0]="j'";
         assert.deepEqual(rowPronouns,expectedPronouns,profile.name+" pronoun/elision column "+verb+" "+tense);
         assert.equal(rowForms.length,6,profile.name+" six conjugated forms");
         assert.doesNotMatch(rowForms.join(" "),/\b(?:je|tu|nous|vous)\s/i,profile.name+" forms must not duplicate row pronouns");
