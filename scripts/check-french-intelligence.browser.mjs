@@ -345,7 +345,7 @@ try {
   await offlinePage.locator("#fiRuleSearch").fill("negation");
   await offlinePage.locator("#fiRules").getByText(/Negation/i).first().waitFor();
   assert.deepEqual(offlineErrors, [], "Offline browser console/page errors were detected");
-  console.log("PASS offline: service worker controlled the page; fa-v16 precached the index and both split modules; dictionary, translation, conjugation and grammar work offline");
+  console.log("PASS offline: service worker controlled the page; " + swCacheVersion + " precached the index and both split modules; dictionary, translation, conjugation and grammar work offline");
   await offlineContext.close();
 
   assert.deepEqual(failures, [], "Browser console/page errors were detected");
