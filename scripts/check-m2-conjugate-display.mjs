@@ -16,7 +16,7 @@ try{
     await page.locator("#hfrenchint").click();
     await page.locator('[data-fitab="verbs"]').click();
     const selector=page.locator("#fiTense");
-    const initialBox=await selector.boundingBox();
+    const initialTop=await selector.evaluate(el=>el.getBoundingClientRect().top+window.scrollY);
     for(const verb of cases){
       await page.locator("#fiVerb").fill(verb);
       for(const tense of tenses){
@@ -47,8 +47,8 @@ try{
         }
         const heights=await answer.locator("tbody tr").evaluateAll(rows=>rows.map(row=>row.getBoundingClientRect().height));
         assert.ok(heights.every(height=>height>=44),profile.name+" tap target row height >=44px");
-        const afterBox=await selector.boundingBox();
-        assert.ok(Math.abs(afterBox.y-initialBox.y)<1,profile.name+" tense selector remains in place");
+        const afterTop=await selector.evaluate(el=>el.getBoundingClientRect().top+window.scrollY);
+        assert.ok(Math.abs(afterTop-initialTop)<1,profile.name+" tense selector remains in the same document position");
         if(profile.name==="mobile-360"){
           const widths=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth,body:document.body.scrollWidth}));
           assert.ok(widths.scroll<=widths.client&&widths.body<=widths.client,JSON.stringify(widths)+" no horizontal scroll at 360px");
