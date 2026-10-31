@@ -169,7 +169,8 @@ function runAction(id){
         showAnswer(`<div class="fi-answer"><h3>${esc($("fiVerb")?.value||"")} — ${esc(tense)}</h3><div class="fi-note">${esc(r?.explanation||"No Lexique-verified forms are available for this verb and tense.")}</div></div>`);
       }else{
         const note=tense==="passé composé"?`<div class="fi-note"><b>Auxiliary:</b> ${esc(r.auxiliary)} · <b>Past participle:</b> ${esc((r.participleForms||[]).join(" / "))}</div><div class="fi-note">${esc(r.note||r.agreementNote||"")}</div>`:"";
-        showAnswer(`<div class="fi-answer"><h3>${esc(r.v)} — ${esc(tense)}</h3><div class="fi-muted">${esc(r.type)}</div><table><tbody>${r.forms.map((f,i)=>`<tr><td>${esc(persons[i])}</td><td><b>${esc(f)}</b></td></tr>`).join("")}</tbody></table>${note}</div>`);
+        const sourceNote=r.source==="rule-generated"?'<div class="fi-muted">Rule-generated form; not yet cross-checked against Lexique.</div>':"";
+        showAnswer(`<div class="fi-answer"><h3>${esc(r.v)} — ${esc(tense)}</h3><div class="fi-muted">${esc(r.type)}</div>${sourceNote}<table><tbody>${r.forms.map((f,i)=>`<tr><td>${esc(persons[i])}</td><td><b>${esc(f)}</b></td></tr>`).join("")}</tbody></table>${note}</div>`);
       }
     }
     if(id==="fiCheck"){const q=$("fiInput")?.value||"";showAnswer(q.trim()?unifiedCheckWriting(q):"Paste some text first.");}
