@@ -30,7 +30,7 @@ for(const path of goldenPaths){
 safetyInputs.set("characterization:clean sentence disclaimer","Bonjour, je m'appelle Léa.");
 assert.equal(safetyInputs.size,639,"The frozen legacy no-issue safety net must remain exactly 639 inputs.");
 const cases=[
-  {input:"Je leurs ai dit de partir",expected:"Je leur ai dit de partir",rule:"NR-03",legacyOnly:true},
+  {input:"Je leurs ai dit de partir",expected:"Je leur ai dit de partir",rule:"NR-03"},
   {input:"Je suis 20 ans",expected:"J'ai 20 ans",rule:"legacy-age",legacyOnly:true},
   {input:"Je suis 20 ans et il et fatigué.",expected:"J'ai 20 ans et il est fatigué.",rule:"legacy+NR-09",multi:true},
   {input:"un vieux homme",expected:"un vieil homme",rule:"NR-05"},
