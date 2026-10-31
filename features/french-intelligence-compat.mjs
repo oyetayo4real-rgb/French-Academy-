@@ -162,7 +162,8 @@ function unifiedCheckWriting(q){
     corrected=next;
   }
   const coreRuleKeys=new Set(coreSuggestions.filter(item=>item.ruleId).map(item=>[item.ruleId,item.before??item.found??"",item.why??item.explanation??""].join("|")));
-  const extraRuleSuggestions=ruleFindings.filter(item=>!coreRuleKeys.has([item.ruleId,item.found,item.explanation].join("|"))).map(item=>({
+  const coreMessageExplanations=new Set(coreSuggestions.filter(item=>item.messageOnly).map(item=>item.why??item.explanation??""));
+  const extraRuleSuggestions=ruleFindings.filter(item=>!coreRuleKeys.has([item.ruleId,item.found,item.explanation].join("|"))&&!coreMessageExplanations.has(item.explanation)).map(item=>({
     before:item.found,why:item.explanation,messageOnly:item.kind==="review",ruleId:item.ruleId,suggestion:item.suggestion
   }));
   const allSuggestions=[...legacy.suggestions,...coreSuggestions,...extraRuleSuggestions];
