@@ -1,0 +1,903 @@
+{
+ "version": 1,
+ "status": "drafted-by-claude-pending-teacher-review",
+ "source_note": "English glosses, clean POS labels and learner notes drafted by Claude for the 128 M1 headwords. Not yet reviewed by a French teacher. No Lexique codes or frequency scores in learner-facing text.",
+ "entries": [
+  {
+   "headword": "pas",
+   "gloss": "not (with ne); step",
+   "pos_label": "adverb (negation)",
+   "note": "Je ne sais pas = I don't know. Also a noun: un pas = a step.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "dire",
+   "gloss": "to say; to tell",
+   "pos_label": "verb",
+   "note": "Irregular: vous dites.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "plus",
+   "gloss": "more; (ne … plus) no longer",
+   "pos_label": "adverb",
+   "note": "Je ne travaille plus ici = I no longer work here.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "voir",
+   "gloss": "to see",
+   "pos_label": "verb",
+   "note": "Irregular: nous voyons.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "savoir",
+   "gloss": "to know (facts); to know how to",
+   "pos_label": "verb",
+   "note": "Compare connaître (to be familiar with).",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "son",
+   "gloss": "his; her; its (before a masculine singular noun)",
+   "pos_label": "possessive adjective",
+   "note": "Son frère = his/her brother. Also used before a feminine noun that starts with a vowel: son amie.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "mon",
+   "gloss": "my (before a masculine singular noun)",
+   "pos_label": "possessive adjective",
+   "note": "Mon frère. Also mon amie (before a vowel).",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "sa",
+   "gloss": "his; her; its (before a feminine singular noun)",
+   "pos_label": "possessive adjective",
+   "note": "Sa maison = his/her house.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "cette",
+   "gloss": "this; that (feminine)",
+   "pos_label": "demonstrative adjective",
+   "note": "Cette maison.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "ma",
+   "gloss": "my (before a feminine singular noun)",
+   "pos_label": "possessive adjective",
+   "note": "Ma maison.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "ses",
+   "gloss": "his; her; its (plural)",
+   "pos_label": "possessive adjective",
+   "note": "Ses amis = his/her friends.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "prendre",
+   "gloss": "to take; to have (food or drink)",
+   "pos_label": "verb",
+   "note": "Irregular: nous prenons, ils prennent.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "suivre",
+   "gloss": "to follow",
+   "pos_label": "verb",
+   "note": "Irregular: je suis (this is also the form of être).",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "ici",
+   "gloss": "here",
+   "pos_label": "adverb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "chose",
+   "gloss": "thing",
+   "pos_label": "noun (feminine)",
+   "note": "Quelque chose = something.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "alors",
+   "gloss": "so; then",
+   "pos_label": "adverb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "ces",
+   "gloss": "these; those",
+   "pos_label": "demonstrative adjective",
+   "note": "Ces amis.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "aussi",
+   "gloss": "also; too; as",
+   "pos_label": "adverb",
+   "note": "Moi aussi = me too.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "passer",
+   "gloss": "to pass; to spend (time)",
+   "pos_label": "verb",
+   "note": "Passé composé uses avoir or être depending on the meaning.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "deux",
+   "gloss": "two",
+   "pos_label": "numeral",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "aimer",
+   "gloss": "to like; to love",
+   "pos_label": "verb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "penser",
+   "gloss": "to think",
+   "pos_label": "verb",
+   "note": "Penser à = to think about.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "votre",
+   "gloss": "your (formal, or several people; singular noun)",
+   "pos_label": "possessive adjective",
+   "note": "Votre maison.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "trouver",
+   "gloss": "to find",
+   "pos_label": "verb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "regarder",
+   "gloss": "to look at; to watch",
+   "pos_label": "verb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "laisser",
+   "gloss": "to leave; to let",
+   "pos_label": "verb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "mes",
+   "gloss": "my (plural)",
+   "pos_label": "possessive adjective",
+   "note": "Mes amis.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "donner",
+   "gloss": "to give",
+   "pos_label": "verb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "fois",
+   "gloss": "time (occasion)",
+   "pos_label": "noun (feminine)",
+   "note": "Une fois = once.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "ton",
+   "gloss": "your (informal; masculine singular noun)",
+   "pos_label": "possessive adjective",
+   "note": "Ton frère.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "arriver",
+   "gloss": "to arrive; to happen",
+   "pos_label": "verb",
+   "note": "Uses être in the passé composé.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "demander",
+   "gloss": "to ask (for)",
+   "pos_label": "verb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "grand",
+   "gloss": "big; tall; great",
+   "pos_label": "adjective",
+   "note": "Feminine: grande.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "vie",
+   "gloss": "life",
+   "pos_label": "noun (feminine)",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "seul",
+   "gloss": "alone; only",
+   "pos_label": "adjective",
+   "note": "Feminine: seule.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "rester",
+   "gloss": "to stay; to remain",
+   "pos_label": "verb",
+   "note": "Uses être in the passé composé.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "main",
+   "gloss": "hand",
+   "pos_label": "noun (feminine)",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "notre",
+   "gloss": "our (singular noun)",
+   "pos_label": "possessive adjective",
+   "note": "Notre maison.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "trop",
+   "gloss": "too; too much",
+   "pos_label": "adverb",
+   "note": "Trop de monde = too many people.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "appeler",
+   "gloss": "to call; to name",
+   "pos_label": "verb",
+   "note": "Spelling: j'appelle, nous appelons.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "père",
+   "gloss": "father",
+   "pos_label": "noun (masculine)",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "peut-être",
+   "gloss": "maybe; perhaps",
+   "pos_label": "adverb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "monde",
+   "gloss": "world; people",
+   "pos_label": "noun (masculine)",
+   "note": "Tout le monde = everyone.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "ta",
+   "gloss": "your (informal; feminine singular noun)",
+   "pos_label": "possessive adjective",
+   "note": "Ta maison.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "arrêter",
+   "gloss": "to stop; to arrest",
+   "pos_label": "verb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "mère",
+   "gloss": "mother",
+   "pos_label": "noun (feminine)",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "entendre",
+   "gloss": "to hear",
+   "pos_label": "verb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "quelque",
+   "gloss": "some; a few",
+   "pos_label": "indefinite adjective",
+   "note": "Quelque chose = something.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "tête",
+   "gloss": "head",
+   "pos_label": "noun (feminine)",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "sûr",
+   "gloss": "sure; certain; safe",
+   "pos_label": "adjective",
+   "note": "Feminine: sûre.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "coup",
+   "gloss": "blow; knock; stroke",
+   "pos_label": "noun (masculine)",
+   "note": "Un coup de téléphone = a phone call.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "mourir",
+   "gloss": "to die",
+   "pos_label": "verb",
+   "note": "Irregular. Uses être in the passé composé.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "dieu",
+   "gloss": "god",
+   "pos_label": "noun (masculine)",
+   "note": "Plural: dieux.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "sentir",
+   "gloss": "to feel; to smell",
+   "pos_label": "verb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "tenir",
+   "gloss": "to hold; to keep",
+   "pos_label": "verb",
+   "note": "Irregular: je tiens, nous tenons.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "vraiment",
+   "gloss": "really; truly",
+   "pos_label": "adverb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "vrai",
+   "gloss": "true; real",
+   "pos_label": "adjective",
+   "note": "Feminine: vraie.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "moins",
+   "gloss": "less; fewer",
+   "pos_label": "adverb",
+   "note": "Au moins = at least.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "chercher",
+   "gloss": "to look for; to search",
+   "pos_label": "verb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "moment",
+   "gloss": "moment",
+   "pos_label": "noun (masculine)",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "revenir",
+   "gloss": "to come back",
+   "pos_label": "verb",
+   "note": "Uses être in the passé composé.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "nos",
+   "gloss": "our (plural)",
+   "pos_label": "possessive adjective",
+   "note": "Nos amis.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "tuer",
+   "gloss": "to kill",
+   "pos_label": "verb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "quelques",
+   "gloss": "a few; some",
+   "pos_label": "indefinite adjective",
+   "note": "Plural only.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "monsieur",
+   "gloss": "mister; sir; gentleman",
+   "pos_label": "noun (masculine)",
+   "note": "Plural: messieurs.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "mieux",
+   "gloss": "better",
+   "pos_label": "adverb",
+   "note": "Le mieux = the best.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "premier",
+   "gloss": "first",
+   "pos_label": "adjective",
+   "note": "Feminine: première.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "trois",
+   "gloss": "three",
+   "pos_label": "numeral",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "cet",
+   "gloss": "this; that (masculine, before a vowel)",
+   "pos_label": "demonstrative adjective",
+   "note": "Cet homme.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "rendre",
+   "gloss": "to give back; to make (+ adjective)",
+   "pos_label": "verb",
+   "note": "Rendre quelqu'un heureux = to make someone happy.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "finir",
+   "gloss": "to finish",
+   "pos_label": "verb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "devenir",
+   "gloss": "to become",
+   "pos_label": "verb",
+   "note": "Uses être in the passé composé.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "vivre",
+   "gloss": "to live",
+   "pos_label": "verb",
+   "note": "Irregular: je vis, nous vivons.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "essayer",
+   "gloss": "to try",
+   "pos_label": "verb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "nom",
+   "gloss": "name; noun",
+   "pos_label": "noun (masculine)",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "comme",
+   "gloss": "like; as; how",
+   "pos_label": "conjunction / adverb",
+   "note": "Comme ça = like that.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "perdre",
+   "gloss": "to lose",
+   "pos_label": "verb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "mort",
+   "gloss": "death",
+   "pos_label": "noun (feminine)",
+   "note": "La mort = death. (Le mort = a dead man.)",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "jouer",
+   "gloss": "to play",
+   "pos_label": "verb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "peur",
+   "gloss": "fear",
+   "pos_label": "noun (feminine)",
+   "note": "Avoir peur = to be afraid.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "jeune",
+   "gloss": "young",
+   "pos_label": "adjective",
+   "note": "Same form for masculine and feminine.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "commencer",
+   "gloss": "to begin; to start",
+   "pos_label": "verb",
+   "note": "Spelling: nous commençons.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "côté",
+   "gloss": "side",
+   "pos_label": "noun (masculine)",
+   "note": "À côté de = next to.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "tomber",
+   "gloss": "to fall",
+   "pos_label": "verb",
+   "note": "Uses être in the passé composé.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "entrer",
+   "gloss": "to enter; to come in",
+   "pos_label": "verb",
+   "note": "Uses être in the passé composé.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "aider",
+   "gloss": "to help",
+   "pos_label": "verb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "vite",
+   "gloss": "quickly; fast",
+   "pos_label": "adverb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "tes",
+   "gloss": "your (informal; plural)",
+   "pos_label": "possessive adjective",
+   "note": "Tes amis.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "dernier",
+   "gloss": "last; latest",
+   "pos_label": "adjective",
+   "note": "Feminine: dernière.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "mot",
+   "gloss": "word",
+   "pos_label": "noun (masculine)",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "vos",
+   "gloss": "your (formal, or several people; plural noun)",
+   "pos_label": "possessive adjective",
+   "note": "Vos amis.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "assez",
+   "gloss": "enough; fairly",
+   "pos_label": "adverb",
+   "note": "Assez de temps = enough time.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "tant",
+   "gloss": "so much; so many",
+   "pos_label": "adverb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "rentrer",
+   "gloss": "to go back in; to come home",
+   "pos_label": "verb",
+   "note": "Uses être in the passé composé.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "juste",
+   "gloss": "fair; just; right",
+   "pos_label": "adjective",
+   "note": "Same form for masculine and feminine. Also an adverb: just, exactly.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "mal",
+   "gloss": "badly; poorly",
+   "pos_label": "adverb",
+   "note": "Also a noun: le mal = pain; evil.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "sembler",
+   "gloss": "to seem",
+   "pos_label": "verb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "tirer",
+   "gloss": "to pull; to shoot",
+   "pos_label": "verb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "porter",
+   "gloss": "to carry; to wear",
+   "pos_label": "verb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "écouter",
+   "gloss": "to listen (to)",
+   "pos_label": "verb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "oublier",
+   "gloss": "to forget",
+   "pos_label": "verb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "place",
+   "gloss": "place; square; seat",
+   "pos_label": "noun (feminine)",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "fait",
+   "gloss": "fact",
+   "pos_label": "noun (masculine)",
+   "note": "Also the past participle of faire.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "quelle",
+   "gloss": "which; what (feminine)",
+   "pos_label": "interrogative adjective",
+   "note": "Quelle heure est-il ? = What time is it?",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "terre",
+   "gloss": "earth; land; ground",
+   "pos_label": "noun (feminine)",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "plaire",
+   "gloss": "to please",
+   "pos_label": "verb",
+   "note": "S'il vous plaît = please.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "voix",
+   "gloss": "voice",
+   "pos_label": "noun (feminine)",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "chaque",
+   "gloss": "each; every",
+   "pos_label": "indefinite adjective",
+   "note": "Never changes.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "corps",
+   "gloss": "body",
+   "pos_label": "noun (masculine)",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "fils",
+   "gloss": "son",
+   "pos_label": "noun (masculine)",
+   "note": "Plural is the same: les fils.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "rue",
+   "gloss": "street",
+   "pos_label": "noun (feminine)",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "répondre",
+   "gloss": "to answer; to reply",
+   "pos_label": "verb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "asseoir",
+   "gloss": "to seat; (s'asseoir) to sit down",
+   "pos_label": "verb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "retrouver",
+   "gloss": "to find again; to meet up with",
+   "pos_label": "verb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "visage",
+   "gloss": "face",
+   "pos_label": "noun (masculine)",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "enfin",
+   "gloss": "finally; at last",
+   "pos_label": "adverb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "chambre",
+   "gloss": "bedroom; room",
+   "pos_label": "noun (feminine)",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "loin",
+   "gloss": "far",
+   "pos_label": "adverb",
+   "note": "Loin de = far from.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "pied",
+   "gloss": "foot",
+   "pos_label": "noun (masculine)",
+   "note": "À pied = on foot.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "tard",
+   "gloss": "late",
+   "pos_label": "adverb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "marcher",
+   "gloss": "to walk; to work (for a machine)",
+   "pos_label": "verb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "maman",
+   "gloss": "mum; mom",
+   "pos_label": "noun (feminine)",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "travailler",
+   "gloss": "to work",
+   "pos_label": "verb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "monter",
+   "gloss": "to go up; to climb; to carry up",
+   "pos_label": "verb",
+   "note": "Uses être or avoir in the passé composé depending on meaning.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "seulement",
+   "gloss": "only; just",
+   "pos_label": "adverb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "ainsi",
+   "gloss": "thus; like this",
+   "pos_label": "adverb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "changer",
+   "gloss": "to change",
+   "pos_label": "verb",
+   "note": "Spelling: nous changeons.",
+   "gloss_status": "drafted-pending-review"
+  },
+  {
+   "headword": "presque",
+   "gloss": "almost",
+   "pos_label": "adverb",
+   "note": "",
+   "gloss_status": "drafted-pending-review"
+  }
+ ]
+}
