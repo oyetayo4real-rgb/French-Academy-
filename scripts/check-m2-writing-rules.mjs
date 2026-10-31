@@ -70,7 +70,7 @@ try{
 
 const legacyInput="Je suis 20 ans";
 const legacyOutput=checkWriting(legacyInput);
-try{assert.ok(legacyOutput.includes("J'ai 20 ans"));}catch(error){failures.push({step:"legacy-correction-preserved",input:legacyInput,expected:"Je leur ai dit de partir",actual:legacyOutput,details:error.message});}
+try{assert.ok(legacyOutput.includes("J'ai 20 ans"));}catch(error){failures.push({step:"legacy-correction-preserved",input:legacyInput,expected:"J'ai 20 ans",actual:legacyOutput,details:error.message});}
 
 
 const repeatedPasOutput=checkWriting("Je ne comprends pas pas.");
