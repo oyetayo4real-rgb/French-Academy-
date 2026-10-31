@@ -31,10 +31,10 @@ for (const [verb, entry] of Object.entries(reference.verbs)) {
     const expectedCheck = cross?.tenses?.[tense];
     const actual = conjugate(verb, { tense });
     const classified = classification.verbs.find(row => row.verb === verb)?.tenses?.[tense] || [];
-    const contradicted = classified.filter(pair => pair.status === "contradicted");
-    if (contradicted.length) {
-      record("contradicted-owner-review", { verb, tense }, "unsupported", actual.status);
-    } else if (classified.length === 6 && classified.every(pair => ["matched","absent","verb-not-in-pilot"].includes(pair.status))) {
+    const ownerConfirmedContradictions = classified.filter(pair => pair.status === "contradicted" && pair.ownerConfirmedCorrect === "lexique");
+    if (ownerConfirmedContradictions.length) {
+      record("owner-confirmed-contradiction", { verb, tense }, "unsupported", actual.status);
+    } else if (classified.length === 6 && classified.every(pair => ["matched","absent","verb-not-in-pilot","contradicted"].includes(pair.status))) {
       record("tense-status", { verb, tense }, "supported", actual.status);
       const expectedSource = classified.every(pair => pair.status === "matched") ? "lexique-verified" : "rule-generated";
       record("tense-source", { verb, tense }, expectedSource, actual.source);
