@@ -13,6 +13,7 @@ on:
       - "data/m1-glosses-draft.json"
       - "tests/reference/tense-reference.json"
       - "tests/reference/lexique-tense-crosscheck.json"
+      - "tests/reference/lexique-tense-classification.json"
       - "scripts/check-m1-tense-conjugation.mjs"
       - "scripts/check-m1-reference-integrity.mjs"
       - ".github/CODEOWNERS"
@@ -62,6 +63,7 @@ on:
       - "data/m1-glosses-draft.json"
       - "tests/reference/tense-reference.json"
       - "tests/reference/lexique-tense-crosscheck.json"
+      - "tests/reference/lexique-tense-classification.json"
       - "scripts/check-m1-tense-conjugation.mjs"
       - "scripts/check-m1-reference-integrity.mjs"
       - ".github/CODEOWNERS"
@@ -119,6 +121,7 @@ jobs:
             data/m1-glosses-draft.json
             tests/reference/tense-reference.json
             tests/reference/lexique-tense-crosscheck.json
+            tests/reference/lexique-tense-classification.json
             scripts/check-m1-tense-conjugation.mjs
             scripts/check-m1-reference-integrity.mjs
             features/french-data.mjs
