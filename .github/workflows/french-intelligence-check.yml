@@ -62,6 +62,7 @@ on:
       - "scripts/check-french-intelligence.mjs"
       - "scripts/check-french-intelligence.browser.mjs"
       - "scripts/check-french-intelligence.ui-parity.mjs"
+      - "scripts/check-writing-compat-parity.mjs"
       - "tests/fixtures/french-intelligence-legacy.html"
       - "tests/fixtures/french-intelligence-compat.html"
       - "scripts/generate-golden.mjs"
@@ -102,6 +103,7 @@ jobs:
             scripts/generate-golden.mjs
             scripts/check-golden-integrity.mjs
             scripts/check-golden-v3.mjs
+            scripts/check-writing-compat-parity.mjs
             tests/golden/legacy-v1.json
           )
           missing=()
