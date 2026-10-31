@@ -32,6 +32,7 @@ on:
       - "scripts/check-french-intelligence.ui-parity.mjs"
       - "scripts/check-writing-compat-parity.mjs"
       - "scripts/check-m2-conjugate-display.mjs"
+      - "scripts/check-m2-writing-rules.mjs"
       - "tests/fixtures/french-intelligence-legacy.html"
       - "tests/fixtures/french-intelligence-compat.html"
       - "scripts/generate-golden.mjs"
@@ -207,6 +208,8 @@ jobs:
         run: node scripts/check-writing-compat-parity.mjs
       - name: Verify M2 conjugation display on desktop and 360px mobile
         run: node scripts/check-m2-conjugate-display.mjs
+      - name: Verify M2 Writing closed-list rules and structured legacy flag
+        run: node scripts/check-m2-writing-rules.mjs
 
   golden-reproducibility:
     name: Reproduce legacy golden in memory
