@@ -38,7 +38,7 @@ const cases=[
   {input:"Elle est toute contente",noIssue:true},
   {input:"des gens intéressants",noIssue:true}
 ];
-const allInputs=[...goldenInputs,...[...safetyInputs].map(([source,input])=>({source,input})),...cases.map(item=>({source:"section12-case:"+item.rule+":"+item.input,input:item.input}))];
+const allInputs=[...goldenInputs,...[...safetyInputs].map(([source,input])=>({source,input}))];
 const browser=await chromium.launch({headless:true});
 const pages={};
 try{
@@ -75,6 +75,8 @@ try{
       assert.match(output,new RegExp(item.review),"NR-02 review explanation");
       assert.doesNotMatch(output,/<p class="fi-output">/,"NR-02 must not propose a correction");
     }else{
+      const mainOutput=await pages.main.evaluate(value=>window.FrenchIntelligenceCore.checkWriting(value),item.input);
+      assert.equal(output,mainOutput,"negative publicCheckWriting output must remain byte-identical to main");
       assert.match(output,/No issue from the small built-in check list was detected/,"negative keeps original no-issue output");
       assert.doesNotMatch(output,/<p class="fi-output">/,"negative has no correction");
     }
