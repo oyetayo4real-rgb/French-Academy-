@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
 import { chromium } from "playwright";
 
 const baseURL=process.env.FRENCH_ACADEMY_URL||"http://127.0.0.1:4173";
+const mainCompatSource=execFileSync("git",["show","75553fa1ff848714e753d3f8cd4217fb17553344:features/french-intelligence-compat.mjs"],{encoding:"utf8"});
 const goldenPaths=["tests/golden/legacy-v1.json","tests/golden/legacy-v2.json","tests/golden/legacy-v3.json"];
 const goldenInputs=[];
 const safetyInputs=new Map();
@@ -40,10 +42,11 @@ const allInputs=[...goldenInputs,...[...safetyInputs].map(([source,input])=>({so
 const browser=await chromium.launch({headless:true});
 const pages={};
 try{
-  for(const [name,path] of Object.entries({main:"/tests/fixtures/french-intelligence-legacy.html",compat:"/tests/fixtures/french-intelligence-compat.html"})){
+  for(const name of ["main","compat"]){
     const page=await browser.newPage({viewport:{width:1280,height:900}});
     pages[name]=page;
-    await page.goto(new URL(path,baseURL).href,{waitUntil:"networkidle"});
+    if(name==="main")await page.route("**/features/french-intelligence-compat.mjs",route=>route.fulfill({status:200,contentType:"text/javascript",body:mainCompatSource}));
+    await page.goto(new URL("/tests/fixtures/french-intelligence-compat.html",baseURL).href,{waitUntil:"networkidle"});
     await page.locator("#hfrenchint").click();
     await page.locator('[data-fitab="correct"]').click();
   }
@@ -52,14 +55,14 @@ try{
     const input=item.input;
     const mainApi=await pages.main.evaluate(value=>window.FrenchIntelligenceCore.checkWriting(value),input);
     const compatApi=await pages.compat.evaluate(value=>window.FrenchIntelligenceCore.checkWriting(value),input);
-    assert.equal(compatApi,mainApi,"publicCheckWriting differs from main for "+item.source+" input="+JSON.stringify(input));
+    assert.equal(compatApi,mainApi,"publicCheckWriting differs from main-branch compatibility API for "+item.source+" input="+JSON.stringify(input));
     for(const page of Object.values(pages)){
       await page.locator("#fiInput").fill(input);
       await page.locator("#fiCheck").click();
     }
     const mainUI=await pages.main.locator("#fiAnswer").evaluate(node=>node.innerHTML);
     const compatUI=await pages.compat.locator("#fiAnswer").evaluate(node=>node.innerHTML);
-    assert.equal(compatUI,mainUI,"Writing UI differs from main for "+item.source+" input="+JSON.stringify(input));
+    assert.equal(compatUI,mainUI,"Writing UI differs from main-branch compatibility UI for "+item.source+" input="+JSON.stringify(input));
     assert.equal(compatUI,compatApi,"Writing UI and public API must return identical markup for "+item.source);
     checked++;
   }
