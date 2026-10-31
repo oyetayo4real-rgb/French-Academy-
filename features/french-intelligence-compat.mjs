@@ -161,14 +161,16 @@ function unifiedCheckWriting(q){
     if(next===corrected)break;
     corrected=next;
   }
-  const coreRuleKeys=new Set(coreSuggestions.filter(item=>item.ruleId).map(item=>[item.ruleId,item.before??item.found??"",item.why??item.explanation??""].join("|")));
-  const coreMessageExplanations=new Set(coreSuggestions.filter(item=>item.messageOnly).map(item=>item.why??item.explanation??""));
+  const legacySuggestionKeys=new Set(legacy.suggestions.map(item=>[item.before??"",item.why??"",!!item.messageOnly].join("|")));
+  const distinctCoreSuggestions=coreSuggestions.filter(item=>!legacySuggestionKeys.has([item.before??"",item.why??"",!!item.messageOnly].join("|")));
+  const coreRuleKeys=new Set(distinctCoreSuggestions.filter(item=>item.ruleId).map(item=>[item.ruleId,item.before??item.found??"",item.why??item.explanation??""].join("|")));
+  const coreMessageExplanations=new Set([...legacy.suggestions,...coreSuggestions].filter(item=>item.messageOnly).map(item=>item.why??item.explanation??""));
   const extraRuleSuggestions=ruleFindings.filter(item=>!coreRuleKeys.has([item.ruleId,item.found,item.explanation].join("|"))&&!coreMessageExplanations.has(item.explanation)).map(item=>({
     before:item.found,why:item.explanation,messageOnly:item.kind==="review",ruleId:item.ruleId,suggestion:item.suggestion
   }));
-  const allSuggestions=[...legacy.suggestions,...coreSuggestions,...extraRuleSuggestions];
+  const allSuggestions=[...legacy.suggestions,...distinctCoreSuggestions,...extraRuleSuggestions];
   if(!allSuggestions.length)return legacy.html;
-  if(legacy.hasIssue&&!coreSuggestions.length&&!extraRuleSuggestions.length)return legacy.html;
+  if(legacy.hasIssue&&!distinctCoreSuggestions.length&&!extraRuleSuggestions.length)return legacy.html;
   const hasCorrection=allSuggestions.some(item=>!item.messageOnly);
   const output=hasCorrection?'<p class="fi-output">'+esc(corrected)+'</p>':"";
   const action=hasCorrection?'<button id="fiUseCorrection" class="g">Use corrected text</button>':"";
