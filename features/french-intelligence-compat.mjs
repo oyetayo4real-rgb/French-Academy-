@@ -1,4 +1,5 @@
 import * as structuredCore from "./french-intelligence-core-v1.mjs";
+import { checkSection12Rules } from "./french-section12-rules.mjs";
 /* Exact legacy HTML renderer extracted from the golden source. Keep its output byte-stable. */
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const writingPattern = (source, flags = "gi") => new RegExp("(?<![\\p{L}\\p{N}_'’\\-])(?:" + source + ")(?![\\p{L}\\p{N}_'’\\-])", flags.includes("u") ? flags : flags + "u");
@@ -84,7 +85,7 @@ function answerQuestion(q){
   if(/bonjour|salut|merci|au revoir/.test(n)){const d=lookup(q.replace(/[?!.]$/,""));if(d)return dictionaryHtml(d);}
   return "I can answer from the built-in French reference set, grammar guide, common phrases and conjugation rules. I couldn't match this question confidently yet, so I won't invent an answer. Try asking about ne…pas, tu/vous, passé composé, adjective agreement, or a word in the dictionary. For deeper open-ended questions, this no-key version currently needs an optional on-device language model.";
 }
-function checkWriting(q){
+function checkWritingDetailed(q){
   let suggestions=[],corrected=q;
   const subjunctiveVerbs = [
     { name: "être", indicative: ["suis","es","est","sommes","êtes","sont"], subjunctive: ["sois","sois","soit","soyons","soyez","soient"] },
@@ -129,26 +130,48 @@ function checkWriting(q){
     [writingPattern("je ne comprends pas pas"),null,"Repeated adjacent pas is flagged for review; no automatic correction.",true],
   ];
   for(const [re,rep,why,messageOnly=false] of checks){if(re.test(corrected)){re.lastIndex=0;const before=corrected;if(!messageOnly)corrected=corrected.replace(re,rep);suggestions.push({before,why,messageOnly});}}
-  if(!suggestions.length)return `<div class="fi-answer"><b>Text received</b><p>${esc(q)}</p><p>No issue from the small built-in check list was detected. That does not prove the sentence is fully correct; this is not a full grammar checker.</p></div>`;
+  if(!suggestions.length)return {html:`<div class="fi-answer"><b>Text received</b><p>${esc(q)}</p><p>No issue from the small built-in check list was detected. That does not prove the sentence is fully correct; this is not a full grammar checker.</p></div>`,hasIssue:false,corrected:q,suggestions:[]};
   const hasCorrection = suggestions.some(s => !s.messageOnly);
   const heading = hasCorrection ? "Suggested text" : "Grammar note";
   const output = hasCorrection ? `<p class="fi-output">${esc(corrected)}</p>` : "";
   const action = hasCorrection ? `<button id="fiUseCorrection" class="g">Use corrected text</button>` : "";
-  return `<div class="fi-answer"><b>${heading}</b>${output}<b>Why these changes?</b>${suggestions.map(s=>`<div class="fi-result">${esc(s.why)}<div class="fi-muted">Original: ${esc(s.before)}</div></div>`).join("")}${action}</div>`;
+  return {html:'<div class="fi-answer"><b>'+heading+'</b>'+output+'<b>Why these changes?</b>'+suggestions.map(s=>'<div class="fi-result">'+esc(s.why)+'<div class="fi-muted">Original: '+esc(s.before)+'</div></div>').join("")+action+'</div>',hasIssue:true,corrected,suggestions};
 }
-
+function checkWriting(q){return checkWritingDetailed(q).html;}
 
 function unifiedCheckWriting(q){
-  const legacyOutput=checkWriting(q);
-  if(!legacyOutput.includes("No issue from the small built-in check list was detected"))return legacyOutput;
-  const coreResult=structuredCore.checkWriting(q);
-  const suggestions=Array.isArray(coreResult?.suggestions)?coreResult.suggestions:[];
-  if(!suggestions.length)return legacyOutput;
-  const hasCorrection=suggestions.some(item=>!item.messageOnly);
-  const corrected=typeof coreResult.corrected==="string"?coreResult.corrected:q;
+  const legacy=checkWritingDetailed(q);
+  const coreResult=structuredCore.checkWriting(legacy.corrected);
+  let corrected=typeof coreResult?.corrected==="string"?coreResult.corrected:legacy.corrected;
+  const coreSuggestions=Array.isArray(coreResult?.suggestions)?coreResult.suggestions:[];
+  const ruleFindings=[],seenRules=new Set();
+  for(let pass=0;pass<4;pass++){
+    const findings=checkSection12Rules(corrected);
+    if(!findings.length)break;
+    const fresh=findings.filter(item=>{
+      const key=[item.ruleId,item.kind,item.found,item.suggestion||"",item.explanation].join("|");
+      if(seenRules.has(key))return false;
+      seenRules.add(key);return true;
+    });
+    ruleFindings.push(...fresh);
+    const corrections=findings.filter(item=>item.kind==="correction").sort((a,b)=>b.span[0]-a.span[0]);
+    if(!corrections.length)break;
+    let next=corrected;
+    for(const item of corrections)next=next.slice(0,item.span[0])+item.suggestion+next.slice(item.span[1]);
+    if(next===corrected)break;
+    corrected=next;
+  }
+  const coreRuleKeys=new Set(coreSuggestions.filter(item=>item.ruleId).map(item=>[item.ruleId,item.before??item.found??"",item.why??item.explanation??""].join("|")));
+  const extraRuleSuggestions=ruleFindings.filter(item=>!coreRuleKeys.has([item.ruleId,item.found,item.explanation].join("|"))).map(item=>({
+    before:item.found,why:item.explanation,messageOnly:item.kind==="review",ruleId:item.ruleId,suggestion:item.suggestion
+  }));
+  const allSuggestions=[...legacy.suggestions,...coreSuggestions,...extraRuleSuggestions];
+  if(!allSuggestions.length)return legacy.html;
+  if(legacy.hasIssue&&!coreSuggestions.length&&!extraRuleSuggestions.length)return legacy.html;
+  const hasCorrection=allSuggestions.some(item=>!item.messageOnly);
   const output=hasCorrection?'<p class="fi-output">'+esc(corrected)+'</p>':"";
   const action=hasCorrection?'<button id="fiUseCorrection" class="g">Use corrected text</button>':"";
-  const notes=suggestions.map(item=>{
+  const notes=allSuggestions.map(item=>{
     const before=item.before??item.found??"";
     const why=item.why??item.explanation??"";
     return '<div class="fi-result">'+esc(why)+'<div class="fi-muted">Original: '+esc(before)+'</div></div>';
