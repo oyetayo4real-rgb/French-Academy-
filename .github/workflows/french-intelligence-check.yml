@@ -12,6 +12,8 @@ on:
       - "features/french-vocabulary-m1.mjs"
       - "data/m1-glosses-draft.json"
       - "tests/reference/tense-reference.json"
+      - "tests/reference/lexique-tense-crosscheck.json"
+      - "scripts/check-m1-tense-conjugation.mjs"
       - "scripts/check-m1-reference-integrity.mjs"
       - ".github/CODEOWNERS"
       - "scripts/check-french-intelligence-core.mjs"
@@ -59,6 +61,8 @@ on:
       - "features/french-vocabulary-m1.mjs"
       - "data/m1-glosses-draft.json"
       - "tests/reference/tense-reference.json"
+      - "tests/reference/lexique-tense-crosscheck.json"
+      - "scripts/check-m1-tense-conjugation.mjs"
       - "scripts/check-m1-reference-integrity.mjs"
       - ".github/CODEOWNERS"
       - "scripts/check-french-intelligence-core.mjs"
@@ -114,6 +118,8 @@ jobs:
             features/french-vocabulary-m1.mjs
             data/m1-glosses-draft.json
             tests/reference/tense-reference.json
+            tests/reference/lexique-tense-crosscheck.json
+            scripts/check-m1-tense-conjugation.mjs
             scripts/check-m1-reference-integrity.mjs
             features/french-data.mjs
             features/french-section12-rules.mjs
@@ -139,6 +145,8 @@ jobs:
           node-version: "22"
       - name: Verify immutable M1 references and vocabulary glosses
         run: node scripts/check-m1-reference-integrity.mjs
+      - name: Check M1 tense conjugation against the immutable reference and Lexique pilot
+        run: node scripts/check-m1-tense-conjugation.mjs
       - name: Check engine JavaScript syntax
         run: node --check features/french-intelligence.js
       - name: Check pure core syntax
