@@ -1,0 +1,3820 @@
+{
+ "version": 1,
+ "status": "drafted-by-claude-pending-teacher-review",
+ "persons": [
+  "je",
+  "tu",
+  "il/elle",
+  "nous",
+  "vous",
+  "ils/elles"
+ ],
+ "verbs": {
+  "être": {
+   "auxiliary": "avoir",
+   "participle": [
+    "été",
+    "été",
+    "été",
+    "été"
+   ],
+   "imparfait": [
+    "étais",
+    "étais",
+    "était",
+    "étions",
+    "étiez",
+    "étaient"
+   ],
+   "futur": [
+    "serai",
+    "seras",
+    "sera",
+    "serons",
+    "serez",
+    "seront"
+   ],
+   "conditionnel": [
+    "serais",
+    "serais",
+    "serait",
+    "serions",
+    "seriez",
+    "seraient"
+   ],
+   "note": "participle invariable"
+  },
+  "avoir": {
+   "auxiliary": "avoir",
+   "participle": [
+    "eu",
+    "eue",
+    "eus",
+    "eues"
+   ],
+   "imparfait": [
+    "avais",
+    "avais",
+    "avait",
+    "avions",
+    "aviez",
+    "avaient"
+   ],
+   "futur": [
+    "aurai",
+    "auras",
+    "aura",
+    "aurons",
+    "aurez",
+    "auront"
+   ],
+   "conditionnel": [
+    "aurais",
+    "aurais",
+    "aurait",
+    "aurions",
+    "auriez",
+    "auraient"
+   ],
+   "note": ""
+  },
+  "aller": {
+   "auxiliary": "être",
+   "participle": [
+    "allé",
+    "allée",
+    "allés",
+    "allées"
+   ],
+   "imparfait": [
+    "allais",
+    "allais",
+    "allait",
+    "allions",
+    "alliez",
+    "allaient"
+   ],
+   "futur": [
+    "irai",
+    "iras",
+    "ira",
+    "irons",
+    "irez",
+    "iront"
+   ],
+   "conditionnel": [
+    "irais",
+    "irais",
+    "irait",
+    "irions",
+    "iriez",
+    "iraient"
+   ],
+   "note": ""
+  },
+  "faire": {
+   "auxiliary": "avoir",
+   "participle": [
+    "fait",
+    "faite",
+    "faits",
+    "faites"
+   ],
+   "imparfait": [
+    "faisais",
+    "faisais",
+    "faisait",
+    "faisions",
+    "faisiez",
+    "faisaient"
+   ],
+   "futur": [
+    "ferai",
+    "feras",
+    "fera",
+    "ferons",
+    "ferez",
+    "feront"
+   ],
+   "conditionnel": [
+    "ferais",
+    "ferais",
+    "ferait",
+    "ferions",
+    "feriez",
+    "feraient"
+   ],
+   "note": "nous faisons; imparfait written fais-"
+  },
+  "venir": {
+   "auxiliary": "être",
+   "participle": [
+    "venu",
+    "venue",
+    "venus",
+    "venues"
+   ],
+   "imparfait": [
+    "venais",
+    "venais",
+    "venait",
+    "venions",
+    "veniez",
+    "venaient"
+   ],
+   "futur": [
+    "viendrai",
+    "viendras",
+    "viendra",
+    "viendrons",
+    "viendrez",
+    "viendront"
+   ],
+   "conditionnel": [
+    "viendrais",
+    "viendrais",
+    "viendrait",
+    "viendrions",
+    "viendriez",
+    "viendraient"
+   ],
+   "note": ""
+  },
+  "prendre": {
+   "auxiliary": "avoir",
+   "participle": [
+    "pris",
+    "prise",
+    "pris",
+    "prises"
+   ],
+   "imparfait": [
+    "prenais",
+    "prenais",
+    "prenait",
+    "prenions",
+    "preniez",
+    "prenaient"
+   ],
+   "futur": [
+    "prendrai",
+    "prendras",
+    "prendra",
+    "prendrons",
+    "prendrez",
+    "prendront"
+   ],
+   "conditionnel": [
+    "prendrais",
+    "prendrais",
+    "prendrait",
+    "prendrions",
+    "prendriez",
+    "prendraient"
+   ],
+   "note": ""
+  },
+  "pouvoir": {
+   "auxiliary": "avoir",
+   "participle": [
+    "pu",
+    "pu",
+    "pu",
+    "pu"
+   ],
+   "imparfait": [
+    "pouvais",
+    "pouvais",
+    "pouvait",
+    "pouvions",
+    "pouviez",
+    "pouvaient"
+   ],
+   "futur": [
+    "pourrai",
+    "pourras",
+    "pourra",
+    "pourrons",
+    "pourrez",
+    "pourront"
+   ],
+   "conditionnel": [
+    "pourrais",
+    "pourrais",
+    "pourrait",
+    "pourrions",
+    "pourriez",
+    "pourraient"
+   ],
+   "note": "participle invariable"
+  },
+  "vouloir": {
+   "auxiliary": "avoir",
+   "participle": [
+    "voulu",
+    "voulue",
+    "voulus",
+    "voulues"
+   ],
+   "imparfait": [
+    "voulais",
+    "voulais",
+    "voulait",
+    "voulions",
+    "vouliez",
+    "voulaient"
+   ],
+   "futur": [
+    "voudrai",
+    "voudras",
+    "voudra",
+    "voudrons",
+    "voudrez",
+    "voudront"
+   ],
+   "conditionnel": [
+    "voudrais",
+    "voudrais",
+    "voudrait",
+    "voudrions",
+    "voudriez",
+    "voudraient"
+   ],
+   "note": ""
+  },
+  "devoir": {
+   "auxiliary": "avoir",
+   "participle": [
+    "dû",
+    "due",
+    "dus",
+    "dues"
+   ],
+   "imparfait": [
+    "devais",
+    "devais",
+    "devait",
+    "devions",
+    "deviez",
+    "devaient"
+   ],
+   "futur": [
+    "devrai",
+    "devras",
+    "devra",
+    "devrons",
+    "devrez",
+    "devront"
+   ],
+   "conditionnel": [
+    "devrais",
+    "devrais",
+    "devrait",
+    "devrions",
+    "devriez",
+    "devraient"
+   ],
+   "note": "participle: dû, due, dus, dues"
+  },
+  "savoir": {
+   "auxiliary": "avoir",
+   "participle": [
+    "su",
+    "sue",
+    "sus",
+    "sues"
+   ],
+   "imparfait": [
+    "savais",
+    "savais",
+    "savait",
+    "savions",
+    "saviez",
+    "savaient"
+   ],
+   "futur": [
+    "saurai",
+    "sauras",
+    "saura",
+    "saurons",
+    "saurez",
+    "sauront"
+   ],
+   "conditionnel": [
+    "saurais",
+    "saurais",
+    "saurait",
+    "saurions",
+    "sauriez",
+    "sauraient"
+   ],
+   "note": ""
+  },
+  "dire": {
+   "auxiliary": "avoir",
+   "participle": [
+    "dit",
+    "dite",
+    "dits",
+    "dites"
+   ],
+   "imparfait": [
+    "disais",
+    "disais",
+    "disait",
+    "disions",
+    "disiez",
+    "disaient"
+   ],
+   "futur": [
+    "dirai",
+    "diras",
+    "dira",
+    "dirons",
+    "direz",
+    "diront"
+   ],
+   "conditionnel": [
+    "dirais",
+    "dirais",
+    "dirait",
+    "dirions",
+    "diriez",
+    "diraient"
+   ],
+   "note": "vous dites (present only)"
+  },
+  "écrire": {
+   "auxiliary": "avoir",
+   "participle": [
+    "écrit",
+    "écrite",
+    "écrits",
+    "écrites"
+   ],
+   "imparfait": [
+    "écrivais",
+    "écrivais",
+    "écrivait",
+    "écrivions",
+    "écriviez",
+    "écrivaient"
+   ],
+   "futur": [
+    "écrirai",
+    "écriras",
+    "écrira",
+    "écrirons",
+    "écrirez",
+    "écriront"
+   ],
+   "conditionnel": [
+    "écrirais",
+    "écrirais",
+    "écrirait",
+    "écririons",
+    "écririez",
+    "écriraient"
+   ],
+   "note": ""
+  },
+  "lire": {
+   "auxiliary": "avoir",
+   "participle": [
+    "lu",
+    "lue",
+    "lus",
+    "lues"
+   ],
+   "imparfait": [
+    "lisais",
+    "lisais",
+    "lisait",
+    "lisions",
+    "lisiez",
+    "lisaient"
+   ],
+   "futur": [
+    "lirai",
+    "liras",
+    "lira",
+    "lirons",
+    "lirez",
+    "liront"
+   ],
+   "conditionnel": [
+    "lirais",
+    "lirais",
+    "lirait",
+    "lirions",
+    "liriez",
+    "liraient"
+   ],
+   "note": ""
+  },
+  "boire": {
+   "auxiliary": "avoir",
+   "participle": [
+    "bu",
+    "bue",
+    "bus",
+    "bues"
+   ],
+   "imparfait": [
+    "buvais",
+    "buvais",
+    "buvait",
+    "buvions",
+    "buviez",
+    "buvaient"
+   ],
+   "futur": [
+    "boirai",
+    "boiras",
+    "boira",
+    "boirons",
+    "boirez",
+    "boiront"
+   ],
+   "conditionnel": [
+    "boirais",
+    "boirais",
+    "boirait",
+    "boirions",
+    "boiriez",
+    "boiraient"
+   ],
+   "note": ""
+  },
+  "dormir": {
+   "auxiliary": "avoir",
+   "participle": [
+    "dormi",
+    "dormie",
+    "dormis",
+    "dormies"
+   ],
+   "imparfait": [
+    "dormais",
+    "dormais",
+    "dormait",
+    "dormions",
+    "dormiez",
+    "dormaient"
+   ],
+   "futur": [
+    "dormirai",
+    "dormiras",
+    "dormira",
+    "dormirons",
+    "dormirez",
+    "dormiront"
+   ],
+   "conditionnel": [
+    "dormirais",
+    "dormirais",
+    "dormirait",
+    "dormirions",
+    "dormiriez",
+    "dormiraient"
+   ],
+   "note": ""
+  },
+  "partir": {
+   "auxiliary": "être",
+   "participle": [
+    "parti",
+    "partie",
+    "partis",
+    "parties"
+   ],
+   "imparfait": [
+    "partais",
+    "partais",
+    "partait",
+    "partions",
+    "partiez",
+    "partaient"
+   ],
+   "futur": [
+    "partirai",
+    "partiras",
+    "partira",
+    "partirons",
+    "partirez",
+    "partiront"
+   ],
+   "conditionnel": [
+    "partirais",
+    "partirais",
+    "partirait",
+    "partirions",
+    "partiriez",
+    "partiraient"
+   ],
+   "note": ""
+  },
+  "sortir": {
+   "auxiliary": "être",
+   "participle": [
+    "sorti",
+    "sortie",
+    "sortis",
+    "sorties"
+   ],
+   "imparfait": [
+    "sortais",
+    "sortais",
+    "sortait",
+    "sortions",
+    "sortiez",
+    "sortaient"
+   ],
+   "futur": [
+    "sortirai",
+    "sortiras",
+    "sortira",
+    "sortirons",
+    "sortirez",
+    "sortiront"
+   ],
+   "conditionnel": [
+    "sortirais",
+    "sortirais",
+    "sortirait",
+    "sortirions",
+    "sortiriez",
+    "sortiraient"
+   ],
+   "note": "uses avoir when transitive (j'ai sorti la voiture)"
+  },
+  "mettre": {
+   "auxiliary": "avoir",
+   "participle": [
+    "mis",
+    "mise",
+    "mis",
+    "mises"
+   ],
+   "imparfait": [
+    "mettais",
+    "mettais",
+    "mettait",
+    "mettions",
+    "mettiez",
+    "mettaient"
+   ],
+   "futur": [
+    "mettrai",
+    "mettras",
+    "mettra",
+    "mettrons",
+    "mettrez",
+    "mettront"
+   ],
+   "conditionnel": [
+    "mettrais",
+    "mettrais",
+    "mettrait",
+    "mettrions",
+    "mettriez",
+    "mettraient"
+   ],
+   "note": ""
+  },
+  "recevoir": {
+   "auxiliary": "avoir",
+   "participle": [
+    "reçu",
+    "reçue",
+    "reçus",
+    "reçues"
+   ],
+   "imparfait": [
+    "recevais",
+    "recevais",
+    "recevait",
+    "recevions",
+    "receviez",
+    "recevaient"
+   ],
+   "futur": [
+    "recevrai",
+    "recevras",
+    "recevra",
+    "recevrons",
+    "recevrez",
+    "recevront"
+   ],
+   "conditionnel": [
+    "recevrais",
+    "recevrais",
+    "recevrait",
+    "recevrions",
+    "recevriez",
+    "recevraient"
+   ],
+   "note": ""
+  },
+  "ouvrir": {
+   "auxiliary": "avoir",
+   "participle": [
+    "ouvert",
+    "ouverte",
+    "ouverts",
+    "ouvertes"
+   ],
+   "imparfait": [
+    "ouvrais",
+    "ouvrais",
+    "ouvrait",
+    "ouvrions",
+    "ouvriez",
+    "ouvraient"
+   ],
+   "futur": [
+    "ouvrirai",
+    "ouvriras",
+    "ouvrira",
+    "ouvrirons",
+    "ouvrirez",
+    "ouvriront"
+   ],
+   "conditionnel": [
+    "ouvrirais",
+    "ouvrirais",
+    "ouvrirait",
+    "ouvririons",
+    "ouvririez",
+    "ouvriraient"
+   ],
+   "note": ""
+  },
+  "croire": {
+   "auxiliary": "avoir",
+   "participle": [
+    "cru",
+    "crue",
+    "crus",
+    "crues"
+   ],
+   "imparfait": [
+    "croyais",
+    "croyais",
+    "croyait",
+    "croyions",
+    "croyiez",
+    "croyaient"
+   ],
+   "futur": [
+    "croirai",
+    "croiras",
+    "croira",
+    "croirons",
+    "croirez",
+    "croiront"
+   ],
+   "conditionnel": [
+    "croirais",
+    "croirais",
+    "croirait",
+    "croirions",
+    "croiriez",
+    "croiraient"
+   ],
+   "note": ""
+  },
+  "courir": {
+   "auxiliary": "avoir",
+   "participle": [
+    "couru",
+    "courue",
+    "courus",
+    "courues"
+   ],
+   "imparfait": [
+    "courais",
+    "courais",
+    "courait",
+    "courions",
+    "couriez",
+    "couraient"
+   ],
+   "futur": [
+    "courrai",
+    "courras",
+    "courra",
+    "courrons",
+    "courrez",
+    "courront"
+   ],
+   "conditionnel": [
+    "courrais",
+    "courrais",
+    "courrait",
+    "courrions",
+    "courriez",
+    "courraient"
+   ],
+   "note": ""
+  },
+  "connaître": {
+   "auxiliary": "avoir",
+   "participle": [
+    "connu",
+    "connue",
+    "connus",
+    "connues"
+   ],
+   "imparfait": [
+    "connaissais",
+    "connaissais",
+    "connaissait",
+    "connaissions",
+    "connaissiez",
+    "connaissaient"
+   ],
+   "futur": [
+    "connaîtrai",
+    "connaîtras",
+    "connaîtra",
+    "connaîtrons",
+    "connaîtrez",
+    "connaîtront"
+   ],
+   "conditionnel": [
+    "connaîtrais",
+    "connaîtrais",
+    "connaîtrait",
+    "connaîtrions",
+    "connaîtriez",
+    "connaîtraient"
+   ],
+   "note": ""
+  },
+  "comprendre": {
+   "auxiliary": "avoir",
+   "participle": [
+    "compris",
+    "comprise",
+    "compris",
+    "comprises"
+   ],
+   "imparfait": [
+    "comprenais",
+    "comprenais",
+    "comprenait",
+    "comprenions",
+    "compreniez",
+    "comprenaient"
+   ],
+   "futur": [
+    "comprendrai",
+    "comprendras",
+    "comprendra",
+    "comprendrons",
+    "comprendrez",
+    "comprendront"
+   ],
+   "conditionnel": [
+    "comprendrais",
+    "comprendrais",
+    "comprendrait",
+    "comprendrions",
+    "comprendriez",
+    "comprendraient"
+   ],
+   "note": ""
+  },
+  "apprendre": {
+   "auxiliary": "avoir",
+   "participle": [
+    "appris",
+    "apprise",
+    "appris",
+    "apprises"
+   ],
+   "imparfait": [
+    "apprenais",
+    "apprenais",
+    "apprenait",
+    "apprenions",
+    "appreniez",
+    "apprenaient"
+   ],
+   "futur": [
+    "apprendrai",
+    "apprendras",
+    "apprendra",
+    "apprendrons",
+    "apprendrez",
+    "apprendront"
+   ],
+   "conditionnel": [
+    "apprendrais",
+    "apprendrais",
+    "apprendrait",
+    "apprendrions",
+    "apprendriez",
+    "apprendraient"
+   ],
+   "note": ""
+  },
+  "surprendre": {
+   "auxiliary": "avoir",
+   "participle": [
+    "surpris",
+    "surprise",
+    "surpris",
+    "surprises"
+   ],
+   "imparfait": [
+    "surprenais",
+    "surprenais",
+    "surprenait",
+    "surprenions",
+    "surpreniez",
+    "surprenaient"
+   ],
+   "futur": [
+    "surprendrai",
+    "surprendras",
+    "surprendra",
+    "surprendrons",
+    "surprendrez",
+    "surprendront"
+   ],
+   "conditionnel": [
+    "surprendrais",
+    "surprendrais",
+    "surprendrait",
+    "surprendrions",
+    "surprendriez",
+    "surprendraient"
+   ],
+   "note": ""
+  },
+  "reprendre": {
+   "auxiliary": "avoir",
+   "participle": [
+    "repris",
+    "reprise",
+    "repris",
+    "reprises"
+   ],
+   "imparfait": [
+    "reprenais",
+    "reprenais",
+    "reprenait",
+    "reprenions",
+    "repreniez",
+    "reprenaient"
+   ],
+   "futur": [
+    "reprendrai",
+    "reprendras",
+    "reprendra",
+    "reprendrons",
+    "reprendrez",
+    "reprendront"
+   ],
+   "conditionnel": [
+    "reprendrais",
+    "reprendrais",
+    "reprendrait",
+    "reprendrions",
+    "reprendriez",
+    "reprendraient"
+   ],
+   "note": ""
+  },
+  "voir": {
+   "auxiliary": "avoir",
+   "participle": [
+    "vu",
+    "vue",
+    "vus",
+    "vues"
+   ],
+   "imparfait": [
+    "voyais",
+    "voyais",
+    "voyait",
+    "voyions",
+    "voyiez",
+    "voyaient"
+   ],
+   "futur": [
+    "verrai",
+    "verras",
+    "verra",
+    "verrons",
+    "verrez",
+    "verront"
+   ],
+   "conditionnel": [
+    "verrais",
+    "verrais",
+    "verrait",
+    "verrions",
+    "verriez",
+    "verraient"
+   ],
+   "note": ""
+  },
+  "vivre": {
+   "auxiliary": "avoir",
+   "participle": [
+    "vécu",
+    "vécue",
+    "vécus",
+    "vécues"
+   ],
+   "imparfait": [
+    "vivais",
+    "vivais",
+    "vivait",
+    "vivions",
+    "viviez",
+    "vivaient"
+   ],
+   "futur": [
+    "vivrai",
+    "vivras",
+    "vivra",
+    "vivrons",
+    "vivrez",
+    "vivront"
+   ],
+   "conditionnel": [
+    "vivrais",
+    "vivrais",
+    "vivrait",
+    "vivrions",
+    "vivriez",
+    "vivraient"
+   ],
+   "note": ""
+  },
+  "suivre": {
+   "auxiliary": "avoir",
+   "participle": [
+    "suivi",
+    "suivie",
+    "suivis",
+    "suivies"
+   ],
+   "imparfait": [
+    "suivais",
+    "suivais",
+    "suivait",
+    "suivions",
+    "suiviez",
+    "suivaient"
+   ],
+   "futur": [
+    "suivrai",
+    "suivras",
+    "suivra",
+    "suivrons",
+    "suivrez",
+    "suivront"
+   ],
+   "conditionnel": [
+    "suivrais",
+    "suivrais",
+    "suivrait",
+    "suivrions",
+    "suivriez",
+    "suivraient"
+   ],
+   "note": ""
+  },
+  "tenir": {
+   "auxiliary": "avoir",
+   "participle": [
+    "tenu",
+    "tenue",
+    "tenus",
+    "tenues"
+   ],
+   "imparfait": [
+    "tenais",
+    "tenais",
+    "tenait",
+    "tenions",
+    "teniez",
+    "tenaient"
+   ],
+   "futur": [
+    "tiendrai",
+    "tiendras",
+    "tiendra",
+    "tiendrons",
+    "tiendrez",
+    "tiendront"
+   ],
+   "conditionnel": [
+    "tiendrais",
+    "tiendrais",
+    "tiendrait",
+    "tiendrions",
+    "tiendriez",
+    "tiendraient"
+   ],
+   "note": ""
+  },
+  "obtenir": {
+   "auxiliary": "avoir",
+   "participle": [
+    "obtenu",
+    "obtenue",
+    "obtenus",
+    "obtenues"
+   ],
+   "imparfait": [
+    "obtenais",
+    "obtenais",
+    "obtenait",
+    "obtenions",
+    "obteniez",
+    "obtenaient"
+   ],
+   "futur": [
+    "obtiendrai",
+    "obtiendras",
+    "obtiendra",
+    "obtiendrons",
+    "obtiendrez",
+    "obtiendront"
+   ],
+   "conditionnel": [
+    "obtiendrais",
+    "obtiendrais",
+    "obtiendrait",
+    "obtiendrions",
+    "obtiendriez",
+    "obtiendraient"
+   ],
+   "note": ""
+  },
+  "devenir": {
+   "auxiliary": "être",
+   "participle": [
+    "devenu",
+    "devenue",
+    "devenus",
+    "devenues"
+   ],
+   "imparfait": [
+    "devenais",
+    "devenais",
+    "devenait",
+    "devenions",
+    "deveniez",
+    "devenaient"
+   ],
+   "futur": [
+    "deviendrai",
+    "deviendras",
+    "deviendra",
+    "deviendrons",
+    "deviendrez",
+    "deviendront"
+   ],
+   "conditionnel": [
+    "deviendrais",
+    "deviendrais",
+    "deviendrait",
+    "deviendrions",
+    "deviendriez",
+    "deviendraient"
+   ],
+   "note": ""
+  },
+  "revenir": {
+   "auxiliary": "être",
+   "participle": [
+    "revenu",
+    "revenue",
+    "revenus",
+    "revenues"
+   ],
+   "imparfait": [
+    "revenais",
+    "revenais",
+    "revenait",
+    "revenions",
+    "reveniez",
+    "revenaient"
+   ],
+   "futur": [
+    "reviendrai",
+    "reviendras",
+    "reviendra",
+    "reviendrons",
+    "reviendrez",
+    "reviendront"
+   ],
+   "conditionnel": [
+    "reviendrais",
+    "reviendrais",
+    "reviendrait",
+    "reviendrions",
+    "reviendriez",
+    "reviendraient"
+   ],
+   "note": ""
+  },
+  "retenir": {
+   "auxiliary": "avoir",
+   "participle": [
+    "retenu",
+    "retenue",
+    "retenus",
+    "retenues"
+   ],
+   "imparfait": [
+    "retenais",
+    "retenais",
+    "retenait",
+    "retenions",
+    "reteniez",
+    "retenaient"
+   ],
+   "futur": [
+    "retiendrai",
+    "retiendras",
+    "retiendra",
+    "retiendrons",
+    "retiendrez",
+    "retiendront"
+   ],
+   "conditionnel": [
+    "retiendrais",
+    "retiendrais",
+    "retiendrait",
+    "retiendrions",
+    "retiendriez",
+    "retiendraient"
+   ],
+   "note": ""
+  },
+  "mourir": {
+   "auxiliary": "être",
+   "participle": [
+    "mort",
+    "morte",
+    "morts",
+    "mortes"
+   ],
+   "imparfait": [
+    "mourais",
+    "mourais",
+    "mourait",
+    "mourions",
+    "mouriez",
+    "mouraient"
+   ],
+   "futur": [
+    "mourrai",
+    "mourras",
+    "mourra",
+    "mourrons",
+    "mourrez",
+    "mourront"
+   ],
+   "conditionnel": [
+    "mourrais",
+    "mourrais",
+    "mourrait",
+    "mourrions",
+    "mourriez",
+    "mourraient"
+   ],
+   "note": ""
+  },
+  "promettre": {
+   "auxiliary": "avoir",
+   "participle": [
+    "promis",
+    "promise",
+    "promis",
+    "promises"
+   ],
+   "imparfait": [
+    "promettais",
+    "promettais",
+    "promettait",
+    "promettions",
+    "promettiez",
+    "promettaient"
+   ],
+   "futur": [
+    "promettrai",
+    "promettras",
+    "promettra",
+    "promettrons",
+    "promettrez",
+    "promettront"
+   ],
+   "conditionnel": [
+    "promettrais",
+    "promettrais",
+    "promettrait",
+    "promettrions",
+    "promettriez",
+    "promettraient"
+   ],
+   "note": ""
+  },
+  "permettre": {
+   "auxiliary": "avoir",
+   "participle": [
+    "permis",
+    "permise",
+    "permis",
+    "permises"
+   ],
+   "imparfait": [
+    "permettais",
+    "permettais",
+    "permettait",
+    "permettions",
+    "permettiez",
+    "permettaient"
+   ],
+   "futur": [
+    "permettrai",
+    "permettras",
+    "permettra",
+    "permettrons",
+    "permettrez",
+    "permettront"
+   ],
+   "conditionnel": [
+    "permettrais",
+    "permettrais",
+    "permettrait",
+    "permettrions",
+    "permettriez",
+    "permettraient"
+   ],
+   "note": ""
+  },
+  "remettre": {
+   "auxiliary": "avoir",
+   "participle": [
+    "remis",
+    "remise",
+    "remis",
+    "remises"
+   ],
+   "imparfait": [
+    "remettais",
+    "remettais",
+    "remettait",
+    "remettions",
+    "remettiez",
+    "remettaient"
+   ],
+   "futur": [
+    "remettrai",
+    "remettras",
+    "remettra",
+    "remettrons",
+    "remettrez",
+    "remettront"
+   ],
+   "conditionnel": [
+    "remettrais",
+    "remettrais",
+    "remettrait",
+    "remettrions",
+    "remettriez",
+    "remettraient"
+   ],
+   "note": ""
+  },
+  "conduire": {
+   "auxiliary": "avoir",
+   "participle": [
+    "conduit",
+    "conduite",
+    "conduits",
+    "conduites"
+   ],
+   "imparfait": [
+    "conduisais",
+    "conduisais",
+    "conduisait",
+    "conduisions",
+    "conduisiez",
+    "conduisaient"
+   ],
+   "futur": [
+    "conduirai",
+    "conduiras",
+    "conduira",
+    "conduirons",
+    "conduirez",
+    "conduiront"
+   ],
+   "conditionnel": [
+    "conduirais",
+    "conduirais",
+    "conduirait",
+    "conduirions",
+    "conduiriez",
+    "conduiraient"
+   ],
+   "note": ""
+  },
+  "envoyer": {
+   "auxiliary": "avoir",
+   "participle": [
+    "envoyé",
+    "envoyée",
+    "envoyés",
+    "envoyées"
+   ],
+   "imparfait": [
+    "envoyais",
+    "envoyais",
+    "envoyait",
+    "envoyions",
+    "envoyiez",
+    "envoyaient"
+   ],
+   "futur": [
+    "enverrai",
+    "enverras",
+    "enverra",
+    "enverrons",
+    "enverrez",
+    "enverront"
+   ],
+   "conditionnel": [
+    "enverrais",
+    "enverrais",
+    "enverrait",
+    "enverrions",
+    "enverriez",
+    "enverraient"
+   ],
+   "note": ""
+  },
+  "acheter": {
+   "auxiliary": "avoir",
+   "participle": [
+    "acheté",
+    "achetée",
+    "achetés",
+    "achetées"
+   ],
+   "imparfait": [
+    "achetais",
+    "achetais",
+    "achetait",
+    "achetions",
+    "achetiez",
+    "achetaient"
+   ],
+   "futur": [
+    "achèterai",
+    "achèteras",
+    "achètera",
+    "achèterons",
+    "achèterez",
+    "achèteront"
+   ],
+   "conditionnel": [
+    "achèterais",
+    "achèterais",
+    "achèterait",
+    "achèterions",
+    "achèteriez",
+    "achèteraient"
+   ],
+   "note": ""
+  },
+  "lever": {
+   "auxiliary": "avoir",
+   "participle": [
+    "levé",
+    "levée",
+    "levés",
+    "levées"
+   ],
+   "imparfait": [
+    "levais",
+    "levais",
+    "levait",
+    "levions",
+    "leviez",
+    "levaient"
+   ],
+   "futur": [
+    "lèverai",
+    "lèveras",
+    "lèvera",
+    "lèverons",
+    "lèverez",
+    "lèveront"
+   ],
+   "conditionnel": [
+    "lèverais",
+    "lèverais",
+    "lèverait",
+    "lèverions",
+    "lèveriez",
+    "lèveraient"
+   ],
+   "note": ""
+  },
+  "préférer": {
+   "auxiliary": "avoir",
+   "participle": [
+    "préféré",
+    "préférée",
+    "préférés",
+    "préférées"
+   ],
+   "imparfait": [
+    "préférais",
+    "préférais",
+    "préférait",
+    "préférions",
+    "préfériez",
+    "préféraient"
+   ],
+   "futur": [
+    "préférerai",
+    "préféreras",
+    "préférera",
+    "préférerons",
+    "préférerez",
+    "préféreront"
+   ],
+   "conditionnel": [
+    "préférerais",
+    "préférerais",
+    "préférerait",
+    "préférerions",
+    "préféreriez",
+    "préféreraient"
+   ],
+   "note": "rectified spelling futur/cond: préfèrer-",
+   "futur_variants": [
+    "préfèrerai",
+    "préfèreras",
+    "préfèrera",
+    "préfèrerons",
+    "préfèrerez",
+    "préfèreront"
+   ]
+  },
+  "espérer": {
+   "auxiliary": "avoir",
+   "participle": [
+    "espéré",
+    "espérée",
+    "espérés",
+    "espérées"
+   ],
+   "imparfait": [
+    "espérais",
+    "espérais",
+    "espérait",
+    "espérions",
+    "espériez",
+    "espéraient"
+   ],
+   "futur": [
+    "espérerai",
+    "espéreras",
+    "espérera",
+    "espérerons",
+    "espérerez",
+    "espéreront"
+   ],
+   "conditionnel": [
+    "espérerais",
+    "espérerais",
+    "espérerait",
+    "espérerions",
+    "espéreriez",
+    "espéreraient"
+   ],
+   "note": "rectified spelling futur/cond: espèrer-",
+   "futur_variants": [
+    "espèrerai",
+    "espèreras",
+    "espèrera",
+    "espèrerons",
+    "espèrerez",
+    "espèreront"
+   ]
+  },
+  "appeler": {
+   "auxiliary": "avoir",
+   "participle": [
+    "appelé",
+    "appelée",
+    "appelés",
+    "appelées"
+   ],
+   "imparfait": [
+    "appelais",
+    "appelais",
+    "appelait",
+    "appelions",
+    "appeliez",
+    "appelaient"
+   ],
+   "futur": [
+    "appellerai",
+    "appelleras",
+    "appellera",
+    "appellerons",
+    "appellerez",
+    "appelleront"
+   ],
+   "conditionnel": [
+    "appellerais",
+    "appellerais",
+    "appellerait",
+    "appellerions",
+    "appelleriez",
+    "appelleraient"
+   ],
+   "note": ""
+  },
+  "jeter": {
+   "auxiliary": "avoir",
+   "participle": [
+    "jeté",
+    "jetée",
+    "jetés",
+    "jetées"
+   ],
+   "imparfait": [
+    "jetais",
+    "jetais",
+    "jetait",
+    "jetions",
+    "jetiez",
+    "jetaient"
+   ],
+   "futur": [
+    "jetterai",
+    "jetteras",
+    "jettera",
+    "jetterons",
+    "jetterez",
+    "jetteront"
+   ],
+   "conditionnel": [
+    "jetterais",
+    "jetterais",
+    "jetterait",
+    "jetterions",
+    "jetteriez",
+    "jetteraient"
+   ],
+   "note": ""
+  },
+  "payer": {
+   "auxiliary": "avoir",
+   "participle": [
+    "payé",
+    "payée",
+    "payés",
+    "payées"
+   ],
+   "imparfait": [
+    "payais",
+    "payais",
+    "payait",
+    "payions",
+    "payiez",
+    "payaient"
+   ],
+   "futur": [
+    "paierai",
+    "paieras",
+    "paiera",
+    "paierons",
+    "paierez",
+    "paieront"
+   ],
+   "conditionnel": [
+    "paierais",
+    "paierais",
+    "paierait",
+    "paierions",
+    "paieriez",
+    "paieraient"
+   ],
+   "note": "variant futur/cond: payer-",
+   "futur_variants": [
+    "payerai",
+    "payeras",
+    "payera",
+    "payerons",
+    "payerez",
+    "payeront"
+   ],
+   "conditionnel_variants": [
+    "payerais",
+    "payerais",
+    "payerait",
+    "payerions",
+    "payeriez",
+    "payeraient"
+   ]
+  },
+  "voyager": {
+   "auxiliary": "avoir",
+   "participle": [
+    "voyagé",
+    "voyagée",
+    "voyagés",
+    "voyagées"
+   ],
+   "imparfait": [
+    "voyageais",
+    "voyageais",
+    "voyageait",
+    "voyagions",
+    "voyagiez",
+    "voyageaient"
+   ],
+   "futur": [
+    "voyagerai",
+    "voyageras",
+    "voyagera",
+    "voyagerons",
+    "voyagerez",
+    "voyageront"
+   ],
+   "conditionnel": [
+    "voyagerais",
+    "voyagerais",
+    "voyagerait",
+    "voyagerions",
+    "voyageriez",
+    "voyageraient"
+   ],
+   "note": "ger-verb"
+  },
+  "changer": {
+   "auxiliary": "avoir",
+   "participle": [
+    "changé",
+    "changée",
+    "changés",
+    "changées"
+   ],
+   "imparfait": [
+    "changeais",
+    "changeais",
+    "changeait",
+    "changions",
+    "changiez",
+    "changeaient"
+   ],
+   "futur": [
+    "changerai",
+    "changeras",
+    "changera",
+    "changerons",
+    "changerez",
+    "changeront"
+   ],
+   "conditionnel": [
+    "changerais",
+    "changerais",
+    "changerait",
+    "changerions",
+    "changeriez",
+    "changeraient"
+   ],
+   "note": "ger-verb"
+  },
+  "partager": {
+   "auxiliary": "avoir",
+   "participle": [
+    "partagé",
+    "partagée",
+    "partagés",
+    "partagées"
+   ],
+   "imparfait": [
+    "partageais",
+    "partageais",
+    "partageait",
+    "partagions",
+    "partagiez",
+    "partageaient"
+   ],
+   "futur": [
+    "partagerai",
+    "partageras",
+    "partagera",
+    "partagerons",
+    "partagerez",
+    "partageront"
+   ],
+   "conditionnel": [
+    "partagerais",
+    "partagerais",
+    "partagerait",
+    "partagerions",
+    "partageriez",
+    "partageraient"
+   ],
+   "note": "ger-verb"
+  },
+  "ranger": {
+   "auxiliary": "avoir",
+   "participle": [
+    "rangé",
+    "rangée",
+    "rangés",
+    "rangées"
+   ],
+   "imparfait": [
+    "rangeais",
+    "rangeais",
+    "rangeait",
+    "rangions",
+    "rangiez",
+    "rangeaient"
+   ],
+   "futur": [
+    "rangerai",
+    "rangeras",
+    "rangera",
+    "rangerons",
+    "rangerez",
+    "rangeront"
+   ],
+   "conditionnel": [
+    "rangerais",
+    "rangerais",
+    "rangerait",
+    "rangerions",
+    "rangeriez",
+    "rangeraient"
+   ],
+   "note": "ger-verb"
+  },
+  "manger": {
+   "auxiliary": "avoir",
+   "participle": [
+    "mangé",
+    "mangée",
+    "mangés",
+    "mangées"
+   ],
+   "imparfait": [
+    "mangeais",
+    "mangeais",
+    "mangeait",
+    "mangions",
+    "mangiez",
+    "mangeaient"
+   ],
+   "futur": [
+    "mangerai",
+    "mangeras",
+    "mangera",
+    "mangerons",
+    "mangerez",
+    "mangeront"
+   ],
+   "conditionnel": [
+    "mangerais",
+    "mangerais",
+    "mangerait",
+    "mangerions",
+    "mangeriez",
+    "mangeraient"
+   ],
+   "note": "ger-verb"
+  },
+  "lancer": {
+   "auxiliary": "avoir",
+   "participle": [
+    "lancé",
+    "lancée",
+    "lancés",
+    "lancées"
+   ],
+   "imparfait": [
+    "lançais",
+    "lançais",
+    "lançait",
+    "lancions",
+    "lanciez",
+    "lançaient"
+   ],
+   "futur": [
+    "lancerai",
+    "lanceras",
+    "lancera",
+    "lancerons",
+    "lancerez",
+    "lanceront"
+   ],
+   "conditionnel": [
+    "lancerais",
+    "lancerais",
+    "lancerait",
+    "lancerions",
+    "lanceriez",
+    "lanceraient"
+   ],
+   "note": "cer-verb"
+  },
+  "placer": {
+   "auxiliary": "avoir",
+   "participle": [
+    "placé",
+    "placée",
+    "placés",
+    "placées"
+   ],
+   "imparfait": [
+    "plaçais",
+    "plaçais",
+    "plaçait",
+    "placions",
+    "placiez",
+    "plaçaient"
+   ],
+   "futur": [
+    "placerai",
+    "placeras",
+    "placera",
+    "placerons",
+    "placerez",
+    "placeront"
+   ],
+   "conditionnel": [
+    "placerais",
+    "placerais",
+    "placerait",
+    "placerions",
+    "placeriez",
+    "placeraient"
+   ],
+   "note": "cer-verb"
+  },
+  "avancer": {
+   "auxiliary": "avoir",
+   "participle": [
+    "avancé",
+    "avancée",
+    "avancés",
+    "avancées"
+   ],
+   "imparfait": [
+    "avançais",
+    "avançais",
+    "avançait",
+    "avancions",
+    "avanciez",
+    "avançaient"
+   ],
+   "futur": [
+    "avancerai",
+    "avanceras",
+    "avancera",
+    "avancerons",
+    "avancerez",
+    "avanceront"
+   ],
+   "conditionnel": [
+    "avancerais",
+    "avancerais",
+    "avancerait",
+    "avancerions",
+    "avanceriez",
+    "avanceraient"
+   ],
+   "note": "cer-verb"
+  },
+  "commencer": {
+   "auxiliary": "avoir",
+   "participle": [
+    "commencé",
+    "commencée",
+    "commencés",
+    "commencées"
+   ],
+   "imparfait": [
+    "commençais",
+    "commençais",
+    "commençait",
+    "commencions",
+    "commenciez",
+    "commençaient"
+   ],
+   "futur": [
+    "commencerai",
+    "commenceras",
+    "commencera",
+    "commencerons",
+    "commencerez",
+    "commenceront"
+   ],
+   "conditionnel": [
+    "commencerais",
+    "commencerais",
+    "commencerait",
+    "commencerions",
+    "commenceriez",
+    "commenceraient"
+   ],
+   "note": "cer-verb"
+  },
+  "finir": {
+   "auxiliary": "avoir",
+   "participle": [
+    "fini",
+    "finie",
+    "finis",
+    "finies"
+   ],
+   "imparfait": [
+    "finissais",
+    "finissais",
+    "finissait",
+    "finissions",
+    "finissiez",
+    "finissaient"
+   ],
+   "futur": [
+    "finirai",
+    "finiras",
+    "finira",
+    "finirons",
+    "finirez",
+    "finiront"
+   ],
+   "conditionnel": [
+    "finirais",
+    "finirais",
+    "finirait",
+    "finirions",
+    "finiriez",
+    "finiraient"
+   ],
+   "note": ""
+  },
+  "choisir": {
+   "auxiliary": "avoir",
+   "participle": [
+    "choisi",
+    "choisie",
+    "choisis",
+    "choisies"
+   ],
+   "imparfait": [
+    "choisissais",
+    "choisissais",
+    "choisissait",
+    "choisissions",
+    "choisissiez",
+    "choisissaient"
+   ],
+   "futur": [
+    "choisirai",
+    "choisiras",
+    "choisira",
+    "choisirons",
+    "choisirez",
+    "choisiront"
+   ],
+   "conditionnel": [
+    "choisirais",
+    "choisirais",
+    "choisirait",
+    "choisirions",
+    "choisiriez",
+    "choisiraient"
+   ],
+   "note": ""
+  },
+  "réussir": {
+   "auxiliary": "avoir",
+   "participle": [
+    "réussi",
+    "réussie",
+    "réussis",
+    "réussies"
+   ],
+   "imparfait": [
+    "réussissais",
+    "réussissais",
+    "réussissait",
+    "réussissions",
+    "réussissiez",
+    "réussissaient"
+   ],
+   "futur": [
+    "réussirai",
+    "réussiras",
+    "réussira",
+    "réussirons",
+    "réussirez",
+    "réussiront"
+   ],
+   "conditionnel": [
+    "réussirais",
+    "réussirais",
+    "réussirait",
+    "réussirions",
+    "réussiriez",
+    "réussiraient"
+   ],
+   "note": ""
+  },
+  "grandir": {
+   "auxiliary": "avoir",
+   "participle": [
+    "grandi",
+    "grandie",
+    "grandis",
+    "grandies"
+   ],
+   "imparfait": [
+    "grandissais",
+    "grandissais",
+    "grandissait",
+    "grandissions",
+    "grandissiez",
+    "grandissaient"
+   ],
+   "futur": [
+    "grandirai",
+    "grandiras",
+    "grandira",
+    "grandirons",
+    "grandirez",
+    "grandiront"
+   ],
+   "conditionnel": [
+    "grandirais",
+    "grandirais",
+    "grandirait",
+    "grandirions",
+    "grandiriez",
+    "grandiraient"
+   ],
+   "note": ""
+  },
+  "remplir": {
+   "auxiliary": "avoir",
+   "participle": [
+    "rempli",
+    "remplie",
+    "remplis",
+    "remplies"
+   ],
+   "imparfait": [
+    "remplissais",
+    "remplissais",
+    "remplissait",
+    "remplissions",
+    "remplissiez",
+    "remplissaient"
+   ],
+   "futur": [
+    "remplirai",
+    "rempliras",
+    "remplira",
+    "remplirons",
+    "remplirez",
+    "rempliront"
+   ],
+   "conditionnel": [
+    "remplirais",
+    "remplirais",
+    "remplirait",
+    "remplirions",
+    "rempliriez",
+    "rempliraient"
+   ],
+   "note": ""
+  },
+  "obéir": {
+   "auxiliary": "avoir",
+   "participle": [
+    "obéi",
+    "obéie",
+    "obéis",
+    "obéies"
+   ],
+   "imparfait": [
+    "obéissais",
+    "obéissais",
+    "obéissait",
+    "obéissions",
+    "obéissiez",
+    "obéissaient"
+   ],
+   "futur": [
+    "obéirai",
+    "obéiras",
+    "obéira",
+    "obéirons",
+    "obéirez",
+    "obéiront"
+   ],
+   "conditionnel": [
+    "obéirais",
+    "obéirais",
+    "obéirait",
+    "obéirions",
+    "obéiriez",
+    "obéiraient"
+   ],
+   "note": ""
+  },
+  "réfléchir": {
+   "auxiliary": "avoir",
+   "participle": [
+    "réfléchi",
+    "réfléchie",
+    "réfléchis",
+    "réfléchies"
+   ],
+   "imparfait": [
+    "réfléchissais",
+    "réfléchissais",
+    "réfléchissait",
+    "réfléchissions",
+    "réfléchissiez",
+    "réfléchissaient"
+   ],
+   "futur": [
+    "réfléchirai",
+    "réfléchiras",
+    "réfléchira",
+    "réfléchirons",
+    "réfléchirez",
+    "réfléchiront"
+   ],
+   "conditionnel": [
+    "réfléchirais",
+    "réfléchirais",
+    "réfléchirait",
+    "réfléchirions",
+    "réfléchiriez",
+    "réfléchiraient"
+   ],
+   "note": ""
+  },
+  "vendre": {
+   "auxiliary": "avoir",
+   "participle": [
+    "vendu",
+    "vendue",
+    "vendus",
+    "vendues"
+   ],
+   "imparfait": [
+    "vendais",
+    "vendais",
+    "vendait",
+    "vendions",
+    "vendiez",
+    "vendaient"
+   ],
+   "futur": [
+    "vendrai",
+    "vendras",
+    "vendra",
+    "vendrons",
+    "vendrez",
+    "vendront"
+   ],
+   "conditionnel": [
+    "vendrais",
+    "vendrais",
+    "vendrait",
+    "vendrions",
+    "vendriez",
+    "vendraient"
+   ],
+   "note": ""
+  },
+  "attendre": {
+   "auxiliary": "avoir",
+   "participle": [
+    "attendu",
+    "attendue",
+    "attendus",
+    "attendues"
+   ],
+   "imparfait": [
+    "attendais",
+    "attendais",
+    "attendait",
+    "attendions",
+    "attendiez",
+    "attendaient"
+   ],
+   "futur": [
+    "attendrai",
+    "attendras",
+    "attendra",
+    "attendrons",
+    "attendrez",
+    "attendront"
+   ],
+   "conditionnel": [
+    "attendrais",
+    "attendrais",
+    "attendrait",
+    "attendrions",
+    "attendriez",
+    "attendraient"
+   ],
+   "note": ""
+  },
+  "entendre": {
+   "auxiliary": "avoir",
+   "participle": [
+    "entendu",
+    "entendue",
+    "entendus",
+    "entendues"
+   ],
+   "imparfait": [
+    "entendais",
+    "entendais",
+    "entendait",
+    "entendions",
+    "entendiez",
+    "entendaient"
+   ],
+   "futur": [
+    "entendrai",
+    "entendras",
+    "entendra",
+    "entendrons",
+    "entendrez",
+    "entendront"
+   ],
+   "conditionnel": [
+    "entendrais",
+    "entendrais",
+    "entendrait",
+    "entendrions",
+    "entendriez",
+    "entendraient"
+   ],
+   "note": ""
+  },
+  "répondre": {
+   "auxiliary": "avoir",
+   "participle": [
+    "répondu",
+    "répondue",
+    "répondus",
+    "répondues"
+   ],
+   "imparfait": [
+    "répondais",
+    "répondais",
+    "répondait",
+    "répondions",
+    "répondiez",
+    "répondaient"
+   ],
+   "futur": [
+    "répondrai",
+    "répondras",
+    "répondra",
+    "répondrons",
+    "répondrez",
+    "répondront"
+   ],
+   "conditionnel": [
+    "répondrais",
+    "répondrais",
+    "répondrait",
+    "répondrions",
+    "répondriez",
+    "répondraient"
+   ],
+   "note": ""
+  },
+  "perdre": {
+   "auxiliary": "avoir",
+   "participle": [
+    "perdu",
+    "perdue",
+    "perdus",
+    "perdues"
+   ],
+   "imparfait": [
+    "perdais",
+    "perdais",
+    "perdait",
+    "perdions",
+    "perdiez",
+    "perdaient"
+   ],
+   "futur": [
+    "perdrai",
+    "perdras",
+    "perdra",
+    "perdrons",
+    "perdrez",
+    "perdront"
+   ],
+   "conditionnel": [
+    "perdrais",
+    "perdrais",
+    "perdrait",
+    "perdrions",
+    "perdriez",
+    "perdraient"
+   ],
+   "note": ""
+  },
+  "rendre": {
+   "auxiliary": "avoir",
+   "participle": [
+    "rendu",
+    "rendue",
+    "rendus",
+    "rendues"
+   ],
+   "imparfait": [
+    "rendais",
+    "rendais",
+    "rendait",
+    "rendions",
+    "rendiez",
+    "rendaient"
+   ],
+   "futur": [
+    "rendrai",
+    "rendras",
+    "rendra",
+    "rendrons",
+    "rendrez",
+    "rendront"
+   ],
+   "conditionnel": [
+    "rendrais",
+    "rendrais",
+    "rendrait",
+    "rendrions",
+    "rendriez",
+    "rendraient"
+   ],
+   "note": ""
+  },
+  "descendre": {
+   "auxiliary": "être",
+   "participle": [
+    "descendu",
+    "descendue",
+    "descendus",
+    "descendues"
+   ],
+   "imparfait": [
+    "descendais",
+    "descendais",
+    "descendait",
+    "descendions",
+    "descendiez",
+    "descendaient"
+   ],
+   "futur": [
+    "descendrai",
+    "descendras",
+    "descendra",
+    "descendrons",
+    "descendrez",
+    "descendront"
+   ],
+   "conditionnel": [
+    "descendrais",
+    "descendrais",
+    "descendrait",
+    "descendrions",
+    "descendriez",
+    "descendraient"
+   ],
+   "note": "uses avoir when transitive"
+  },
+  "parler": {
+   "auxiliary": "avoir",
+   "participle": [
+    "parlé",
+    "parlée",
+    "parlés",
+    "parlées"
+   ],
+   "imparfait": [
+    "parlais",
+    "parlais",
+    "parlait",
+    "parlions",
+    "parliez",
+    "parlaient"
+   ],
+   "futur": [
+    "parlerai",
+    "parleras",
+    "parlera",
+    "parlerons",
+    "parlerez",
+    "parleront"
+   ],
+   "conditionnel": [
+    "parlerais",
+    "parlerais",
+    "parlerait",
+    "parlerions",
+    "parleriez",
+    "parleraient"
+   ],
+   "note": "regular -er"
+  },
+  "aimer": {
+   "auxiliary": "avoir",
+   "participle": [
+    "aimé",
+    "aimée",
+    "aimés",
+    "aimées"
+   ],
+   "imparfait": [
+    "aimais",
+    "aimais",
+    "aimait",
+    "aimions",
+    "aimiez",
+    "aimaient"
+   ],
+   "futur": [
+    "aimerai",
+    "aimeras",
+    "aimera",
+    "aimerons",
+    "aimerez",
+    "aimeront"
+   ],
+   "conditionnel": [
+    "aimerais",
+    "aimerais",
+    "aimerait",
+    "aimerions",
+    "aimeriez",
+    "aimeraient"
+   ],
+   "note": "regular -er"
+  },
+  "travailler": {
+   "auxiliary": "avoir",
+   "participle": [
+    "travaillé",
+    "travaillée",
+    "travaillés",
+    "travaillées"
+   ],
+   "imparfait": [
+    "travaillais",
+    "travaillais",
+    "travaillait",
+    "travaillions",
+    "travailliez",
+    "travaillaient"
+   ],
+   "futur": [
+    "travaillerai",
+    "travailleras",
+    "travaillera",
+    "travaillerons",
+    "travaillerez",
+    "travailleront"
+   ],
+   "conditionnel": [
+    "travaillerais",
+    "travaillerais",
+    "travaillerait",
+    "travaillerions",
+    "travailleriez",
+    "travailleraient"
+   ],
+   "note": "regular -er"
+  },
+  "habiter": {
+   "auxiliary": "avoir",
+   "participle": [
+    "habité",
+    "habitée",
+    "habités",
+    "habitées"
+   ],
+   "imparfait": [
+    "habitais",
+    "habitais",
+    "habitait",
+    "habitions",
+    "habitiez",
+    "habitaient"
+   ],
+   "futur": [
+    "habiterai",
+    "habiteras",
+    "habitera",
+    "habiterons",
+    "habiterez",
+    "habiteront"
+   ],
+   "conditionnel": [
+    "habiterais",
+    "habiterais",
+    "habiterait",
+    "habiterions",
+    "habiteriez",
+    "habiteraient"
+   ],
+   "note": "regular -er"
+  },
+  "étudier": {
+   "auxiliary": "avoir",
+   "participle": [
+    "étudié",
+    "étudiée",
+    "étudiés",
+    "étudiées"
+   ],
+   "imparfait": [
+    "étudiais",
+    "étudiais",
+    "étudiait",
+    "étudiions",
+    "étudiiez",
+    "étudiaient"
+   ],
+   "futur": [
+    "étudierai",
+    "étudieras",
+    "étudiera",
+    "étudierons",
+    "étudierez",
+    "étudieront"
+   ],
+   "conditionnel": [
+    "étudierais",
+    "étudierais",
+    "étudierait",
+    "étudierions",
+    "étudieriez",
+    "étudieraient"
+   ],
+   "note": "regular -er"
+  },
+  "jouer": {
+   "auxiliary": "avoir",
+   "participle": [
+    "joué",
+    "jouée",
+    "joués",
+    "jouées"
+   ],
+   "imparfait": [
+    "jouais",
+    "jouais",
+    "jouait",
+    "jouions",
+    "jouiez",
+    "jouaient"
+   ],
+   "futur": [
+    "jouerai",
+    "joueras",
+    "jouera",
+    "jouerons",
+    "jouerez",
+    "joueront"
+   ],
+   "conditionnel": [
+    "jouerais",
+    "jouerais",
+    "jouerait",
+    "jouerions",
+    "joueriez",
+    "joueraient"
+   ],
+   "note": "regular -er"
+  },
+  "regarder": {
+   "auxiliary": "avoir",
+   "participle": [
+    "regardé",
+    "regardée",
+    "regardés",
+    "regardées"
+   ],
+   "imparfait": [
+    "regardais",
+    "regardais",
+    "regardait",
+    "regardions",
+    "regardiez",
+    "regardaient"
+   ],
+   "futur": [
+    "regarderai",
+    "regarderas",
+    "regardera",
+    "regarderons",
+    "regarderez",
+    "regarderont"
+   ],
+   "conditionnel": [
+    "regarderais",
+    "regarderais",
+    "regarderait",
+    "regarderions",
+    "regarderiez",
+    "regarderaient"
+   ],
+   "note": "regular -er"
+  },
+  "écouter": {
+   "auxiliary": "avoir",
+   "participle": [
+    "écouté",
+    "écoutée",
+    "écoutés",
+    "écoutées"
+   ],
+   "imparfait": [
+    "écoutais",
+    "écoutais",
+    "écoutait",
+    "écoutions",
+    "écoutiez",
+    "écoutaient"
+   ],
+   "futur": [
+    "écouterai",
+    "écouteras",
+    "écoutera",
+    "écouterons",
+    "écouterez",
+    "écouteront"
+   ],
+   "conditionnel": [
+    "écouterais",
+    "écouterais",
+    "écouterait",
+    "écouterions",
+    "écouteriez",
+    "écouteraient"
+   ],
+   "note": "regular -er"
+  },
+  "demander": {
+   "auxiliary": "avoir",
+   "participle": [
+    "demandé",
+    "demandée",
+    "demandés",
+    "demandées"
+   ],
+   "imparfait": [
+    "demandais",
+    "demandais",
+    "demandait",
+    "demandions",
+    "demandiez",
+    "demandaient"
+   ],
+   "futur": [
+    "demanderai",
+    "demanderas",
+    "demandera",
+    "demanderons",
+    "demanderez",
+    "demanderont"
+   ],
+   "conditionnel": [
+    "demanderais",
+    "demanderais",
+    "demanderait",
+    "demanderions",
+    "demanderiez",
+    "demanderaient"
+   ],
+   "note": "regular -er"
+  },
+  "chercher": {
+   "auxiliary": "avoir",
+   "participle": [
+    "cherché",
+    "cherchée",
+    "cherchés",
+    "cherchées"
+   ],
+   "imparfait": [
+    "cherchais",
+    "cherchais",
+    "cherchait",
+    "cherchions",
+    "cherchiez",
+    "cherchaient"
+   ],
+   "futur": [
+    "chercherai",
+    "chercheras",
+    "cherchera",
+    "chercherons",
+    "chercherez",
+    "chercheront"
+   ],
+   "conditionnel": [
+    "chercherais",
+    "chercherais",
+    "chercherait",
+    "chercherions",
+    "chercheriez",
+    "chercheraient"
+   ],
+   "note": "regular -er"
+  },
+  "donner": {
+   "auxiliary": "avoir",
+   "participle": [
+    "donné",
+    "donnée",
+    "donnés",
+    "données"
+   ],
+   "imparfait": [
+    "donnais",
+    "donnais",
+    "donnait",
+    "donnions",
+    "donniez",
+    "donnaient"
+   ],
+   "futur": [
+    "donnerai",
+    "donneras",
+    "donnera",
+    "donnerons",
+    "donnerez",
+    "donneront"
+   ],
+   "conditionnel": [
+    "donnerais",
+    "donnerais",
+    "donnerait",
+    "donnerions",
+    "donneriez",
+    "donneraient"
+   ],
+   "note": "regular -er"
+  },
+  "porter": {
+   "auxiliary": "avoir",
+   "participle": [
+    "porté",
+    "portée",
+    "portés",
+    "portées"
+   ],
+   "imparfait": [
+    "portais",
+    "portais",
+    "portait",
+    "portions",
+    "portiez",
+    "portaient"
+   ],
+   "futur": [
+    "porterai",
+    "porteras",
+    "portera",
+    "porterons",
+    "porterez",
+    "porteront"
+   ],
+   "conditionnel": [
+    "porterais",
+    "porterais",
+    "porterait",
+    "porterions",
+    "porteriez",
+    "porteraient"
+   ],
+   "note": "regular -er"
+  },
+  "penser": {
+   "auxiliary": "avoir",
+   "participle": [
+    "pensé",
+    "pensée",
+    "pensés",
+    "pensées"
+   ],
+   "imparfait": [
+    "pensais",
+    "pensais",
+    "pensait",
+    "pensions",
+    "pensiez",
+    "pensaient"
+   ],
+   "futur": [
+    "penserai",
+    "penseras",
+    "pensera",
+    "penserons",
+    "penserez",
+    "penseront"
+   ],
+   "conditionnel": [
+    "penserais",
+    "penserais",
+    "penserait",
+    "penserions",
+    "penseriez",
+    "penseraient"
+   ],
+   "note": "regular -er"
+  },
+  "trouver": {
+   "auxiliary": "avoir",
+   "participle": [
+    "trouvé",
+    "trouvée",
+    "trouvés",
+    "trouvées"
+   ],
+   "imparfait": [
+    "trouvais",
+    "trouvais",
+    "trouvait",
+    "trouvions",
+    "trouviez",
+    "trouvaient"
+   ],
+   "futur": [
+    "trouverai",
+    "trouveras",
+    "trouvera",
+    "trouverons",
+    "trouverez",
+    "trouveront"
+   ],
+   "conditionnel": [
+    "trouverais",
+    "trouverais",
+    "trouverait",
+    "trouverions",
+    "trouveriez",
+    "trouveraient"
+   ],
+   "note": "regular -er"
+  },
+  "utiliser": {
+   "auxiliary": "avoir",
+   "participle": [
+    "utilisé",
+    "utilisée",
+    "utilisés",
+    "utilisées"
+   ],
+   "imparfait": [
+    "utilisais",
+    "utilisais",
+    "utilisait",
+    "utilisions",
+    "utilisiez",
+    "utilisaient"
+   ],
+   "futur": [
+    "utiliserai",
+    "utiliseras",
+    "utilisera",
+    "utiliserons",
+    "utiliserez",
+    "utiliseront"
+   ],
+   "conditionnel": [
+    "utiliserais",
+    "utiliserais",
+    "utiliserait",
+    "utiliserions",
+    "utiliseriez",
+    "utiliseraient"
+   ],
+   "note": "regular -er"
+  },
+  "visiter": {
+   "auxiliary": "avoir",
+   "participle": [
+    "visité",
+    "visitée",
+    "visités",
+    "visitées"
+   ],
+   "imparfait": [
+    "visitais",
+    "visitais",
+    "visitait",
+    "visitions",
+    "visitiez",
+    "visitaient"
+   ],
+   "futur": [
+    "visiterai",
+    "visiteras",
+    "visitera",
+    "visiterons",
+    "visiterez",
+    "visiteront"
+   ],
+   "conditionnel": [
+    "visiterais",
+    "visiterais",
+    "visiterait",
+    "visiterions",
+    "visiteriez",
+    "visiteraient"
+   ],
+   "note": "regular -er"
+  },
+  "aider": {
+   "auxiliary": "avoir",
+   "participle": [
+    "aidé",
+    "aidée",
+    "aidés",
+    "aidées"
+   ],
+   "imparfait": [
+    "aidais",
+    "aidais",
+    "aidait",
+    "aidions",
+    "aidiez",
+    "aidaient"
+   ],
+   "futur": [
+    "aiderai",
+    "aideras",
+    "aidera",
+    "aiderons",
+    "aiderez",
+    "aideront"
+   ],
+   "conditionnel": [
+    "aiderais",
+    "aiderais",
+    "aiderait",
+    "aiderions",
+    "aideriez",
+    "aideraient"
+   ],
+   "note": "regular -er"
+  },
+  "marcher": {
+   "auxiliary": "avoir",
+   "participle": [
+    "marché",
+    "marchée",
+    "marchés",
+    "marchées"
+   ],
+   "imparfait": [
+    "marchais",
+    "marchais",
+    "marchait",
+    "marchions",
+    "marchiez",
+    "marchaient"
+   ],
+   "futur": [
+    "marcherai",
+    "marcheras",
+    "marchera",
+    "marcherons",
+    "marcherez",
+    "marcheront"
+   ],
+   "conditionnel": [
+    "marcherais",
+    "marcherais",
+    "marcherait",
+    "marcherions",
+    "marcheriez",
+    "marcheraient"
+   ],
+   "note": "regular -er"
+  },
+  "terminer": {
+   "auxiliary": "avoir",
+   "participle": [
+    "terminé",
+    "terminée",
+    "terminés",
+    "terminées"
+   ],
+   "imparfait": [
+    "terminais",
+    "terminais",
+    "terminait",
+    "terminions",
+    "terminiez",
+    "terminaient"
+   ],
+   "futur": [
+    "terminerai",
+    "termineras",
+    "terminera",
+    "terminerons",
+    "terminerez",
+    "termineront"
+   ],
+   "conditionnel": [
+    "terminerais",
+    "terminerais",
+    "terminerait",
+    "terminerions",
+    "termineriez",
+    "termineraient"
+   ],
+   "note": "regular -er"
+  },
+  "continuer": {
+   "auxiliary": "avoir",
+   "participle": [
+    "continué",
+    "continuée",
+    "continués",
+    "continuées"
+   ],
+   "imparfait": [
+    "continuais",
+    "continuais",
+    "continuait",
+    "continuions",
+    "continuiez",
+    "continuaient"
+   ],
+   "futur": [
+    "continuerai",
+    "continueras",
+    "continuera",
+    "continuerons",
+    "continuerez",
+    "continueront"
+   ],
+   "conditionnel": [
+    "continuerais",
+    "continuerais",
+    "continuerait",
+    "continuerions",
+    "continueriez",
+    "continueraient"
+   ],
+   "note": "regular -er"
+  },
+  "montrer": {
+   "auxiliary": "avoir",
+   "participle": [
+    "montré",
+    "montrée",
+    "montrés",
+    "montrées"
+   ],
+   "imparfait": [
+    "montrais",
+    "montrais",
+    "montrait",
+    "montrions",
+    "montriez",
+    "montraient"
+   ],
+   "futur": [
+    "montrerai",
+    "montreras",
+    "montrera",
+    "montrerons",
+    "montrerez",
+    "montreront"
+   ],
+   "conditionnel": [
+    "montrerais",
+    "montrerais",
+    "montrerait",
+    "montrerions",
+    "montreriez",
+    "montreraient"
+   ],
+   "note": "regular -er"
+  },
+  "garder": {
+   "auxiliary": "avoir",
+   "participle": [
+    "gardé",
+    "gardée",
+    "gardés",
+    "gardées"
+   ],
+   "imparfait": [
+    "gardais",
+    "gardais",
+    "gardait",
+    "gardions",
+    "gardiez",
+    "gardaient"
+   ],
+   "futur": [
+    "garderai",
+    "garderas",
+    "gardera",
+    "garderons",
+    "garderez",
+    "garderont"
+   ],
+   "conditionnel": [
+    "garderais",
+    "garderais",
+    "garderait",
+    "garderions",
+    "garderiez",
+    "garderaient"
+   ],
+   "note": "regular -er"
+  },
+  "oublier": {
+   "auxiliary": "avoir",
+   "participle": [
+    "oublié",
+    "oubliée",
+    "oubliés",
+    "oubliées"
+   ],
+   "imparfait": [
+    "oubliais",
+    "oubliais",
+    "oubliait",
+    "oubliions",
+    "oubliiez",
+    "oubliaient"
+   ],
+   "futur": [
+    "oublierai",
+    "oublieras",
+    "oubliera",
+    "oublierons",
+    "oublierez",
+    "oublieront"
+   ],
+   "conditionnel": [
+    "oublierais",
+    "oublierais",
+    "oublierait",
+    "oublierions",
+    "oublieriez",
+    "oublieraient"
+   ],
+   "note": "regular -er"
+  },
+  "présenter": {
+   "auxiliary": "avoir",
+   "participle": [
+    "présenté",
+    "présentée",
+    "présentés",
+    "présentées"
+   ],
+   "imparfait": [
+    "présentais",
+    "présentais",
+    "présentait",
+    "présentions",
+    "présentiez",
+    "présentaient"
+   ],
+   "futur": [
+    "présenterai",
+    "présenteras",
+    "présentera",
+    "présenterons",
+    "présenterez",
+    "présenteront"
+   ],
+   "conditionnel": [
+    "présenterais",
+    "présenterais",
+    "présenterait",
+    "présenterions",
+    "présenteriez",
+    "présenteraient"
+   ],
+   "note": "regular -er"
+  },
+  "expliquer": {
+   "auxiliary": "avoir",
+   "participle": [
+    "expliqué",
+    "expliquée",
+    "expliqués",
+    "expliquées"
+   ],
+   "imparfait": [
+    "expliquais",
+    "expliquais",
+    "expliquait",
+    "expliquions",
+    "expliquiez",
+    "expliquaient"
+   ],
+   "futur": [
+    "expliquerai",
+    "expliqueras",
+    "expliquera",
+    "expliquerons",
+    "expliquerez",
+    "expliqueront"
+   ],
+   "conditionnel": [
+    "expliquerais",
+    "expliquerais",
+    "expliquerait",
+    "expliquerions",
+    "expliqueriez",
+    "expliqueraient"
+   ],
+   "note": "regular -er"
+  },
+  "organiser": {
+   "auxiliary": "avoir",
+   "participle": [
+    "organisé",
+    "organisée",
+    "organisés",
+    "organisées"
+   ],
+   "imparfait": [
+    "organisais",
+    "organisais",
+    "organisait",
+    "organisions",
+    "organisiez",
+    "organisaient"
+   ],
+   "futur": [
+    "organiserai",
+    "organiseras",
+    "organisera",
+    "organiserons",
+    "organiserez",
+    "organiseront"
+   ],
+   "conditionnel": [
+    "organiserais",
+    "organiserais",
+    "organiserait",
+    "organiserions",
+    "organiseriez",
+    "organiseraient"
+   ],
+   "note": "regular -er"
+  },
+  "préparer": {
+   "auxiliary": "avoir",
+   "participle": [
+    "préparé",
+    "préparée",
+    "préparés",
+    "préparées"
+   ],
+   "imparfait": [
+    "préparais",
+    "préparais",
+    "préparait",
+    "préparions",
+    "prépariez",
+    "préparaient"
+   ],
+   "futur": [
+    "préparerai",
+    "prépareras",
+    "préparera",
+    "préparerons",
+    "préparerez",
+    "prépareront"
+   ],
+   "conditionnel": [
+    "préparerais",
+    "préparerais",
+    "préparerait",
+    "préparerions",
+    "prépareriez",
+    "prépareraient"
+   ],
+   "note": "regular -er"
+  },
+  "fermer": {
+   "auxiliary": "avoir",
+   "participle": [
+    "fermé",
+    "fermée",
+    "fermés",
+    "fermées"
+   ],
+   "imparfait": [
+    "fermais",
+    "fermais",
+    "fermait",
+    "fermions",
+    "fermiez",
+    "fermaient"
+   ],
+   "futur": [
+    "fermerai",
+    "fermeras",
+    "fermera",
+    "fermerons",
+    "fermerez",
+    "fermeront"
+   ],
+   "conditionnel": [
+    "fermerais",
+    "fermerais",
+    "fermerait",
+    "fermerions",
+    "fermeriez",
+    "fermeraient"
+   ],
+   "note": "regular -er"
+  },
+  "toucher": {
+   "auxiliary": "avoir",
+   "participle": [
+    "touché",
+    "touchée",
+    "touchés",
+    "touchées"
+   ],
+   "imparfait": [
+    "touchais",
+    "touchais",
+    "touchait",
+    "touchions",
+    "touchiez",
+    "touchaient"
+   ],
+   "futur": [
+    "toucherai",
+    "toucheras",
+    "touchera",
+    "toucherons",
+    "toucherez",
+    "toucheront"
+   ],
+   "conditionnel": [
+    "toucherais",
+    "toucherais",
+    "toucherait",
+    "toucherions",
+    "toucheriez",
+    "toucheraient"
+   ],
+   "note": "regular -er"
+  },
+  "chanter": {
+   "auxiliary": "avoir",
+   "participle": [
+    "chanté",
+    "chantée",
+    "chantés",
+    "chantées"
+   ],
+   "imparfait": [
+    "chantais",
+    "chantais",
+    "chantait",
+    "chantions",
+    "chantiez",
+    "chantaient"
+   ],
+   "futur": [
+    "chanterai",
+    "chanteras",
+    "chantera",
+    "chanterons",
+    "chanterez",
+    "chanteront"
+   ],
+   "conditionnel": [
+    "chanterais",
+    "chanterais",
+    "chanterait",
+    "chanterions",
+    "chanteriez",
+    "chanteraient"
+   ],
+   "note": "regular -er"
+  },
+  "danser": {
+   "auxiliary": "avoir",
+   "participle": [
+    "dansé",
+    "dansée",
+    "dansés",
+    "dansées"
+   ],
+   "imparfait": [
+    "dansais",
+    "dansais",
+    "dansait",
+    "dansions",
+    "dansiez",
+    "dansaient"
+   ],
+   "futur": [
+    "danserai",
+    "danseras",
+    "dansera",
+    "danserons",
+    "danserez",
+    "danseront"
+   ],
+   "conditionnel": [
+    "danserais",
+    "danserais",
+    "danserait",
+    "danserions",
+    "danseriez",
+    "danseraient"
+   ],
+   "note": "regular -er"
+  },
+  "cuisiner": {
+   "auxiliary": "avoir",
+   "participle": [
+    "cuisiné",
+    "cuisinée",
+    "cuisinés",
+    "cuisinées"
+   ],
+   "imparfait": [
+    "cuisinais",
+    "cuisinais",
+    "cuisinait",
+    "cuisinions",
+    "cuisiniez",
+    "cuisinaient"
+   ],
+   "futur": [
+    "cuisinerai",
+    "cuisineras",
+    "cuisinera",
+    "cuisinerons",
+    "cuisinerez",
+    "cuisineront"
+   ],
+   "conditionnel": [
+    "cuisinerais",
+    "cuisinerais",
+    "cuisinerait",
+    "cuisinerions",
+    "cuisineriez",
+    "cuisineraient"
+   ],
+   "note": "regular -er"
+  },
+  "déjeuner": {
+   "auxiliary": "avoir",
+   "participle": [
+    "déjeuné",
+    "déjeunée",
+    "déjeunés",
+    "déjeunées"
+   ],
+   "imparfait": [
+    "déjeunais",
+    "déjeunais",
+    "déjeunait",
+    "déjeunions",
+    "déjeuniez",
+    "déjeunaient"
+   ],
+   "futur": [
+    "déjeunerai",
+    "déjeuneras",
+    "déjeunera",
+    "déjeunerons",
+    "déjeunerez",
+    "déjeuneront"
+   ],
+   "conditionnel": [
+    "déjeunerais",
+    "déjeunerais",
+    "déjeunerait",
+    "déjeunerions",
+    "déjeuneriez",
+    "déjeuneraient"
+   ],
+   "note": "regular -er"
+  },
+  "dîner": {
+   "auxiliary": "avoir",
+   "participle": [
+    "dîné",
+    "dînée",
+    "dînés",
+    "dînées"
+   ],
+   "imparfait": [
+    "dînais",
+    "dînais",
+    "dînait",
+    "dînions",
+    "dîniez",
+    "dînaient"
+   ],
+   "futur": [
+    "dînerai",
+    "dîneras",
+    "dînera",
+    "dînerons",
+    "dînerez",
+    "dîneront"
+   ],
+   "conditionnel": [
+    "dînerais",
+    "dînerais",
+    "dînerait",
+    "dînerions",
+    "dîneriez",
+    "dîneraient"
+   ],
+   "note": "regular -er"
+  },
+  "arriver": {
+   "auxiliary": "être",
+   "participle": [
+    "arrivé",
+    "arrivée",
+    "arrivés",
+    "arrivées"
+   ],
+   "imparfait": [
+    "arrivais",
+    "arrivais",
+    "arrivait",
+    "arrivions",
+    "arriviez",
+    "arrivaient"
+   ],
+   "futur": [
+    "arriverai",
+    "arriveras",
+    "arrivera",
+    "arriverons",
+    "arriverez",
+    "arriveront"
+   ],
+   "conditionnel": [
+    "arriverais",
+    "arriverais",
+    "arriverait",
+    "arriverions",
+    "arriveriez",
+    "arriveraient"
+   ],
+   "note": "regular -er; auxiliary être"
+  },
+  "rester": {
+   "auxiliary": "être",
+   "participle": [
+    "resté",
+    "restée",
+    "restés",
+    "restées"
+   ],
+   "imparfait": [
+    "restais",
+    "restais",
+    "restait",
+    "restions",
+    "restiez",
+    "restaient"
+   ],
+   "futur": [
+    "resterai",
+    "resteras",
+    "restera",
+    "resterons",
+    "resterez",
+    "resteront"
+   ],
+   "conditionnel": [
+    "resterais",
+    "resterais",
+    "resterait",
+    "resterions",
+    "resteriez",
+    "resteraient"
+   ],
+   "note": "regular -er; auxiliary être"
+  },
+  "tomber": {
+   "auxiliary": "être",
+   "participle": [
+    "tombé",
+    "tombée",
+    "tombés",
+    "tombées"
+   ],
+   "imparfait": [
+    "tombais",
+    "tombais",
+    "tombait",
+    "tombions",
+    "tombiez",
+    "tombaient"
+   ],
+   "futur": [
+    "tomberai",
+    "tomberas",
+    "tombera",
+    "tomberons",
+    "tomberez",
+    "tomberont"
+   ],
+   "conditionnel": [
+    "tomberais",
+    "tomberais",
+    "tomberait",
+    "tomberions",
+    "tomberiez",
+    "tomberaient"
+   ],
+   "note": "regular -er; auxiliary être"
+  },
+  "entrer": {
+   "auxiliary": "être",
+   "participle": [
+    "entré",
+    "entrée",
+    "entrés",
+    "entrées"
+   ],
+   "imparfait": [
+    "entrais",
+    "entrais",
+    "entrait",
+    "entrions",
+    "entriez",
+    "entraient"
+   ],
+   "futur": [
+    "entrerai",
+    "entreras",
+    "entrera",
+    "entrerons",
+    "entrerez",
+    "entreront"
+   ],
+   "conditionnel": [
+    "entrerais",
+    "entrerais",
+    "entrerait",
+    "entrerions",
+    "entreriez",
+    "entreraient"
+   ],
+   "note": "regular -er; auxiliary être"
+  },
+  "monter": {
+   "auxiliary": "être",
+   "participle": [
+    "monté",
+    "montée",
+    "montés",
+    "montées"
+   ],
+   "imparfait": [
+    "montais",
+    "montais",
+    "montait",
+    "montions",
+    "montiez",
+    "montaient"
+   ],
+   "futur": [
+    "monterai",
+    "monteras",
+    "montera",
+    "monterons",
+    "monterez",
+    "monteront"
+   ],
+   "conditionnel": [
+    "monterais",
+    "monterais",
+    "monterait",
+    "monterions",
+    "monteriez",
+    "monteraient"
+   ],
+   "note": "regular -er; être when intransitive, avoir when transitive"
+  },
+  "passer": {
+   "auxiliary": "être",
+   "participle": [
+    "passé",
+    "passée",
+    "passés",
+    "passées"
+   ],
+   "imparfait": [
+    "passais",
+    "passais",
+    "passait",
+    "passions",
+    "passiez",
+    "passaient"
+   ],
+   "futur": [
+    "passerai",
+    "passeras",
+    "passera",
+    "passerons",
+    "passerez",
+    "passeront"
+   ],
+   "conditionnel": [
+    "passerais",
+    "passerais",
+    "passerait",
+    "passerions",
+    "passeriez",
+    "passeraient"
+   ],
+   "note": "regular -er; être when intransitive, avoir when transitive"
+  }
+ }
+}

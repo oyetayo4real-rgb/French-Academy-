@@ -9,6 +9,14 @@ on:
       - "features/french-section12-rules.mjs"
       - "features/french-conjugation-paradigms.mjs"
       - "features/french-intelligence-compat.mjs"
+      - "features/french-vocabulary-m1.mjs"
+      - "data/m1-glosses-draft.json"
+      - "tests/reference/tense-reference.json"
+      - "tests/reference/lexique-tense-crosscheck.json"
+      - "tests/reference/lexique-tense-classification.json"
+      - "scripts/check-m1-tense-conjugation.mjs"
+      - "scripts/check-m1-reference-integrity.mjs"
+      - ".github/CODEOWNERS"
       - "scripts/check-french-intelligence-core.mjs"
       - "scripts/check-french-intelligence-correctness.mjs"
       - "scripts/check-french-intelligence-parity.mjs"
@@ -44,12 +52,21 @@ on:
     branches:
       - feat/french-intelligence-engine
       - feat/wire-section12-writing
+      - feat/m1-vocab-tenses
     paths:
       - "features/french-intelligence.js"
       - "features/french-intelligence-core-v1.mjs"
       - "features/french-section12-rules.mjs"
       - "features/french-conjugation-paradigms.mjs"
       - "features/french-intelligence-compat.mjs"
+      - "features/french-vocabulary-m1.mjs"
+      - "data/m1-glosses-draft.json"
+      - "tests/reference/tense-reference.json"
+      - "tests/reference/lexique-tense-crosscheck.json"
+      - "tests/reference/lexique-tense-classification.json"
+      - "scripts/check-m1-tense-conjugation.mjs"
+      - "scripts/check-m1-reference-integrity.mjs"
+      - ".github/CODEOWNERS"
       - "scripts/check-french-intelligence-core.mjs"
       - "scripts/check-french-intelligence-correctness.mjs"
       - "scripts/check-french-intelligence-parity.mjs"
@@ -100,6 +117,13 @@ jobs:
             features/french-intelligence.js
             features/french-intelligence-core-v1.mjs
             features/french-intelligence-compat.mjs
+            features/french-vocabulary-m1.mjs
+            data/m1-glosses-draft.json
+            tests/reference/tense-reference.json
+            tests/reference/lexique-tense-crosscheck.json
+            tests/reference/lexique-tense-classification.json
+            scripts/check-m1-tense-conjugation.mjs
+            scripts/check-m1-reference-integrity.mjs
             features/french-data.mjs
             features/french-section12-rules.mjs
             scripts/generate-golden.mjs
@@ -122,6 +146,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - name: Verify immutable M1 references and vocabulary glosses
+        run: node scripts/check-m1-reference-integrity.mjs
+      - name: Check M1 tense conjugation against the immutable reference and Lexique pilot
+        run: node scripts/check-m1-tense-conjugation.mjs
       - name: Check engine JavaScript syntax
         run: node --check features/french-intelligence.js
       - name: Check pure core syntax

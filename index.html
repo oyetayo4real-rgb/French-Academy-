@@ -822,4 +822,10 @@ function boot(){if("serviceWorker" in navigator&&/^https?:/.test(location.protoc
   else if(guestOk()){view="home";render()}else{let seen=null;try{seen=localStorage.getItem("fa_seen")}catch(e){}view=seen?"auth":"landing";render()}}
 boot();
 
-</script><script type="module" src="/features/french-intelligence-compat.mjs"></script><script src="/features/ai-classroom.js?v=20261017-2" onerror="document.getElementById('app').insertAdjacentHTML('afterbegin','<div class=&quot;card err&quot; role=&quot;alert&quot;>AI Tutor and Dictionary could not load their feature script. Please reload this page or open it in Chrome.</div>')"></script></body></html>
+</script><script type="module" src="/features/french-intelligence-compat.mjs"></script><script src="/features/ai-classroom.js?v=20261017-2" onerror="document.getElementById('app').insertAdjacentHTML('afterbegin','<div class=&quot;card err&quot; role=&quot;alert&quot;>AI Tutor and Dictionary could not load their feature script. Please reload this page or open it in Chrome.</div>')"></script><footer id="lexique-credits" aria-labelledby="lexique-credits-title" style="box-sizing:border-box;max-width:1120px;width:calc(100% - 32px);margin:24px auto 36px;padding:18px 20px;border:1px solid rgba(127,127,127,.28);border-radius:14px;font-size:14px;line-height:1.6;color:inherit">
+  <h2 id="lexique-credits-title" style="font-size:1rem;margin:0 0 8px">Credits &amp; data licence</h2>
+  <p style="margin:0 0 8px">Vocabulary data adapted from <a href="https://www.lexique.org/" target="_blank" rel="noopener noreferrer">Lexique 3.83</a>, by Boris New and Christophe Pallier. The adapted lexical data is licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)</a>.</p>
+  <p style="margin:0 0 8px">Changes made: a selected vocabulary subset was reorganised for this application; English glosses and learner notes were added separately. Adaptations shared from this dataset must retain attribution, link to the licence, identify changes, and use the same CC BY-SA 4.0 licence.</p>
+  <p style="margin:0"><a href="/LEXIQUE-NOTICE.md">Read the full Lexique data notice</a>.</p>
+</footer>
+</body></html>

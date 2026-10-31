@@ -17,7 +17,7 @@ function rootStyle(){return `<style>
     if(tab==="ask")b.innerHTML=`<div class="fi-panel"><h2>Ask about French</h2>${panel("Your question","Example: Why do we say « j'ai vingt ans » instead of « je suis vingt ans » ?")}<button id="fiAsk">Explain</button><div id="fiAnswer" class="fi-output"></div><div class="fi-muted">This first version uses curated grammar explanations and local language patterns, not unrestricted generative AI.</div></div><div class="fi-panel"><b>Try one of these</b><div class="fi-row">${["Explain ne … pas","When do I use tu and vous?","Explain passé composé","Why is maison feminine?"].map((x,i)=>`<button class="g" data-fiprompt="${i}">${x}</button>`).join("")}</div></div>`;
     else if(tab==="dict")b.innerHTML=`<div class="fi-panel"><h2>French reference dictionary</h2><p class="fi-muted">Search built-in entries for common words and expressions. If an entry is missing, open trusted reference sources instead of inventing a definition.</p><input class="fi-input" id="fiWord" placeholder="Enter a French or English word…" autocomplete="off"><button id="fiLookup" style="width:100%">Look up word</button><div id="fiAnswer" class="fi-output"></div><div class="fi-result"><b>Reference sources</b><p><a href="https://www.dictionnaire-academie.fr/" target="_blank" rel="noopener noreferrer">Académie française dictionary</a> · <a href="https://www.cnrtl.fr/definition/" target="_blank" rel="noopener noreferrer">CNRTL / TLFi</a> · <a href="https://fr.wiktionary.org/" target="_blank" rel="noopener noreferrer">Wiktionnaire</a></p></div></div>`;
     else if(tab==="translate")b.innerHTML=`<div class="fi-panel"><h2>Translation assistant</h2><label class="fi-label" for="fiDirection">Direction</label><select class="fi-input" id="fiDirection"><option value="fr-en">French → English</option><option value="en-fr">English → French (phrasebook coverage)</option></select>${panel("Text to translate","Enter a phrase or short sentence…")}<button id="fiTranslate">Translate</button><div id="fiAnswer" class="fi-output"></div><div class="fi-note">The local phrasebook handles common phrases and known vocabulary. For long or unfamiliar text, use a trusted translation service and review the result.</div></div><div class="fi-panel"><b>Useful phrasebook</b>${examples.map(x=>`<div class="fi-result"><div>${esc(x[0])}</div><div class="fi-muted">${esc(x[1])}</div><button class="g" data-fiexample="${esc(x[0])}">Use phrase</button></div>`).join("")}</div>`;
-    else if(tab==="verbs")b.innerHTML=`<div class="fi-panel"><h2>Verb conjugator · present tense</h2><input class="fi-input" id="fiVerb" value="être" placeholder="Infinitive, e.g. parler"><button id="fiConjugate">Conjugate</button><div id="fiAnswer"></div><div class="fi-note">Irregular verbs in the built-in list are handled separately. Regular -er verbs use the standard present-tense pattern; spelling exceptions and other tenses may need checking.</div></div>`;
+    else if(tab==="verbs")b.innerHTML=`<div class="fi-panel"><h2>Verb conjugator · present tense</h2><input class="fi-input" id="fiVerb" value="être" placeholder="Infinitive, e.g. parler"><label class="fi-label" for="fiTense">Tense</label><select class="fi-input" id="fiTense" aria-label="Conjugation tense"><option value="present" selected>Present</option><option value="imparfait">Imparfait</option><option value="futur">Futur</option><option value="conditionnel">Conditionnel</option><option value="passé composé">Passé composé</option></select><button id="fiConjugate">Conjugate</button><div id="fiAnswer"></div><div class="fi-note">Only tenses cross-checked against the local Lexique 3.83 pilot are available. Unsupported verb-and-tense pairs are not guessed.</div></div>`;
     else if(tab==="correct")b.innerHTML=`<div class="fi-panel"><h2>French writing checker</h2>${panel("Paste your French text","Write or paste a sentence…")}<button id="fiCheck">Check writing</button><div id="fiAnswer" class="fi-output"></div><div class="fi-note">This checks a small set of common patterns. It is not a full grammar checker and may miss errors or flag text that is valid in context.</div></div>`;
     else b.innerHTML=`<div class="fi-panel"><h2>French grammar guide</h2><input class="fi-input" id="fiRuleSearch" placeholder="Filter rules…"><div id="fiRules">${ruleHtml(rules)}</div></div>`;
   }
@@ -58,10 +58,14 @@ function translate(text,direction){
   const exact=Object.keys(pairs).find(k=>norm(k)===norm(q));if(exact)return '<div class="fi-answer"><b>French:</b> '+esc(pairs[exact])+'<p class="fi-muted">Known phrasebook match.</p></div>';
   return '<div class="fi-answer">This phrase is not in the local phrasebook yet. I won\'t guess a full translation. Try a shorter phrase, or use <a href="https://www.deepl.com/translator#en/fr/'+encodeURIComponent(q)+'" target="_blank" rel="noopener noreferrer">DeepL</a> or <a href="https://translate.google.com/?sl=en&tl=fr&text='+encodeURIComponent(q)+'" target="_blank" rel="noopener noreferrer">Google Translate</a> and review the result.</div>';
 }
-function conjugate(raw){
-  const value=structuredCore.conjugate(raw);
-  if(!value || value.status!=="supported")return null;
-  return {v:value.v,forms:[...value.forms],type:value.type};
+function conjugate(raw, options = undefined){
+  const value=structuredCore.conjugate(raw, options);
+  const tense=options?.tense ?? "present";
+  if(tense==="present"){
+    if(!value || value.status!=="supported")return null;
+    return {v:value.v,forms:[...value.forms],type:value.type};
+  }
+  return value;
 }
 function answerQuestion(q){
   const n=norm(q);
@@ -156,7 +160,19 @@ function runAction(id){
     if(id==="fiAsk"){const q=$("fiInput")?.value||"";showAnswer(answerQuestion(q));}
     if(id==="fiLookup"){const q=$("fiWord")?.value||"";const d=lookup(q);showAnswer(d?dictionaryHtml(d):`<div class="fi-answer">No built-in entry for <b>${esc(q)}</b>. No definition has been fabricated. Check <a href="https://www.dictionnaire-academie.fr/" target="_blank" rel="noopener noreferrer">Académie française</a>, <a href="https://www.cnrtl.fr/definition/${encodeURIComponent(q)}" target="_blank" rel="noopener noreferrer">CNRTL/TLFi</a> or <a href="https://fr.wiktionary.org/wiki/${encodeURIComponent(q)}" target="_blank" rel="noopener noreferrer">Wiktionnaire</a>.</div>`);}
     if(id==="fiTranslate"){showAnswer(translate($("fiInput")?.value||"",$("fiDirection")?.value||"fr-en"));}
-    if(id==="fiConjugate"){const r=conjugate($("fiVerb")?.value||"");showAnswer(r?`<div class="fi-answer"><h3>${esc(r.v)} — present tense</h3><div class="fi-muted">${esc(r.type)}</div><table><tbody>${r.forms.map((f,i)=>`<tr><td>${esc(persons[i])}</td><td><b>${esc(f)}</b></td></tr>`).join("")}</tbody></table></div>`:`<div class="fi-answer">No conjugation pattern is available for this verb. Try être, avoir, aller, faire, venir, prendre, pouvoir, vouloir, devoir, savoir, dire or a regular -er verb such as parler.</div>`);}
+    if(id==="fiConjugate"){
+      const tense=$("fiTense")?.value||"present";
+      const r=conjugate($("fiVerb")?.value||"",{tense});
+      if(tense==="present"){
+        showAnswer(r?`<div class="fi-answer"><h3>${esc(r.v)} — present tense</h3><div class="fi-muted">${esc(r.type)}</div><table><tbody>${r.forms.map((f,i)=>`<tr><td>${esc(persons[i])}</td><td><b>${esc(f)}</b></td></tr>`).join("")}</tbody></table></div>`:`<div class="fi-answer">No conjugation pattern is available for this verb. Try être, avoir, aller, faire, venir, prendre, pouvoir, vouloir, devoir, savoir, dire or a regular -er verb such as parler.</div>`);
+      }else if(!r||r.status!=="supported"){
+        showAnswer(`<div class="fi-answer"><h3>${esc($("fiVerb")?.value||"")} — ${esc(tense)}</h3><div class="fi-note">${esc(r?.explanation||"No Lexique-verified forms are available for this verb and tense.")}</div></div>`);
+      }else{
+        const note=tense==="passé composé"?`<div class="fi-note"><b>Auxiliary:</b> ${esc(r.auxiliary)} · <b>Past participle:</b> ${esc((r.participleForms||[]).join(" / "))}</div><div class="fi-note">${esc(r.note||r.agreementNote||"")}</div>`:"";
+        const sourceNote=r.source==="rule-generated"?'<div class="fi-muted">Rule-generated form; not yet cross-checked against Lexique.</div>':"";
+        showAnswer(`<div class="fi-answer"><h3>${esc(r.v)} — ${esc(tense)}</h3><div class="fi-muted">${esc(r.type)}</div>${sourceNote}<table><tbody>${r.forms.map((f,i)=>`<tr><td>${esc(persons[i])}</td><td><b>${esc(f)}</b></td></tr>`).join("")}</tbody></table>${note}</div>`);
+      }
+    }
     if(id==="fiCheck"){const q=$("fiInput")?.value||"";showAnswer(q.trim()?unifiedCheckWriting(q):"Paste some text first.");}
   }
   function open(){tab="ask";history=[];const app=$("app");if(!app)return;app.innerHTML=header();renderBody();window.scrollTo(0,0);}
