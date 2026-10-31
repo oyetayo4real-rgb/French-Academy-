@@ -202,16 +202,14 @@ function runAction(id){
             const [masculineSingular,feminineSingular,masculinePlural,femininePlural]=r.participleForms;
             phrase= i===0 ? "suis "+masculineSingular+"(e)"
               : i===1 ? "es "+masculineSingular+"(e)"
-              : i===2 ? "il est "+masculineSingular+" / elle est "+feminineSingular+" / on est "+masculineSingular+"(e)"
+              : i===2 ? "est "+masculineSingular+" / est "+feminineSingular+" / est "+masculineSingular+"(e)"
               : i===3 ? "sommes "+masculineSingular+"(e)s"
               : i===4 ? "êtes "+masculineSingular+"(e)(s)"
-              : "ils sont "+masculinePlural+" / elles sont "+femininePlural;
-            if(i===2||i===5)pronoun="";
+              : "sont "+masculinePlural+" / sont "+femininePlural;
           }else if(i===0&&elides(form.split(/\s+/u)[0])){
             pronoun="j'";
           }
-          const display=pronoun?pronoun+(pronoun==="j'"?"":" ")+phrase:phrase;
-          return `<tr><th scope="row">${esc(labels[i])}</th><td>${esc(display)}</td></tr>`;
+          return `<tr><th scope="row">${esc(pronoun)}</th><td>${esc(phrase)}</td></tr>`;
         }).join("");
         const verified=r.source==="lexique-verified";
         const badge=verified?"Verified":"Rule-based";
