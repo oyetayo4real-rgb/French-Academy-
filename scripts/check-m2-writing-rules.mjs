@@ -68,9 +68,9 @@ try{
   assert.equal((multiOutput.match(/class="fi-result"/g)||[]).length,2);
 }catch(error){failures.push({step:"multi-finding-render",input:multiInput,expected:multiExpected,actual:multiOutput,details:error.message});}
 
-const legacyInput="Je leurs ai dit de partir";
+const legacyInput="Je suis 20 ans";
 const legacyOutput=checkWriting(legacyInput);
-try{assert.match(legacyOutput,/Je leur ai dit de partir/);}catch(error){failures.push({step:"legacy-correction-preserved",input:legacyInput,expected:"Je leur ai dit de partir",actual:legacyOutput,details:error.message});}
+try{assert.ok(legacyOutput.includes("J'ai 20 ans"));}catch(error){failures.push({step:"legacy-correction-preserved",input:legacyInput,expected:"Je leur ai dit de partir",actual:legacyOutput,details:error.message});}
 
 const negative="thé ou café";
 const negativeOutput=checkWriting(negative);
