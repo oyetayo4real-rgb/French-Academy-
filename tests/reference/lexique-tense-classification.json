@@ -13,11 +13,12 @@
     "verbCount": 111,
     "immutable": true
   },
-  "method": "Exact expected forms are compared with each lemma's forms and rare_forms. The pilot is lemma-level only and has no tense/person annotation, so a different surface form cannot be attributed to the same person; no contradicted pair is inferred without that evidence. Missing expected forms are absent; missing lemmas are verb-not-in-pilot.",
+  "method": "Each selected tense-reference surface form is compared with the same lemma's Lexique pilot forms and rare_forms. Exact presence is matched; a missing exact surface form for a lemma present in the pilot is absent; a missing lemma is verb-not-in-pilot. Lexique pilot rows have no tense/person annotations, so a different surface form cannot be attributed to the same person and is never labelled contradicted.",
   "limitations": [
-    "The pilot lacks tense/person tags; contradicted pairs require owner-verified same-person evidence and are therefore zero in this evidence-only report.",
-    "Passé composé is checked by participle form; auxiliary forms are generated from the immutable reference/paradigm."
+    "The pilot is a lemma-level frequency list without tense/person annotations. It cannot prove a same-person alternative; contradicted pairs remain empty unless a future person-tagged source establishes both forms.",
+    "Passé composé is cross-checked at participle level; the compound form is generated from the approved reference and auxiliary paradigm."
   ],
+  "ownerReviewPolicy": "For a future evidenced same-person contradiction, include both Lexique and reference forms and require explicit owner confirmation. Until confirmed, keep the tense-reference form and flag owner review. Only ownerConfirmedCorrect='lexique' removes support.",
   "summary": {
     "imparfait": {
       "matched": 354,
@@ -3045,7 +3046,9 @@
             "expected": [
               "écririons"
             ],
-            "matchedForms": []
+            "matchedForms": [],
+            "ownerReviewRequired": false,
+            "reason": "Expected surface form absent from lemma's pilot form list; no person-tagged alternative is supplied."
           },
           {
             "person": "vous",
@@ -7605,7 +7608,9 @@
             "expected": [
               "tiendrions"
             ],
-            "matchedForms": []
+            "matchedForms": [],
+            "ownerReviewRequired": false,
+            "reason": "Expected surface form absent from lemma's pilot form list; no person-tagged alternative is supplied."
           },
           {
             "person": "vous",
@@ -11793,7 +11798,9 @@
             "expected": [
               "changerions"
             ],
-            "matchedForms": []
+            "matchedForms": [],
+            "ownerReviewRequired": false,
+            "reason": "Expected surface form absent from lemma's pilot form list; no person-tagged alternative is supplied."
           },
           {
             "person": "vous",
@@ -15787,7 +15794,9 @@
             "expected": [
               "répondrions"
             ],
-            "matchedForms": []
+            "matchedForms": [],
+            "ownerReviewRequired": false,
+            "reason": "Expected surface form absent from lemma's pilot form list; no person-tagged alternative is supplied."
           },
           {
             "person": "vous",
@@ -16293,7 +16302,9 @@
             "expected": [
               "rendrions"
             ],
-            "matchedForms": []
+            "matchedForms": [],
+            "ownerReviewRequired": false,
+            "reason": "Expected surface form absent from lemma's pilot form list; no person-tagged alternative is supplied."
           },
           {
             "person": "vous",
@@ -18439,7 +18450,9 @@
             "expected": [
               "écouterions"
             ],
-            "matchedForms": []
+            "matchedForms": [],
+            "ownerReviewRequired": false,
+            "reason": "Expected surface form absent from lemma's pilot form list; no person-tagged alternative is supplied."
           },
           {
             "person": "vous",
@@ -18691,7 +18704,9 @@
             "expected": [
               "demanderions"
             ],
-            "matchedForms": []
+            "matchedForms": [],
+            "ownerReviewRequired": false,
+            "reason": "Expected surface form absent from lemma's pilot form list; no person-tagged alternative is supplied."
           },
           {
             "person": "vous",
@@ -19451,7 +19466,9 @@
             "expected": [
               "porterions"
             ],
-            "matchedForms": []
+            "matchedForms": [],
+            "ownerReviewRequired": false,
+            "reason": "Expected surface form absent from lemma's pilot form list; no person-tagged alternative is supplied."
           },
           {
             "person": "vous",
@@ -21965,7 +21982,9 @@
             "expected": [
               "oublieriez"
             ],
-            "matchedForms": []
+            "matchedForms": [],
+            "ownerReviewRequired": false,
+            "reason": "Expected surface form absent from lemma's pilot form list; no person-tagged alternative is supplied."
           },
           {
             "person": "ils/elles",
@@ -25281,7 +25300,9 @@
             "expected": [
               "entreriez"
             ],
-            "matchedForms": []
+            "matchedForms": [],
+            "ownerReviewRequired": false,
+            "reason": "Expected surface form absent from lemma's pilot form list; no person-tagged alternative is supplied."
           },
           {
             "person": "ils/elles",
@@ -25535,7 +25556,9 @@
             "expected": [
               "monterions"
             ],
-            "matchedForms": []
+            "matchedForms": [],
+            "ownerReviewRequired": false,
+            "reason": "Expected surface form absent from lemma's pilot form list; no person-tagged alternative is supplied."
           },
           {
             "person": "vous",
