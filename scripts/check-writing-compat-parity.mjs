@@ -69,7 +69,7 @@ function extractDeclaredArray(source,name){
 const checkerSource=readFileSync("scripts/check-french-intelligence.mjs","utf8");
 const cleanCorpus=extractDeclaredArray(checkerSource,"cleanSentenceCorpus");
 const hardNegativeCorpus=extractDeclaredArray(checkerSource,"hardNegativeSentences");
-const characterizationInputs=["Je suis 20 ans.","Bien que je suis fatigué, je continue.","Bonjour, je m'appelle Léa."];
+const characterizationInputs=["bonjour","ecole","xqz-not-a-word","Thank you","J'ai besoin d'aide","  ","être","parler","xyz","What is the difference between depuis and pendant?","Explain a very obscure French construction","","Je suis 20 ans.","Bien que je suis fatigué, je continue.","Bonjour, je m'appelle Léa."];
 const safetyCandidates=[...allInputs,...cleanCorpus.map((input,index)=>({source:"clean-corpus:"+index,input})),...hardNegativeCorpus.map((input,index)=>({source:"hard-negative:"+index,input})),...characterizationInputs.map((input,index)=>({source:"characterization:"+index,input}))];
 const browser=await chromium.launch({headless:true});
 const pages={};
