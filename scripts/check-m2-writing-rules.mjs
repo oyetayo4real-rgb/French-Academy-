@@ -72,6 +72,10 @@ const legacyInput="Je suis 20 ans";
 const legacyOutput=checkWriting(legacyInput);
 try{assert.ok(legacyOutput.includes("J'ai 20 ans"));}catch(error){failures.push({step:"legacy-correction-preserved",input:legacyInput,expected:"Je leur ai dit de partir",actual:legacyOutput,details:error.message});}
 
+
+const repeatedPasOutput=checkWriting("Je ne comprends pas pas.");
+try{assert.equal((repeatedPasOutput.match(/class="fi-result"/g)||[]).length,1);}catch(error){failures.push({step:"review-finding-deduplication",input:"Je ne comprends pas pas.",expected:"one review finding",actual:repeatedPasOutput,details:error.message});}
+
 const negative="thé ou café";
 const negativeOutput=checkWriting(negative);
 try{
