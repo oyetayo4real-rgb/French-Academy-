@@ -31,6 +31,8 @@ safetyInputs.set("characterization:clean sentence disclaimer","Bonjour, je m'app
 assert.equal(safetyInputs.size,639,"The frozen legacy no-issue safety net must remain exactly 639 inputs.");
 const cases=[
   {input:"Je leurs ai dit de partir",expected:"Je leur ai dit de partir",rule:"NR-03",legacyOnly:true},
+  {input:"Je suis 20 ans",expected:"J'ai 20 ans",rule:"legacy-age",legacyOnly:true},
+  {input:"Je suis 20 ans et il et fatigué.",expected:"J'ai 20 ans et il est fatigué.",rule:"legacy+NR-09",multi:true},
   {input:"un vieux homme",expected:"un vieil homme",rule:"NR-05"},
   {input:"Elle est tout contente",expected:"Elle est toute contente",rule:"NR-04"},
   {input:"s'elle vient",expected:"si elle vient",rule:"NR-06"},
@@ -142,7 +144,7 @@ try{
     console.error("M2 WRITING SAFETY FAILURES "+JSON.stringify(safetyFailures,null,2));
     throw new Error("M2 new-rule safety net found "+safetyFailures.length+" unapproved inputs.");
   }
-  const sampleInputs=["Je leurs ai dit de partir","Il à mangé et elle et fatiguée.","Ou est le marché ?","Ils son contents; sa dépend.","Nous allons a le marché."];
+  const sampleInputs=["Je suis 20 ans et il et fatigué.","Il à mangé et elle et fatiguée.","Ou est le marché ?","Ils son contents; sa dépend.","Nous allons a le marché."];
   const samples=[];
   for(const input of sampleInputs){
     const html=await pages.compat.evaluate(value=>window.FrenchIntelligenceCore.checkWriting(value),input);
