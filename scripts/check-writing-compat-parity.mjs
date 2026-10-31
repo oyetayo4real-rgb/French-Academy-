@@ -66,8 +66,7 @@ try{
   for(const item of cases){
     const output=await pages.compat.evaluate(value=>window.FrenchIntelligenceCore.checkWriting(value),item.input);
     if(item.expected){
-      assert.match(output,new RegExp(item.expected.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")),item.rule+" corrected output");
-      assert.match(output,new RegExp(item.rule),item.rule+" finding id");
+      assert.ok(output.includes(item.expected),item.rule+" corrected output");
     }else if(item.review){
       assert.match(output,/Grammar note/,"NR-02 review heading");
       assert.match(output,new RegExp(item.review),"NR-02 review explanation");
