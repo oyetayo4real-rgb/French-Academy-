@@ -4,6 +4,7 @@ import { readFileSync, statSync } from "node:fs";
 
 const engineSizeBytes = statSync("features/french-intelligence-compat.mjs").size;
 const swSource = readFileSync("sw.js", "utf8");
+const goldenV3 = JSON.parse(readFileSync("tests/golden/legacy-v3.json", "utf8"));
 const htmlSource = readFileSync("index.html", "utf8");
 const swCacheVersion = swSource.match(/const V="([^"]+)"/)?.[1];
 assert.ok(swCacheVersion, "Service-worker cache version V must be declared in sw.js");
@@ -163,6 +164,29 @@ try {
     await page.locator("#fiVerb").fill("être");
     await page.locator("#fiConjugate").click();
     await page.locator("#fiAnswer").getByText("suis", { exact: true }).waitFor();
+    const expectedPresent = goldenV3.inventory.conjugation.verbs.find(row => row.verb === "être")?.output;
+    const actualPresent = await page.evaluate(() => window.FrenchIntelligenceCore.conjugate("être"));
+    assert.deepEqual(actualPresent, expectedPresent, `${profile.name}: default present API remains byte-identical to golden v3`);
+    assert.equal(await page.locator("#fiTense").inputValue(), "present", `${profile.name}: default tense is present`);
+    const tenseCases = [
+      { tense: "imparfait", cases: [{ verb: "trouver", expected: "trouvais" }, { verb: "être", expected: "étais" }] },
+      { tense: "futur", cases: [{ verb: "trouver", expected: "trouverai" }, { verb: "être", expected: "serai" }] },
+      { tense: "conditionnel", cases: [{ verb: "trouver", expected: "trouverais" }, { verb: "être", expected: "serais" }] },
+      { tense: "passé composé", cases: [{ verb: "arriver", expected: "suis arrivé / arrivée" }, { verb: "faire", expected: "ai fait" }] }
+    ];
+    for (const group of tenseCases) {
+      for (const item of group.cases) {
+        await page.locator("#fiTense").selectOption(group.tense);
+        await page.locator("#fiVerb").fill(item.verb);
+        await page.locator("#fiConjugate").click();
+        const output = await page.locator("#fiAnswer").innerText();
+        assert.ok(output.includes(item.expected), `${profile.name}: ${item.verb} ${group.tense} contains ${item.expected}; actual=${output}`);
+      }
+    }
+    await page.locator("#fiTense").selectOption("present");
+    await page.locator("#fiVerb").fill("être");
+    await page.locator("#fiConjugate").click();
+    assert.deepEqual(await page.evaluate(() => window.FrenchIntelligenceCore.conjugate("être")), expectedPresent, `${profile.name}: returning to present restores golden output`);
 
     await page.locator('[data-fitab="correct"]').click();
     const section12WritingCases = [
