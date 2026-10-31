@@ -70,6 +70,9 @@ const spellingCases=[["manger","present",3,"mangeons"],["commencer","present",3,
 for(const [verb,tense,index,expected] of spellingCases){const actual=conjugate(verb,tense==="present"?undefined:{tense});if(actual?.forms?.[index]!==expected)oracleFailures.push({verb,tense,expected,actual:actual?.forms?.[index]||null});}
 if(oracleFailures.length)failures.push(...oracleFailures.map(x=>({step:"hand-checked-oracle",input:{verb:x.verb,tense:x.tense},expected:x.expected,actual:x.actual})));
 
+const unknownVerb = conjugate("nexiste-pas-dans-la-reference", { tense: "futur" });
+record("unknown-verb-remains-unsupported", "nexiste-pas-dans-la-reference", "unsupported", unknownVerb.status);
+
 // Thirty source-driven passé composé cases: all Lexique-verified être-auxiliary verbs
 // plus seventeen Lexique-verified avoir-auxiliary verbs from the immutable reference.
 const supportedPC = Object.entries(reference.verbs).filter(([verb]) =>
