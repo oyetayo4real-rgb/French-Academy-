@@ -31,6 +31,8 @@ on:
       - "scripts/check-french-intelligence.browser.mjs"
       - "scripts/check-french-intelligence.ui-parity.mjs"
       - "scripts/check-writing-compat-parity.mjs"
+      - "scripts/check-m2-conjugate-display.mjs"
+      - "scripts/check-m2-writing-rules.mjs"
       - "tests/fixtures/french-intelligence-legacy.html"
       - "tests/fixtures/french-intelligence-compat.html"
       - "scripts/generate-golden.mjs"
@@ -53,6 +55,7 @@ on:
       - feat/french-intelligence-engine
       - feat/wire-section12-writing
       - feat/m1-vocab-tenses
+      - feat/m2-polish-writing
     paths:
       - "features/french-intelligence.js"
       - "features/french-intelligence-core-v1.mjs"
@@ -203,6 +206,10 @@ jobs:
         run: node scripts/check-french-intelligence.ui-parity.mjs
       - name: Verify Writing API and UI parity against main golden and 639-input safety net
         run: node scripts/check-writing-compat-parity.mjs
+      - name: Verify M2 conjugation display on desktop and 360px mobile
+        run: node scripts/check-m2-conjugate-display.mjs
+      - name: Verify M2 Writing closed-list rules and structured legacy flag
+        run: node scripts/check-m2-writing-rules.mjs
 
   golden-reproducibility:
     name: Reproduce legacy golden in memory

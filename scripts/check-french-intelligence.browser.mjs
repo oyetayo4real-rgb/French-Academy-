@@ -172,7 +172,7 @@ try {
       { tense: "imparfait", cases: [{ verb: "trouver", expected: "trouvais" }, { verb: "être", expected: "étais" }] },
       { tense: "futur", cases: [{ verb: "trouver", expected: "trouverai" }, { verb: "être", expected: "serai" }] },
       { tense: "conditionnel", cases: [{ verb: "trouver", expected: "trouverais" }, { verb: "être", expected: "serais" }] },
-      { tense: "passé composé", cases: [{ verb: "arriver", expected: "suis arrivé / arrivée" }, { verb: "faire", expected: "ai fait" }] }
+      { tense: "passé composé", cases: [{ verb: "arriver", expected: "suis arrivé(e)", pronoun: "je" }, { verb: "faire", expected: "ai fait", pronoun: "j'" }] }
     ];
     for (const group of tenseCases) {
       for (const item of group.cases) {
@@ -180,7 +180,12 @@ try {
         await page.locator("#fiVerb").fill(item.verb);
         await page.locator("#fiConjugate").click();
         const output = await page.locator("#fiAnswer").innerText();
-        assert.ok(output.includes(item.expected), `${profile.name}: ${item.verb} ${group.tense} contains ${item.expected}; actual=${output}`);
+        if(item.pronoun){
+          assert.equal(await page.locator("#fiAnswer tbody th").first().innerText(),item.pronoun,`${profile.name}: ${item.verb} ${group.tense} pronoun`);
+          assert.equal(await page.locator("#fiAnswer tbody td").first().innerText(),item.expected,`${profile.name}: ${item.verb} ${group.tense} conjugated form`);
+        }else{
+          assert.ok(output.includes(item.expected), `${profile.name}: ${item.verb} ${group.tense} contains ${item.expected}; actual=${output}`);
+        }
       }
     }
     await page.locator("#fiTense").selectOption("present");
@@ -192,6 +197,9 @@ try {
     const section12WritingCases = [
       { input: "Je leurs ai dit de partir", expected: "Je leur ai dit de partir" },
       { input: "un vieux homme", expected: "un vieil homme" },
+      { input: "Je suis 20 ans et il et fatigué.", expected: "J'ai 20 ans et il est fatigué.", multi: true },
+      { input: "Il à mangé et elle et fatiguée.", expected: "Il a mangé et elle est fatiguée.", multi: true },
+      { input: "thé ou café", noIssue: true },
       { input: "Je leur ai dit", noIssue: true }
     ];
     for (const item of section12WritingCases) {
@@ -202,9 +210,10 @@ try {
         assert.equal(await page.locator("#fiAnswer .fi-output").count(), 0);
       } else {
         assert.equal((await page.locator("#fiAnswer .fi-output").innerText()).trim(), item.expected, `${profile.name}: Section 12 correction`);
+        if(item.multi)assert.ok(await page.locator("#fiAnswer .fi-result").count()>=2,profile.name+": multi-finding input renders at least two findings");
       }
     }
-    console.log(`PASS ${profile.name}: Writing tab applies NR-03 and NR-05 and preserves the NR-03 negative`);
+    console.log(`PASS ${profile.name}: Writing tab preserves legacy corrections, combines NR-07/NR-09, and keeps negatives unchanged`);
 
     await page.locator('[data-fitab="grammar"]').click();
     await page.locator("#fiRuleSearch").fill("negation");
