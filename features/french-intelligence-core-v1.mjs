@@ -99,6 +99,7 @@ function conjugatePresent(raw) {
   return result("supported", status === "verified" ? 0.99 : 0.75, "conjugation.present." + status, type, { v, forms, type, paradigmStatus: status, persons: [...PERSONS] });
 }
 
+const lexiqueTenseByVerb = new Map(lexiqueTenseCrosscheck.verbs.map(row => [row.verb, row]));
 const lexiqueTenseClassificationByVerb = new Map(lexiqueTenseClassification.verbs.map(row => [row.verb, row]));
 function conjugate(raw, options = undefined) {
   const tense = options?.tense ?? "present";
@@ -108,24 +109,26 @@ function conjugate(raw, options = undefined) {
   if (!["imparfait", "futur", "conditionnel", "passé composé"].includes(tense)) return result("unsupported", 0, "conjugation.unsupported-tense", "This tense is not supported.", { query: v, tense });
   const reference = tenseReference.verbs?.[v];
   if (!reference) return result("unsupported", 0, "conjugation.no-reference", "This verb is not in the approved 111-verb tense reference.", { query: v, tense });
-  const classified = lexiqueTenseClassificationByVerb.get(v)?.tenses?.[tense] || [];
-  const contradicted = classified.filter(pair => pair.status === "contradicted");
-  if (contradicted.length) return result("unsupported", 0, "conjugation.owner-review-required", "A same-person Lexique contradiction is awaiting owner confirmation.", { query: v, v, tense, contradictedPairs: contradicted });
-  const source = classified.length === PERSONS.length && classified.every(pair => pair.status === "matched") ? "lexique-verified" : "rule-generated";
+  const pairs = lexiqueTenseClassificationByVerb.get(v)?.tenses?.[tense] || [];
+  const ownerConfirmed = pairs.filter(pair => pair.status === "contradicted" && pair.ownerConfirmedCorrect === "lexique");
+  if (ownerConfirmed.length) return result("unsupported", 0, "conjugation.owner-confirmed-contradiction", "The owner confirmed the Lexique form for this person; this pair is unsupported.", { query:v,v,tense,contradictedPairs:ownerConfirmed });
+  const source = pairs.length === PERSONS.length && pairs.every(pair => pair.status === "matched") ? "lexique-verified" : "rule-generated";
+  const crosscheck = lexiqueTenseByVerb.get(v)?.tenses?.[tense];
   if (tense === "passé composé") {
     const auxiliary = reference.auxiliary;
     const auxiliaryForms = VERB_PARADIGMS[auxiliary] ? [...VERB_PARADIGMS[auxiliary]] : null;
-    if (!auxiliaryForms || auxiliaryForms.length !== PERSONS.length) return result("unsupported", 0, "conjugation.auxiliary-unavailable", "The required auxiliary paradigm is unavailable.", { query: v, v, tense, auxiliary });
+    if (!auxiliaryForms || auxiliaryForms.length !== PERSONS.length) return result("unsupported", 0, "conjugation.auxiliary-unavailable", "The required auxiliary paradigm is unavailable.", { query:v,v,tense,auxiliary });
     const participleForms = auxiliary === "avoir" ? [reference.participle[0]] : [...reference.participle];
     const forms = auxiliary === "avoir" ? auxiliaryForms.map(form => form + " " + participleForms[0]) : auxiliaryForms.map((form,index) => form + " " + (index < 3 ? participleForms[0] + " / " + participleForms[1] : participleForms[2] + " / " + participleForms[3]));
     const agreementNote = auxiliary === "être" ? "With être, the past participle agrees with the subject in gender and number. Reflexive verbs also use être; agreement depends on the reflexive construction and the position of a direct object." : "With avoir, the past participle normally does not agree with the subject; it agrees with a preceding direct object. Reflexive verbs use être and follow reflexive-agreement rules.";
     const referenceNote = reference.note || "";
-    return result("supported", source === "lexique-verified" ? 0.99 : 0.85, "conjugation.passe-compose." + source, source === "lexique-verified" ? "Passé composé · Lexique 3.83 cross-checked" : "Passé composé · rule-generated from the approved reference", { v, tense, forms, auxiliary, participleForms, agreementNote, note:[referenceNote,agreementNote].filter(Boolean).join(" "), type:"Passé composé · " + source, source, persons:[...PERSONS] });
+    return result("supported", source === "lexique-verified" ? 0.99 : 0.85, "conjugation.passe-compose." + source, source === "lexique-verified" ? "Passé composé · Lexique 3.83 participle cross-checked" : "Passé composé · rule-generated from the approved reference", { v,tense,forms,auxiliary,participleForms,agreementNote,note:[referenceNote,agreementNote].filter(Boolean).join(" "),type:"Passé composé · " + source,source,persons:[...PERSONS] });
   }
-  const selected = reference[tense];
-  if (!Array.isArray(selected) || selected.length !== PERSONS.length) return result("unsupported", 0, "conjugation.reference-invalid", "The approved reference does not contain six forms for this tense.", { query:v,v,tense });
-  const type = tense.charAt(0).toLocaleUpperCase("fr") + tense.slice(1) + " · " + source;
-  return result("supported", source === "lexique-verified" ? 0.99 : 0.85, "conjugation." + tense + "." + source, type, { v,tense,forms:[...selected],type,source,persons:[...PERSONS] });
+  const candidates=[reference[tense],...(reference[tense+"_variants"]||[])];
+  const selected=candidates[crosscheck?.selectedVariant??0]||candidates[0];
+  if(!Array.isArray(selected)||selected.length!==PERSONS.length)return result("unsupported",0,"conjugation.reference-invalid","The approved reference does not contain six forms for this tense.",{query:v,v,tense});
+  const type=tense.charAt(0).toLocaleUpperCase("fr")+tense.slice(1)+" · "+source;
+  return result("supported",source==="lexique-verified"?0.99:0.85,"conjugation."+tense+"."+source,type,{v,tense,forms:[...selected],type,source,persons:[...PERSONS]});
 }
 
 function answerQuestion(q) {
