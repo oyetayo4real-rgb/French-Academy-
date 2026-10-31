@@ -50,7 +50,7 @@ try{
         const afterTop=await selector.evaluate(el=>el.getBoundingClientRect().top+window.scrollY);
         assert.ok(Math.abs(afterTop-initialTop)<1,profile.name+" tense selector remains in the same document position");
         if(profile.name==="mobile-360"){
-          const widths=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth,body:document.body.scrollWidth}));
+          const widths=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth,body:document.body.scrollWidth,overflow:[...document.querySelectorAll("body *")].map(el=>({tag:el.tagName,id:el.id,cls:typeof el.className==="string"?el.className:"",right:Math.round(el.getBoundingClientRect().right*10)/10,width:Math.round(el.getBoundingClientRect().width*10)/10})).filter(el=>el.right>document.documentElement.clientWidth+0.5).slice(0,12)}));
           assert.ok(widths.scroll<=widths.client&&widths.body<=widths.client,JSON.stringify(widths)+" no horizontal scroll at 360px");
         }
       }
