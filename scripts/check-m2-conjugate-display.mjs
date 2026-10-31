@@ -31,19 +31,19 @@ try{
         const footer=expected.source==="lexique-verified"?"Checked against Lexique 3.83.":"Standard conjugation rule; not yet checked against Lexique.";
         assert.equal(await answer.locator(".fi-conjugation-footer").innerText(),footer,profile.name+" footer "+verb+" "+tense);
         assert.equal(await answer.locator("tbody tr").count(),6,profile.name+" six pronoun rows");
-        const rowText=(await answer.locator("tbody").innerText()).replace(/\s+/g," ");
-        for(const pronoun of ["je","tu","il / elle / on","nous","vous","ils / elles"])assert.ok(rowText.includes(pronoun),profile.name+" pronoun "+pronoun+" "+verb+" "+tense);
+        const rowPronouns=await answer.locator("tbody th").allTextContents();
+        const rowForms=await answer.locator("tbody td").allTextContents();
+        const expectedPronouns=["je","tu","il / elle / on","nous","vous","ils / elles"];
+        if(verb==="aimer"||verb==="habiter")expectedPronouns[0]="j'";
+        assert.deepEqual(rowPronouns,expectedPronouns,profile.name+" pronoun/elision column "+verb+" "+tense);
+        assert.equal(rowForms.length,6,profile.name+" six conjugated forms");
+        assert.doesNotMatch(rowForms.join(" "),/\b(?:je|tu|nous|vous)\s/i,profile.name+" forms must not duplicate row pronouns");
         assert.doesNotMatch(await answer.innerText(),/Only tenses cross-checked against the local Lexique|No account or API key is used/);
-        assert.equal(await answer.locator("th").filter({hasText:/je\s*\/\s*j'/}).count(),0,"No separate je / j' header");
-        if(verb==="aimer")assert.match(rowText,/j'(?:aim|ai)/,"aimer elides je before a vowel, including the auxiliary ai");
-        if(verb==="habiter")assert.match(rowText,/j'(?:habit|ai)/,"habiter uses mute-h elision or elides before the auxiliary ai");
+        assert.equal(await answer.locator("thead").count(),0,"No separate je / j' column header");
+        if(verb==="aimer")assert.match(rowForms[0],/^(?:aim|ai)/,"aimer elides je before a vowel, including the auxiliary ai");
+        if(verb==="habiter")assert.match(rowForms[0],/^(?:habit|ai)/,"habiter uses mute-h elision or elides before the auxiliary ai");
         if(verb==="aller"&&tense==="passé composé"){
-          assert.match(rowText,/je suis allé\(e\)/);
-          assert.match(rowText,/tu es allé\(e\)/);
-          assert.match(rowText,/il est allé \/ elle est allée/);
-          assert.match(rowText,/nous sommes allé\(e\)s/);
-          assert.match(rowText,/vous êtes allé\(e\)\(s\)/);
-          assert.match(rowText,/ils sont allés \/ elles sont allées/);
+          assert.deepEqual(rowForms,["suis allé(e)","es allé(e)","est allé / est allée / est allé(e)","sommes allé(e)s","êtes allé(e)(s)","sont allés / sont allées"]);
         }
         const heights=await answer.locator("tbody tr").evaluateAll(rows=>rows.map(row=>row.getBoundingClientRect().height));
         assert.ok(heights.every(height=>height>=44),profile.name+" tap target row height >=44px");
