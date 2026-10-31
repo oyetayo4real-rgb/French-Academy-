@@ -192,6 +192,8 @@ try {
     const section12WritingCases = [
       { input: "Je leurs ai dit de partir", expected: "Je leur ai dit de partir" },
       { input: "un vieux homme", expected: "un vieil homme" },
+      { input: "Il à mangé et elle et fatiguée.", expected: "Il a mangé et elle est fatiguée.", multi: true },
+      { input: "thé ou café", noIssue: true },
       { input: "Je leur ai dit", noIssue: true }
     ];
     for (const item of section12WritingCases) {
@@ -202,9 +204,10 @@ try {
         assert.equal(await page.locator("#fiAnswer .fi-output").count(), 0);
       } else {
         assert.equal((await page.locator("#fiAnswer .fi-output").innerText()).trim(), item.expected, `${profile.name}: Section 12 correction`);
+        if(item.multi)assert.ok(await page.locator("#fiAnswer .fi-result").count()>=2,profile.name+": multi-finding input renders at least two findings");
       }
     }
-    console.log(`PASS ${profile.name}: Writing tab applies NR-03 and NR-05 and preserves the NR-03 negative`);
+    console.log(`PASS ${profile.name}: Writing tab preserves legacy corrections, combines NR-07/NR-09, and keeps negatives unchanged`);
 
     await page.locator('[data-fitab="grammar"]').click();
     await page.locator("#fiRuleSearch").fill("negation");
