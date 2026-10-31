@@ -65,7 +65,7 @@ try{
  for(const p of Object.values(pages))await p.keyboard.press("Enter");await compareState("keyboard Enter activates focused tab");
  for(const p of Object.values(pages)){await clickTab(p,"dict");await p.locator("#fiWord").fill("bonjour");await p.locator("#fiWord").press("Enter");}await compareState("keyboard Enter submits dictionary lookup");
  for(const p of Object.values(pages))await p.locator("#fiHome").click();await compareState("back-to-home");
- if(differences){for(const item of details){const field=item.legacy.visibleText!==item.compat.visibleText?"visibleText":item.legacy.innerHTML!==item.compat.innerHTML?"innerHTML":"activeElement";const legacyValue=String(item.legacy[field]??"");const newValue=String(item.compat[field]??"");console.error("UNAPPROVED CHECKPOINT SEGMENT "+JSON.stringify({label:item.label,field,legacy:firstDifferenceSegment(legacyValue,newValue),new:firstDifferenceSegment(newValue,legacyValue)}));}}
+ if(differences){console.error("UNAPPROVED CHECKPOINT DETAILS "+JSON.stringify(details,null,2));}
  assert.equal(differences,0,"unlisted legacy/compat UI differences must fail");
  console.log("PASS browser UI parity: checkpoints="+compared+" unapproved_differences="+differences+" intentional_differences="+intentional.length);
  console.log("DELIBERATE DIFFERENCE LEDGER "+JSON.stringify({categories:DELIBERATE_DIFFERENCES,observed:intentional},null,2));
