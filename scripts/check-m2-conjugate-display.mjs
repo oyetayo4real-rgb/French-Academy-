@@ -35,8 +35,8 @@ try{
         for(const pronoun of ["je","tu","il / elle / on","nous","vous","ils / elles"])assert.ok(rowText.includes(pronoun),profile.name+" pronoun "+pronoun+" "+verb+" "+tense);
         assert.doesNotMatch(await answer.innerText(),/Only tenses cross-checked against the local Lexique|No account or API key is used/);
         assert.equal(await answer.locator("th").filter({hasText:/je\s*\/\s*j'/}).count(),0,"No separate je / j' header");
-        if(verb==="aimer")assert.match(rowText,/j'aim/,"aimer elides je");
-        if(verb==="habiter")assert.match(rowText,/j'habit/,"habiter uses mute-h elision");
+        if(verb==="aimer")assert.match(rowText,/j'(?:aim|ai)/,"aimer elides je before a vowel, including the auxiliary ai");
+        if(verb==="habiter")assert.match(rowText,/j'(?:habit|ai)/,"habiter uses mute-h elision or elides before the auxiliary ai");
         if(verb==="aller"&&tense==="passé composé"){
           assert.match(rowText,/je suis allé\(e\)/);
           assert.match(rowText,/tu es allé\(e\)/);
