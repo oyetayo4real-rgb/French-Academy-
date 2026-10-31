@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { chromium } from "playwright";
 import { conjugate } from "../features/french-intelligence-core-v1.mjs";
 
@@ -6,6 +7,9 @@ const baseURL=process.env.FRENCH_ACADEMY_URL||"http://127.0.0.1:4173";
 const browser=await chromium.launch({headless:true});
 const cases=["parler","aimer","habiter","aller"];
 const tenses=["imparfait","futur","conditionnel","passé composé"];
+const credits=readFileSync(new URL("../index.html",import.meta.url),"utf8");
+assert.match(credits,/Conjugation coverage: the approved reference supports 111 verbs across imparfait, futur, conditionnel and passé composé/);
+assert.match(credits,/The local conjugation engine runs in the browser and does not require an account or API key/i);
 try{
   for(const profile of [{name:"desktop",viewport:{width:1280,height:900}},{name:"mobile-360",viewport:{width:360,height:800}}]){
     const page=await browser.newPage({viewport:profile.viewport});
@@ -15,6 +19,7 @@ try{
     await page.goto(new URL("/tests/fixtures/french-intelligence-compat.html",baseURL).href,{waitUntil:"networkidle"});
     await page.locator("#hfrenchint").click();
     await page.locator('[data-fitab="verbs"]').click();
+    assert.doesNotMatch(await page.locator(".fi-wrap").innerText(),/Only tenses cross-checked against the local Lexique|No account or API key is used/);
     const selector=page.locator("#fiTense");
     const initialTop=await selector.evaluate(el=>el.getBoundingClientRect().top+window.scrollY);
     for(const verb of cases){
@@ -30,6 +35,7 @@ try{
         assert.equal(await answer.locator(".fi-status").innerText(),badge,profile.name+" badge "+verb+" "+tense);
         const footer=expected.source==="lexique-verified"?"Checked against Lexique 3.83.":"Standard conjugation rule; not yet checked against Lexique.";
         assert.equal(await answer.locator(".fi-conjugation-footer").innerText(),footer,profile.name+" footer "+verb+" "+tense);
+        assert.equal(await answer.locator(".fi-conjugation-footer").count(),1,profile.name+" exactly one footer line "+verb+" "+tense);
         assert.equal(await answer.locator("tbody tr").count(),6,profile.name+" six pronoun rows");
         const rowPronouns=await answer.locator("tbody th").allTextContents();
         const rowForms=await answer.locator("tbody td").allTextContents();

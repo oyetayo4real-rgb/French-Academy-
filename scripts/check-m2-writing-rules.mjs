@@ -34,7 +34,8 @@ function expectNoRule(input,id){
 }
 
 const participles=["été","eu","fait","dit","mangé","parlé","pris","vu","voulu","pu","su","fini","donné","trouvé"];
-for(const form of participles)expectCorrection("Il à "+form,"Il a "+form,"NR-07");
+const subjectPronouns=["Il","Elle","On"];
+for(const subject of subjectPronouns)for(const form of participles)expectCorrection(subject+" à "+form,subject+" a "+form,"NR-07");
 const motionVerbs=["va","vais","vas","allons","allez","vont","suis","es","sommes","êtes"];
 for(const verb of motionVerbs)expectCorrection(verb+" a Paris",verb+" à Paris","NR-07");
 for(const place of ["la","le","l'","les","Paris","Lagos","l'école","la maison"])expectCorrection("va a "+place,"va à "+place,"NR-07");
@@ -95,6 +96,6 @@ if(failures.length){
   console.error(JSON.stringify(failures.map(({step,input,expected,actual})=>({step,input,expected,actual})),null,2));
   process.exitCode=1;
 }else{
-  console.log(JSON.stringify({rules:["NR-07","NR-08","NR-09","NR-10","NR-11","NR-12"],positiveCases:participles.length+motionVerbs.length+8+14+17+3+4+9+masculine.length*2+5+4,negativeCases:14,multiFindingCount:2,legacyCorrection:"preserved",negativeMessage:"preserved",failures:0}));
+  console.log(JSON.stringify({rules:["NR-07","NR-08","NR-09","NR-10","NR-11","NR-12"],positiveCases:participles.length*subjectPronouns.length+motionVerbs.length+8+14+17+3+4+9+masculine.length*2+5+4,negativeCases:14,multiFindingCount:2,legacyCorrection:"preserved",negativeMessage:"preserved",failures:0}));
   console.log("PASS M2 Writing rules, closed-list negatives, structured legacy flag and combined finding rendering.");
 }
