@@ -192,7 +192,7 @@ function runAction(id){
       if(tense==="present"){
         showAnswer(r?`<div class="fi-answer"><h3>${esc(r.v)} — present tense</h3><div class="fi-muted">${esc(r.type)}</div><table><tbody>${r.forms.map((f,i)=>`<tr><td>${esc(persons[i])}</td><td><b>${esc(f)}</b></td></tr>`).join("")}</tbody></table></div>`:`<div class="fi-answer">No conjugation pattern is available for this verb. Try être, avoir, aller, faire, venir, prendre, pouvoir, vouloir, devoir, savoir, dire or a regular -er verb such as parler.</div>`);
       }else if(!r||r.status!=="supported"){
-        showAnswer(`<div class="fi-answer"><h3>${esc($("fiVerb")?.value||"")} — ${esc(tense)}</h3><div class="fi-note">${esc(r?.explanation||"No Lexique-verified forms are available for this verb and tense.")}</div></div>`);
+        showAnswer(`<div class="fi-answer"><h3>Verb conjugator</h3><div class="fi-note">${esc(r?.explanation||"No Lexique-verified forms are available for this verb and tense.")}</div></div>`);
       }else{
         const labels=["je","tu","il / elle / on","nous","vous","ils / elles"];
         const elides=(form)=>/^[aeiouyàâäéèêëîïôöùûüÿœ]/iu.test(form)||((r.v==="habiter")&&/^h/iu.test(form));

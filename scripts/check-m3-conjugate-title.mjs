@@ -59,6 +59,11 @@ try {
           );
           assert.equal(await answer.locator("tbody tr").count(), 6,
             profile.name + " " + tense + " retains all six person rows");
+          await page.locator("#fiVerb").fill("xyz");
+          await page.locator("#fiConjugate").click();
+          assert.equal(await answer.locator("h3").textContent(), "Verb conjugator",
+            profile.name + " unsupported " + tense + " card heading");
+          await page.locator("#fiVerb").fill("être");
         }
       }
 
