@@ -214,7 +214,7 @@ function runAction(id){
         const verified=r.source==="lexique-verified";
         const badge=verified?"Verified":"Rule-based";
         const footer=verified?"Checked against Lexique 3.83.":"Standard conjugation rule; not yet checked against Lexique.";
-        showAnswer(`<div class="fi-answer fi-conjugation"><div class="fi-conjugation-heading"><h3>${esc(r.v)} · ${esc(tense)}</h3><span class="fi-status">${badge}</span></div><table class="fi-conjugation-table"><tbody>${rows}</tbody></table><p class="fi-conjugation-footer">${footer}</p></div>`);
+        showAnswer(`<div class="fi-answer fi-conjugation"><div class="fi-conjugation-heading"><h3>${tense==="present"?esc(r.v)+" · "+esc(tense):"Verb conjugator"}</h3><span class="fi-status">${badge}</span></div><table class="fi-conjugation-table"><tbody>${rows}</tbody></table><p class="fi-conjugation-footer">${footer}</p></div>`);
       }
     }
     if(id==="fiCheck"){const q=$("fiInput")?.value||"";showAnswer(q.trim()?unifiedCheckWriting(q):"Paste some text first.");}
