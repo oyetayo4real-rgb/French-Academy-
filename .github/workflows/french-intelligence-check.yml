@@ -194,14 +194,17 @@ jobs:
         run: npm install --no-save playwright@1.56.1
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
-      - name: Start local static server
+      - name: Start branch and main static servers
         run: |
-          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/french-academy-http.log 2>&1 &
+          set -euo pipefail
+          git worktree add --detach /tmp/french-academy-main origin/main
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/french-academy-branch-http.log 2>&1 &
+          python3 -m http.server 4174 --directory /tmp/french-academy-main --bind 127.0.0.1 >/tmp/french-academy-main-http.log 2>&1 &
           for i in $(seq 1 30); do
-            if curl --fail --silent http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            if curl --fail --silent http://127.0.0.1:4173/ >/dev/null && curl --fail --silent http://127.0.0.1:4174/ >/dev/null; then exit 0; fi
             sleep 1
           done
-          cat /tmp/french-academy-http.log
+          cat /tmp/french-academy-branch-http.log /tmp/french-academy-main-http.log
           exit 1
       - name: Verify the app in desktop and mobile Chromium
         run: node scripts/check-french-intelligence.browser.mjs
@@ -213,7 +216,9 @@ jobs:
         run: node scripts/check-m2-conjugate-display.mjs
       - name: Verify M2 Writing closed-list rules and structured legacy flag
         run: node scripts/check-m2-writing-rules.mjs
-      - name: Verify M3 conjugator title on desktop and 360px mobile
+      - name: Verify M3 conjugator title and compare desktop overflow against main
+        env:
+          MAIN_FRENCH_ACADEMY_URL: http://127.0.0.1:4174
         run: node scripts/check-m3-conjugate-title.mjs
 
   golden-reproducibility:
