@@ -32,8 +32,10 @@ on:
       - "scripts/check-french-intelligence.ui-parity.mjs"
       - "scripts/check-writing-compat-parity.mjs"
       - "scripts/check-m3-conjugate-title.mjs"
+      - "scripts/check-m3-writing-highlights.mjs"
       - "scripts/check-m2-conjugate-display.mjs"
       - "scripts/check-m3-conjugate-title.mjs"
+      - "scripts/check-m3-writing-highlights.mjs"
       - "scripts/check-m2-writing-rules.mjs"
       - "tests/fixtures/french-intelligence-legacy.html"
       - "tests/fixtures/french-intelligence-compat.html"
@@ -220,6 +222,10 @@ jobs:
         env:
           MAIN_FRENCH_ACADEMY_URL: http://127.0.0.1:4174
         run: node scripts/check-m3-conjugate-title.mjs
+      - name: Verify M3 Writing highlights on desktop and mobile Chromium
+        env:
+          MAIN_FRENCH_ACADEMY_URL: http://127.0.0.1:4174
+        run: node scripts/check-m3-writing-highlights.mjs
 
   golden-reproducibility:
     name: Reproduce legacy golden in memory

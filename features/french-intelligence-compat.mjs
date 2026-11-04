@@ -6,10 +6,11 @@ const writingPattern = (source, flags = "gi") => new RegExp("(?<![\\p{L}\\p{N}_'
 const preserveInitialCase = (match, replacement) => match && /^\p{Lu}/u.test(match) ? replacement.charAt(0).toLocaleUpperCase("fr") + replacement.slice(1) : replacement;
 const $ = (id) => document.getElementById(id);
 let tab = "ask", history = [], busy = false;
+let activeWritingReview = null;
 import { dictionary, rules, phraseMap, phrasebookPairs, examples, persons } from "./french-data.mjs";
 
 function rootStyle(){return `<style>
-  .fi-wrap{color:var(--tx,#1d2433);font:inherit}.fi-hero{padding:20px;border-radius:18px;background:linear-gradient(135deg,#172554,#3730a3 65%,#6d28d9);color:#fff;margin:12px 0}.fi-hero h1{font:700 26px Georgia,serif;margin:4px 0}.fi-hero p{margin:6px 0;opacity:.9}.fi-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}.fi-tab{width:100%;text-align:left;background:var(--card,#fff);color:var(--tx,#1d2433);border:1px solid var(--bd,#e5e1d8);padding:12px;min-height:76px}.fi-tab.active{border:2px solid var(--ac,#1d4ed8);background:rgba(59,130,246,.1)}.fi-panel{background:var(--card,#fff);border:1px solid var(--bd,#e5e1d8);border-radius:14px;padding:14px;margin:10px 0}.fi-label{display:block;font-weight:650;margin:8px 0 4px}.fi-input{display:block;width:100%;font:inherit;padding:12px;border:1px solid var(--bd,#e5e1d8);border-radius:10px;background:var(--bg,#f7f5f0);color:var(--tx,#1d2433);margin:6px 0}.fi-output{white-space:pre-wrap;line-height:1.7;overflow-wrap:anywhere}.fi-muted{font-size:13px;color:var(--mu,#6b7280)}.fi-result{padding:12px 0;border-top:1px solid var(--bd,#e5e1d8)}.fi-tag{display:inline-block;padding:2px 8px;border-radius:20px;background:var(--bg,#f7f5f0);font-size:12px;margin:2px}.fi-answer{background:var(--bg,#f7f5f0);border-radius:10px;padding:12px;margin-top:10px}.fi-row{display:flex;gap:8px;flex-wrap:wrap}.fi-row button{flex:1;min-width:120px}.fi-note{border-left:3px solid var(--ac,#1d4ed8);padding:8px 10px;background:var(--bg,#f7f5f0);font-size:13px}.fi-back{margin:4px 0}.fi-source{font-size:12px;color:var(--mu,#6b7280)}${tab==="verbs"?".fi-conjugation-table{width:100%;table-layout:fixed;border-collapse:collapse}.fi-conjugation-table th,.fi-conjugation-table td{height:44px;min-height:44px;padding:8px 6px;border-bottom:1px solid var(--bd,#e5e1d8);text-align:left;vertical-align:middle;overflow-wrap:anywhere}.fi-conjugation-table th{width:34%;font-weight:600}.fi-conjugation-table td{font-weight:650}.fi-conjugation-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.fi-conjugation-heading h3{margin:0;overflow-wrap:anywhere}.fi-status{display:inline-flex;align-items:center;border:1px solid var(--bd,#d1d5db);border-radius:999px;padding:3px 9px;font-size:12px;color:var(--mu,#6b7280);white-space:nowrap}.fi-conjugation-footer{margin:10px 0 0;font-size:12px;color:var(--mu,#6b7280)}@media(max-width:420px){.fi-panel{min-width:0;max-width:100%;box-sizing:border-box}.fi-panel .fi-input{box-sizing:border-box;max-width:100%}.fi-conjugation,.fi-conjugation-table{min-width:0;max-width:100%;box-sizing:border-box}.fi-conjugation-table th{width:32%}.fi-conjugation-table th,.fi-conjugation-table td{padding:8px 4px;font-size:14px}}":""}@media(max-width:420px){.fi-grid{grid-template-columns:1fr}.fi-hero{padding:16px}.fi-hero h1{font-size:23px}}</style>`;}
+  .fi-wrap{color:var(--tx,#1d2433);font:inherit}.fi-hero{padding:20px;border-radius:18px;background:linear-gradient(135deg,#172554,#3730a3 65%,#6d28d9);color:#fff;margin:12px 0}.fi-hero h1{font:700 26px Georgia,serif;margin:4px 0}.fi-hero p{margin:6px 0;opacity:.9}.fi-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}.fi-tab{width:100%;text-align:left;background:var(--card,#fff);color:var(--tx,#1d2433);border:1px solid var(--bd,#e5e1d8);padding:12px;min-height:76px}.fi-tab.active{border:2px solid var(--ac,#1d4ed8);background:rgba(59,130,246,.1)}.fi-panel{background:var(--card,#fff);border:1px solid var(--bd,#e5e1d8);border-radius:14px;padding:14px;margin:10px 0}.fi-label{display:block;font-weight:650;margin:8px 0 4px}.fi-input{display:block;width:100%;font:inherit;padding:12px;border:1px solid var(--bd,#e5e1d8);border-radius:10px;background:var(--bg,#f7f5f0);color:var(--tx,#1d2433);margin:6px 0}.fi-output{white-space:pre-wrap;line-height:1.7;overflow-wrap:anywhere}.fi-muted{font-size:13px;color:var(--mu,#6b7280)}.fi-result{padding:12px 0;border-top:1px solid var(--bd,#e5e1d8)}.fi-tag{display:inline-block;padding:2px 8px;border-radius:20px;background:var(--bg,#f7f5f0);font-size:12px;margin:2px}.fi-answer{background:var(--bg,#f7f5f0);border-radius:10px;padding:12px;margin-top:10px}.fi-row{display:flex;gap:8px;flex-wrap:wrap}.fi-row button{flex:1;min-width:120px}.fi-note{border-left:3px solid var(--ac,#1d4ed8);padding:8px 10px;background:var(--bg,#f7f5f0);font-size:13px}.fi-back{margin:4px 0}.fi-source{font-size:12px;color:var(--mu,#6b7280)}.fi-highlight-block{margin:10px 0;padding:12px;border:1px solid var(--bd,#e5e1d8);border-radius:10px;background:var(--card,#fff);min-width:0;max-width:100%;box-sizing:border-box}.fi-highlight-text{white-space:pre-wrap;line-height:1.7;overflow-wrap:anywhere;min-width:0;max-width:100%}.fi-highlight-mark{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;min-width:44px;min-height:44px;padding:0 4px;background:#fff3b0;color:#111827;text-decoration:underline;text-decoration-thickness:2px;text-decoration-color:#7c2d12;text-underline-offset:3px;border-bottom:2px solid #7c2d12;border-radius:3px;cursor:help}.fi-highlight-mark:focus-visible{outline:3px solid #1d4ed8;outline-offset:2px}.fi-finding{border-top:1px solid var(--bd,#e5e1d8);padding:10px 0;min-width:0;overflow-wrap:anywhere}.fi-finding-summary{display:flex;gap:8px;flex-wrap:wrap;align-items:baseline}.fi-finding-found{font-weight:700}.fi-finding-arrow{color:var(--mu,#6b7280)}.fi-apply{min-height:44px;min-width:76px;margin-top:6px}.fi-apply:focus-visible{outline:3px solid var(--ac,#1d4ed8);outline-offset:2px}@media(max-width:420px){.fi-highlight-block,.fi-highlight-text,.fi-finding{min-width:0;max-width:100%;box-sizing:border-box}.fi-highlight-text{overflow-wrap:anywhere}.fi-apply{min-height:44px}}${tab==="verbs"?".fi-conjugation-table{width:100%;table-layout:fixed;border-collapse:collapse}.fi-conjugation-table th,.fi-conjugation-table td{height:44px;min-height:44px;padding:8px 6px;border-bottom:1px solid var(--bd,#e5e1d8);text-align:left;vertical-align:middle;overflow-wrap:anywhere}.fi-conjugation-table th{width:34%;font-weight:600}.fi-conjugation-table td{font-weight:650}.fi-conjugation-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.fi-conjugation-heading h3{margin:0;overflow-wrap:anywhere}.fi-status{display:inline-flex;align-items:center;border:1px solid var(--bd,#d1d5db);border-radius:999px;padding:3px 9px;font-size:12px;color:var(--mu,#6b7280);white-space:nowrap}.fi-conjugation-footer{margin:10px 0 0;font-size:12px;color:var(--mu,#6b7280)}@media(max-width:420px){.fi-panel{min-width:0;max-width:100%;box-sizing:border-box}.fi-panel .fi-input{box-sizing:border-box;max-width:100%}.fi-conjugation,.fi-conjugation-table{min-width:0;max-width:100%;box-sizing:border-box}.fi-conjugation-table th{width:32%}.fi-conjugation-table th,.fi-conjugation-table td{padding:8px 4px;font-size:14px}}":""}@media(max-width:420px){.fi-grid{grid-template-columns:1fr}.fi-hero{padding:16px}.fi-hero h1{font-size:23px}}</style>`;}
   function header(){return rootStyle()+`<div class="fi-wrap"><button class="g fi-back" id="fiHome">← Back to French Academy</button><div class="fi-hero"><div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase">${tab==="verbs"?"Local-first":"Local-first · No API key"}</div><h1>🇫🇷 French Intelligence</h1><p>Your French language workbench: dictionary, grammar, translation support, conjugation and writing help.</p></div>${tab==="verbs"?"":`<div class="fi-note"><b>Transparent mode:</b> core features run in your browser. They do not call Gemini or require an AI API key. Built-in word data and phrase translations are limited; complex answers are not generated by a large language model.</div>`}<div class="fi-grid">`+
     [["ask","💬","Ask & explain","Grammar and language questions"],["dict","📖","Dictionary","Meaning and usage"],["translate","🌍","Translate","Phrase-based support"],["verbs","🔤","Conjugate","Common verb forms"],["correct","✍️","Writing check","Catch common mistakes"],["grammar","📘","Grammar guide","Clear rule explanations"]].map(([id,icon,name,desc])=>`<button class="fi-tab ${tab===id?"active":""}" data-fitab="${id}"><b>${icon} ${name}</b><div class="fi-muted">${desc}</div></button>`).join("")+`</div><div id="fiBody"></div>${tab==="verbs"?"":`<p class="fi-source">No account or API key is used by this module. Reference links are offered for further checking; external dictionary websites may have their own terms.</p>`}</div>`;}
   function panel(label,placeholder,id="fiInput"){return `<label class="fi-label" for="${id}">${label}</label><textarea class="fi-input" id="${id}" rows="3" placeholder="${placeholder}"></textarea>`;}
@@ -139,10 +140,32 @@ function checkWritingDetailed(q){
 }
 function checkWriting(q){return checkWritingDetailed(q).html;}
 
+function renderFindingHighlights(text, findings) {
+  const ordered = findings.map((item, index) => ({ item, index }))
+    .filter(({ item }) => Array.isArray(item.span) && item.span.length === 2)
+    .sort((a, b) => a.item.span[0] - b.item.span[0] || b.item.span[1] - a.item.span[1]);
+  let html = "", cursor = 0;
+  for (const { item } of ordered) {
+    const start = Number(item.span[0]), end = Number(item.span[1]);
+    if (!Number.isInteger(start) || !Number.isInteger(end) || start < cursor || end <= start || end > text.length) continue;
+    const found = text.slice(start, end);
+    if (found !== item.found) continue;
+    html += esc(text.slice(cursor, start));
+    html += '<mark class="fi-highlight-mark" tabindex="0" data-start="' + start +
+      '" data-end="' + end + '" data-rule-id="' + esc(item.ruleId) +
+      '" aria-label="' + esc("Flagged text: " + found) + '">' + esc(found) + "</mark>";
+    cursor = end;
+  }
+  html += esc(text.slice(cursor));
+  return html;
+}
+
 function unifiedCheckWriting(q){
   const legacy=checkWritingDetailed(q);
-  const coreResult=structuredCore.checkWriting(legacy.corrected);
-  let corrected=typeof coreResult?.corrected==="string"?coreResult.corrected:legacy.corrected;
+  const textAfterLegacy=legacy.corrected;
+  const visibleRuleFindings=checkSection12Rules(textAfterLegacy);
+  const coreResult=structuredCore.checkWriting(textAfterLegacy);
+  let corrected=typeof coreResult?.corrected==="string"?coreResult.corrected:textAfterLegacy;
   const coreSuggestions=Array.isArray(coreResult?.suggestions)?coreResult.suggestions:[];
   const ruleFindings=[],seenRules=new Set();
   for(let pass=0;pass<4;pass++){
@@ -169,11 +192,40 @@ function unifiedCheckWriting(q){
     before:item.found,why:item.explanation,messageOnly:item.kind==="review",ruleId:item.ruleId,suggestion:item.suggestion
   }));
   const allSuggestions=[...legacy.suggestions,...distinctCoreSuggestions,...extraRuleSuggestions];
-  if(!allSuggestions.length)return legacy.html;
-  if(legacy.hasIssue&&!distinctCoreSuggestions.length&&!extraRuleSuggestions.length)return legacy.html;
-  const hasCorrection=allSuggestions.some(item=>!item.messageOnly);
+  if(!allSuggestions.length&&!visibleRuleFindings.length){activeWritingReview=null;return legacy.html;}
+  if(legacy.hasIssue&&!distinctCoreSuggestions.length&&!extraRuleSuggestions.length&&!visibleRuleFindings.length){activeWritingReview=null;return legacy.html;}
+
+  const hasCorrection=allSuggestions.some(item=>!item.messageOnly)||visibleRuleFindings.some(item=>item.kind==="correction");
   const output=hasCorrection?'<p class="fi-output">'+esc(corrected)+'</p>':"";
   const action=hasCorrection?'<button id="fiUseCorrection" class="g">Use corrected text</button>':"";
+
+  if(visibleRuleFindings.length){
+    activeWritingReview={baseText:textAfterLegacy,findings:visibleRuleFindings};
+    const legacyNotes=legacy.suggestions.map(item=>{
+      const before=item.before??"",why=item.why??"";
+      return '<div class="fi-result">'+esc(why)+'<div class="fi-muted">Original: '+esc(before)+'</div></div>';
+    }).join("");
+    const coreNotes=distinctCoreSuggestions.filter(item=>!item.ruleId).map(item=>{
+      const before=item.before??item.found??"",why=item.why??item.explanation??"";
+      return '<div class="fi-result">'+esc(why)+'<div class="fi-muted">Original: '+esc(before)+'</div></div>';
+    }).join("");
+    const label=textAfterLegacy!==q?"Text after the first fix":"Text with highlighted findings";
+    const highlighted='<div class="fi-highlight-block"><b>'+label+'</b><div class="fi-highlight-text">'+
+      renderFindingHighlights(textAfterLegacy,visibleRuleFindings)+'</div></div>';
+    const findingRows=visibleRuleFindings.map((item,index)=>{
+      const suggestion=item.kind==="correction"?(item.suggestion||""):"Review only — no automatic correction";
+      const apply=item.kind==="correction"
+        ?'<button type="button" class="g fi-apply" data-fiapply="'+index+'" aria-label="'+esc("Apply: "+item.found+" to "+item.suggestion)+'">Apply</button>'
+        :"";
+      return '<div class="fi-finding"><div class="fi-finding-summary"><span class="fi-finding-found">'+esc(item.found)+'</span><span class="fi-finding-arrow" aria-hidden="true">→</span><span>'+esc(suggestion)+'</span></div><p class="fi-muted">'+esc(item.explanation)+'</p>'+apply+'</div>';
+    }).join("");
+    return '<div class="fi-answer"><b>'+(hasCorrection?"Suggested text":"Grammar note")+'</b>'+
+      (legacyNotes||coreNotes?'<b>Why these changes?</b>'+legacyNotes+coreNotes:"")+
+      highlighted+'<b>Section 12 findings</b>'+findingRows+output+action+'</div>';
+  }
+
+  activeWritingReview=null;
+  if(!allSuggestions.length)return legacy.html;
   const notes=allSuggestions.map(item=>{
     const before=item.before??item.found??"";
     const why=item.why??item.explanation??"";
@@ -229,6 +281,7 @@ function runAction(id){
     if(t.dataset.fiprompt){const prompts=["Explain ne … pas","When do I use tu and vous?","Explain passé composé","Why is maison feminine?"];const input=$("fiInput");if(input)input.value=prompts[Number(t.dataset.fiprompt)]||"";return;}
     if(t.dataset.fiexample){const input=$("fiInput");if(input)input.value=t.dataset.fiexample;return;}
     if(t.dataset.firule){tab="ask";const app=$("app");if(app)app.innerHTML=header();renderBody();const input=$("fiInput");if(input)input.value=rules[Number(t.dataset.firule)]?.title||"";return;}
+    if(t.hasAttribute("data-fiapply")){const review=activeWritingReview;const index=Number(t.dataset.fiapply);const item=review?.findings[index];const target=$("fiInput");if(review&&item&&item.kind==="correction"&&target){target.value=review.baseText.slice(0,item.span[0])+item.suggestion+review.baseText.slice(item.span[1]);activeWritingReview=null;runAction("fiCheck");}return;}
     if(t.id==="fiUseCorrection"){const out=$("fiAnswer");const target=$("fiInput");const p=out?.querySelector(".fi-output");if(target&&p)target.value=p.textContent;return;}
     runAction(t.id);
   });
