@@ -22,7 +22,7 @@ create or replace function public.ai_use_reserve(p_uid uuid, p_request_id uuid)
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = ''
 as $function$
 declare
   v_day date := current_date;
@@ -137,7 +137,7 @@ create or replace function public.ai_use_settle(
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = ''
 as $function$
 declare
   v_day date;

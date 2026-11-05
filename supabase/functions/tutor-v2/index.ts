@@ -30,10 +30,10 @@ const ATTEMPT_BUDGET_MS: Record<Depth, number> = {
 };
 // Two Gemini model attempts plus three alternate-provider attempts, and a
 // one-second control-plane margin. Each individual attempt remains capped above.
-const OVERALL_DEADLINE_MS: Record<Depth, number> = {
-  quick: 51_000,
-  standard: 76_000,
-  deep: 126_000
+export const OVERALL_DEADLINE_MS: Record<Depth, number> = {
+  quick: 40_000,
+  standard: 60_000,
+  deep: 100_000
 };
 const MAX_TOKENS: Record<Depth, number> = {
   quick: 1_200,

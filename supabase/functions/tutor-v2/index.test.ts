@@ -131,7 +131,7 @@ Deno.test("all provider timeouts return provider_timeout within the deadline plu
   const elapsed = performance.now() - started;
   const body = await response.json();
   assert(response.status === 504 && body.error === "provider_timeout", "all-timeout result was not provider_timeout");
-  assert(elapsed < 52_000, "quick-depth timeout exceeded the 51-second overall deadline plus one second");
+  assert(elapsed < 41_000, "quick-depth timeout exceeded the 40-second overall deadline plus one second");
   assert(calls.some((x) => x.name === "settle" && x.body.p_success === false), "all-timeout path did not settle false");
 });
 
@@ -199,4 +199,16 @@ Deno.test("question, history, and answer content never appear in logs", async ()
   assert(!joined.includes("PRIVATE QUESTION TEXT"), "question leaked into logs");
   assert(!joined.includes("PRIVATE HISTORY TEXT"), "history leaked into logs");
   assert(!joined.includes("PRIVATE ANSWER TEXT"), "answer leaked into logs");
+});
+
+
+Deno.test("every overall deadline is below the 110-second reservation-expiry ceiling", () => {
+  const deadlines = Object.entries(OVERALL_DEADLINE_MS);
+  assert(deadlines.length === 3, "expected quick, standard, and deep overall deadlines");
+  for (const [depth, deadline] of deadlines) {
+    assert(deadline < 110_000, `${depth} overall deadline must remain below 110 seconds; got ${deadline}`);
+  }
+  assert(OVERALL_DEADLINE_MS.quick === 40_000, "quick overall deadline changed unexpectedly");
+  assert(OVERALL_DEADLINE_MS.standard === 60_000, "standard overall deadline changed unexpectedly");
+  assert(OVERALL_DEADLINE_MS.deep === 100_000, "deep overall deadline changed unexpectedly");
 });

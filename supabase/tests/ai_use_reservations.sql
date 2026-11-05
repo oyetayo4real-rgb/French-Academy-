@@ -5,21 +5,15 @@ begin;
 
 do $test$
 declare
-  v_uid uuid;
+  -- Replace this with the UUID of a throwaway test user before execution.
+  v_uid constant uuid := '00000000-0000-0000-0000-000000000000';
   v_request uuid;
   v_result jsonb;
   v_count integer;
   v_n integer;
 begin
-  select u.id into v_uid
-  from auth.users u
-  left join public.profiles p on p.id = u.id
-  where coalesce(p.role, '') <> 'lecturer'
-  order by u.created_at
-  limit 1;
-
-  if v_uid is null then
-    raise exception 'TEST_FIXTURE_REQUIRED: create an ordinary auth user before running this script';
+  if v_uid = '00000000-0000-0000-0000-000000000000'::uuid then
+    raise exception 'TEST_FIXTURE_REQUIRED: replace v_uid with the UUID of a throwaway test user before running this script';
   end if;
 
   -- Isolate this user's current-day counter; transaction rollback restores it.
