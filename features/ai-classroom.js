@@ -2,7 +2,18 @@
 (function () {
   "use strict";
   let FA_DAILY_CALL = null, FA_DAILY_META = null, FA_DAILY_SDK_PROMISE = null;
-  const FA_AI = { level: "A1", mode: "chat", messages: [], pending: false, error: "" };
+  const FA_TUTOR_FUNCTION_SLUG = "tutor";
+  const FA_SCRIPT_URL = document.currentScript && document.currentScript.src;
+  const FA_AI = { level: "A1", mode: "chat", depth: "quick", messages: [], pending: false, error: "", lastRequest: null };
+  function faEnsureTutorStyles() {
+    if (document.getElementById("faTutorStyles")) return;
+    const link = document.createElement("link");
+    link.id = "faTutorStyles";
+    link.rel = "stylesheet";
+    link.href = FA_SCRIPT_URL ? new URL("ai-classroom.css", FA_SCRIPT_URL).href : "/features/ai-classroom.css";
+    document.head.appendChild(link);
+  }
+  faEnsureTutorStyles();
   const FA_DICT = { level: "A1", mode: "dict", query: "", result: null, error: "", pending: false };
   const faEl = (id) => document.getElementById(id);
   const faSafe = (value) => esc(String(value == null ? "" : value));
@@ -40,7 +51,7 @@
     render();
   };
   function faNeedSignIn() { if (typeof AUTH !== "undefined" && AUTH && AUTH.user) return true; view = "auth"; render(); return false; }
-  async function faTutorRequest(payload) { return api("/functions/v1/tutor", { m: "POST", body: payload }); }
+  async function faTutorRequest(payload) { return api("/functions/v1/" + FA_TUTOR_FUNCTION_SLUG, { m: "POST", body: payload }); }
   async function faLoadDailySdk() {
     const available = window.DailyIframe || window.Daily;
     if (available && typeof available.createFrame === "function") return available;
@@ -114,26 +125,58 @@
   function faTutorView() {
     if (!AUTH || !AUTH.user) { $.innerHTML = '<button class="g" id="faHome">← Home</button><h1>🤖 AI French tutor</h1><div class="card"><p>Sign in to use the tutor and keep your learning progress.</p><button id="faSignIn" style="width:100%">Sign in / Create account</button></div>'; return; }
     const messageHtml = FA_AI.messages.map((m) => '<div class="card" style="margin:8px 0"><b>' + (m.role === "user" ? "You" : "Académie AI") + '</b><div class="fa-answer" style="margin-top:8px;line-height:1.75">' + (m.role === "assistant" ? faMarkdown(m.content) : '<div style="white-space:pre-wrap">' + faSafe(m.content) + "</div>") + "</div></div>").join("");
-    $.innerHTML = (typeof topbar === "function" ? topbar() : "") + '<button class="g" id="faHome">← Home</button><h1>🤖 Académie French Intelligence</h1><p class="mu">A deep French-language research assistant for grammar, syntax, semantics, literature, history, translation, writing and contemporary usage. CEFR level is optional guidance, never a ceiling on answer depth.</p>' +
-      '<div class="card"><label for="faTutorLevel"><b>Optional explanation style</b></label><select class="inp" id="faTutorLevel"><option value="none"' + (FA_AI.level === "none" ? " selected" : "") + '>No level restriction · full-depth answer</option>' + ["A1","A2","B1","B2","C1","C2"].map((l) => '<option value="' + l + '"' + (l === FA_AI.level ? " selected" : "") + '>' + l + ' · optional learner scaffolding</option>').join("") + '</select><label for="faTutorMode"><b>Tool</b></label><select class="inp" id="faTutorMode">' + [["chat","Deep answer / research"],["practice","Conversation practice"],["correct","Correct and analyse my French"],["translate","Translate French ↔ English"]].map((o) => '<option value="' + o[0] + '"' + (o[0] === FA_AI.mode ? " selected" : "") + '>' + o[1] + '</option>').join("") + "</select></div><div id=\"faTutorMessages\">" + (messageHtml || '<div class="card mu">Ask a question of any depth. For complex questions, I should explain the reasoning, alternatives, exceptions, examples and sources where available.</div>') + "</div>" +
-      (FA_AI.pending ? '<div class="card mu">Researching and preparing an answer…</div>' : "") + (FA_AI.error ? '<div class="err">' + faSafe(FA_AI.error) + "</div>" : "") +
-      '<div class="card"><textarea class="inp" id="faTutorInput" rows="5" placeholder="Ask anything about French: a complex grammar question, literary passage, idiom, translation, essay, etymology or language research…"></textarea><button id="faTutorSend" style="width:100%"' + (FA_AI.pending ? " disabled" : "") + ">" + (FA_AI.pending ? "Please wait…" : "Ask Académie") + '</button><p class="mu">Answers should distinguish verified source material from analysis and uncertainty. Live AI answers require a configured provider.</p></div>';
+    $.innerHTML = (typeof topbar === "function" ? topbar() : "") + '<button class="g" id="faHome">← Home</button><h1>🤖 Académie French Intelligence</h1><p class="mu">A French-language tutor for grammar, syntax, semantics, literature, history, translation, writing and contemporary usage. CEFR level is optional guidance.</p>' +
+      '<div class="card"><label for="faTutorDepth"><b>Answer depth</b></label><select class="inp" id="faTutorDepth">' +
+      '<option value="quick"' + (FA_AI.depth === "quick" ? " selected" : "") + '>Quick answer</option><option value="deep"' + (FA_AI.depth === "deep" ? " selected" : "") + '>Deep answer</option></select>' +
+      '<label for="faTutorLevel"><b>Optional explanation style</b></label><select class="inp" id="faTutorLevel"><option value="none"' + (FA_AI.level === "none" ? " selected" : "") + '>No level restriction</option>' + ["A1","A2","B1","B2","C1","C2"].map((l) => '<option value="' + l + '"' + (l === FA_AI.level ? " selected" : "") + '>' + l + ' · optional learner scaffolding</option>').join("") + '</select><label for="faTutorMode"><b>Tool</b></label><select class="inp" id="faTutorMode">' + [["chat","Tutor answer"],["practice","Conversation practice"],["correct","Correct and analyse my French"],["translate","Translate French ↔ English"]].map((o) => '<option value="' + o[0] + '"' + (o[0] === FA_AI.mode ? " selected" : "") + '>' + o[1] + '</option>').join("") + "</select></div><div id=\"faTutorMessages\">" + (messageHtml || '<div class="card mu">Ask a question. Choose Quick answer for a focused explanation or Deep answer for a fuller treatment.</div>') + "</div>" +
+      (FA_AI.pending ? '<div class="card mu">Preparing your answer…</div>' : "") + (FA_AI.error ? '<div class="err" role="alert">' + faSafe(FA_AI.error) + '</div>' + (FA_AI.lastRequest ? '<button id="faTutorRetry" class="g" type="button"' + (FA_AI.pending ? ' disabled' : '') + '>Try again</button>' : '') : "") +
+      '<div class="card fa-tutor-panel"><textarea class="inp" id="faTutorInput" rows="5" placeholder="Ask anything about French: grammar, literature, idioms, translation, writing or language usage…"></textarea><button id="faTutorSend" style="width:100%"' + (FA_AI.pending ? " disabled" : "") + ">" + (FA_AI.pending ? "Please wait…" : "Ask Académie") + '</button><p class="mu">Answers distinguish established information from interpretation and uncertainty. Live AI answers require a configured provider.</p></div>';
     if (typeof bindTop === "function") bindTop();
   }
-  async function faTutorSend() {
-    if (!faNeedSignIn()) return;
-    const input = faEl("faTutorInput"), text = input ? input.value.trim() : "";
-    if (!text || FA_AI.pending) return;
-    FA_AI.level = faEl("faTutorLevel")?.value || "none"; FA_AI.mode = faEl("faTutorMode")?.value || "chat";
-    const history = FA_AI.messages.slice(-12).map((m) => ({ role: m.role, content: m.content }));
-    FA_AI.messages.push({ role: "user", content: text }); FA_AI.pending = true; FA_AI.error = ""; faTutorView();
-    try {
-      const response = await faTutorRequest({ mode: FA_AI.mode, level: FA_AI.level, text, history, depth: "comprehensive", research: true });
-      if (response && response.error === "not_configured") throw new Error("The AI provider is not configured yet. The sourced dictionary works independently; add an AI provider key in Supabase Edge Function Secrets to enable deep AI answers.");
-      FA_AI.messages.push({ role: "assistant", content: response && typeof response.text === "string" ? response.text : "I could not prepare an answer. Please try again." });
+  async function faTutorSend(isRetry) {
+    if (!faNeedSignIn() || FA_AI.pending) return;
+    let request = FA_AI.lastRequest;
+    if (!isRetry) {
+      const input = faEl("faTutorInput"), text = input ? input.value.trim() : "";
+      if (!text) return;
+      FA_AI.level = faEl("faTutorLevel")?.value || "none";
+      FA_AI.mode = faEl("faTutorMode")?.value || "chat";
+      FA_AI.depth = faEl("faTutorDepth")?.value === "deep" ? "deep" : "quick";
+      const history = FA_AI.messages.slice(-12).map((m) => ({ role: m.role, content: m.content }));
+      request = { mode: FA_AI.mode, level: FA_AI.level, depth: FA_AI.depth, text, history };
+      FA_AI.lastRequest = request;
+      FA_AI.messages.push({ role: "user", content: text });
       FA_AI.messages = FA_AI.messages.slice(-24);
-    } catch (error) { FA_AI.error = (error && error.message) || "The tutor could not answer just now."; }
-    finally { FA_AI.pending = false; render(true); const messages = faEl("faTutorMessages"); if (messages) messages.scrollIntoView({ block: "end", behavior: "smooth" }); }
+    }
+    if (!request) return;
+    FA_AI.pending = true;
+    FA_AI.error = "";
+    faTutorView();
+    try {
+      const response = await faTutorRequest({
+        mode: request.mode, level: request.level, depth: request.depth,
+        text: request.text, history: request.history
+      });
+      const answer = response && typeof response.text === "string" ? response.text.trim() : "";
+      if (!answer) {
+        const code = response && response.error;
+        if (code === "quota_exceeded") throw new Error("You have reached today's Tutor usage limit. Please try again tomorrow.");
+        if (code === "provider_rate_limit") throw new Error("The AI provider is temporarily rate-limiting requests. Please try again shortly.");
+        if (code === "provider_timeout") throw new Error("The Tutor took too long to respond. Please try again.");
+        if (code === "provider_unavailable") throw new Error("The Tutor service is temporarily unavailable. Please try again.");
+        throw new Error((response && response.message) || "The Tutor could not prepare an answer.");
+      }
+      FA_AI.messages.push({ role: "assistant", content: answer });
+      FA_AI.messages = FA_AI.messages.slice(-24);
+      FA_AI.lastRequest = null;
+    } catch (error) {
+      FA_AI.error = (error && error.message) || "The Tutor could not answer just now.";
+    } finally {
+      FA_AI.pending = false;
+      render(true);
+      const messages = faEl("faTutorMessages");
+      if (messages) messages.scrollIntoView({ block: "end", behavior: "smooth" });
+    }
   }
 
   function faDictSourceLinks() {
@@ -292,7 +335,7 @@
     else if (button.id === "faHome") { view = "home"; render(); }
     else if (button.id === "faCallBack") await faExitCall(false);
     else if (button.id === "faSignIn") { view = "auth"; render(); }
-    else if (button.id === "faTutorSend") await faTutorSend();
+    else if (button.id === "faTutorSend") await faTutorSend();\n    else if (button.id === "faTutorRetry") await faTutorSend(true);
     else if (button.id === "faDictLookup") await faDictionaryLookup();
     else if (button.id === "faExpandLesson") await faLessonRequest("expand");
     else if (button.id === "faMoreExamples") await faLessonRequest("examples");

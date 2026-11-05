@@ -1,0 +1,26 @@
+/* Tutor-only layout rules. Loaded by features/ai-classroom.js. */
+.fa-tutor-panel {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
+}
+#faTutorMessages {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+#faTutorInput {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  resize: vertical;
+}
+@media (max-width: 360px) {
+  .fa-tutor-panel,
+  #faTutorMessages {
+    min-width: 0;
+    max-width: 100%;
+  }
+}
