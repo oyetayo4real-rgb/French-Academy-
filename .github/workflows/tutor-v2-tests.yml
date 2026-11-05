@@ -1,0 +1,45 @@
+name: Tutor v2 mocked reliability
+
+on:
+  pull_request:
+    paths:
+      - "supabase/functions/**"
+      - "features/ai-classroom.js"
+      - "features/ai-classroom.css"
+      - "scripts/check-tutor-retry-browser.mjs"
+      - ".github/workflows/tutor-v2-tests.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  tutor-v2-mocked-tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Install pinned Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: "2.5.6"
+      - name: Run tutor-v2 mocked-fetch tests (network permission not granted)
+        run: deno test supabase/functions/tutor-v2/index.test.ts
+      - name: Set up Node.js for browser test
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install pinned Playwright
+        run: npm install --no-save playwright@1.56.1
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Start local static server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/tutor-v2-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/tutor-v2-http.log
+          exit 1
+      - name: Verify retry state in Chromium using mocked API only
+        run: node scripts/check-tutor-retry-browser.mjs

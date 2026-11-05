@@ -1,3 +1,4 @@
+// reference copy of production v37
 // AI tutor + source-first French dictionary for Académie Française.
 // The provider and its key are resolved together; never choose another provider's key.
 // Secrets must remain server-side and must never be logged or returned.
@@ -47,7 +48,7 @@ function providerConfig() {
   return { provider, key: Deno.env.get(selectedName)!, selectedName, model: configuredModel || MODELS[provider] };
 }
 
-async function callAI(system: string, messages: { role: string; content: string }[], maxTokens: number, timeoutMs = 7000, maxCandidates = 2) {
+async function callAI(system: string, messages: { role: string; content: string }[], maxTokens: number, timeoutMs = 5000, maxCandidates = 2) {
   const config = providerConfig();
   if (config.provider === "gemini") {
     // Discover models available to this exact API key/project. Model access differs
@@ -56,7 +57,7 @@ async function callAI(system: string, messages: { role: string; content: string 
     try {
       const catalog = await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000", {
         headers: { "x-goog-api-key": config.key },
-        signal: AbortSignal.timeout(1500)
+        signal: AbortSignal.timeout(800)
       });
       if (catalog.ok) {
         const json = await catalog.json();
@@ -101,11 +102,12 @@ async function callAI(system: string, messages: { role: string; content: string 
       } catch (error) {
         if (error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError")) {
           lastStatus = 504;
-          console.error("[tutor] model request timed out; trying next available model", JSON.stringify({
+          console.error("[tutor] Gemini model request timed out", JSON.stringify({
             model,
             remainingCandidates: Math.max(0, candidates.length - candidates.indexOf(model) - 1)
           }));
-          continue;
+          // Avoid spending the entire edge request budget on multiple stalled Google calls.
+          break;
         }
         throw error;
       }
@@ -145,7 +147,40 @@ async function callAI(system: string, messages: { role: string; content: string 
       }
       throw new Error("provider_http_" + response.status);
     }
-    throw new Error("provider_http_" + (lastStatus || 404));
+    // If Gemini stalls, try one alternate provider only when its own server-side key is configured.
+    const fallbacks = [
+      { provider: "groq", keyName: "GROQ_API_KEY", model: MODELS.groq },
+      { provider: "mistral", keyName: "MISTRAL_API_KEY", model: MODELS.mistral },
+      { provider: "openrouter", keyName: "OPENROUTER_API_KEY", model: MODELS.openrouter }
+    ].filter((item) => Boolean(Deno.env.get(item.keyName)));
+    for (const fallback of fallbacks.slice(0, 1)) {
+      try {
+        console.error("[tutor] attempting configured provider fallback", JSON.stringify({ provider: fallback.provider }));
+        const response = await fetch(BASES[fallback.provider] + "/chat/completions", {
+          method: "POST",
+          headers: { Authorization: "Bearer " + Deno.env.get(fallback.keyName)!, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: fallback.model,
+            max_tokens: Math.min(maxTokens, 2400),
+            temperature: 0.4,
+            messages: [{ role: "system", content: system }, ...messages]
+          }),
+          signal: AbortSignal.timeout(4500)
+        });
+        if (response.status === 429) throw new Error("rate");
+        if (!response.ok) {
+          console.error("[tutor] fallback provider returned HTTP error", JSON.stringify({ provider: fallback.provider, status: response.status }));
+          continue;
+        }
+        const json = await response.json();
+        const output = String(json?.choices?.[0]?.message?.content || "").trim();
+        if (output) return output;
+      } catch (error) {
+        if (error instanceof Error && error.message === "rate") throw error;
+        console.error("[tutor] fallback provider attempt failed", JSON.stringify({ provider: fallback.provider, reason: error instanceof Error ? error.name : "unknown" }));
+      }
+    }
+    throw new Error("provider_http_" + (lastStatus || 504));
   }
 
   const response = await fetch(BASES[config.provider] + "/chat/completions", {
