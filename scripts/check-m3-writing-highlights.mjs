@@ -61,8 +61,10 @@ const legacyRuleCases=[
   {input:"Je suis faim et il et fatigué.",after:"J'ai faim et il et fatigué.",rule:"NR-09"},
   {input:"Je suis soif et elle et contente.",after:"J'ai soif et elle et contente.",rule:"NR-09"},
   {input:"Sa va et il et content.",after:"Ça va et il et content.",rule:"NR-09"},
-  {input:"Beacoup, ils son contents.",after:"Beaucoup, ils son contents.",rule:"NR-10"},
-  {input:"Bonjor, Il à mangé.",after:"bonjour, Il à mangé.",rule:"NR-07"}
+  {input:"Beacoup, ils son contents.",after:"beaucoup, ils son contents.",rule:"NR-10"},
+  {input:"Bonjor, Il à mangé.",after:"bonjour, Il à mangé.",rule:"NR-07"},
+  {input:"Sa va et elle et contente.",after:"Ça va et elle est contente.",rule:"NR-09"},
+  {input:"Bonjor, il à mangé.",after:"bonjour, il a mangé.",rule:"NR-07"}
 ];
 
 try{
@@ -96,6 +98,9 @@ try{
         assert.equal(await page.locator(".fi-highlight-block b").innerText(),"Text after the first fix",
           profile.name+" "+item.rule+" labels the post-legacy text");
         const marks=await assertMarksMatch(page,item.after,profile.name+" legacy+ "+item.rule);
+        assert.equal(await page.locator("#fiAnswer .fi-result").count(),1,profile.name+" "+item.rule+" has exactly one legacy result");
+        assert.equal(await page.locator("#fiAnswer .fi-finding").count(),1,profile.name+" "+item.rule+" has exactly one Section 12 rule finding");
+        assert.equal(await page.locator(".fi-highlight-text mark").count(),1,profile.name+" "+item.rule+" has exactly one mark");
         assert.ok(marks.some(mark=>mark.ruleId===item.rule),profile.name+" "+item.rule+" finding is highlighted after legacy correction");
         if(profile.name==="mobile-360")await checkNoHorizontalScroll(page,"legacy+ "+item.rule);
       }
@@ -183,11 +188,11 @@ try{
   }
 
   const sw=readFileSync("sw.js","utf8");
-  assert.match(sw,/const V="fa-v26"/,"service-worker cache version bumped");
+  assert.match(sw,/const V="fa-v27"/,"service-worker cache version bumped");
   assert.doesNotMatch(sw,/fa-v25/,"old cache version removed");
   for(const path of ["/index.html","/features/french-intelligence-compat.mjs","/features/french-section12-rules.mjs"]){
     assert.ok(sw.includes('"'+path+'"'),"service-worker precaches "+path);
   }
-  console.log("PASS M3 service-worker cache v26 precaches index, compatibility renderer and Section 12 rules.");
-  console.log("PASS M3 Part B: desktop/mobile Chromium; NR-03/05/07/12; six legacy-first cases; two Apply actions; XSS; no-issue and legacy-only byte parity.");
+  console.log("PASS M3 service-worker cache v27 precaches index, compatibility renderer and Section 12 rules.");
+  console.log("PASS M3 Part B: desktop/mobile Chromium; NR-03/05/07/12; eight legacy-first cases; two Apply actions; XSS; no-issue and legacy-only byte parity.");
 }finally{await browser.close();}

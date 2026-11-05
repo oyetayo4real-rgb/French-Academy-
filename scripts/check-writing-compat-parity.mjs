@@ -32,7 +32,7 @@ assert.equal(safetyInputs.size,639,"The frozen legacy no-issue safety net must r
 const cases=[
   {input:"Je leurs ai dit de partir",expected:"Je leur ai dit de partir",rule:"NR-03"},
   {input:"Je suis 20 ans",expected:"J'ai 20 ans",rule:"legacy-age",legacyOnly:true},
-  {input:"Je suis 20 ans et il et fatigué.",expected:"J'ai 20 ans et il est fatigué.",rule:"legacy+NR-09",multi:true},
+  {input:"Je suis 20 ans et il et fatigué.",expected:"J'ai 20 ans et il est fatigué.",rule:"legacy+NR-09"},
   {input:"un vieux homme",expected:"un vieil homme",rule:"NR-05"},
   {input:"Elle est tout contente",expected:"Elle est toute contente",rule:"NR-04"},
   {input:"s'elle vient",expected:"si elle vient",rule:"NR-06"},
@@ -42,6 +42,8 @@ const cases=[
   {input:"Ils son contents",expected:"Ils sont contents",rule:"NR-10"},
   {input:"sa dépend",expected:"ça dépend",rule:"NR-11"},
   {input:"Nous allons a le marché",expected:"Nous allons au marché",rule:"NR-07/NR-12"},
+  {input:"Sa va et elle et contente.",expected:"Ça va et elle est contente.",rule:"legacy+NR-09"},
+  {input:"Bonjor, il à mangé.",expected:"bonjour, il a mangé.",rule:"legacy+NR-07"},
   {input:"Je leur ai dit",noIssue:true},
   {input:"un vieil homme",noIssue:true},
   {input:"Elle est toute contente",noIssue:true},
@@ -100,25 +102,38 @@ try{
     assert.equal(compatUI,compatApi,"Writing UI and public API must return identical markup for "+item.source);
     checked++;
   }
+  const writingAssertionFailures=[];
   for(const item of cases){
-    const output=await pages.compat.evaluate(value=>window.FrenchIntelligenceCore.checkWriting(value),item.input);
-    if(item.expected){
-      assert.ok(output.includes(item.expected),item.rule+" corrected output");
-      if(item.legacyOnly){
+    let output="";
+    try{
+      output=await pages.compat.evaluate(value=>window.FrenchIntelligenceCore.checkWriting(value),item.input);
+      if(item.expected){
+        assert.ok(output.includes(item.expected),item.rule+" corrected output");
+        if(item.legacyOnly){
+          const mainOutput=await pages.main.evaluate(value=>window.FrenchIntelligenceCore.checkWriting(value),item.input);
+          assert.equal(output,mainOutput,"legacy-only correction remains byte-identical to main");
+        }
+        if(item.multi){
+          const ruleFindingCount=(output.match(/class="fi-finding\b/g)||[]).length;
+          assert.equal(ruleFindingCount,2,"two-rule input renders exactly two Section 12 findings");
+        }
+      }else if(item.review){
+        assert.match(output,/Grammar note/,"NR-02 review heading");
+        assert.match(output,new RegExp(item.review),"NR-02 review explanation");
+        assert.doesNotMatch(output,/<p class="fi-output">/,"NR-02 must not propose a correction");
+      }else{
         const mainOutput=await pages.main.evaluate(value=>window.FrenchIntelligenceCore.checkWriting(value),item.input);
-        assert.equal(output,mainOutput,"legacy-only correction remains byte-identical to main");
+        assert.equal(output,mainOutput,"negative publicCheckWriting output must remain byte-identical to main");
+        assert.match(output,/No issue from the small built-in check list was detected/,"negative keeps original no-issue output");
+        assert.doesNotMatch(output,/<p class="fi-output">/,"negative has no correction");
       }
-      if(item.multi)assert.ok((output.match(/class="fi-finding\\b/g)||[]).length>=2,"multi-finding input renders multiple findings");
-    }else if(item.review){
-      assert.match(output,/Grammar note/,"NR-02 review heading");
-      assert.match(output,new RegExp(item.review),"NR-02 review explanation");
-      assert.doesNotMatch(output,/<p class="fi-output">/,"NR-02 must not propose a correction");
-    }else{
-      const mainOutput=await pages.main.evaluate(value=>window.FrenchIntelligenceCore.checkWriting(value),item.input);
-      assert.equal(output,mainOutput,"negative publicCheckWriting output must remain byte-identical to main");
-      assert.match(output,/No issue from the small built-in check list was detected/,"negative keeps original no-issue output");
-      assert.doesNotMatch(output,/<p class="fi-output">/,"negative has no correction");
+    }catch(error){
+      writingAssertionFailures.push({test:item.rule||"writing-case",input:item.input,expected:item.expected??item.review??"no issue; byte-identical to main",actual:output});
     }
+  }
+  if(writingAssertionFailures.length){
+    console.error("WRITING ASSERTION FAILURES "+JSON.stringify(writingAssertionFailures,null,2));
+    throw new Error("Writing assertions failed: "+writingAssertionFailures.length);
   }
   const newRuleIds=new Set(["NR-07","NR-08","NR-09","NR-10","NR-11","NR-12"]);
   const safetyFailures=[];
