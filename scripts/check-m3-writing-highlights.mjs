@@ -89,7 +89,7 @@ try{
         const button=page.getByRole("button",{name:"Apply: "+item.found+" to "+item.suggestion});
         await button.waitFor();
         assert.equal(await button.innerText(),"Apply");
-        assert.ok(await button.evaluate(node=>node.getAttribute("aria-label")==="Apply: "+item.found+" to "+item.suggestion));
+        assert.equal(await button.getAttribute("aria-label"),"Apply: "+item.found+" to "+item.suggestion);
         if(profile.name==="mobile-360")await checkNoHorizontalScroll(page,item.rule);
       }
 
