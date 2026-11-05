@@ -28,6 +28,11 @@ try {
   await page.setContent('<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main id="app"></main></body></html>');
   await page.evaluate(() => {
     window.AUTH = { user: { id: "mock-user" } };
+    // The production feature bridge is loaded after these globals in index.html.
+    window.startCall = null;
+    window.callView = null;
+    window.endCall = null;
+    window.view = "tutor";
     window.$ = document.getElementById("app");
     window.esc = (value) => String(value).replace(/[&<>"]/g, (char) => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"
