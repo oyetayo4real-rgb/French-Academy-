@@ -1,4 +1,4 @@
-import { createTutorHandler } from "./index.ts";
+import { createTutorHandler, OVERALL_DEADLINE_MS } from "./index.ts";
 
 const uid = "00000000-0000-4000-8000-000000000001";
 const token = "eyJhbGciOiJub25lIn0." +
