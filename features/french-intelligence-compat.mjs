@@ -218,7 +218,7 @@ function unifiedCheckWriting(q){
       const apply=item.kind==="correction"
         ?'<button type="button" class="g fi-apply" data-fiapply="'+index+'" aria-label="'+esc("Apply: "+item.found+" to "+item.suggestion)+'">Apply</button>'
         :"";
-      return '<div class="fi-finding fi-result"><div class="fi-finding-summary"><span class="fi-finding-found">'+esc(item.found)+'</span><span class="fi-finding-arrow" aria-hidden="true">→</span><span>'+esc(suggestion)+'</span></div><p class="fi-muted">'+esc(item.explanation)+'</p>'+apply+'</div>';
+      return '<div class="fi-finding"><div class="fi-finding-summary"><span class="fi-finding-found">'+esc(item.found)+'</span><span class="fi-finding-arrow" aria-hidden="true">→</span><span>'+esc(suggestion)+'</span></div><p class="fi-muted">'+esc(item.explanation)+'</p>'+apply+'</div>';
     }).join("");
     return highlightStyles+'<div class="fi-answer"><b>'+(hasCorrection?"Suggested text":"Grammar note")+'</b>'+
       (legacyNotes||coreNotes?'<b>Why these changes?</b>'+legacyNotes+coreNotes:"")+

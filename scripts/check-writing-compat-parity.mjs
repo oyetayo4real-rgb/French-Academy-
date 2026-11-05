@@ -108,7 +108,7 @@ try{
         const mainOutput=await pages.main.evaluate(value=>window.FrenchIntelligenceCore.checkWriting(value),item.input);
         assert.equal(output,mainOutput,"legacy-only correction remains byte-identical to main");
       }
-      if(item.multi)assert.ok((output.match(/class="fi-result"/g)||[]).length>=2,"multi-finding input renders multiple findings");
+      if(item.multi)assert.ok((output.match(/class="fi-finding\\b/g)||[]).length>=2,"multi-finding input renders multiple findings");
     }else if(item.review){
       assert.match(output,/Grammar note/,"NR-02 review heading");
       assert.match(output,new RegExp(item.review),"NR-02 review explanation");

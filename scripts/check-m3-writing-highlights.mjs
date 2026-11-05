@@ -103,6 +103,11 @@ try{
       const twoFinding="Il à mangé et elle et fatiguée.";
       await check(page,twoFinding);
       await assertMarksMatch(page,twoFinding,profile.name+" two findings");
+      assert.equal(await page.locator("#fiUseCorrection").innerText(),"Use corrected text",profile.name+" existing Use corrected text button remains available");
+      await page.locator("#fiUseCorrection").click();
+      assert.equal(await page.locator("#fiInput").inputValue(),"Il a mangé et elle est fatiguée.",profile.name+" Use corrected text applies the complete suggested text");
+      await check(page,twoFinding);
+      await assertMarksMatch(page,twoFinding,profile.name+" two findings before individual Apply");
       assert.equal(await page.locator(".fi-apply").count(),2,profile.name+" two-finding input has two Apply buttons");
       await page.getByRole("button",{name:"Apply: à to a"}).click();
       const once="Il a mangé et elle et fatiguée.";
@@ -112,6 +117,11 @@ try{
       await page.getByRole("button",{name:"Apply: et to est"}).click();
       assert.equal(await page.locator("#fiInput").inputValue(),"Il a mangé et elle est fatiguée.",profile.name+" second Apply fixes remaining span");
       assert.equal(await page.locator(".fi-apply").count(),0,profile.name+" no findings remain after both Apply actions");
+
+      await check(page,"des gens intéressantes");
+      await assertMarksMatch(page,"des gens intéressantes",profile.name+" NR-02 review-only");
+      assert.equal(await page.locator(".fi-apply").count(),0,profile.name+" review-only findings have no Apply button");
+      assert.equal(await page.locator("#fiUseCorrection").count(),0,profile.name+" review-only findings have no Use corrected text action");
 
       const xss='<script>alert(1)</script> Je leurs ai dit';
       await check(page,xss);

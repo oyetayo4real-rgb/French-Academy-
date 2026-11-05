@@ -66,7 +66,7 @@ const multiExpected="Il a mangé et elle est fatiguée.";
 const multiOutput=checkWriting(multiInput);
 try{
   assert.ok(multiOutput.includes(multiExpected));
-  assert.equal((multiOutput.match(/class="fi-result"/g)||[]).length,2);
+  assert.equal((multiOutput.match(/class="fi-finding\\b/g)||[]).length,2);
 }catch(error){failures.push({step:"multi-finding-render",input:multiInput,expected:multiExpected,actual:multiOutput,details:error.message});}
 
 const legacyInput="Je suis 20 ans";
