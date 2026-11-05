@@ -114,7 +114,7 @@ try{
           assert.equal(output,mainOutput,"legacy-only correction remains byte-identical to main");
         }
         if(item.multi){
-          const ruleFindingCount=(output.match(/class="fi-finding\b/g)||[]).length;
+          const ruleFindingCount=(output.match(/class="fi-finding"/g)||[]).length;
           assert.equal(ruleFindingCount,2,"two-rule input renders exactly two Section 12 findings");
         }
       }else if(item.review){
@@ -128,7 +128,7 @@ try{
         assert.doesNotMatch(output,/<p class="fi-output">/,"negative has no correction");
       }
     }catch(error){
-      writingAssertionFailures.push({test:item.rule||"writing-case",input:item.input,expected:item.expected??item.review??"no issue; byte-identical to main",actual:output});
+      writingAssertionFailures.push({test:item.multi?"multi-finding-count":item.rule||"writing-case",input:item.input,expected:item.expected??item.review??"no issue; byte-identical to main",actual:output});
     }
   }
   if(writingAssertionFailures.length){
