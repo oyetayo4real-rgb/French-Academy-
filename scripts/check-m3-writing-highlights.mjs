@@ -57,15 +57,21 @@ function checkNoHorizontalScroll(page,label){
 }
 
 const legacyRuleCases=[
-  {input:"Je suis 20 ans et il et fatigué.",after:"J'ai 20 ans et il et fatigué.",rule:"NR-09"},
-  {input:"Je suis faim et il et fatigué.",after:"J'ai faim et il et fatigué.",rule:"NR-09"},
-  {input:"Je suis soif et elle et contente.",after:"J'ai soif et elle et contente.",rule:"NR-09"},
-  {input:"Sa va et il et content.",after:"Ça va et il et content.",rule:"NR-09"},
-  {input:"Beacoup, ils son contents.",after:"beaucoup, ils son contents.",rule:"NR-10"},
-  {input:"Bonjor, Il à mangé.",after:"bonjour, Il à mangé.",rule:"NR-07"},
-  {input:"Sa va et elle et contente.",after:"Ça va et elle est contente.",rule:"NR-09"},
-  {input:"Bonjor, il à mangé.",after:"bonjour, il a mangé.",rule:"NR-07"}
+  {input:"Je suis 20 ans et il et fatigué.",after:"J'ai 20 ans et il et fatigué.",mark:"et",suggestion:"est",full:"J'ai 20 ans et il est fatigué.",rule:"NR-09"},
+  {input:"Je suis faim et il et fatigué.",after:"J'ai faim et il et fatigué.",mark:"et",suggestion:"est",full:"J'ai faim et il est fatigué.",rule:"NR-09"},
+  {input:"Je suis soif et elle et contente.",after:"J'ai soif et elle et contente.",mark:"et",suggestion:"est",full:"J'ai soif et elle est contente.",rule:"NR-09"},
+  {input:"Sa va et il et content.",after:"Ça va et il et content.",mark:"et",suggestion:"est",full:"Ça va et il est content.",rule:"NR-09"},
+  {input:"Beacoup, ils son contents.",after:"beaucoup, ils son contents.",mark:"son",suggestion:"sont",full:"beaucoup, ils sont contents.",rule:"NR-10"},
+  {input:"Bonjor, Il à mangé.",after:"bonjour, Il à mangé.",mark:"à",suggestion:"a",full:"bonjour, Il a mangé.",rule:"NR-07"},
+  {input:"Sa va et elle et contente.",after:"Ça va et elle et contente.",mark:"et",suggestion:"est",full:"Ça va et elle est contente.",rule:"NR-09"},
+  {input:"Bonjor, il à mangé.",after:"bonjour, il à mangé.",mark:"à",suggestion:"a",full:"bonjour, il a mangé.",rule:"NR-07"}
 ];
+const fixtureFailures=[];
+const fixtureObservations=[];
+function collectFixtureAssertion(viewport,fixture,assertion,expected,actual){
+  if(!Object.is(expected,actual))fixtureFailures.push({viewport,fixture,assertion,expected,actual});
+}
+
 
 try{
   for(const profile of [
@@ -95,14 +101,59 @@ try{
 
       for(const item of legacyRuleCases){
         await check(page,item.input);
-        assert.equal(await page.locator(".fi-highlight-block b").innerText(),"Text after the first fix",
-          profile.name+" "+item.rule+" labels the post-legacy text");
-        const marks=await assertMarksMatch(page,item.after,profile.name+" legacy+ "+item.rule);
-        assert.equal(await page.locator("#fiAnswer .fi-result").count(),1,profile.name+" "+item.rule+" has exactly one legacy result");
-        assert.equal(await page.locator("#fiAnswer .fi-finding").count(),1,profile.name+" "+item.rule+" has exactly one Section 12 rule finding");
-        assert.equal(await page.locator(".fi-highlight-text mark").count(),1,profile.name+" "+item.rule+" has exactly one mark");
-        assert.ok(marks.some(mark=>mark.ruleId===item.rule),profile.name+" "+item.rule+" finding is highlighted after legacy correction");
-        if(profile.name==="mobile-360")await checkNoHorizontalScroll(page,"legacy+ "+item.rule);
+        const fixture=item.input;
+        const highlight=page.locator(".fi-highlight-block");
+        await highlight.waitFor({state:"visible"});
+        const label=await page.locator(".fi-highlight-block b").innerText();
+        const actualAfter=await page.locator(".fi-highlight-text").textContent();
+        const marks=await page.locator(".fi-highlight-text mark").evaluateAll(nodes=>nodes.map(node=>({
+          text:node.textContent,start:Number(node.dataset.start),end:Number(node.dataset.end),
+          ruleId:node.dataset.ruleId,tabIndex:node.tabIndex,ariaLabel:node.getAttribute("aria-label")
+        })));
+        const expectedStart=item.after.lastIndexOf(item.mark);
+        const expectedSpan=[expectedStart,expectedStart+item.mark.length];
+        collectFixtureAssertion(profile.name,fixture,"post_legacy_label","Text after the first fix",label);
+        collectFixtureAssertion(profile.name,fixture,"text_after_first_fix",item.after,actualAfter);
+        collectFixtureAssertion(profile.name,fixture,"mark_count",1,marks.length);
+        collectFixtureAssertion(profile.name,fixture,"finding_count",1,await page.locator("#fiAnswer .fi-finding").count());
+        collectFixtureAssertion(profile.name,fixture,"legacy_result_count",1,await page.locator("#fiAnswer .fi-result").count());
+        collectFixtureAssertion(profile.name,fixture,"mark_text",item.mark,marks[0]?.text??null);
+        collectFixtureAssertion(profile.name,fixture,"mark_span",expectedSpan,marks[0]?[marks[0].start,marks[0].end]:null);
+        collectFixtureAssertion(profile.name,fixture,"mark_rule_id",item.rule,marks[0]?.ruleId??null);
+        if(marks[0]){
+          collectFixtureAssertion(profile.name,fixture,"mark_matches_actual_source_substring",marks[0].text,actualAfter.slice(marks[0].start,marks[0].end));
+          collectFixtureAssertion(profile.name,fixture,"mark_keyboard_focus",0,marks[0].tabIndex);
+          collectFixtureAssertion(profile.name,fixture,"mark_accessible_name",true,Boolean(marks[0].ariaLabel));
+        }
+        let overflow={client:null,scroll:null,body:null};
+        if(profile.name==="mobile-360"){
+          overflow=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth,body:document.body.scrollWidth}));
+          collectFixtureAssertion(profile.name,fixture,"no_horizontal_scroll",true,overflow.scroll===overflow.client&&overflow.body<=overflow.client);
+        }
+        const apply=page.getByRole("button",{name:"Apply: "+item.mark+" to "+item.suggestion});
+        let applyVisible=false;
+        try{await apply.waitFor({state:"visible",timeout:2500});applyVisible=true;}catch{}
+        collectFixtureAssertion(profile.name,fixture,"apply_button_visible",true,applyVisible);
+        let actualFull=null;
+        if(applyVisible){
+          await apply.click();
+          try{
+            await page.waitForFunction(expected=>document.querySelector("#fiInput")?.value===expected,item.full,{timeout:2500});
+          }catch{}
+          actualFull=await page.locator("#fiInput").inputValue();
+          collectFixtureAssertion(profile.name,fixture,"full_corrected_text_after_apply",item.full,actualFull);
+        }
+        fixtureObservations.push({
+          viewport:profile.name,input:item.input,legacy_corrected_text:item.after,
+          text_after_first_fix:actualAfter,marks,expected_mark_span:expectedSpan,
+          full_corrected_text_after_apply:actualFull,expected_full_corrected_text:item.full,
+          assertions:{
+            label:"Text after the first fix",
+            text_after_first_fix:"expected legacy corrected text; not final Section 12 correction",
+            marks:"expected one exact source span with the configured rule id",
+            apply:"expected per-finding Apply to produce the fully corrected text"
+          }
+        });
       }
 
       const twoFinding="Il à mangé et elle et fatiguée.";
@@ -195,4 +246,13 @@ try{
   }
   console.log("PASS M3 service-worker cache v27 precaches index, compatibility renderer and Section 12 rules.");
   console.log("PASS M3 Part B: desktop/mobile Chromium; NR-03/05/07/12; eight legacy-first cases; two Apply actions; XSS; no-issue and legacy-only byte parity.");
-}finally{await browser.close();}
+}finally{
+  if(fixtureFailures.length){
+    console.error("M3_FIXTURE_ASSERTION_FAILURES_JSON");
+    console.error(JSON.stringify(fixtureFailures,null,2));
+  }
+  console.log("M3_FIXTURE_OBSERVATIONS_JSON");
+  console.log(JSON.stringify(fixtureObservations,null,2));
+  await browser.close();
+}
+if(fixtureFailures.length)process.exitCode=1;
