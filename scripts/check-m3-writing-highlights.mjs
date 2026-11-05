@@ -69,7 +69,11 @@ const legacyRuleCases=[
 const fixtureFailures=[];
 const fixtureObservations=[];
 function collectFixtureAssertion(viewport,fixture,assertion,expected,actual){
-  if(!Object.is(expected,actual))fixtureFailures.push({viewport,fixture,assertion,expected,actual});
+  const equal = (expected !== null && typeof expected === "object") ||
+    (actual !== null && typeof actual === "object")
+    ? JSON.stringify(expected) === JSON.stringify(actual)
+    : Object.is(expected,actual);
+  if(!equal)fixtureFailures.push({viewport,fixture,assertion,expected,actual});
 }
 
 
