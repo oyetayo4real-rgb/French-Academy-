@@ -6,6 +6,7 @@ const writingPattern = (source, flags = "gi") => new RegExp("(?<![\\p{L}\\p{N}_'
 const preserveInitialCase = (match, replacement) => match && /^\p{Lu}/u.test(match) ? replacement.charAt(0).toLocaleUpperCase("fr") + replacement.slice(1) : replacement;
 const $ = (id) => document.getElementById(id);
 let tab = "ask", history = [], busy = false;
+let activeWritingReview = null;
 import { dictionary, rules, phraseMap, phrasebookPairs, examples, persons } from "./french-data.mjs";
 
 function rootStyle(){return `<style>
@@ -139,10 +140,32 @@ function checkWritingDetailed(q){
 }
 function checkWriting(q){return checkWritingDetailed(q).html;}
 
+function renderFindingHighlights(text, findings) {
+  const ordered = findings.map((item, index) => ({ item, index }))
+    .filter(({ item }) => Array.isArray(item.span) && item.span.length === 2)
+    .sort((a, b) => a.item.span[0] - b.item.span[0] || b.item.span[1] - a.item.span[1]);
+  let html = "", cursor = 0;
+  for (const { item } of ordered) {
+    const start = Number(item.span[0]), end = Number(item.span[1]);
+    if (!Number.isInteger(start) || !Number.isInteger(end) || start < cursor || end <= start || end > text.length) continue;
+    const found = text.slice(start, end);
+    if (found !== item.found) continue;
+    html += esc(text.slice(cursor, start));
+    html += '<mark class="fi-highlight-mark" tabindex="0" data-start="' + start +
+      '" data-end="' + end + '" data-rule-id="' + esc(item.ruleId) +
+      '" aria-label="' + esc("Flagged text: " + found) + '">' + esc(found) + "</mark>";
+    cursor = end;
+  }
+  html += esc(text.slice(cursor));
+  return html;
+}
+
 function unifiedCheckWriting(q){
   const legacy=checkWritingDetailed(q);
-  const coreResult=structuredCore.checkWriting(legacy.corrected);
-  let corrected=typeof coreResult?.corrected==="string"?coreResult.corrected:legacy.corrected;
+  const textAfterLegacy=legacy.corrected;
+  const visibleRuleFindings=checkSection12Rules(textAfterLegacy);
+  const coreResult=structuredCore.checkWriting(textAfterLegacy);
+  let corrected=typeof coreResult?.corrected==="string"?coreResult.corrected:textAfterLegacy;
   const coreSuggestions=Array.isArray(coreResult?.suggestions)?coreResult.suggestions:[];
   const ruleFindings=[],seenRules=new Set();
   for(let pass=0;pass<4;pass++){
@@ -169,11 +192,41 @@ function unifiedCheckWriting(q){
     before:item.found,why:item.explanation,messageOnly:item.kind==="review",ruleId:item.ruleId,suggestion:item.suggestion
   }));
   const allSuggestions=[...legacy.suggestions,...distinctCoreSuggestions,...extraRuleSuggestions];
-  if(!allSuggestions.length)return legacy.html;
-  if(legacy.hasIssue&&!distinctCoreSuggestions.length&&!extraRuleSuggestions.length)return legacy.html;
-  const hasCorrection=allSuggestions.some(item=>!item.messageOnly);
+  if(!allSuggestions.length&&!visibleRuleFindings.length){activeWritingReview=null;return legacy.html;}
+  if(legacy.hasIssue&&!distinctCoreSuggestions.length&&!extraRuleSuggestions.length&&!visibleRuleFindings.length){activeWritingReview=null;return legacy.html;}
+
+  const hasCorrection=allSuggestions.some(item=>!item.messageOnly)||visibleRuleFindings.some(item=>item.kind==="correction");
   const output=hasCorrection?'<p class="fi-output">'+esc(corrected)+'</p>':"";
   const action=hasCorrection?'<button id="fiUseCorrection" class="g">Use corrected text</button>':"";
+
+  if(visibleRuleFindings.length){
+    activeWritingReview={baseText:textAfterLegacy,findings:visibleRuleFindings};
+    const legacyNotes=legacy.suggestions.map(item=>{
+      const before=item.before??"",why=item.why??"";
+      return '<div class="fi-result">'+esc(why)+'<div class="fi-muted">Original: '+esc(before)+'</div></div>';
+    }).join("");
+    const coreNotes=distinctCoreSuggestions.filter(item=>!item.ruleId).map(item=>{
+      const before=item.before??item.found??"",why=item.why??item.explanation??"";
+      return '<div class="fi-result">'+esc(why)+'<div class="fi-muted">Original: '+esc(before)+'</div></div>';
+    }).join("");
+    const highlightStyles='<style id="fi-writing-highlight-styles">.fi-highlight-block{margin:10px 0;padding:12px;border:1px solid var(--bd,#e5e1d8);border-radius:10px;background:var(--card,#fff);min-width:0;max-width:100%;box-sizing:border-box}.fi-highlight-text{white-space:pre-wrap;line-height:1.7;overflow-wrap:anywhere;min-width:0;max-width:100%}.fi-highlight-mark{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;min-width:44px;min-height:44px;padding:0 4px;background:#fff3b0;color:#111827;text-decoration:underline;text-decoration-thickness:2px;text-decoration-color:#7c2d12;text-underline-offset:3px;border-bottom:2px solid #7c2d12;border-radius:3px;cursor:help}.fi-highlight-mark:focus-visible{outline:3px solid #1d4ed8;outline-offset:2px}.fi-finding{border-top:1px solid var(--bd,#e5e1d8);padding:10px 0;min-width:0;overflow-wrap:anywhere}.fi-finding-summary{display:flex;gap:8px;flex-wrap:wrap;align-items:baseline}.fi-finding-found{font-weight:700}.fi-finding-arrow{color:var(--mu,#6b7280)}.fi-apply{min-height:44px;min-width:76px;margin-top:6px}.fi-apply:focus-visible{outline:3px solid var(--ac,#1d4ed8);outline-offset:2px}@media(max-width:420px){.fi-highlight-block,.fi-highlight-text,.fi-finding{min-width:0;max-width:100%;box-sizing:border-box}.fi-highlight-text{overflow-wrap:anywhere}.fi-apply{min-height:44px}}</style>';
+    const label=textAfterLegacy!==q?"Text after the first fix":"Text with highlighted findings";
+    const highlighted='<div class="fi-highlight-block"><b>'+label+'</b><div class="fi-highlight-text">'+
+      renderFindingHighlights(textAfterLegacy,visibleRuleFindings)+'</div></div>';
+    const findingRows=visibleRuleFindings.map((item,index)=>{
+      const suggestion=item.kind==="correction"?(item.suggestion||""):"Review only — no automatic correction";
+      const apply=item.kind==="correction"
+        ?'<button type="button" class="g fi-apply" data-fiapply="'+index+'" aria-label="'+esc("Apply: "+item.found+" to "+item.suggestion)+'">Apply</button>'
+        :"";
+      return '<div class="fi-finding"><div class="fi-finding-summary"><span class="fi-finding-found">'+esc(item.found)+'</span><span class="fi-finding-arrow" aria-hidden="true">→</span><span>'+esc(suggestion)+'</span></div><p class="fi-muted">'+esc(item.explanation)+'</p>'+apply+'</div>';
+    }).join("");
+    return highlightStyles+'<div class="fi-answer"><b>'+(hasCorrection?"Suggested text":"Grammar note")+'</b>'+
+      (legacyNotes||coreNotes?'<b>Why these changes?</b>'+legacyNotes+coreNotes:"")+
+      highlighted+'<b>Section 12 findings</b>'+findingRows+output+action+'</div>';
+  }
+
+  activeWritingReview=null;
+  if(!allSuggestions.length)return legacy.html;
   const notes=allSuggestions.map(item=>{
     const before=item.before??item.found??"";
     const why=item.why??item.explanation??"";
@@ -192,7 +245,7 @@ function runAction(id){
       if(tense==="present"){
         showAnswer(r?`<div class="fi-answer"><h3>${esc(r.v)} — present tense</h3><div class="fi-muted">${esc(r.type)}</div><table><tbody>${r.forms.map((f,i)=>`<tr><td>${esc(persons[i])}</td><td><b>${esc(f)}</b></td></tr>`).join("")}</tbody></table></div>`:`<div class="fi-answer">No conjugation pattern is available for this verb. Try être, avoir, aller, faire, venir, prendre, pouvoir, vouloir, devoir, savoir, dire or a regular -er verb such as parler.</div>`);
       }else if(!r||r.status!=="supported"){
-        showAnswer(`<div class="fi-answer"><h3>${esc($("fiVerb")?.value||"")} — ${esc(tense)}</h3><div class="fi-note">${esc(r?.explanation||"No Lexique-verified forms are available for this verb and tense.")}</div></div>`);
+        showAnswer(`<div class="fi-answer"><h3>Verb conjugator</h3><div class="fi-note">${esc(r?.explanation||"No Lexique-verified forms are available for this verb and tense.")}</div></div>`);
       }else{
         const labels=["je","tu","il / elle / on","nous","vous","ils / elles"];
         const elides=(form)=>/^[aeiouyàâäéèêëîïôöùûüÿœ]/iu.test(form)||((r.v==="habiter")&&/^h/iu.test(form));
@@ -214,7 +267,7 @@ function runAction(id){
         const verified=r.source==="lexique-verified";
         const badge=verified?"Verified":"Rule-based";
         const footer=verified?"Checked against Lexique 3.83.":"Standard conjugation rule; not yet checked against Lexique.";
-        showAnswer(`<div class="fi-answer fi-conjugation"><div class="fi-conjugation-heading"><h3>${esc(r.v)} · ${esc(tense)}</h3><span class="fi-status">${badge}</span></div><table class="fi-conjugation-table"><tbody>${rows}</tbody></table><p class="fi-conjugation-footer">${footer}</p></div>`);
+        showAnswer(`<div class="fi-answer fi-conjugation"><div class="fi-conjugation-heading"><h3>${tense==="present"?esc(r.v)+" · "+esc(tense):"Verb conjugator"}</h3><span class="fi-status">${badge}</span></div><table class="fi-conjugation-table"><tbody>${rows}</tbody></table><p class="fi-conjugation-footer">${footer}</p></div>`);
       }
     }
     if(id==="fiCheck"){const q=$("fiInput")?.value||"";showAnswer(q.trim()?unifiedCheckWriting(q):"Paste some text first.");}
@@ -229,6 +282,7 @@ function runAction(id){
     if(t.dataset.fiprompt){const prompts=["Explain ne … pas","When do I use tu and vous?","Explain passé composé","Why is maison feminine?"];const input=$("fiInput");if(input)input.value=prompts[Number(t.dataset.fiprompt)]||"";return;}
     if(t.dataset.fiexample){const input=$("fiInput");if(input)input.value=t.dataset.fiexample;return;}
     if(t.dataset.firule){tab="ask";const app=$("app");if(app)app.innerHTML=header();renderBody();const input=$("fiInput");if(input)input.value=rules[Number(t.dataset.firule)]?.title||"";return;}
+    if(t.hasAttribute("data-fiapply")){const review=activeWritingReview;const index=Number(t.dataset.fiapply);const item=review?.findings[index];const target=$("fiInput");if(review&&item&&item.kind==="correction"&&target){target.value=review.baseText.slice(0,item.span[0])+item.suggestion+review.baseText.slice(item.span[1]);activeWritingReview=null;runAction("fiCheck");}return;}
     if(t.id==="fiUseCorrection"){const out=$("fiAnswer");const target=$("fiInput");const p=out?.querySelector(".fi-output");if(target&&p)target.value=p.textContent;return;}
     runAction(t.id);
   });

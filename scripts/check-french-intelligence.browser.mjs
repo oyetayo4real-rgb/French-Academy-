@@ -210,7 +210,7 @@ try {
         assert.equal(await page.locator("#fiAnswer .fi-output").count(), 0);
       } else {
         assert.equal((await page.locator("#fiAnswer .fi-output").innerText()).trim(), item.expected, `${profile.name}: Section 12 correction`);
-        if(item.multi)assert.ok(await page.locator("#fiAnswer .fi-result").count()>=2,profile.name+": multi-finding input renders at least two findings");
+        if(item.multi)assert.ok(await page.locator("#fiAnswer .fi-result, #fiAnswer .fi-finding").count()>=2,profile.name+": multi-finding input renders at least two findings");
       }
     }
     console.log(`PASS ${profile.name}: Writing tab preserves legacy corrections, combines NR-07/NR-09, and keeps negatives unchanged`);
