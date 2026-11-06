@@ -33,6 +33,8 @@ on:
       - "scripts/check-writing-compat-parity.mjs"
       - "scripts/check-m3-conjugate-title.mjs"
       - "scripts/check-m3-writing-highlights.mjs"
+      - "scripts/diagnose-overflow-360.mjs"
+      - "scripts/diagnose-overflow-360.mjs"
       - "scripts/check-m2-conjugate-display.mjs"
       - "scripts/check-m3-conjugate-title.mjs"
       - "scripts/check-m3-writing-highlights.mjs"
@@ -208,6 +210,12 @@ jobs:
           done
           cat /tmp/french-academy-branch-http.log /tmp/french-academy-main-http.log
           exit 1
+      - name: Diagnose all 360px Writing overflow elements (report-only)
+        continue-on-error: true
+        env:
+          MAIN_FRENCH_ACADEMY_URL: http://127.0.0.1:4174
+          FRENCH_ACADEMY_URL: http://127.0.0.1:4173
+        run: node scripts/diagnose-overflow-360.mjs
       - name: Verify the app in desktop and mobile Chromium
         run: node scripts/check-french-intelligence.browser.mjs
       - name: Compare legacy and compatibility browser UI

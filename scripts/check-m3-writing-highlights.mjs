@@ -46,13 +46,14 @@ function luminance(rgb){
   return 0.2126*values[0]+0.7152*values[1]+0.0722*values[2];
 }
 function contrast(a,b){const x=luminance(a),y=luminance(b);return (Math.max(x,y)+0.05)/(Math.min(x,y)+0.05);}
-async function checkNoHorizontalScroll(page){
-  return page.evaluate(()=>{
+function checkNoHorizontalScroll(page,label){
+  return page.evaluate(label=>{
     const client=document.documentElement.clientWidth;
     const scroll=document.documentElement.scrollWidth;
     const body=document.body.scrollWidth;
-    return {client,scroll,body,ok:scroll===client&&body<=client};
-  });
+    if(scroll!==client||body>client)throw new Error(label+" horizontal overflow "+JSON.stringify({client,scroll,body}));
+    return {client,scroll,body};
+  },label);
 }
 
 const legacyRuleCases=[
@@ -99,10 +100,7 @@ try{
         await button.waitFor();
         assert.equal(await button.innerText(),"Apply");
         assert.equal(await button.getAttribute("aria-label"),"Apply: "+item.found+" to "+item.suggestion);
-        if(profile.name==="mobile-360"){
-          const overflow=await checkNoHorizontalScroll(page);
-          collectFixtureAssertion(profile.name,item.input,"no_horizontal_scroll",true,overflow.ok?true:overflow);
-        }
+        if(profile.name==="mobile-360")await checkNoHorizontalScroll(page,item.rule);
       }
 
       for(const item of legacyRuleCases){
@@ -133,8 +131,8 @@ try{
         }
         let overflow={client:null,scroll:null,body:null};
         if(profile.name==="mobile-360"){
-          overflow=await checkNoHorizontalScroll(page);
-          collectFixtureAssertion(profile.name,fixture,"no_horizontal_scroll",true,overflow.ok?true:overflow);
+          overflow=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth,body:document.body.scrollWidth}));
+          collectFixtureAssertion(profile.name,fixture,"no_horizontal_scroll",true,overflow.scroll===overflow.client&&overflow.body<=overflow.client);
         }
         const apply=page.getByRole("button",{name:"Apply: "+item.mark+" to "+item.suggestion});
         let applyVisible=false;
@@ -218,8 +216,7 @@ try{
       if(profile.name==="mobile-360"){
         assert.ok(accessibility.markWidth>=44&&accessibility.markHeight>=44,"360px mark target at least 44x44");
         assert.ok(accessibility.buttonWidth>=44&&accessibility.buttonHeight>=44,"360px Apply target at least 44x44");
-        const overflow=await checkNoHorizontalScroll(page);
-        collectFixtureAssertion(profile.name,"Je leurs ai dit","accessibility_state_no_horizontal_scroll",true,overflow.ok?true:overflow);
+        await checkNoHorizontalScroll(page,"360px accessibility state");
       }
       for(const theme of ["light","dark"]){
         const colors=await page.evaluate(theme=>{
