@@ -35,7 +35,7 @@
       let text = String(value == null ? "" : value);
       const tokens = [];
       const hold = (html) => {
-        const marker = "\u0000FA_INLINE_" + tokens.length + "\u0000";
+        const marker = "\u0000FAINLINE" + tokens.length + "\u0000";
         tokens.push([marker, html]);
         return marker;
       };
