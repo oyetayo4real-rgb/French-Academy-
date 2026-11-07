@@ -9,7 +9,7 @@ const cases=["parler","aimer","habiter","aller"];
 const tenses=["imparfait","futur","conditionnel","passé composé"];
 const credits=readFileSync(new URL("../index.html",import.meta.url),"utf8");
 assert.match(credits,/Conjugation coverage: the approved reference supports 111 verbs across imparfait, futur, conditionnel and passé composé/);
-assert.match(credits,/The local conjugation engine runs in the browser and does not require an account or API key/i);
+assert.match(credits,/The local French Intelligence engine \(writing checker, conjugator and built-in dictionary\) runs in your browser with no account or API key/i);
 try{
   for(const profile of [{name:"desktop",viewport:{width:1280,height:900}},{name:"mobile-360",viewport:{width:360,height:800}}]){
     const page=await browser.newPage({viewport:profile.viewport});
@@ -30,7 +30,7 @@ try{
         const expected=conjugate(verb,{tense});
         const answer=page.locator("#fiAnswer");
         await answer.locator("h3").waitFor();
-        assert.equal(await answer.locator("h3").innerText(),verb+" · "+tense,profile.name+" heading "+verb+" "+tense);
+        assert.equal(await answer.locator("h3").innerText(),"Verb conjugator",profile.name+" M3 shared conjugator heading "+verb+" "+tense);
         const badge=expected.source==="lexique-verified"?"Verified":"Rule-based";
         assert.equal(await answer.locator(".fi-status").innerText(),badge,profile.name+" badge "+verb+" "+tense);
         const footer=expected.source==="lexique-verified"?"Checked against Lexique 3.83.":"Standard conjugation rule; not yet checked against Lexique.";
