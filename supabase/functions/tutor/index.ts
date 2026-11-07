@@ -1,4 +1,4 @@
-// reference copy of production v37
+// reference copy of production v44 (2026-11-07)
 // AI tutor + source-first French dictionary for Académie Française.
 // The provider and its key are resolved together; never choose another provider's key.
 // Secrets must remain server-side and must never be logged or returned.
@@ -19,7 +19,7 @@ const clip = (value: unknown, max: number) => String(value ?? "").slice(0, max);
 const LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"];
 const MODELS: Record<string, string> = {
   gemini: "gemini-3.5-flash-lite",
-  groq: "llama-3.3-70b-versatile",
+  groq: "openai/gpt-oss-120b",
   mistral: "mistral-small-latest",
   openrouter: "meta-llama/llama-3.3-70b-instruct:free"
 };
@@ -29,23 +29,29 @@ const BASES: Record<string, string> = {
   openrouter: "https://openrouter.ai/api/v1"
 };
 
-function providerConfig() {
-  const configuredProvider = (Deno.env.get("AI_PROVIDER") || "gemini").trim().toLowerCase();
-  // Older production configuration used "auto" when Gemini was the configured provider.
-  const provider = configuredProvider === "auto" ? "gemini" : configuredProvider;
+function resolveProviderKey(provider: string) {
   const secretNames: Record<string, string[]> = {
     gemini: ["GEMINI_API_KEY", "AI_API_KEY"],
     groq: ["GROQ_API_KEY", "AI_API_KEY"],
     mistral: ["MISTRAL_API_KEY", "AI_API_KEY"],
     openrouter: ["OPENROUTER_API_KEY", "AI_API_KEY"]
   };
-  if (!secretNames[provider]) throw new Error("bad_provider");
-  const selectedName = secretNames[provider].find((name) => Boolean(Deno.env.get(name)));
-  if (!selectedName) throw new Error("not_configured");
+  const names = secretNames[provider];
+  if (!names) throw new Error("bad_provider");
+  const selectedName = names.find((name) => Boolean(Deno.env.get(name)));
+  if (!selectedName) return null;
+  return { key: Deno.env.get(selectedName)!, selectedName };
+}
+function providerConfig() {
+  const configuredProvider = (Deno.env.get("AI_PROVIDER") || "gemini").trim().toLowerCase();
+  // Older production configuration used "auto" when Gemini was the configured provider.
+  const provider = configuredProvider === "auto" ? "gemini" : configuredProvider;
+  const resolved = resolveProviderKey(provider);
+  if (!resolved) throw new Error("not_configured");
   const modelNames: Record<string, string> = { gemini: "GEMINI_MODEL", groq: "GROQ_MODEL", mistral: "MISTRAL_MODEL", openrouter: "OPENROUTER_MODEL" };
   // Keep Gemini on a known supported default; legacy model overrides caused production 404s.
   const configuredModel = provider === "gemini" ? "" : Deno.env.get(modelNames[provider]);
-  return { provider, key: Deno.env.get(selectedName)!, selectedName, model: configuredModel || MODELS[provider] };
+  return { provider, ...resolved, model: configuredModel || MODELS[provider] };
 }
 
 async function callAI(system: string, messages: { role: string; content: string }[], maxTokens: number, timeoutMs = 5000, maxCandidates = 2) {
@@ -149,16 +155,16 @@ async function callAI(system: string, messages: { role: string; content: string 
     }
     // If Gemini stalls, try one alternate provider only when its own server-side key is configured.
     const fallbacks = [
-      { provider: "groq", keyName: "GROQ_API_KEY", model: MODELS.groq },
-      { provider: "mistral", keyName: "MISTRAL_API_KEY", model: MODELS.mistral },
-      { provider: "openrouter", keyName: "OPENROUTER_API_KEY", model: MODELS.openrouter }
-    ].filter((item) => Boolean(Deno.env.get(item.keyName)));
+      { provider: "groq", model: Deno.env.get("GROQ_MODEL")?.trim() || MODELS.groq },
+      { provider: "mistral", model: Deno.env.get("MISTRAL_MODEL")?.trim() || MODELS.mistral },
+      { provider: "openrouter", model: Deno.env.get("OPENROUTER_MODEL")?.trim() || MODELS.openrouter }
+    ].filter((item) => Boolean(resolveProviderKey(item.provider)));
     for (const fallback of fallbacks.slice(0, 1)) {
       try {
         console.error("[tutor] attempting configured provider fallback", JSON.stringify({ provider: fallback.provider }));
         const response = await fetch(BASES[fallback.provider] + "/chat/completions", {
           method: "POST",
-          headers: { Authorization: "Bearer " + Deno.env.get(fallback.keyName)!, "Content-Type": "application/json" },
+          headers: { Authorization: "Bearer " + resolveProviderKey(fallback.provider)!.key, "Content-Type": "application/json" },
           body: JSON.stringify({
             model: fallback.model,
             max_tokens: Math.min(maxTokens, 2400),
@@ -400,6 +406,66 @@ Deno.serve(async (req: Request) => {
     const uid = subOf(req);
     if (!uid) return J({ error: "not_signed_in", message: "Please sign in again." }, 401);
     const body = await req.json().catch(() => ({}));
+
+    // One-time, tightly scoped Groq connectivity diagnostic. The Supabase
+    // gateway verifies the JWT; this server-side allowlist restricts execution.
+    if (body.action === "groq_diagnostic") {
+      const diagnosticRequestId = crypto.randomUUID();
+      const diagnosticModel = Deno.env.get("GROQ_MODEL")?.trim() || MODELS.groq;
+      if (uid !== "ad709f9c-18fe-405c-beac-a5bc15d4341e") {
+        console.warn("[tutor] Groq diagnostic denied", JSON.stringify({
+          requestId: diagnosticRequestId, provider: "groq", status: 403
+        }));
+        return J({ ok: false, error: "forbidden", requestId: diagnosticRequestId }, 403);
+      }
+      const groqCredential = resolveProviderKey("groq");
+      if (!groqCredential) {
+        console.error("[tutor] Groq diagnostic unavailable", JSON.stringify({
+          requestId: diagnosticRequestId, provider: "groq", model: diagnosticModel,
+          status: 503, configured: false
+        }));
+        return J({ ok: false, error: "provider_not_configured", provider: "groq",
+          model: diagnosticModel, status: 503, requestId: diagnosticRequestId }, 503);
+      }
+      try {
+        const diagnosticResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: { Authorization: "Bearer " + groqCredential.key, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: diagnosticModel,
+            messages: [{ role: "user", content: "Reply exactly: GROQ_OK" }],
+            max_tokens: 64
+          }),
+          signal: AbortSignal.timeout(8000)
+        });
+        const diagnosticJson = await diagnosticResponse.json().catch(() => null);
+        const diagnosticContent = diagnosticJson?.choices?.[0]?.message?.content;
+        const diagnosticHasContent = typeof diagnosticContent === "string" && diagnosticContent.trim().length > 0;
+        const diagnosticOk = diagnosticResponse.ok && diagnosticHasContent;
+        console.info("[tutor] Groq diagnostic completed", JSON.stringify({
+          requestId: diagnosticRequestId, provider: "groq", model: diagnosticModel,
+          keySource: groqCredential.selectedName, status: diagnosticResponse.status, ok: diagnosticOk,
+          contentPresent: diagnosticHasContent
+        }));
+        return J({
+          ok: diagnosticOk, provider: "groq", model: diagnosticModel,
+          keySource: groqCredential.selectedName, status: diagnosticResponse.status, contentPresent: diagnosticHasContent,
+          requestId: diagnosticRequestId
+        }, diagnosticOk ? 200 : 502);
+      } catch (diagnosticError) {
+        const timedOut = diagnosticError instanceof Error &&
+          (diagnosticError.name === "TimeoutError" || diagnosticError.name === "AbortError");
+        console.error("[tutor] Groq diagnostic request failed", JSON.stringify({
+          requestId: diagnosticRequestId, provider: "groq", model: diagnosticModel,
+          status: timedOut ? 504 : 502, ok: false
+        }));
+        return J({
+          ok: false, error: timedOut ? "provider_timeout" : "provider_unavailable",
+          provider: "groq", model: diagnosticModel, status: timedOut ? 504 : 502,
+          requestId: diagnosticRequestId
+        }, timedOut ? 504 : 502);
+      }
+    }
     const mode = ["chat", "translate", "correct", "practice", "dict", "sources", "examples"].includes(body.mode) ? body.mode : "chat";
     const text = clip(body.text, 1800).trim();
     if (!text && mode !== "examples") return J({ error: "empty", message: "Type something first." }, 400);
