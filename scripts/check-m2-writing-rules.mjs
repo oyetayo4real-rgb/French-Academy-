@@ -66,7 +66,7 @@ const multiExpected="Il a mangé et elle est fatiguée.";
 const multiOutput=checkWriting(multiInput);
 try{
   assert.ok(multiOutput.includes(multiExpected));
-  assert.equal((multiOutput.match(/class="fi-result"/g)||[]).length,2);
+  assert.equal((multiOutput.match(/class="fi-finding"/g)||[]).length,2);
 }catch(error){failures.push({step:"multi-finding-render",input:multiInput,expected:multiExpected,actual:multiOutput,details:error.message});}
 
 const legacyInput="Je suis 20 ans";
@@ -93,7 +93,7 @@ try{
 }catch(error){failures.push({step:"structured-legacy-flag",input:"checkWritingDetailed",expected:"{ html, hasIssue } with no output-text detection",actual:"static contract failed",details:error.message});}
 
 if(failures.length){
-  console.error(JSON.stringify(failures.map(({step,input,expected,actual})=>({step,input,expected,actual})),null,2));
+  console.error(JSON.stringify(failures.map(({step,input,expected,actual})=>({test:step,input,expected,actual})),null,2));
   process.exitCode=1;
 }else{
   console.log(JSON.stringify({rules:["NR-07","NR-08","NR-09","NR-10","NR-11","NR-12"],positiveCases:participles.length*subjectPronouns.length+motionVerbs.length+8+14+17+3+4+9+masculine.length*2+5+4,negativeCases:14,multiFindingCount:2,legacyCorrection:"preserved",negativeMessage:"preserved",failures:0}));
