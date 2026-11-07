@@ -123,13 +123,23 @@ function normalizeHistory(value: unknown): ChatMessage[] {
   });
 }
 
-function makeSystemPrompt(mode: string, level: string, depth: Depth): string {
+export function makeSystemPrompt(mode: string, level: string, depth: Depth): string {
   const learner = level && level !== "none" ? "Optional learner level: " + level + "." : "";
+  const formatRules = [
+    "Formatting rules: use plain-text arrows such as ->; do not use LaTeX or dollar-sign math.",
+    "Do not use horizontal rules (--- or ***).",
+    "Use tables only when a comparison needs them; maximum 4 columns, one header row, and every table row on its own line.",
+    "Use short headings.",
+    "Keep answer length proportional to the question; for short questions or A1-A2 requests, stay under 250 words unless the user asks for depth.",
+    "If unsure about regional variation or usage claims, say \"I'm not sure\" instead of guessing.",
+    "Never present an unsourced claim as established."
+  ].join(" ");
   if (depth === "quick") {
     return [
       "You are a precise French-language tutor.",
       "Answer the user's question directly and clearly. Prioritize the core explanation, one useful example, and a concise correction where relevant.",
       "Do not invent sources or claim certainty when uncertain.",
+      formatRules,
       learner,
       "Requested task: " + mode + "."
     ].filter(Boolean).join(" ");
@@ -138,6 +148,7 @@ function makeSystemPrompt(mode: string, level: string, depth: Depth): string {
     "You are an expert French-language tutor and linguistics educator.",
     "Give a rigorous, structured answer with definitions, reasoning, examples, exceptions, and relevant contrasts.",
     "Distinguish established facts from interpretation and uncertainty. Never invent citations or sources.",
+    formatRules,
     learner,
     "Requested task: " + mode + "."
   ].filter(Boolean).join(" ");

@@ -1,4 +1,4 @@
-import { createTutorHandler, OVERALL_DEADLINE_MS } from "./index.ts";
+import { createTutorHandler, makeSystemPrompt, OVERALL_DEADLINE_MS } from "./index.ts";
 
 const uid = "00000000-0000-4000-8000-000000000001";
 const token = "eyJhbGciOiJub25lIn0." +
@@ -386,4 +386,37 @@ Deno.test("T1c acceptance matrix collects all failures as JSON", async () => {
 
   console.log("T1C_ACCEPTANCE_FAILURES_JSON " + JSON.stringify(failures));
   if (failures.length) throw new Error("T1c acceptance matrix failed: " + failures.length + " issue(s)");
+});
+
+
+Deno.test("system prompt enforces the requested formatting and uncertainty rules", () => {
+  const failures: Array<{ step: string; test: string; input: string; expected: string; actual: string }> = [];
+  const required = [
+    "plain-text arrows such as ->",
+    "do not use LaTeX or dollar-sign math",
+    "Do not use horizontal rules",
+    "maximum 4 columns",
+    "one header row",
+    "every table row on its own line",
+    "Use short headings",
+    "A1-A2 requests, stay under 250 words",
+    "say \\"I'm not sure\\" instead of guessing",
+    "Never present an unsourced claim as established"
+  ];
+  for (const depth of ["quick", "deep"] as const) {
+    const prompt = makeSystemPrompt("chat", "A1", depth);
+    for (const phrase of required) {
+      if (!prompt.includes(phrase)) {
+        failures.push({
+          step: "T1d tutor-v2 prompt",
+          test: "formatting and uncertainty rules",
+          input: "depth=" + depth + "; phrase=" + phrase,
+          expected: "system prompt contains the exact required rule",
+          actual: "required phrase missing"
+        });
+      }
+    }
+  }
+  console.log("T1D_PROMPT_FAILURES_JSON " + JSON.stringify(failures));
+  if (failures.length) throw new Error("Tutor prompt formatting acceptance failed: " + failures.length);
 });
