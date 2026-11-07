@@ -243,12 +243,12 @@ try{
   }
 
   const sw=readFileSync("sw.js","utf8");
-  assert.match(sw,/const V="fa-v27"/,"service-worker cache version bumped");
+  assert.match(sw,/const V="fa-v28"/,"service-worker cache version bumped");
   assert.doesNotMatch(sw,/fa-v25/,"old cache version removed");
   for(const path of ["/index.html","/features/french-intelligence-compat.mjs","/features/french-section12-rules.mjs"]){
     assert.ok(sw.includes('"'+path+'"'),"service-worker precaches "+path);
   }
-  console.log("PASS M3 service-worker cache v27 precaches index, compatibility renderer and Section 12 rules.");
+  console.log("PASS M3 service-worker cache v28 precaches index, compatibility renderer and Section 12 rules.");
   console.log("PASS M3 Part B: desktop/mobile Chromium; NR-03/05/07/12; eight legacy-first cases; two Apply actions; XSS; no-issue and legacy-only byte parity.");
 }finally{
   if(fixtureFailures.length){
