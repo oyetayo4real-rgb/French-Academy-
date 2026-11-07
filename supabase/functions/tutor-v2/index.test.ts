@@ -400,7 +400,7 @@ Deno.test("system prompt enforces the requested formatting and uncertainty rules
     "every table row on its own line",
     "Use short headings",
     "A1-A2 requests, stay under 250 words",
-    "say \\"I'm not sure\\" instead of guessing",
+    `say "I'm not sure" instead of guessing`,
     "Never present an unsourced claim as established"
   ];
   for (const depth of ["quick", "deep"] as const) {
