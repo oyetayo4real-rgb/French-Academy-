@@ -6,6 +6,7 @@ type Role = "user" | "assistant";
 type ChatMessage = { role: Role; content: string };
 type ProviderName = "gemini" | "groq" | "mistral" | "openrouter";
 type Depth = "quick" | "standard" | "deep";
+type QuotaMode = "legacy" | "reservation";
 type Env = { get(name: string): string | undefined };
 type Fetcher = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
 
@@ -47,7 +48,7 @@ const PROVIDERS: Array<{
   base?: string;
 }> = [
   { name: "gemini", key: "GEMINI_API_KEY", model: "gemini-3.5-flash-lite" },
-  { name: "groq", key: "GROQ_API_KEY", model: "llama-3.3-70b-versatile", base: "https://api.groq.com/openai/v1" },
+  { name: "groq", key: "GROQ_API_KEY", model: "openai/gpt-oss-120b", base: "https://api.groq.com/openai/v1" },
   { name: "mistral", key: "MISTRAL_API_KEY", model: "mistral-small-latest", base: "https://api.mistral.ai/v1" },
   { name: "openrouter", key: "OPENROUTER_API_KEY", model: "meta-llama/llama-3.3-70b-instruct:free", base: "https://openrouter.ai/api/v1" }
 ];
@@ -142,13 +143,51 @@ function makeSystemPrompt(mode: string, level: string, depth: Depth): string {
   ].filter(Boolean).join(" ");
 }
 
+function configuredProviderName(env: Env): ProviderName | null {
+  const raw = (env.get("AI_PROVIDER") || "gemini").trim().toLowerCase();
+  const name = raw === "auto" ? "gemini" : raw;
+  return PROVIDERS.some((item) => item.name === name) ? name as ProviderName : null;
+}
+
+function getQuotaMode(env: Env): QuotaMode {
+  return env.get("QUOTA_MODE")?.trim().toLowerCase() === "reservation"
+    ? "reservation" : "legacy";
+}
+
+function getGroqModels(env: Env): string[] {
+  const configured = (env.get("GROQ_MODELS") || "")
+    .split(",")
+    .map((model) => model.trim())
+    .filter((model) => /^[A-Za-z0-9._:/-]{1,160}$/.test(model));
+  return [...new Set(configured.length ? configured : ["openai/gpt-oss-120b"])];
+}
+
 function getConfiguredProvider(name: ProviderName, env: Env) {
   const spec = PROVIDERS.find((item) => item.name === name)!;
-  const key = env.get(spec.key);
+  const dedicatedKey = env.get(spec.key);
+  // AI_API_KEY belongs only to AI_PROVIDER; never reuse it for a fallback host.
+  const genericKey = configuredProviderName(env) === name ? env.get("AI_API_KEY") : undefined;
+  const key = dedicatedKey || genericKey;
   if (!key) return null;
   const modelEnv = name.toUpperCase() + "_MODEL";
-  const model = env.get(modelEnv) || spec.model;
+  const model = name === "groq" ? getGroqModels(env)[0] : env.get(modelEnv) || spec.model;
   return { ...spec, key, model };
+}
+
+function logProviderAttempt(
+  log: Dependencies["log"],
+  provider: ProviderName,
+  model: string,
+  status: number | "timeout",
+  startedAt: number,
+  now: () => number
+) {
+  log?.("provider_attempt", {
+    provider,
+    model,
+    status,
+    elapsed_ms: Math.max(0, now() - startedAt)
+  });
 }
 
 function parseProviderTimeout(error: unknown): boolean {
@@ -215,6 +254,7 @@ async function callGemini(
   for (const model of candidates) {
     const remaining = deadline - deps.now();
     if (remaining <= 0) break;
+    const attemptStarted = deps.now();
     try {
       const response = await deps.fetchImpl(
         "https://generativelanguage.googleapis.com/v1beta/models/" +
@@ -236,10 +276,10 @@ async function callGemini(
           signal: AbortSignal.timeout(Math.min(ATTEMPT_BUDGET_MS[depth], remaining))
         }
       );
+      logProviderAttempt(deps.log, "gemini", model, response.status, attemptStarted, deps.now);
 
       if (response.status === 429) throw new TutorFault("provider_rate_limit", true, 429);
       if (!response.ok) {
-        deps.log("provider_http_error", { provider: "gemini", status: response.status });
         if (response.status >= 500 || response.status === 408) continue;
         throw new TutorFault("provider_unavailable", false, 502);
       }
@@ -258,11 +298,11 @@ async function callGemini(
       if (error instanceof TutorFault) throw error;
       if (parseProviderTimeout(error)) {
         timedOut = true;
-        deps.log("provider_attempt_timeout", { provider: "gemini", model });
+        logProviderAttempt(deps.log, "gemini", model, "timeout", attemptStarted, deps.now);
         // A timeout consumes only this candidate's budget; continue to the next.
         continue;
       }
-      deps.log("provider_attempt_error", { provider: "gemini" });
+      logProviderAttempt(deps.log, "gemini", model, 0, attemptStarted, deps.now);
     }
   }
   return { text: "", timedOut };
@@ -280,6 +320,7 @@ async function callCompatibleProvider(
 ): Promise<{ text: string; timedOut: boolean }> {
   const remaining = deadline - now();
   if (remaining <= 0) return { text: "", timedOut: true };
+  const attemptStarted = now();
   try {
     const response = await fetchImpl(config.base + "/chat/completions", {
       method: "POST",
@@ -295,9 +336,9 @@ async function callCompatibleProvider(
       signal: AbortSignal.timeout(Math.min(ATTEMPT_BUDGET_MS[depth], remaining))
     });
 
+    logProviderAttempt(log, config.name, config.model, response.status, attemptStarted, now);
     if (response.status === 429) throw new TutorFault("provider_rate_limit", true, 429);
     if (!response.ok) {
-      log?.("provider_http_error", { provider: config.name, status: response.status });
       return { text: "", timedOut: response.status >= 500 || response.status === 408 };
     }
 
@@ -307,12 +348,69 @@ async function callCompatibleProvider(
   } catch (error) {
     if (error instanceof TutorFault) throw error;
     if (parseProviderTimeout(error)) {
-      log?.("provider_attempt_timeout", { provider: config.name });
+      logProviderAttempt(log, config.name, config.model, "timeout", attemptStarted, now);
       return { text: "", timedOut: true };
     }
-    log?.("provider_attempt_error", { provider: config.name });
+    logProviderAttempt(log, config.name, config.model, 0, attemptStarted, now);
     return { text: "", timedOut: false };
   }
+}
+
+async function callGroqModels(
+  config: NonNullable<ReturnType<typeof getConfiguredProvider>>,
+  models: string[],
+  system: string,
+  messages: ChatMessage[],
+  depth: Depth,
+  deadline: number,
+  fetchImpl: Fetcher,
+  now: () => number,
+  log: Dependencies["log"]
+): Promise<{ text: string; timedOut: boolean }> {
+  let timedOut = false;
+  for (const model of models) {
+    const remaining = deadline - now();
+    if (remaining <= 0) {
+      timedOut = true;
+      break;
+    }
+    const attemptStarted = now();
+    try {
+      const response = await fetchImpl(config.base + "/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer " + config.key,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: MAX_TOKENS[depth],
+          messages: [{ role: "system", content: system }, ...messages]
+        }),
+        signal: AbortSignal.timeout(Math.min(ATTEMPT_BUDGET_MS[depth], remaining))
+      });
+      const errorBody = response.ok ? null : await response.clone().json().catch(() => null);
+      const errorCode = String(errorBody?.error?.code || errorBody?.error?.type || errorBody?.code || "").toLowerCase();
+      logProviderAttempt(log, "groq", model, response.status, attemptStarted, now);
+
+      if (response.status === 429) throw new TutorFault("provider_rate_limit", true, 429);
+      if (response.status === 404 || errorCode === "model_not_found") continue;
+      if (!response.ok) return { text: "", timedOut: response.status >= 500 || response.status === 408 };
+
+      const body = await response.json();
+      const text = String(body?.choices?.[0]?.message?.content || "").trim();
+      if (text) return { text, timedOut };
+    } catch (error) {
+      if (error instanceof TutorFault) throw error;
+      if (parseProviderTimeout(error)) {
+        timedOut = true;
+        logProviderAttempt(log, "groq", model, "timeout", attemptStarted, now);
+        continue;
+      }
+      logProviderAttempt(log, "groq", model, 0, attemptStarted, now);
+    }
+  }
+  return { text: "", timedOut };
 }
 
 async function generateAnswer(
@@ -342,9 +440,9 @@ async function generateAnswer(
     const config = getConfiguredProvider(name, deps.env);
     if (!config) continue;
     attempted = true;
-    const result = await callCompatibleProvider(
-      config, system, messages, depth, deadline, deps.fetchImpl, deps.now, deps.log
-    );
+    const result = name === "groq"
+      ? await callGroqModels(config, getGroqModels(deps.env), system, messages, depth, deadline, deps.fetchImpl, deps.now, deps.log)
+      : await callCompatibleProvider(config, system, messages, depth, deadline, deps.fetchImpl, deps.now, deps.log);
     if (result.text) return result.text;
     timedOut ||= result.timedOut;
   }
@@ -357,7 +455,7 @@ async function generateAnswer(
 }
 
 async function rpc(
-  name: "ai_use_reserve" | "ai_use_settle",
+  name: "ai_use" | "ai_use_reserve" | "ai_use_settle",
   body: Record<string, unknown>,
   deps: Required<Pick<Dependencies, "env" | "fetchImpl">>
 ): Promise<any> {
@@ -400,6 +498,18 @@ export function createTutorHandler(overrides: Dependencies = {}) {
       return json({ error: "invalid_request", retryable: false }, 400);
     }
 
+    if (body?.health === true) {
+      const providerKeys = Object.fromEntries(PROVIDERS.map((provider) => [
+        provider.name,
+        Boolean(getConfiguredProvider(provider.name, deps.env))
+      ]));
+      return json({
+        providerKeys,
+        groqModels: getGroqModels(deps.env),
+        quotaMode: getQuotaMode(deps.env)
+      });
+    }
+
     const mode = ["chat", "translate", "correct", "practice", "examples"].includes(body?.mode)
       ? body.mode : "chat";
     const question = clip(body?.text, 1_800).trim();
@@ -408,18 +518,25 @@ export function createTutorHandler(overrides: Dependencies = {}) {
     const depth = parseDepth(body?.depth);
     const history = normalizeHistory(body?.history);
     const messages: ChatMessage[] = [...history, { role: "user", content: question }];
-    const requestId = crypto.randomUUID();
+    const quotaMode = getQuotaMode(deps.env);
+    const requestId = quotaMode === "reservation" ? crypto.randomUUID() : "";
     let reserved = false;
 
     try {
-      const reservation = await rpc("ai_use_reserve", {
-        p_uid: uid,
-        p_request_id: requestId
-      }, deps);
-      if (reservation?.allowed !== true) {
-        return json({ error: "quota_exceeded", retryable: false }, 429);
+      if (quotaMode === "reservation") {
+        const reservation = await rpc("ai_use_reserve", {
+          p_uid: uid,
+          p_request_id: requestId
+        }, deps);
+        if (reservation?.allowed !== true) {
+          return json({ error: "quota_exceeded", retryable: false }, 429);
+        }
+        reserved = true;
+      } else {
+        // Match production tutor's existing ai_use(uuid) quota contract exactly.
+        const allowed = await rpc("ai_use", { p_uid: uid }, deps);
+        if (allowed !== true) return json({ error: "quota_exceeded", retryable: false }, 429);
       }
-      reserved = true;
 
       let answer = "";
       try {
@@ -431,23 +548,27 @@ export function createTutorHandler(overrides: Dependencies = {}) {
         );
         if (!answer.trim()) throw new TutorFault("provider_unavailable", true, 502);
       } catch (error) {
-        await rpc("ai_use_settle", {
-          p_uid: uid,
-          p_request_id: requestId,
-          p_success: false
-        }, deps).catch(() => null);
-        reserved = false;
+        if (reserved) {
+          await rpc("ai_use_settle", {
+            p_uid: uid,
+            p_request_id: requestId,
+            p_success: false
+          }, deps).catch(() => null);
+          reserved = false;
+        }
         throw error;
       }
 
-      const settled = await rpc("ai_use_settle", {
-        p_uid: uid,
-        p_request_id: requestId,
-        p_success: true
-      }, deps);
-      reserved = false;
-      if (settled?.settled !== true || settled?.status !== "succeeded") {
-        throw new TutorFault("quota_unavailable", true, 503);
+      if (reserved) {
+        const settled = await rpc("ai_use_settle", {
+          p_uid: uid,
+          p_request_id: requestId,
+          p_success: true
+        }, deps);
+        reserved = false;
+        if (settled?.settled !== true || settled?.status !== "succeeded") {
+          throw new TutorFault("quota_unavailable", true, 503);
+        }
       }
       return json({ text: answer, depth });
     } catch (error) {
