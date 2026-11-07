@@ -3,12 +3,12 @@
 begin;
 
 create table public.ai_usage_reservations (
-  request_id uuid primary key,
-  user_id uuid not null references auth.users(id) on delete cascade,
-  usage_day date not null,
-  status text not null check (status in ('reserved', 'succeeded', 'failed', 'expired')),
-  created_at timestamptz not null default pg_catalog.now(),
-  settled_at timestamptz
+  request_id pg_catalog.uuid primary key,
+  user_id pg_catalog.uuid not null references auth.users(id) on delete cascade,
+  usage_day pg_catalog.date not null,
+  status pg_catalog.text not null check (status in ('reserved', 'succeeded', 'failed', 'expired')),
+  created_at pg_catalog.timestamptz not null default pg_catalog.now(),
+  settled_at pg_catalog.timestamptz
 );
 
 create index ai_usage_reservations_user_day_status_created_idx
@@ -88,7 +88,7 @@ begin
   left join public.ai_usage u
     on u.user_id = p_uid and u.day = v_day;
 
-  select count(*) into v_failures
+  select pg_catalog.count(*) into v_failures
   from public.ai_usage_reservations r
   where r.user_id = p_uid
     and r.usage_day = v_day
@@ -101,7 +101,7 @@ begin
     );
   end if;
 
-  select count(*) into v_reserved
+  select pg_catalog.count(*) into v_reserved
   from public.ai_usage_reservations r
   where r.user_id = p_uid
     and r.usage_day = v_day
@@ -132,7 +132,7 @@ $function$;
 create or replace function public.ai_use_settle(
   p_uid pg_catalog.uuid,
   p_request_id pg_catalog.uuid,
-  p_success boolean
+  p_success pg_catalog.bool
 )
 returns pg_catalog.jsonb
 language plpgsql
