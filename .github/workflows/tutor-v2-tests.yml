@@ -61,7 +61,6 @@ jobs:
       - name: Apply reservation SQL and run transactional acceptance/rollback
         env:
           PGPASSWORD: postgres
-          TUTOR_TEST_UID: ${{ env.TUTOR_TEST_UID }}
         run: |
           psql -h 127.0.0.1 -U postgres -d tutor_test -v test_uid="$TUTOR_TEST_UID" -v ON_ERROR_STOP=1 -f supabase/migrations/20261105133000_ai_use_reservations.sql
           psql -h 127.0.0.1 -U postgres -d tutor_test -v test_uid="$TUTOR_TEST_UID" -v ON_ERROR_STOP=1 -f supabase/tests/ai_use_reservations.sql
