@@ -40,7 +40,9 @@ jobs:
         env:
           PGPASSWORD: postgres
         run: |
-          psql -h 127.0.0.1 -U postgres -d tutor_test -v ON_ERROR_STOP=1 <<'SQL'
+          TEST_UID="$(cat /proc/sys/kernel/random/uuid)"
+          echo "TUTOR_TEST_UID=$TEST_UID" >> "$GITHUB_ENV"
+          psql -h 127.0.0.1 -U postgres -d tutor_test -v test_uid="$TEST_UID" -v ON_ERROR_STOP=1 <<'SQL'
           create role anon;
           create role authenticated;
           create role service_role;
@@ -53,15 +55,16 @@ jobs:
             n integer not null default 0,
             primary key (user_id, day)
           );
-          insert into auth.users (id) values ('11111111-1111-4111-8111-111111111111');
-          insert into public.profiles (id, role) values ('11111111-1111-4111-8111-111111111111', 'student');
+          insert into auth.users (id) values (:'test_uid');
+          insert into public.profiles (id, role) values (:'test_uid', 'student');
           SQL
       - name: Apply reservation SQL and run transactional acceptance/rollback
         env:
           PGPASSWORD: postgres
+          TUTOR_TEST_UID: ${{ env.TUTOR_TEST_UID }}
         run: |
-          psql -h 127.0.0.1 -U postgres -d tutor_test -v ON_ERROR_STOP=1 -f supabase/migrations/20261105133000_ai_use_reservations.sql
-          psql -h 127.0.0.1 -U postgres -d tutor_test -v ON_ERROR_STOP=1 -f supabase/tests/ai_use_reservations.sql
+          psql -h 127.0.0.1 -U postgres -d tutor_test -v test_uid="$TUTOR_TEST_UID" -v ON_ERROR_STOP=1 -f supabase/migrations/20261105133000_ai_use_reservations.sql
+          psql -h 127.0.0.1 -U postgres -d tutor_test -v test_uid="$TUTOR_TEST_UID" -v ON_ERROR_STOP=1 -f supabase/tests/ai_use_reservations.sql
           psql -h 127.0.0.1 -U postgres -d tutor_test -v ON_ERROR_STOP=1 -f supabase/rollback/20261105133000_ai_use_reservations.sql
       - name: Run tutor-v2 mocked-fetch tests (network permission not granted)
         run: deno test supabase/functions/tutor-v2/index.test.ts

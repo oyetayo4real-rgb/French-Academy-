@@ -3,7 +3,7 @@
 -- The test user is a fixture created by CI/staging setup; every mutation is rolled back.
 begin;
 
-set local test.ai_use_uid = '11111111-1111-4111-8111-111111111111';
+set local test.ai_use_uid = :'test_uid';
 
 do $test$
 declare
