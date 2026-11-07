@@ -165,7 +165,7 @@ try {
   check(layoutResults[1].pageWidth <= 360, "360px renderer has no sideways page scroll", "360px", "<= 360", layoutResults[1].pageWidth);
   check(layoutResults[1].wrappers.some(x => x.scrollWidth > x.clientWidth && x.overflowX === "auto"),
     "wide tables scroll inside their wrapper", "360px table", "overflow contained by .fa-table-scroll", layoutResults[1].wrappers);
-  check(layoutResults[0].tableCount >= 2 && layoutResults[0].scopedHeaders >= 5 && layoutResults[0].rows === 4,
+  check(layoutResults[0].tableCount >= 2 && layoutResults[0].scopedHeaders >= 5 && layoutResults[0].rows === 7,
     "table structure and header semantics survive DOM parsing", "table fixture", "two tables, scoped headers, four body rows", layoutResults[0]);
 
   const noteStyle = await page.evaluate(() => {

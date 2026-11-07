@@ -86,3 +86,5 @@ jobs:
           exit 1
       - name: Verify retry state in Chromium using mocked API only
         run: node scripts/check-tutor-retry-browser.mjs
+      - name: Verify Tutor Markdown renderer, security and responsive links
+        run: node scripts/check-tutor-renderer.mjs
