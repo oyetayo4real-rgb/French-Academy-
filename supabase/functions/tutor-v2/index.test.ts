@@ -419,7 +419,7 @@ Deno.test("system prompt enforces the requested formatting and uncertainty rules
     "Use short headings",
     "A1-A2 requests, stay under 250 words",
     `say "I'm not sure" instead of guessing`,
-    "Never present an unsourced claim as established"
+    "Support factual claims appropriately and state uncertainty plainly."
   ];
   for (const depth of ["quick", "deep"] as const) {
     const prompt = makeSystemPrompt("chat", "A1", depth);
