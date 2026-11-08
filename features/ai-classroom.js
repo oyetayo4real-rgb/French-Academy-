@@ -52,6 +52,7 @@
       text = text.replace(/\*\*(?=\S)([\s\S]*?\S)\*\*/g, "<strong>$1</strong>");
       text = text.replace(/\*(?=\S)([^*]*?\S)\*/g, "<em>$1</em>");
       text = text.replace(/_(?=\S)([^_]*?\S)_/g, "<em>$1</em>");
+      text = text.replace(/\r?\n/g, "<br>");
       for (const [marker, html] of tokens) text = text.split(marker).join(html);
       return text;
     };
@@ -113,7 +114,7 @@
     let list = "", orderedNext = null, paragraph = [];
     const flush = () => {
       if (paragraph.length) {
-        out.push("<p>" + inline(paragraph.join(" ")) + "</p>");
+        out.push("<p>" + inline(paragraph.join("\n")) + "</p>");
         paragraph = [];
       }
     };
