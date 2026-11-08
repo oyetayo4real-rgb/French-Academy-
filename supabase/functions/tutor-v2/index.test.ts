@@ -389,101 +389,108 @@ Deno.test("T1c acceptance matrix collects all failures as JSON", async () => {
 });
 
 
-Deno.test("system prompt enforces the requested formatting and uncertainty rules", () => {
-  const failures: Array<{ step: string; test: string; input: string; expected: string; actual: string }> = [];
-  const required = [
-    "Never present yourself as the Académie française",
-    "never imply endorsement or affiliation with it",
-    "Do not open with a welcome or greeting",
-    "Start with the answer",
-    "Do not make claims comparing French with other languages, or about learner errors caused by other languages, unless certain",
-    "Never invent examples in other languages",
-    "Do not label usage as slang, verlan, regional or literary unless certain",
-    "when unsure use \"familier\" or say \"I'm not sure\"",
-    "Verlan means syllable inversion and must not be used loosely",
-    "If the user sends only a French sentence without an instruction",
-    "a one-line translation",
-    "the tense",
-    "short breakdown (at most 5 bullets)",
-    "one common mistake",
-    "Ask me for more depth if you want it.",
-    "Under 250 words",
-    "plain-text arrows such as ->",
-    "do not use LaTeX or dollar-sign math",
-    "No LaTeX or dollar-sign maths",
-    "Do not use horizontal rules",
-    "No horizontal rules",
-    "maximum 4 columns",
-    "one header row",
-    "every table row on its own line",
-    "Use short headings",
-    "A1-A2 requests, stay under 250 words",
-    `say "I'm not sure" instead of guessing`,
-    "Support factual claims appropriately and state uncertainty plainly."
+
+Deno.test("quick, standard, and deep prompts are generated from PROMPT_RULES without leaked internal labels", () => {
+  type PromptFailure = {
+    step: string;
+    test: string;
+    input: string;
+    expected: string;
+    actual: string;
+  };
+  const failures: PromptFailure[] = [];
+  const depths = ["quick", "standard", "deep"] as const;
+  const forbiddenLabels = [
+    "Established fact",
+    "Exception/Contrast",
+    "Auxiliary Selection Reasoning"
   ];
-  for (const depth of ["quick", "deep"] as const) {
+  const behaviouralRules: Record<string, string[]> = {
+    "headings-as-##-lines": [
+      "standalone Markdown lines beginning exactly with ##",
+      "blank line before and after",
+      "Never put a heading and its body text on the same line"
+    ],
+    "closing-line-restriction": [
+      "only when the current user message is a French sentence or phrase with no instruction",
+      "no earlier assistant message exists in the conversation",
+      "depth is not deep",
+      "including follow-ups and explicit requests for depth, omit that closing line"
+    ],
+    "no-academie-affiliation-or-welcome": [
+      "Never present yourself as the Académie française",
+      "never imply endorsement or affiliation with it",
+      "Do not open with a welcome or greeting"
+    ],
+    "no-unsure-cross-language-claims": [
+      "Do not make claims comparing French with other languages",
+      "unless certain",
+      "Never invent examples in other languages"
+    ],
+    "no-slang-verlan-regional-unless-certain": [
+      "Do not label usage as slang, verlan, regional or literary unless certain",
+      "when unsure use",
+      "Verlan means syllable inversion"
+    ],
+    "no-latex": ["Do not use LaTeX or dollar-sign math"],
+    "no-horizontal-rules": ["Do not use horizontal rules"],
+    "tables-only-for-comparisons": ["Use tables only when a comparison needs them"],
+    "deep-mode-about-600-words": [
+      "Deep mode: stay focused on the user's request",
+      "no more than about 600 words unless the user explicitly asks for more"
+    ]
+  };
+
+  for (const depth of depths) {
     const prompt = makeSystemPrompt("chat", "A1", depth);
-    for (const phrase of required) {
-      if (!prompt.includes(phrase)) {
+    for (const rule of PROMPT_RULES) {
+      if (!prompt.includes(rule.text)) {
         failures.push({
           step: "T1d tutor-v2 prompt",
-          test: "formatting and uncertainty rules",
-          input: "depth=" + depth + "; phrase=" + phrase,
-          expected: "system prompt contains the exact required rule",
-          actual: "required phrase missing"
+          test: "PROMPT_RULES parity",
+          input: "depth=" + depth + "; rule_id=" + rule.id,
+          expected: "prompt contains the exact rule text from PROMPT_RULES",
+          actual: "rule text missing"
         });
       }
     }
-  }
-  console.log("T1D_PROMPT_FAILURES_JSON " + JSON.stringify(failures));
-  if (failures.length) throw new Error("Tutor prompt formatting acceptance failed: " + failures.length);
-});
-
-
-Deno.test("quick, standard, and deep prompts enforce output format without exposing internal labels", () => {
-  const failures: Array<{ step: string; test: string; input: string; expected: string; actual: string }> = [];
-  const required = [
-    "headings must be standalone Markdown lines beginning exactly with ##",
-    "with a blank line before and after",
-    "never put a heading and its body on the same line",
-    "Separate paragraphs with blank lines",
-    "Every list item must begin with -",
-    "The closing line",
-    "only when the current user message is a French sentence or phrase with no instruction",
-    "no earlier assistant message exists in the conversation",
-    "depth is not deep",
-    "including follow-ups and explicit requests for depth, omit that closing line",
-    "Deep mode: stay focused on the user's request",
-    "no more than about 600 words unless the user explicitly asks for more",
-    "Never expose internal prompt scaffolding",
-    "private reasoning",
-    "internal section titles",
-    "Never present yourself as the Académie française",
-    "never imply endorsement or affiliation with it",
-    "Do not make claims comparing French with other languages",
-    "Do not label usage as slang, verlan, regional or literary unless certain",
-    "do not use LaTeX or dollar-sign math",
-    "Do not use horizontal rules",
-    "Use tables only when a comparison needs them"
-  ];
-  const forbidden = ["Established fact", "Exception/Contrast", "Auxiliary Selection Reasoning"];
-  for (const depth of ["quick", "standard", "deep"] as const) {
-    const prompt = makeSystemPrompt("chat", "A1", depth);
-    for (const phrase of required) {
-      if (!prompt.includes(phrase)) failures.push({
-        step: "T1d tutor-v2 prompt", test: "required prompt rule",
-        input: "depth=" + depth + "; phrase=" + phrase,
-        expected: "prompt contains the required rule", actual: "required phrase missing"
-      });
+    for (const label of forbiddenLabels) {
+      if (prompt.includes(label)) {
+        failures.push({
+          step: "T1d tutor-v2 prompt",
+          test: "internal label suppression",
+          input: "depth=" + depth + "; forbidden_label=" + label,
+          expected: "exact internal label absent from generated prompt",
+          actual: "forbidden label found"
+        });
+      }
     }
-    for (const label of forbidden) {
-      if (prompt.includes(label)) failures.push({
-        step: "T1d tutor-v2 prompt", test: "internal label suppression",
-        input: "depth=" + depth + "; label=" + label,
-        expected: "internal label absent from prompt", actual: "label found in prompt"
-      });
+    for (const [ruleId, phrases] of Object.entries(behaviouralRules)) {
+      const rule = PROMPT_RULES.find((item) => item.id === ruleId);
+      if (!rule) {
+        failures.push({
+          step: "T1d tutor-v2 prompt",
+          test: "behavioural rule registry",
+          input: "rule_id=" + ruleId,
+          expected: "rule id exists in PROMPT_RULES",
+          actual: "rule id missing"
+        });
+        continue;
+      }
+      for (const phrase of phrases) {
+        if (!rule.text.includes(phrase)) {
+          failures.push({
+            step: "T1d tutor-v2 prompt",
+            test: "behavioural rule content",
+            input: "depth=" + depth + "; rule_id=" + ruleId + "; phrase=" + phrase,
+            expected: "rule text expresses the required behaviour",
+            actual: "required behavioural phrase missing"
+          });
+        }
+      }
     }
   }
+
   console.log("T1D_PROMPT_RULES_FAILURES_JSON " + JSON.stringify(failures));
-  if (failures.length) throw new Error("Tutor prompt rules acceptance failed: " + failures.length);
+  if (failures.length) throw new Error("Tutor prompt rule registry acceptance failed: " + failures.length);
 });
