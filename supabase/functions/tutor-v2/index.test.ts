@@ -418,9 +418,10 @@ Deno.test("quick, standard, and deep prompts are generated from PROMPT_RULES wit
     ],
     "precise-forms": [
       "state the exact change",
-      "replace the infinitive ending -er with -é",
+      "For a regular -er verb",
+      "remove the infinitive ending -er and add -é",
       "manger -> mangé",
-      "Do not describe this as a generic participle ending"
+      "Do not generalize this pattern to all French verbs"
     ],
     "headings-as-##-lines": [
       "standalone Markdown lines beginning exactly with ##",
