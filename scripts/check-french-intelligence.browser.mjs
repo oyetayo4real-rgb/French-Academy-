@@ -6,12 +6,23 @@ const engineSizeBytes = statSync("features/french-intelligence-compat.mjs").size
 const swSource = readFileSync("sw.js", "utf8");
 const goldenV3 = JSON.parse(readFileSync("tests/golden/legacy-v3.json", "utf8"));
 const htmlSource = readFileSync("index.html", "utf8");
-const swCacheVersion = swSource.match(/const V="([^"]+)"/)?.[1];
-assert.ok(swCacheVersion, "Service-worker cache version V must be declared in sw.js");
+const swCacheVersion = swSource.match(/const\\s+V\\s*=\\s*"(fa-v\\d+)"/)?.[1];
+assert.ok(swCacheVersion, "Service-worker cache version V must be parsed from sw.js");
 assert.notEqual(swCacheVersion, "fa-v13", "Service-worker cache version must differ from production fa-v13");
-const coreMatch = swSource.match(/CORE=\[(.*?)\];/);
+const coreMatch = swSource.match(/CORE=\\[(.*?)\\];/s);
 assert.ok(coreMatch, "Service-worker CORE precache list must be declared");
 const corePaths = [...coreMatch[1].matchAll(/"([^"]+)"/g)].map(match => match[1]);
+const requiredPrecachePaths = [
+  "/features/ai-classroom.js",
+  "/features/ai-classroom.css",
+  "/features/french-intelligence-compat.mjs",
+  "/features/french-section12-rules.mjs",
+  "/features/french-vocabulary-m1.mjs",
+  "/index.html"
+];
+for (const path of requiredPrecachePaths) {
+  assert.ok(corePaths.includes(path), "sw.js CORE must precache " + path);
+}
 const reachable = new Set();
 const pending = ["/features/french-intelligence-compat.mjs"];
 while (pending.length) {
@@ -295,17 +306,15 @@ try {
   await offlinePage.evaluate(async () => { await navigator.serviceWorker.ready; });
   await offlinePage.reload({ waitUntil: "networkidle", timeout: 30000 });
   await offlinePage.waitForFunction(() => !!navigator.serviceWorker.controller, null, { timeout: 15000 });
-  await offlinePage.evaluate(async (expectedCacheVersion) => {
+  await offlinePage.evaluate(async ({ expectedCacheVersion, requiredPaths }) => {
     const cacheNames = await caches.keys();
-    const versionedCaches = cacheNames.filter(name => /^fa-v\d+$/.test(name));
+    const versionedCaches = cacheNames.filter(name => /^fa-v\\d+$/.test(name));
     if (!versionedCaches.includes(expectedCacheVersion)) throw new Error("Active service-worker cache missing: " + expectedCacheVersion);
     if (versionedCaches.some(name => name === "fa-v13")) throw new Error("Production cache fa-v13 must not be active in this test");
     if (versionedCaches.length !== 1 || versionedCaches[0] !== expectedCacheVersion) throw new Error("Browser active cache name does not equal sw.js V: expected " + expectedCacheVersion + "; found " + versionedCaches.join(", "));
     const cache = await caches.open(expectedCacheVersion);
     const required = [
-      "/index.html",
-      "/features/ai-classroom.js?v=20261017-2",
-      "/features/french-intelligence-compat.mjs",
+      ...requiredPaths,
       "/features/french-intelligence-core-v1.mjs",
       "/features/french-data.mjs",
       "/features/french-conjugation-paradigms.mjs"
@@ -313,7 +322,8 @@ try {
     for (const path of required) {
       if (!await cache.match(new URL(path, location.origin).href)) throw new Error("Required offline cache entry missing: " + path);
     }
-  }, swCacheVersion);
+    return { observedCacheVersion: versionedCaches[0], requiredCachedPaths: requiredPaths };
+  }, { expectedCacheVersion: swCacheVersion, requiredPaths: requiredPrecachePaths });
   if (await offlinePage.locator("#lgo").count()) await offlinePage.locator("#lgo").click();
   if (await offlinePage.locator("#hfrenchint").count() === 0) throw new Error("Could not enter home before offline test");
   await offlinePage.locator("#hfrenchint").first().click();

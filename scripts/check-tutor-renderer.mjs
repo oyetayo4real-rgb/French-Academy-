@@ -109,7 +109,22 @@ const noteText = "AI answers can contain mistakes. Check important points in a d
 check(source.includes(noteText) && source.includes('class="fa-tutor-answer-note"') && source.includes('m.role === "assistant" ?'),
   "app-owned note is appended to assistant answers", noteText, "static note after each assistant answer", "note source marker missing");
 const cacheSource = readFileSync("sw.js", "utf8");
-check(cacheSource.includes('const V="fa-v30"'), "service worker cache bumped once", "fa-v29 -> fa-v30", "fa-v30", cacheSource.match(/const V="([^"]+)"/)?.[0] || "missing");
+const cacheVersionMatch = cacheSource.match(/const\\s+V\\s*=\\s*"(fa-v\\d+)"/);
+const cacheVersion = cacheVersionMatch?.[1] || "missing";
+const corePrecacheMatch = cacheSource.match(/CORE=\\[(.*?)\\];/s);
+const corePrecachePaths = corePrecacheMatch ? [...corePrecacheMatch[1].matchAll(/"([^"]+)"/g)].map(match => match[1]) : [];
+const requiredPrecachePaths = [
+  "/features/ai-classroom.js",
+  "/features/ai-classroom.css",
+  "/features/french-intelligence-compat.mjs",
+  "/features/french-section12-rules.mjs",
+  "/features/french-vocabulary-m1.mjs",
+  "/index.html"
+];
+check(cacheVersion !== "missing", "service-worker cache version is parsed from sw.js", "const V=\\\"fa-vNN\\\"", cacheVersion, cacheVersion);
+check(!!corePrecacheMatch && requiredPrecachePaths.every(path => corePrecachePaths.includes(path)),
+  "all required Tutor and French Intelligence files are in the service-worker precache",
+  requiredPrecachePaths.join(", "), "all six paths in CORE", corePrecachePaths.join(", "));
 
 function colorParts(value) {
   const match = String(value).match(/rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)/i);

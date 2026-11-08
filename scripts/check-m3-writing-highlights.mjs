@@ -243,12 +243,26 @@ try{
   }
 
   const sw=readFileSync("sw.js","utf8");
-  assert.match(sw,/const V="fa-v29"/,"service-worker cache version bumped once for Tutor assets");
-  assert.doesNotMatch(sw,/fa-v25/,"old cache version removed");
-  for(const path of ["/index.html","/features/french-intelligence-compat.mjs","/features/french-section12-rules.mjs"]){
-    assert.ok(sw.includes('"'+path+'"'),"service-worker precaches "+path);
+  const versionMatch=sw.match(/const\\s+V\\s*=\\s*"(fa-v\\d+)"/);
+  assert.ok(versionMatch,"service-worker cache version V must be parsed from sw.js");
+  const cacheVersion=versionMatch[1];
+  const embeddedVersions=[...sw.matchAll(/"fa-v\\d+"/g)].map(match=>match[0].slice(1,-1));
+  assert.deepEqual(embeddedVersions,[cacheVersion],"sw.js must declare exactly one current versioned cache");
+  const coreMatch=sw.match(/CORE=\\[(.*?)\\];/s);
+  assert.ok(coreMatch,"service-worker CORE precache list must be declared");
+  const precachePaths=[...coreMatch[1].matchAll(/"([^"]+)"/g)].map(match=>match[1]);
+  const requiredPrecachePaths=[
+    "/features/ai-classroom.js",
+    "/features/ai-classroom.css",
+    "/features/french-intelligence-compat.mjs",
+    "/features/french-section12-rules.mjs",
+    "/features/french-vocabulary-m1.mjs",
+    "/index.html"
+  ];
+  for(const path of requiredPrecachePaths){
+    assert.ok(precachePaths.includes(path),"service-worker CORE precaches "+path);
   }
-  console.log("PASS M3 service-worker cache v28 precaches index, compatibility renderer and Section 12 rules.");
+  console.log("PASS M3 service-worker cache "+cacheVersion+" precaches all six required Tutor and French Intelligence files.");
   console.log("PASS M3 Part B: desktop/mobile Chromium; NR-03/05/07/12; eight legacy-first cases; two Apply actions; XSS; no-issue and legacy-only byte parity.");
 }finally{
   if(fixtureFailures.length){
