@@ -1,0 +1,88 @@
+name: Tutor v2 mocked reliability
+
+on:
+  pull_request:
+    paths:
+      - "supabase/functions/**"
+      - "features/ai-classroom.js"
+      - "features/ai-classroom.css"
+      - "scripts/check-tutor-retry-browser.mjs"
+      - ".github/workflows/tutor-v2-tests.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  tutor-v2-mocked-tests:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: tutor_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d tutor_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Install pinned Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: "2.5.6"
+      - name: Prepare throwaway Postgres fixtures
+        env:
+          PGPASSWORD: postgres
+        run: |
+          TEST_UID="$(cat /proc/sys/kernel/random/uuid)"
+          echo "TUTOR_TEST_UID=$TEST_UID" >> "$GITHUB_ENV"
+          psql -h 127.0.0.1 -U postgres -d tutor_test -v test_uid="$TEST_UID" -v ON_ERROR_STOP=1 <<'SQL'
+          create role anon;
+          create role authenticated;
+          create role service_role;
+          create schema auth;
+          create table auth.users (id uuid primary key);
+          create table public.profiles (id uuid primary key references auth.users(id), role text);
+          create table public.ai_usage (
+            user_id uuid not null references auth.users(id),
+            day date not null,
+            n integer not null default 0,
+            primary key (user_id, day)
+          );
+          insert into auth.users (id) values (:'test_uid');
+          insert into public.profiles (id, role) values (:'test_uid', 'student');
+          SQL
+      - name: Apply reservation SQL and run transactional acceptance/rollback
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h 127.0.0.1 -U postgres -d tutor_test -v test_uid="$TUTOR_TEST_UID" -v ON_ERROR_STOP=1 -f supabase/migrations/20261105133000_ai_use_reservations.sql
+          psql -h 127.0.0.1 -U postgres -d tutor_test -v test_uid="$TUTOR_TEST_UID" -v ON_ERROR_STOP=1 -f supabase/tests/ai_use_reservations.sql
+          psql -h 127.0.0.1 -U postgres -d tutor_test -v ON_ERROR_STOP=1 -f supabase/rollback/20261105133000_ai_use_reservations.sql
+      - name: Run tutor-v2 mocked-fetch tests (network permission not granted)
+        run: deno test supabase/functions/tutor-v2/index.test.ts
+      - name: Set up Node.js for browser test
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install pinned Playwright
+        run: npm install --no-save playwright@1.56.1
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Start local static server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/tutor-v2-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/tutor-v2-http.log
+          exit 1
+      - name: Verify retry state in Chromium using mocked API only
+        run: node scripts/check-tutor-retry-browser.mjs

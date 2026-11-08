@@ -243,7 +243,7 @@ try{
   }
 
   const sw=readFileSync("sw.js","utf8");
-  assert.match(sw,/const V="fa-v28"/,"service-worker cache version bumped");
+  assert.match(sw,/const V="fa-v29"/,"service-worker cache version bumped once for Tutor assets");
   assert.doesNotMatch(sw,/fa-v25/,"old cache version removed");
   for(const path of ["/index.html","/features/french-intelligence-compat.mjs","/features/french-section12-rules.mjs"]){
     assert.ok(sw.includes('"'+path+'"'),"service-worker precaches "+path);
