@@ -2,7 +2,7 @@
 (function () {
   "use strict";
   let FA_DAILY_CALL = null, FA_DAILY_META = null, FA_DAILY_SDK_PROMISE = null;
-  const FA_TUTOR_FUNCTION_SLUG = "tutor-v2";
+  const FA_TUTOR_FUNCTION_SLUG = "tutor-v2-next";
   const FA_SCRIPT_URL = document.currentScript && document.currentScript.src;
   const FA_AI = { level: "A1", mode: "chat", depth: "quick", messages: [], pending: false, error: "", lastRequest: null };
   function faEnsureTutorStyles() {
