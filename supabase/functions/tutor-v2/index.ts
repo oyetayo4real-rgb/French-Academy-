@@ -85,7 +85,7 @@ const catalogCache = new Map<string, CatalogEntry>();
 const defaultEnv: Env = { get: (name) => Deno.env.get(name) };
 const defaultLog = (event: string, fields: Record<string, string | number | boolean> = {}) => {
   // Only structured operational metadata is allowed here; no content or secrets.
-  console.info("[tutor-v2]", JSON.stringify({ event, ...fields }));
+  console.info("[tutor]", JSON.stringify({ event, ...fields }));
 };
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
