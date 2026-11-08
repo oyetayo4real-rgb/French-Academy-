@@ -210,7 +210,7 @@ try {
     const rect = cell.getBoundingClientRect();
     return { textLength: cell.textContent.trim().length, right: rect.right, width: rect.width };
   }));
-  check(mobileCells.length === 12 && mobileCells.every(cell => cell.right <= window.innerWidth),
+  check(mobileCells.length === 12 && mobileCells.every(cell => cell.right <= 360),
     "every production table cell fits within the 360px viewport", "exact production table", "12 cells with right edge <= 360px", mobileCells);
   check(layoutResults[0].tableCount >= 2 && layoutResults[0].scopedHeaders >= 5 && layoutResults[0].rows === 7,
     "table structure and header semantics survive DOM parsing", "table fixture", "two tables, scoped headers, four body rows", layoutResults[0]);
