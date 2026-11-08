@@ -1,4 +1,4 @@
-import { createTutorHandler, makeSystemPrompt, OVERALL_DEADLINE_MS } from "./index.ts";
+import { createTutorHandler, makeSystemPrompt, OVERALL_DEADLINE_MS, PROMPT_RULES } from "./index.ts";
 
 const uid = "00000000-0000-4000-8000-000000000001";
 const token = "eyJhbGciOiJub25lIn0." +
