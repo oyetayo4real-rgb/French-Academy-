@@ -73,6 +73,19 @@ const codePipeTable = "| Code | Meaning | | :--- | :--- | | \x60a|b\x60 | litera
 const codePipeHtml = render(codePipeTable);
 check(codePipeHtml.includes("<code>a|b</code>") && (codePipeHtml.match(/<td>/g) || []).length === 2, "pipe inside code span is not a cell delimiter", codePipeTable, "one data row with two cells", codePipeHtml);
 
+const tenseContrastInput = "Tense Contrasts\nThe passé composé contrasts with other past tenses:";
+const tenseContrastHtml = render(tenseContrastInput);
+check(tenseContrastHtml === "<p>Tense Contrasts<br>The passé composé contrasts with other past tenses:</p>",
+  "single newline inside paragraph renders as a line break",
+  tenseContrastInput, "<p>Tense Contrasts<br>The passé composé contrasts with other past tenses:</p>", tenseContrastHtml);
+
+const agreementInput = "Agreement with Avoir\nEstablished fact: When the auxiliary";
+const agreementHtml = render(agreementInput);
+check(agreementHtml === "<p>Agreement with Avoir<br>Established fact: When the auxiliary</p>",
+  "agreement example preserves the single-line break",
+  agreementInput, "<p>Agreement with Avoir<br>Established fact: When the auxiliary</p>", agreementHtml);
+
+
 const multiLineTable = [
   "| Column A | Column B | Column C |",
   "| :--- | :--- | :--- |",
