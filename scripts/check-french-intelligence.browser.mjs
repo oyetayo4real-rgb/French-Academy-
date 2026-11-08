@@ -6,10 +6,10 @@ const engineSizeBytes = statSync("features/french-intelligence-compat.mjs").size
 const swSource = readFileSync("sw.js", "utf8");
 const goldenV3 = JSON.parse(readFileSync("tests/golden/legacy-v3.json", "utf8"));
 const htmlSource = readFileSync("index.html", "utf8");
-const swCacheVersion = swSource.match(/const\\s+V\\s*=\\s*"(fa-v\\d+)"/)?.[1];
+const swCacheVersion = swSource.match(/const\s+V\s*=\s*"(fa-v\d+)"/)?.[1];
 assert.ok(swCacheVersion, "Service-worker cache version V must be parsed from sw.js");
 assert.notEqual(swCacheVersion, "fa-v13", "Service-worker cache version must differ from production fa-v13");
-const coreMatch = swSource.match(/CORE=\\[(.*?)\\];/s);
+const coreMatch = swSource.match(/CORE=\[(.*?)\];/s);
 assert.ok(coreMatch, "Service-worker CORE precache list must be declared");
 const corePaths = [...coreMatch[1].matchAll(/"([^"]+)"/g)].map(match => match[1]);
 const requiredPrecachePaths = [
@@ -308,7 +308,7 @@ try {
   await offlinePage.waitForFunction(() => !!navigator.serviceWorker.controller, null, { timeout: 15000 });
   await offlinePage.evaluate(async ({ expectedCacheVersion, requiredPaths }) => {
     const cacheNames = await caches.keys();
-    const versionedCaches = cacheNames.filter(name => /^fa-v\\d+$/.test(name));
+    const versionedCaches = cacheNames.filter(name => /^fa-v\d+$/.test(name));
     if (!versionedCaches.includes(expectedCacheVersion)) throw new Error("Active service-worker cache missing: " + expectedCacheVersion);
     if (versionedCaches.some(name => name === "fa-v13")) throw new Error("Production cache fa-v13 must not be active in this test");
     if (versionedCaches.length !== 1 || versionedCaches[0] !== expectedCacheVersion) throw new Error("Browser active cache name does not equal sw.js V: expected " + expectedCacheVersion + "; found " + versionedCaches.join(", "));

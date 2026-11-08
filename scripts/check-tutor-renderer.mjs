@@ -109,9 +109,9 @@ const noteText = "AI answers can contain mistakes. Check important points in a d
 check(source.includes(noteText) && source.includes('class="fa-tutor-answer-note"') && source.includes('m.role === "assistant" ?'),
   "app-owned note is appended to assistant answers", noteText, "static note after each assistant answer", "note source marker missing");
 const cacheSource = readFileSync("sw.js", "utf8");
-const cacheVersionMatch = cacheSource.match(/const\\s+V\\s*=\\s*"(fa-v\\d+)"/);
+const cacheVersionMatch = cacheSource.match(/const\s+V\s*=\s*"(fa-v\d+)"/);
 const cacheVersion = cacheVersionMatch?.[1] || "missing";
-const corePrecacheMatch = cacheSource.match(/CORE=\\[(.*?)\\];/s);
+const corePrecacheMatch = cacheSource.match(/CORE=\[(.*?)\];/s);
 const corePrecachePaths = corePrecacheMatch ? [...corePrecacheMatch[1].matchAll(/"([^"]+)"/g)].map(match => match[1]) : [];
 const requiredPrecachePaths = [
   "/features/ai-classroom.js",

@@ -243,12 +243,12 @@ try{
   }
 
   const sw=readFileSync("sw.js","utf8");
-  const versionMatch=sw.match(/const\\s+V\\s*=\\s*"(fa-v\\d+)"/);
+  const versionMatch=sw.match(/const\s+V\s*=\s*"(fa-v\d+)"/);
   assert.ok(versionMatch,"service-worker cache version V must be parsed from sw.js");
   const cacheVersion=versionMatch[1];
-  const embeddedVersions=[...sw.matchAll(/"fa-v\\d+"/g)].map(match=>match[0].slice(1,-1));
+  const embeddedVersions=[...sw.matchAll(/"fa-v\d+"/g)].map(match=>match[0].slice(1,-1));
   assert.deepEqual(embeddedVersions,[cacheVersion],"sw.js must declare exactly one current versioned cache");
-  const coreMatch=sw.match(/CORE=\\[(.*?)\\];/s);
+  const coreMatch=sw.match(/CORE=\[(.*?)\];/s);
   assert.ok(coreMatch,"service-worker CORE precache list must be declared");
   const precachePaths=[...coreMatch[1].matchAll(/"([^"]+)"/g)].map(match=>match[1]);
   const requiredPrecachePaths=[
