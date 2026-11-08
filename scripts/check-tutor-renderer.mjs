@@ -228,8 +228,8 @@ try {
   }));
   check(fourColumnCells.length === 8 && fourColumnCells.every(cell => cell.right <= 360),
     "four-column cells wrap within the 360px viewport", "four-column 60-character content table", "8 cells with right edge <= 360px", fourColumnCells);
-  check(layoutResults[0].tableCount >= 2 && layoutResults[0].scopedHeaders >= 5 && layoutResults[0].rows === 7,
-    "table structure and header semantics survive DOM parsing", "table fixture", "two tables, scoped headers, four body rows", layoutResults[0]);
+  check(layoutResults[0].tableCount === 4 && layoutResults[0].scopedHeaders === 12 && layoutResults[0].rows === 11,
+    "table structure and header semantics survive DOM parsing", "expanded production and four-column fixtures", "four tables, 12 scoped headers, 11 body rows", layoutResults[0]);
 
   const noteStyle = await page.evaluate(() => {
     const el = document.querySelector(".fa-tutor-answer-note");
