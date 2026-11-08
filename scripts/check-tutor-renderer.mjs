@@ -94,6 +94,16 @@ const mobileProductionTable = [
   "| Question posée | Depuis quand ? | Pendant combien de temps ? |"
 ].join("\n");
 const mobileProductionHtml = render(mobileProductionTable);
+const mobileFourColumnTable = [
+  "| Concept | Definition | Example | Translation |",
+  "| :--- | :--- | :--- | :--- |",
+  "| Regular -er verbs | Remove the infinitive ending -er and add -é | manger -> mangé | A regular pattern, not every French verb |"
+].join("\n");
+const mobileFourColumnHtml = render(mobileFourColumnTable);
+check((mobileFourColumnHtml.match(/<th scope="col">/g) || []).length === 4 &&
+  (mobileFourColumnHtml.match(/<td>/g) || []).length === 4,
+  "four-column 60-character content table renders all cells",
+  mobileFourColumnTable, "4 headers and 4 data cells", mobileFourColumnHtml);
 check((mobileProductionHtml.match(/<th scope="col">/g) || []).length === 3 &&
   (mobileProductionHtml.match(/<td>/g) || []).length === 9,
   "exact production depuis/pendant table renders all cells",
@@ -176,7 +186,7 @@ try {
   await page.goto(baseURL, { waitUntil: "domcontentloaded" });
   await page.addStyleTag({ path: cssPath });
   const fixture = '<main class="w">' +
-    '<div id="faTutorMessages"><div class="card"><div class="fa-answer">' + oneLineHtml + mobileProductionHtml + multiLineHtml + '</div>' +
+    '<div id="faTutorMessages"><div class="card"><div class="fa-answer">' + oneLineHtml + mobileProductionHtml + mobileFourColumnHtml + multiLineHtml + '</div>' +
     '<p class="fa-tutor-answer-note" role="note">' + noteText + '</p></div></div>' +
     '<footer id="lexique-credits" style="box-sizing:border-box;max-width:1120px;width:calc(100% - 32px);margin:24px auto;padding:18px 20px;border:1px solid rgba(127,127,127,.28);border-radius:14px">' +
     '<a href="https://www.lexique.org/">Lexique</a> <a href="https://creativecommons.org/licenses/by-sa/4.0/">Licence</a></footer>' +
@@ -212,6 +222,12 @@ try {
   }));
   check(mobileCells.length === 12 && mobileCells.every(cell => cell.right <= 360),
     "every production table cell fits within the 360px viewport", "exact production table", "12 cells with right edge <= 360px", mobileCells);
+  const fourColumnCells = await page.locator(".fa-table-scroll").nth(2).locator("th,td").evaluateAll(cells => cells.map(cell => {
+    const rect = cell.getBoundingClientRect();
+    return { textLength: cell.textContent.trim().length, right: rect.right, width: rect.width };
+  }));
+  check(fourColumnCells.length === 8 && fourColumnCells.every(cell => cell.right <= 360),
+    "four-column cells wrap within the 360px viewport", "four-column 60-character content table", "8 cells with right edge <= 360px", fourColumnCells);
   check(layoutResults[0].tableCount >= 2 && layoutResults[0].scopedHeaders >= 5 && layoutResults[0].rows === 7,
     "table structure and header semantics survive DOM parsing", "table fixture", "two tables, scoped headers, four body rows", layoutResults[0]);
 
