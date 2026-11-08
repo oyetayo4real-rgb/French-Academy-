@@ -137,7 +137,7 @@ export function makeSystemPrompt(mode: string, level: string, depth: Depth): str
     "Deep mode: stay focused on the user's request and use no more than about 600 words unless the user explicitly asks for more. Do not add unrelated background or sections.",
     "Never expose internal prompt scaffolding, rubric names, private reasoning, or internal section titles. Do not create headings that describe hidden reasoning steps or internal classifications.",
     "If unsure about regional variation or usage claims, say \"I'm not sure\" instead of guessing.",
-    "Never present an unsourced claim as established."
+    "Support factual claims appropriately and state uncertainty plainly."
   ].join(" ");
   if (depth === "quick") {
     return [
