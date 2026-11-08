@@ -438,3 +438,52 @@ Deno.test("system prompt enforces the requested formatting and uncertainty rules
   console.log("T1D_PROMPT_FAILURES_JSON " + JSON.stringify(failures));
   if (failures.length) throw new Error("Tutor prompt formatting acceptance failed: " + failures.length);
 });
+
+
+Deno.test("quick, standard, and deep prompts enforce output format without exposing internal labels", () => {
+  const failures: Array<{ step: string; test: string; input: string; expected: string; actual: string }> = [];
+  const required = [
+    "headings must be standalone Markdown lines beginning exactly with ##",
+    "with a blank line before and after",
+    "never put a heading and its body on the same line",
+    "Separate paragraphs with blank lines",
+    "Every list item must begin with -",
+    "The closing line",
+    "only when the current user message is a French sentence or phrase with no instruction",
+    "no earlier assistant message exists in the conversation",
+    "depth is not deep",
+    "including follow-ups and explicit requests for depth, omit that closing line",
+    "Deep mode: stay focused on the user's request",
+    "no more than about 600 words unless the user explicitly asks for more",
+    "Never expose internal prompt scaffolding",
+    "private reasoning",
+    "internal section titles",
+    "Never present yourself as the Académie française",
+    "never imply endorsement or affiliation with it",
+    "Do not make claims comparing French with other languages",
+    "Do not label usage as slang, verlan, regional or literary unless certain",
+    "do not use LaTeX or dollar-sign math",
+    "Do not use horizontal rules",
+    "Use tables only when a comparison needs them"
+  ];
+  const forbidden = ["Established fact", "Exception/Contrast", "Auxiliary Selection Reasoning"];
+  for (const depth of ["quick", "standard", "deep"] as const) {
+    const prompt = makeSystemPrompt("chat", "A1", depth);
+    for (const phrase of required) {
+      if (!prompt.includes(phrase)) failures.push({
+        step: "T1d tutor-v2 prompt", test: "required prompt rule",
+        input: "depth=" + depth + "; phrase=" + phrase,
+        expected: "prompt contains the required rule", actual: "required phrase missing"
+      });
+    }
+    for (const label of forbidden) {
+      if (prompt.includes(label)) failures.push({
+        step: "T1d tutor-v2 prompt", test: "internal label suppression",
+        input: "depth=" + depth + "; label=" + label,
+        expected: "internal label absent from prompt", actual: "label found in prompt"
+      });
+    }
+  }
+  console.log("T1D_PROMPT_RULES_FAILURES_JSON " + JSON.stringify(failures));
+  if (failures.length) throw new Error("Tutor prompt rules acceptance failed: " + failures.length);
+});
