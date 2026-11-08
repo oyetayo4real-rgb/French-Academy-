@@ -86,6 +86,19 @@ check(agreementHtml === "<p>Agreement with Avoir<br>Established fact: When the a
   agreementInput, "<p>Agreement with Avoir<br>Established fact: When the auxiliary</p>", agreementHtml);
 
 
+const mobileProductionTable = [
+  "| Critère | Depuis | Pendant |",
+  "| :--- | :--- | :--- |",
+  "| Statut de l'action | Continue (commencée dans le passé et se poursuit) | Terminée (limitée à une période précise) |",
+  "| Temps du verbe associé | Généralement le présent | Généralement un temps du passé ou du futur |",
+  "| Question posée | Depuis quand ? | Pendant combien de temps ? |"
+].join("\n");
+const mobileProductionHtml = render(mobileProductionTable);
+check((mobileProductionHtml.match(/<th scope="col">/g) || []).length === 3 &&
+  (mobileProductionHtml.match(/<td>/g) || []).length === 9,
+  "exact production depuis/pendant table renders all cells",
+  mobileProductionTable, "3 headers and 9 data cells", mobileProductionHtml);
+
 const multiLineTable = [
   "| Column A | Column B | Column C |",
   "| :--- | :--- | :--- |",
@@ -163,7 +176,7 @@ try {
   await page.goto(baseURL, { waitUntil: "domcontentloaded" });
   await page.addStyleTag({ path: cssPath });
   const fixture = '<main class="w">' +
-    '<div id="faTutorMessages"><div class="card"><div class="fa-answer">' + oneLineHtml + multiLineHtml + '</div>' +
+    '<div id="faTutorMessages"><div class="card"><div class="fa-answer">' + oneLineHtml + mobileProductionHtml + multiLineHtml + '</div>' +
     '<p class="fa-tutor-answer-note" role="note">' + noteText + '</p></div></div>' +
     '<footer id="lexique-credits" style="box-sizing:border-box;max-width:1120px;width:calc(100% - 32px);margin:24px auto;padding:18px 20px;border:1px solid rgba(127,127,127,.28);border-radius:14px">' +
     '<a href="https://www.lexique.org/">Lexique</a> <a href="https://creativecommons.org/licenses/by-sa/4.0/">Licence</a></footer>' +
@@ -191,8 +204,14 @@ try {
     };
   }));
   check(layoutResults[1].pageWidth <= 360, "360px renderer has no sideways page scroll", "360px", "<= 360", layoutResults[1].pageWidth);
-  check(layoutResults[1].wrappers.some(x => x.scrollWidth > x.clientWidth && x.overflowX === "auto"),
-    "wide tables scroll inside their wrapper", "360px table", "overflow contained by .fa-table-scroll", layoutResults[1].wrappers);
+  check(layoutResults[1].wrappers.every(x => x.scrollWidth <= x.clientWidth + 1),
+    "360px tables wrap without inner horizontal scrolling", "exact production table and existing fixtures", "every wrapper scrollWidth <= clientWidth + 1", layoutResults[1].wrappers);
+  const mobileCells = await page.locator(".fa-table-scroll").nth(1).locator("th,td").evaluateAll(cells => cells.map(cell => {
+    const rect = cell.getBoundingClientRect();
+    return { textLength: cell.textContent.trim().length, right: rect.right, width: rect.width };
+  }));
+  check(mobileCells.length === 12 && mobileCells.every(cell => cell.right <= window.innerWidth),
+    "every production table cell fits within the 360px viewport", "exact production table", "12 cells with right edge <= 360px", mobileCells);
   check(layoutResults[0].tableCount >= 2 && layoutResults[0].scopedHeaders >= 5 && layoutResults[0].rows === 7,
     "table structure and header semantics survive DOM parsing", "table fixture", "two tables, scoped headers, four body rows", layoutResults[0]);
 

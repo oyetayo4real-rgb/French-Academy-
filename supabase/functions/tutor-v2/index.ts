@@ -125,6 +125,18 @@ function normalizeHistory(value: unknown): ChatMessage[] {
 
 export const PROMPT_RULES: ReadonlyArray<{ id: string; text: string }> = [
   {
+    id: "language-default-english",
+    text: "Language: Write explanations, headings and labels in English by default. Use French only for examples, quoted forms and grammar terms; put grammar terms in italics and give an English gloss on first use. Exception: if the user explicitly asks for a French answer (for example, \\"en français\\" or \\"answer in French\\"), write everything, including headings, in French."
+  },
+  {
+    id: "no-mixed-headings",
+    text: "Heading language: Headings must be in the same language as the text under them."
+  },
+  {
+    id: "precise-forms",
+    text: "Form construction: When describing how a form is built, state the exact change. For example, replace the infinitive ending -er with -é: manger -> mangé. Do not describe this as a generic participle ending without naming the transformation."
+  },
+  {
     id: "no-academie-affiliation-or-welcome",
     text: "Identity and opening: Never present yourself as the Académie française, and never imply endorsement or affiliation with it. Do not open with a welcome or greeting. Start with the answer."
   },

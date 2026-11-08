@@ -406,6 +406,22 @@ Deno.test("quick, standard, and deep prompts are generated from PROMPT_RULES wit
     "Auxiliary Selection Reasoning"
   ];
   const behaviouralRules: Record<string, string[]> = {
+    "language-default-english": [
+      "English by default",
+      "Use French only for examples, quoted forms and grammar terms",
+      "grammar terms in italics",
+      "English gloss on first use",
+      "explicitly asks for a French answer"
+    ],
+    "no-mixed-headings": [
+      "Headings must be in the same language as the text under them"
+    ],
+    "precise-forms": [
+      "state the exact change",
+      "replace the infinitive ending -er with -é",
+      "manger -> mangé",
+      "Do not describe this as a generic participle ending"
+    ],
     "headings-as-##-lines": [
       "standalone Markdown lines beginning exactly with ##",
       "blank line before and after",
