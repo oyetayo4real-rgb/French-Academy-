@@ -17,24 +17,157 @@
   const FA_DICT = { level: "A1", mode: "dict", query: "", result: null, error: "", pending: false };
   const faEl = (id) => document.getElementById(id);
   const faSafe = (value) => esc(String(value == null ? "" : value));
-  // Display Tutor answers with consistent headings, paragraphs, lists and emphasis.
+  // Normalize model math to readable Unicode/plain text before Markdown rendering.
+  function faMathCleanup(value) {
+    let text = String(value == null ? "" : value);
+    text = text.replace(/\$\$([\s\S]*?)\$\$/g, (_, expression) => String(expression).replace(/\r?\n/g, " ").trim());
+    text = text.replace(/\$([^$\n]+)\$/g, "$1");
+    text = text.replace(/\\text\{([^{}]*)\}/g, "$1");
+    text = text.replace(/\\rightarrow|\\to/g, "→")
+      .replace(/\\leftarrow/g, "←")
+      .replace(/\\Rightarrow/g, "⇒")
+      .replace(/\\leftrightarrow/g, "↔");
+    return text;
+  }
+  // All model text is escaped first; only this renderer's allow-listed tags are emitted.
   function faMarkdown(value) {
-    const escaped = faSafe(value);
-    const inline = (line) => line.replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>").replace(/(^|[^*])\*([^*]+)\*/g, "$1<em>$2</em>");
-    const lines = escaped.split(/\r?\n/), out = []; let list = "", paragraph = [];
-    const flush = () => { if (paragraph.length) { out.push("<p>" + inline(paragraph.join(" ")) + "</p>"); paragraph = []; } };
-    const close = () => { if (list) { out.push("</" + list + ">"); list = ""; } };
-    for (const raw of lines) {
-      const line = raw.trim(); if (!line) { flush(); close(); continue; }
+    const inline = (value, depth = 0) => {
+      let text = String(value == null ? "" : value);
+      const tokens = [];
+      const hold = (html) => {
+        const marker = "\u0000FAINLINE" + tokens.length + "\u0000";
+        tokens.push([marker, html]);
+        return marker;
+      };
+      text = text.replace(/\x60([^\x60]+)\x60/g, (_, code) => hold("<code>" + faSafe(code) + "</code>"));
+      text = text.replace(/\[([^\]]+)\]\(([^)\s]+)(?:\s+["'][^"']*["'])?\)/g, (_, label, url) => {
+        if (depth > 3) return hold(faSafe(label));
+        const href = String(url || "").trim();
+        if (/^https?:\/\/[^\s"'<>]+$/i.test(href)) {
+          return hold('<a href="' + faSafe(href) + '" target="_blank" rel="noopener noreferrer">' + inline(label, depth + 1) + "</a>");
+        }
+        return hold(inline(label, depth + 1));
+      });
+      text = faSafe(text);
+      text = text.replace(/\*\*(?=\S)([\s\S]*?\S)\*\*/g, "<strong>$1</strong>");
+      text = text.replace(/\*(?=\S)([^*]*?\S)\*/g, "<em>$1</em>");
+      text = text.replace(/_(?=\S)([^_]*?\S)_/g, "<em>$1</em>");
+      for (const [marker, html] of tokens) text = text.split(marker).join(html);
+      return text;
+    };
+    const splitPipeRows = (line) => {
+      const cells = [];
+      let cell = "", inCode = false;
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === "\x60") { inCode = !inCode; cell += char; continue; }
+        if (char === "|" && !inCode) { cells.push(cell); cell = ""; }
+        else cell += char;
+      }
+      cells.push(cell);
+      if (cells.length < 3) return [];
+      if (!cells[0].trim()) cells.shift();
+      if (cells.length && !cells[cells.length - 1].trim()) cells.pop();
+      const rows = [];
+      let row = [];
+      for (const item of cells) {
+        if (!item.trim()) {
+          if (row.length) rows.push(row);
+          row = [];
+        } else row.push(item.trim());
+      }
+      if (row.length) rows.push(row);
+      return rows;
+    };
+    const isSeparator = (row) => Array.isArray(row) && row.length > 0 && row.every(cell => /^:?-{3,}:?$/.test(cell.trim()));
+    const tableAt = (lines, index) => {
+      const current = splitPipeRows(lines[index] || "");
+      if (current.length >= 3 && isSeparator(current[1]) && current[0].length === current[1].length) {
+        return { rows: current, consumed: 1 };
+      }
+      if (current.length !== 1 || index + 1 >= lines.length) return null;
+      const separator = splitPipeRows(lines[index + 1] || "");
+      if (separator.length !== 1 || !isSeparator(separator[0]) || current[0].length !== separator[0].length) return null;
+      const rows = [current[0], separator[0]];
+      let cursor = index + 2;
+      while (cursor < lines.length) {
+        const next = splitPipeRows(lines[cursor] || "");
+        if (next.length !== 1 || !next[0].length) break;
+        rows.push(next[0]);
+        cursor++;
+      }
+      return { rows, consumed: cursor - index };
+    };
+    const renderTable = (rows) => {
+      const columns = rows[0].length;
+      const header = rows[0].slice(0, columns).map(cell => "<th scope=\"col\">" + inline(cell) + "</th>").join("");
+      const body = rows.slice(2).map(row => {
+        const cells = Array.from({ length: columns }, (_, i) => row[i] || "");
+        return "<tr>" + cells.map(cell => "<td>" + inline(cell) + "</td>").join("") + "</tr>";
+      }).join("");
+      return '<div class="fa-table-scroll" role="region" aria-label="Scrollable table" tabindex="0"><table><thead><tr>' +
+        header + "</tr></thead><tbody>" + body + "</tbody></table></div>";
+    };
+    const lines = faMathCleanup(value).split(/\r?\n/);
+    const out = [];
+    let list = "", orderedNext = null, paragraph = [];
+    const flush = () => {
+      if (paragraph.length) {
+        out.push("<p>" + inline(paragraph.join(" ")) + "</p>");
+        paragraph = [];
+      }
+    };
+    const close = () => {
+      if (list) { out.push("</" + list + ">"); list = ""; }
+    };
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) { flush(); close(); continue; }
+      const table = tableAt(lines, i);
+      if (table) {
+        flush(); close(); out.push(renderTable(table.rows)); orderedNext = null;
+        i += table.consumed - 1;
+        continue;
+      }
+      if (/^(?:-{3,}|\*{3,}|_{3,})$/.test(line)) {
+        flush(); close(); out.push("<hr>"); orderedNext = null; continue;
+      }
       const heading = line.match(/^(#{1,4})\s+(.+)$/);
-      if (heading) { flush(); close(); const n = Math.min(heading[1].length + 1, 5); out.push("<h" + n + ">" + inline(heading[2]) + "</h" + n + ">"); continue; }
+      if (heading) {
+        flush(); close();
+        const level = Math.min(heading[1].length + 1, 5);
+        out.push("<h" + level + ">" + inline(heading[2]) + "</h" + level + ">");
+        orderedNext = null;
+        continue;
+      }
       const bullet = line.match(/^[-*•]\s+(.+)$/);
-      if (bullet) { flush(); if (list !== "ul") { close(); list = "ul"; out.push("<ul>"); } out.push("<li>" + inline(bullet[1]) + "</li>"); continue; }
-      const numbered = line.match(/^\d+[.)]\s+(.+)$/);
-      if (numbered) { flush(); if (list !== "ol") { close(); list = "ol"; out.push("<ol>"); } out.push("<li>" + inline(numbered[1]) + "</li>"); continue; }
+      if (bullet) {
+        flush();
+        if (list !== "ul") { close(); list = "ul"; out.push("<ul>"); }
+        out.push("<li>" + inline(bullet[1]) + "</li>");
+        continue;
+      }
+      const numbered = line.match(/^(\d+)[.)]\s+(.+)$/);
+      if (numbered) {
+        flush();
+        const number = Math.max(1, Number(numbered[1]) || 1);
+        if (list === "ol" && number === 1 && orderedNext && orderedNext !== 1) close();
+        if (list !== "ol") {
+          close();
+          out.push("<ol" + (number !== 1 ? ' start="' + number + '"' : "") + ">");
+          list = "ol";
+          orderedNext = number;
+        }
+        const valueAttribute = number !== orderedNext ? ' value="' + number + '"' : "";
+        out.push("<li" + valueAttribute + ">" + inline(numbered[2]) + "</li>");
+        orderedNext = number + 1;
+        continue;
+      }
+      close();
       paragraph.push(line);
     }
-    flush(); close(); return out.join("");
+    flush(); close();
+    return out.join("");
   }
   // Explicit entry points let the home-page buttons work even if event delegation changes.
   window.FAOpenTutor = async function () {
@@ -124,7 +257,7 @@
 
   function faTutorView() {
     if (!AUTH || !AUTH.user) { $.innerHTML = '<button class="g" id="faHome">← Home</button><h1>🤖 AI French tutor</h1><div class="card"><p>Sign in to use the tutor and keep your learning progress.</p><button id="faSignIn" style="width:100%">Sign in / Create account</button></div>'; return; }
-    const messageHtml = FA_AI.messages.map((m) => '<div class="card" style="margin:8px 0"><b>' + (m.role === "user" ? "You" : "Académie AI") + '</b><div class="fa-answer" style="margin-top:8px;line-height:1.75">' + (m.role === "assistant" ? faMarkdown(m.content) : '<div style="white-space:pre-wrap">' + faSafe(m.content) + "</div>") + "</div></div>").join("");
+    const messageHtml = FA_AI.messages.map((m) => '<div class="card" style="margin:8px 0"><b>' + (m.role === "user" ? "You" : "Académie AI") + '</b><div class="fa-answer" style="margin-top:8px;line-height:1.75">' + (m.role === "assistant" ? faMarkdown(m.content) : '<div style="white-space:pre-wrap">' + faSafe(m.content) + "</div>") + "</div>" + (m.role === "assistant" ? '<p class="fa-tutor-answer-note" role="note">AI answers can contain mistakes. Check important points in a dictionary or grammar reference.</p>' : "") + "</div>").join("");
     $.innerHTML = (typeof topbar === "function" ? topbar() : "") + '<button class="g" id="faHome">← Home</button><h1>🤖 Académie French Intelligence</h1><p class="mu">A French-language tutor for grammar, syntax, semantics, literature, history, translation, writing and contemporary usage. CEFR level is optional guidance.</p>' +
       '<div class="card"><label for="faTutorDepth"><b>Answer depth</b></label><select class="inp" id="faTutorDepth">' +
       '<option value="quick"' + (FA_AI.depth === "quick" ? " selected" : "") + '>Quick answer</option><option value="deep"' + (FA_AI.depth === "deep" ? " selected" : "") + '>Deep answer</option></select>' +
@@ -180,7 +313,7 @@
   }
 
   function faDictSourceLinks() {
-    return '<div class="card"><h3>Dictionary sources</h3><p class="mu">The in-app entry loads French-language Wiktionnaire definitions live. The app also resolves matching Académie française article links and checks CNRTL/TLFi page availability live; protected CNRTL/TLFi editorial text stays on its original site.</p><p class="mu">Wiktionnaire data is licensed CC BY-SA and attributed. Protected dictionary text is not copied from CNRTL/TLFi.</p></div>';
+    return '<div class="card fa-dictionary-sources"><h3>Dictionary sources</h3><p class="mu">The in-app entry loads French-language Wiktionnaire definitions live. The app also resolves matching Académie française article links and checks CNRTL/TLFi page availability live; protected CNRTL/TLFi editorial text stays on its original site.</p><p class="mu">Wiktionnaire data is licensed CC BY-SA and attributed. Protected dictionary text is not copied from CNRTL/TLFi.</p></div>';
   }
   function faDictHtml(d) {
     const word = faSafe(d.headword || FA_DICT.query);
@@ -199,7 +332,7 @@
     const groups = Array.isArray(d.entries) ? d.entries : [];
     const hasSourceEntry = groups.length > 0 && !d.generated;
     const list = (items) => Array.isArray(items) ? items.filter(x => x != null && String(typeof x === 'object' ? (x.text || x.form || x.value || '') : x).trim()).map(x => typeof x === 'object' ? (x.text || x.form || x.value || '') : x) : [];
-    const section = (title, body, note) => body ? '<section style="margin-top:20px;padding-top:15px;border-top:1px solid var(--line,rgba(127,127,127,.22))"><h3 style="margin:0 0 10px">' + title + '</h3>' + body + (note ? '<p class="mu" style="font-size:.84em;margin-top:8px">' + note + '</p>' : '') + '</section>' : '';
+    const section = (title, body, note, className) => body ? '<section' + (className ? ' class="' + faSafe(className) + '"' : '') + ' style="margin-top:20px;padding-top:15px;border-top:1px solid var(--line,rgba(127,127,127,.22))"><h3 style="margin:0 0 10px">' + title + '</h3>' + body + (note ? '<p class="mu" style="font-size:.84em;margin-top:8px">' + note + '</p>' : '') + '</section>' : '';
     const definitions = groups.map((group, gi) => {
       const senses = Array.isArray(group.definitions) ? group.definitions : [];
       if (!senses.length) return '';
@@ -238,7 +371,7 @@
       related.join('') +
       section('Usage and nuance', d.notes ? '<p style="line-height:1.75;margin:0">' + faSafe(d.notes) + '</p>' : '') +
       section('Etymology', d.etymology ? '<p style="line-height:1.75;margin:0">' + faSafe(d.etymology) + '</p>' : '') +
-      section('References and attribution', sources) +
+      section('References and attribution', sources, '', 'fa-references-attribution') +
       '</div>';
   }
   function faDictionaryView() {
