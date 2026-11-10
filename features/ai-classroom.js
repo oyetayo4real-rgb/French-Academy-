@@ -80,33 +80,62 @@
       if (row.length) rows.push(row);
       return rows;
     };
+    const pipeCells = (line) => {
+      const value = String(line || "").trim();
+      if (!value.startsWith("|") || !value.endsWith("|")) return [];
+      const cells = [];
+      let cell = "", inCode = false;
+      for (let i = 0; i < value.length; i++) {
+        const char = value[i];
+        if (char === "\x60") { inCode = !inCode; cell += char; continue; }
+        if (char === "|" && !inCode) { cells.push(cell.trim()); cell = ""; }
+        else cell += char;
+      }
+      cells.push(cell.trim());
+      if (!cells[0]) cells.shift();
+      if (!cells[cells.length - 1]) cells.pop();
+      return cells;
+    };
     const isSeparator = (row) => Array.isArray(row) && row.length > 0 && row.every(cell => /^:?-{3,}:?$/.test(cell.trim()));
     const tableAt = (lines, index) => {
-      const current = splitPipeRows(lines[index] || "");
-      if (current.length >= 3 && isSeparator(current[1]) && current[0].length === current[1].length) {
-        return { rows: current, consumed: 1 };
+      const compact = splitPipeRows(lines[index] || "");
+      if (compact.length >= 3 && isSeparator(compact[1]) && compact[0].length === compact[1].length) {
+        return { rows: compact, consumed: 1, hasSeparator: true };
       }
-      if (current.length !== 1 || index + 1 >= lines.length) return null;
-      const separator = splitPipeRows(lines[index + 1] || "");
-      if (separator.length !== 1 || !isSeparator(separator[0]) || current[0].length !== separator[0].length) return null;
-      const rows = [current[0], separator[0]];
+      const header = pipeCells(lines[index] || "");
+      if (header.length < 2 || index + 1 >= lines.length) return null;
+      const second = pipeCells(lines[index + 1] || "");
+      if (second.length < 2) return null;
+      if (isSeparator(second) && header.length === second.length) {
+        const rows = [header, second];
+        let cursor = index + 2;
+        while (cursor < lines.length) {
+          const next = pipeCells(lines[cursor] || "");
+          if (next.length < 2) break;
+          rows.push(next);
+          cursor++;
+        }
+        return { rows, consumed: cursor - index, hasSeparator: true };
+      }
+      if (isSeparator(header) || isSeparator(second) || second.length !== header.length) return null;
+      const rows = [header, second];
       let cursor = index + 2;
       while (cursor < lines.length) {
-        const next = splitPipeRows(lines[cursor] || "");
-        if (next.length !== 1 || !next[0].length) break;
-        rows.push(next[0]);
+        const next = pipeCells(lines[cursor] || "");
+        if (next.length !== header.length || isSeparator(next)) break;
+        rows.push(next);
         cursor++;
       }
-      return { rows, consumed: cursor - index };
+      return { rows, consumed: cursor - index, hasSeparator: false };
     };
-    const renderTable = (rows) => {
+    const renderTable = (rows, hasSeparator = true) => {
       const columns = rows[0].length;
       const header = rows[0].slice(0, columns).map(cell => "<th scope=\"col\">" + inline(cell) + "</th>").join("");
-      const body = rows.slice(2).map(row => {
+      const body = rows.slice(hasSeparator ? 2 : 1).map(row => {
         const cells = Array.from({ length: columns }, (_, i) => row[i] || "");
         return "<tr>" + cells.map(cell => "<td>" + inline(cell) + "</td>").join("") + "</tr>";
       }).join("");
-      return '<div class="fa-table-scroll" role="region" aria-label="Scrollable table" tabindex="0"><table><thead><tr>' +
+      return '<div class="fa-table-scroll" role="region" aria-label="Table" tabindex="0"><table><thead><tr>' +
         header + "</tr></thead><tbody>" + body + "</tbody></table></div>";
     };
     const lines = faMathCleanup(value).split(/\r?\n/);
@@ -124,9 +153,25 @@
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
       if (!line) { flush(); close(); continue; }
+      const fence = line.match(/^(\x60{3,}|~{3,})/);
+      if (fence) {
+        flush(); close();
+        const marker = fence[1], markerChar = marker[0];
+        let cursor = i + 1;
+        while (cursor < lines.length) {
+          const candidate = lines[cursor].trim();
+          const closes = markerChar === "\x60" ? /^\x60{3,}\s*$/.test(candidate) : /^~{3,}\s*$/.test(candidate);
+          if (closes && candidate.length >= marker.length) break;
+          cursor++;
+        }
+        out.push("<pre><code>" + faSafe(lines.slice(i + 1, cursor).join("\n")) + "</code></pre>");
+        i = cursor < lines.length ? cursor : lines.length - 1;
+        orderedNext = null;
+        continue;
+      }
       const table = tableAt(lines, i);
       if (table) {
-        flush(); close(); out.push(renderTable(table.rows)); orderedNext = null;
+        flush(); close(); out.push(renderTable(table.rows, table.hasSeparator)); orderedNext = null;
         i += table.consumed - 1;
         continue;
       }
