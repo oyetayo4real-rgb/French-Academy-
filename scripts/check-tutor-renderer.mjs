@@ -109,6 +109,40 @@ check((mobileProductionHtml.match(/<th scope="col">/g) || []).length === 3 &&
   "exact production depuis/pendant table renders all cells",
   mobileProductionTable, "3 headers and 9 data cells", mobileProductionHtml);
 
+const missingSeparatorInput = [
+  "| Preposition | Usage | French Example | English Translation |",
+  "| depuis | Ongoing action | J'attends depuis une heure. | I have been waiting for an hour. |",
+  "| depuis | Starting point | Il travaille ici depuis 2020. | He has been working here since 2020. |",
+  "| pendant | Completed duration | J'ai dormi pendant huit heures. | I slept for eight hours. |",
+  "| pendant | Time frame | Il a plu pendant le match. | It rained during the match. |"
+].join("\n");
+const missingSeparatorHtml = render(missingSeparatorInput);
+check((missingSeparatorHtml.match(/<th scope="col">/g) || []).length === 4 &&
+  (missingSeparatorHtml.match(/<td>/g) || []).length === 16 &&
+  (missingSeparatorHtml.match(/<tr>/g) || []).length === 5,
+  "header-less four-column pipe table becomes one header and four body rows",
+  missingSeparatorInput, "real table with 4 scoped headers and 4 body rows", missingSeparatorHtml);
+const singlePipeInput = "| only one pipe-delimited line |";
+const singlePipeHtml = render(singlePipeInput);
+check(singlePipeHtml.includes("<p>| only one pipe-delimited line |</p>") && !singlePipeHtml.includes("<table>"),
+  "single pipe line remains plain text", singlePipeInput, "plain paragraph, no table", singlePipeHtml);
+const differentCellCountsInput = "| First | Second |\n| One | Two | Three |";
+const differentCellCountsHtml = render(differentCellCountsInput);
+check(!differentCellCountsHtml.includes("<table>") && differentCellCountsHtml.includes("<br>"),
+  "consecutive pipe lines with different cell counts remain plain text",
+  differentCellCountsInput, "paragraph with line break, no table", differentCellCountsHtml);
+const fencedPipeInput = "\x60\x60\x60markdown\n| First | Second |\n| One | Two |\n\x60\x60\x60";
+const fencedPipeHtml = render(fencedPipeInput);
+check(!fencedPipeHtml.includes("<table>") && fencedPipeHtml.includes("<pre><code>") &&
+  fencedPipeHtml.includes("| First | Second |") && fencedPipeHtml.includes("| One | Two |"),
+  "pipe lines inside fenced code remain code",
+  fencedPipeInput, "escaped pre/code block, no table", fencedPipeHtml);
+const escapedCellInput = "| Field | Value |\n| Markup | <script>alert(1)</script> |";
+const escapedCellHtml = render(escapedCellInput);
+check(escapedCellHtml.includes("&lt;script&gt;alert(1)&lt;/script&gt;") && !/<script\b/i.test(escapedCellHtml),
+  "HTML inside missing-separator table cells stays escaped",
+  escapedCellInput, "escaped script text inside a semantic table", escapedCellHtml);
+
 const multiLineTable = [
   "| Column A | Column B | Column C |",
   "| :--- | :--- | :--- |",
@@ -186,7 +220,7 @@ try {
   await page.goto(baseURL, { waitUntil: "domcontentloaded" });
   await page.addStyleTag({ path: cssPath });
   const fixture = '<main class="w">' +
-    '<div id="faTutorMessages"><div class="card"><div class="fa-answer">' + oneLineHtml + mobileProductionHtml + mobileFourColumnHtml + multiLineHtml + '</div>' +
+    '<div id="faTutorMessages"><div class="card"><div class="fa-answer">' + oneLineHtml + mobileProductionHtml + mobileFourColumnHtml + multiLineHtml + missingSeparatorHtml + '</div>' +
     '<p class="fa-tutor-answer-note" role="note">' + noteText + '</p></div></div>' +
     '<footer id="lexique-credits" style="box-sizing:border-box;max-width:1120px;width:calc(100% - 32px);margin:24px auto;padding:18px 20px;border:1px solid rgba(127,127,127,.28);border-radius:14px">' +
     '<a href="https://www.lexique.org/">Lexique</a> <a href="https://creativecommons.org/licenses/by-sa/4.0/">Licence</a></footer>' +
@@ -227,9 +261,17 @@ try {
     return { textLength: cell.textContent.trim().length, right: rect.right, width: rect.width };
   }));
   check(fourColumnCells.length === 8 && fourColumnCells.every(cell => cell.right <= 360),
-    "four-column cells wrap within the 360px viewport", "four-column 60-character content table", "8 cells with right edge <= 360px", fourColumnCells);
-  check(layoutResults[0].tableCount === 4 && layoutResults[0].scopedHeaders === 12 && layoutResults[0].rows === 11,
-    "table structure and header semantics survive DOM parsing", "expanded production and four-column fixtures", "four tables, 12 scoped headers, 11 body rows", layoutResults[0]);
+    "four-column separator table wraps within the 360px viewport", "four-column separator table", "8 cells with right edge <= 360px", fourColumnCells);
+  const missingSeparatorCells = await page.locator(".fa-table-scroll").nth(4).locator("th,td").evaluateAll(cells => cells.map(cell => {
+    const rect = cell.getBoundingClientRect();
+    return { textLength: cell.textContent.trim().length, right: rect.right, width: rect.width };
+  }));
+  const missingSeparatorRows = await page.locator(".fa-table-scroll").nth(4).locator("tbody tr").count();
+  check(missingSeparatorCells.length === 20 && missingSeparatorRows === 4 && missingSeparatorCells.every(cell => cell.right <= 360),
+    "exact missing-separator four-column table wraps every cell at 360px",
+    missingSeparatorInput, "20 cells, 4 body rows, every right edge <= 360px", { cells: missingSeparatorCells, bodyRows: missingSeparatorRows });
+  check(layoutResults[0].tableCount === 5 && layoutResults[0].scopedHeaders === 16 && layoutResults[0].rows === 15,
+    "table structure and header semantics survive DOM parsing", "expanded production and four-column fixtures", "five tables, 16 scoped headers, 15 body rows", layoutResults[0]);
 
   const noteStyle = await page.evaluate(() => {
     const el = document.querySelector(".fa-tutor-answer-note");
