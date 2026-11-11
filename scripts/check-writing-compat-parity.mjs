@@ -65,7 +65,7 @@ const cases=[
   {input:"sa dépend",expected:"ça dépend",rule:"NR-11"},
   {input:"Nous allons a le marché",expected:"Nous allons au marché",rule:"NR-07/NR-12"},
   {input:"Sa va et elle et contente.",expected:"Ça va et elle est contente.",rule:"legacy+NR-09"},
-  {input:"Bonjor, il à mangé.",expected:"bonjour, il a mangé.",rule:"legacy+NR-07"},
+  {input:"Bonjor, il à mangé.",expected:"Bonjour, il a mangé.",rule:"legacy+NR-07"},
   {input:"Je leur ai dit",noIssue:true},
   {input:"un vieil homme",noIssue:true},
   {input:"Elle est toute contente",noIssue:true},

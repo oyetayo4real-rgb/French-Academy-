@@ -6,6 +6,10 @@ on:
       - "supabase/functions/**"
       - "features/ai-classroom.js"
       - "features/ai-classroom.css"
+      - "features/french-intelligence-compat.mjs"
+      - "features/french-intelligence-core-v1.mjs"
+      - "scripts/check-french-intelligence-correctness.mjs"
+      - "scripts/check-m3-writing-highlights.mjs"
       - "scripts/check-tutor-retry-browser.mjs"
       - ".github/workflows/tutor-v2-tests.yml"
 
