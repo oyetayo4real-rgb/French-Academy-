@@ -61,10 +61,10 @@ const legacyRuleCases=[
   {input:"Je suis faim et il et fatigué.",after:"J'ai faim et il et fatigué.",mark:"et",suggestion:"est",full:"J'ai faim et il est fatigué.",rule:"NR-09"},
   {input:"Je suis soif et elle et contente.",after:"J'ai soif et elle et contente.",mark:"et",suggestion:"est",full:"J'ai soif et elle est contente.",rule:"NR-09"},
   {input:"Sa va et il et content.",after:"Ça va et il et content.",mark:"et",suggestion:"est",full:"Ça va et il est content.",rule:"NR-09"},
-  {input:"Beacoup, ils son contents.",after:"beaucoup, ils son contents.",mark:"son",suggestion:"sont",full:"beaucoup, ils sont contents.",rule:"NR-10"},
-  {input:"Bonjor, Il à mangé.",after:"bonjour, Il à mangé.",mark:"à",suggestion:"a",full:"bonjour, Il a mangé.",rule:"NR-07"},
+  {input:"Beacoup, ils son contents.",after:"Beaucoup, ils son contents.",mark:"son",suggestion:"sont",full:"Beaucoup, ils sont contents.",rule:"NR-10"},
+  {input:"Bonjor, Il à mangé.",after:"Bonjour, Il à mangé.",mark:"à",suggestion:"a",full:"Bonjour, Il a mangé.",rule:"NR-07"},
   {input:"Sa va et elle et contente.",after:"Ça va et elle et contente.",mark:"et",suggestion:"est",full:"Ça va et elle est contente.",rule:"NR-09"},
-  {input:"Bonjor, il à mangé.",after:"bonjour, il à mangé.",mark:"à",suggestion:"a",full:"bonjour, il a mangé.",rule:"NR-07"}
+  {input:"Bonjor, il à mangé.",after:"Bonjour, il à mangé.",mark:"à",suggestion:"a",full:"Bonjour, il a mangé.",rule:"NR-07"}
 ];
 const fixtureFailures=[];
 const fixtureObservations=[];

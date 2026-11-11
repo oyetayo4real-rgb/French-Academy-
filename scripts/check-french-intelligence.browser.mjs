@@ -207,6 +207,15 @@ try {
     await page.locator('[data-fitab="correct"]').click();
     const section12WritingCases = [
       { input: "Je leurs ai dit de partir", expected: "Je leur ai dit de partir" },
+      { input: "Beacoup de gens arrivent.", expected: "Beaucoup de gens arrivent." },
+      { input: "Bonjor, madame.", expected: "Bonjour, madame." },
+      { input: "BONJOR !", expected: "Bonjour !" },
+      { input: "Merçi beaucoup.", expected: "Merci beaucoup." },
+      { input: "beacoup", expected: "beaucoup" },
+      { input: "2026 Beacoup de gens", expected: "2026 Beaucoup de gens" },
+      { input: "L'ecole", noIssue: true },
+      { input: "Ça va", noIssue: true },
+      { input: "Beaucoup de gens arrivent.", noIssue: true },
       { input: "un vieux homme", expected: "un vieil homme" },
       { input: "Je suis 20 ans et il et fatigué.", expected: "J'ai 20 ans et il est fatigué.", multi: true },
       { input: "Il à mangé et elle et fatiguée.", expected: "Il a mangé et elle est fatiguée.", multi: true },
