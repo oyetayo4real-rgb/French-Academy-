@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "ranking": "freqlemfilms2 + freqlemlivres",
+  "sources": {
+    "lexique": {
+      "file": "Lexique383.tsv",
+      "url": "https://www.lexique.org/databases/Lexique383/Lexique383.tsv",
+      "extractDate": "2019-06-04",
+      "sha256": null
+    },
+    "kaikki": {
+      "file": "kaikki.org-dictionary-French.jsonl",
+      "url": "https://kaikki.org/dictionary/French/kaikki.org-dictionary-French.jsonl",
+      "dumpDate": "2026-10-01",
+      "extractDate": "2026-10-30",
+      "sha256": null
+    }
+  },
+  "lockedAt": null
+}

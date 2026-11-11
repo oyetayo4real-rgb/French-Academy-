@@ -1,0 +1,93 @@
+name: Dictionary build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    if: startsWith(github.ref, 'refs/heads/feat/dictionary-')
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout selected dictionary branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Download pinned source files with retries
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p data/raw data/dictionary
+          curl -fL --retry 4 --retry-all-errors --retry-delay 3 --connect-timeout 30 \
+            'https://www.lexique.org/databases/Lexique383/Lexique383.tsv' \
+            -o data/raw/Lexique383.tsv
+          curl -fL --retry 4 --retry-all-errors --retry-delay 3 --connect-timeout 30 \
+            'https://kaikki.org/dictionary/French/kaikki.org-dictionary-French.jsonl' \
+            -o data/raw/kaikki.org-dictionary-French.jsonl
+          sha256sum data/raw/Lexique383.tsv data/raw/kaikki.org-dictionary-French.jsonl
+
+      - name: Establish first-run source lock or verify pinned hashes
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import crypto from 'node:crypto';
+          const lockPath='tools/dictionary/sources.lock.json';
+          const lock=JSON.parse(fs.readFileSync(lockPath,'utf8'));
+          const files=[
+            ['lexique','data/raw/Lexique383.tsv'],
+            ['kaikki','data/raw/kaikki.org-dictionary-French.jsonl']
+          ];
+          const hashes=Object.fromEntries(files.map(([name,file])=>[
+            name,crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex')
+          ]));
+          const empty=files.every(([name])=>!lock.sources[name].sha256);
+          if(empty){
+            for(const [name] of files) lock.sources[name].sha256=hashes[name];
+            lock.lockedAt=new Date().toISOString();
+            fs.writeFileSync(lockPath,JSON.stringify(lock,null,2)+'\n');
+            console.log('SOURCE LOCK ESTABLISHED: '+JSON.stringify(hashes));
+          } else {
+            for(const [name] of files){
+              if(lock.sources[name].sha256!==hashes[name]){
+                throw new Error('Pinned source checksum mismatch for '+name+': expected '+lock.sources[name].sha256+' actual '+hashes[name]);
+              }
+            }
+            console.log('SOURCE LOCK VERIFIED: '+JSON.stringify(hashes));
+          }
+          NODE
+
+      - name: Build Stage A dictionary
+        run: node tools/dictionary/build-stage-a.mjs
+
+      - name: Validate Stage A dictionary
+        run: node tools/dictionary/validate.mjs data/dictionary/common-3000.json
+
+      - name: Print raw and gzipped sizes
+        shell: bash
+        run: |
+          node -e "const m=require('./data/dictionary/common-3000.meta.json'); console.log('Dictionary raw bytes: '+m.sizes.rawBytes); console.log('Dictionary gzip bytes: '+m.sizes.gzipBytes);"
+
+      - name: Commit only generated dictionary files and source lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- data/dictionary/common-3000.json data/dictionary/common-3000.meta.json tools/dictionary/sources.lock.json
+          if git diff --cached --quiet; then
+            echo 'No generated data or lock changes to commit.'
+            exit 0
+          fi
+          git commit -m 'data(dictionary): generate Stage A common 3000'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
