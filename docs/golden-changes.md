@@ -3318,3 +3318,26 @@ Version 3 preserves every version-2 inventory entry except the single expected o
 | `inventory.conjugation.verbs[18].output.type` | `conjugate("courir")` | `Explicit present-tense paradigm · needs review` | `Irregular verb · present tense` | `courir` is the 22nd explicitly verified irregular verb; the previous `slice(0,21)` accidentally excluded it. |
 
 The v3 parity guard compares the complete parsed JSON objects and fails if any other path differs from v2. `legacy-v2.json` and `legacy-v2.sha256` remain unchanged.
+
+## Owner-approved v4 correction — sentence-initial capitalization
+
+**Approval recorded:** 2026-11-10  
+**Approver:** Oyerinde Oyetayo (repository owner)  
+**Scope:** exactly four `inventory.checkWriting.knownErrors` output fields in `legacy-v4.json`, derived from `legacy-v3.json`.
+
+The owner approves creating `legacy-v4.json` as a separately versioned successor to `legacy-v3.json`. The v4 generator may change ONLY these four outputs, each in the known-error checkWriting inventory: `known-error:11`, `known-error:13`, `known-error:14`, and `known-error:15`. The only permitted change is that the first letter of the corrected sentence keeps the capitalisation of the original input's first letter when the correction replaces the sentence's first word (for example input `Beacoup` gives `Beaucoup` instead of `beaucoup`). The generator must derive v4 from v3, assert each expected old value, reject every other JSON-path difference, and leave v1, v2 and v3 and their checksums unchanged. No other golden output is approved to change; vocabulary-hint and "no issue" text topics are outside this approval.
+
+| Golden case | Input | legacy-v3 output | Approved legacy-v4 output |
+|---|---|---|---|
+| `known-error:11` | `Beacoup de gens arrivent.` | `beaucoup de gens arrivent.` | `Beaucoup de gens arrivent.` |
+| `known-error:13` | `Bonjor, madame.` | `bonjour, madame.` | `Bonjour, madame.` |
+| `known-error:14` | `BONJOR !` | `bonjour !` | `Bonjour !` |
+| `known-error:15` | `Merçi beaucoup.` | `merci beaucoup.` | `Merci beaucoup.` |
+
+**Exact approved JSON paths**
+- `inventory.checkWriting.knownErrors[10].output`
+- `inventory.checkWriting.knownErrors[12].output`
+- `inventory.checkWriting.knownErrors[13].output`
+- `inventory.checkWriting.knownErrors[14].output`
+
+The index values above are zero-based array indices; the case identifiers are the stable one-based golden indices shown in the table. No other output, metadata, inventory count, reference, or checksum may change. The compatibility implementation may preserve the initial capital in the rendered correction, but `features/french-intelligence.js`, all v1/v2/v3 golden artifacts, and all v2/v3 generation/checking workflows remain immutable.
