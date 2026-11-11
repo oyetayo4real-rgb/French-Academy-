@@ -7,6 +7,7 @@ import { VERB_PARADIGMS, LEGACY_IRREGULARS, PARADIGM_STATUS, REGULAR_ER_CLASS, R
 
 const writingPattern = (source, flags = "gi") => new RegExp("(?<![\\p{L}\\p{N}_'’\\-])(?:" + source + ")(?![\\p{L}\\p{N}_'’\\-])", flags.includes("u") ? flags : flags + "u");
 const preserveInitialCase = (match, replacement) => match && /^\p{Lu}/u.test(match) ? replacement.charAt(0).toLocaleUpperCase("fr") + replacement.slice(1) : replacement;
+const preserveSentenceInitialCase = (source, offset, replacement) => { const firstAlphaOffset = source.search(/\p{L}/u); if (firstAlphaOffset !== offset) return replacement; const firstAlpha = source.slice(firstAlphaOffset).match(/^\p{L}/u)?.[0]; if (!firstAlpha || !/^\p{Lu}$/u.test(firstAlpha)) return replacement; return replacement.replace(/^\p{L}/u, letter => letter.toLocaleUpperCase("fr")); };
 
 import { dictionary, rules, phraseMap, phrasebookPairs, examples, persons } from "./french-data.mjs";
 
@@ -198,7 +199,7 @@ function checkWriting(q){
     [writingPattern("merçi"),()=>"merci","Merci is written without a cedilla."],
     [writingPattern("je ne comprends pas pas"),null,"Repeated adjacent pas is flagged for review; no automatic correction.",true],
   ];
-  for(const [re,rep,why,messageOnly=false] of checks){if(re.test(corrected)){re.lastIndex=0;const before=corrected;if(!messageOnly)corrected=corrected.replace(re,rep);suggestions.push({before,why,messageOnly});}}
+  for(const [re,rep,why,messageOnly=false] of checks){if(re.test(corrected)){re.lastIndex=0;const before=corrected;if(!messageOnly)corrected=corrected.replace(re,(...args)=>{const offset=args[args.length-2],source=args[args.length-1],replacement=typeof rep==="function"?rep(...args.slice(0,-2)):rep;return preserveSentenceInitialCase(source,offset,replacement);});suggestions.push({before,why,messageOnly});}}
   if (!suggestions.length) {
     const ruleFindings = checkSection12Rules(q);
     if (ruleFindings.length) {

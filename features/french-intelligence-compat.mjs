@@ -4,6 +4,7 @@ import { checkSection12Rules } from "./french-section12-rules.mjs";
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const writingPattern = (source, flags = "gi") => new RegExp("(?<![\\p{L}\\p{N}_'’\\-])(?:" + source + ")(?![\\p{L}\\p{N}_'’\\-])", flags.includes("u") ? flags : flags + "u");
 const preserveInitialCase = (match, replacement) => match && /^\p{Lu}/u.test(match) ? replacement.charAt(0).toLocaleUpperCase("fr") + replacement.slice(1) : replacement;
+const preserveSentenceInitialCase = (source, offset, replacement) => { const firstAlphaOffset = source.search(/\p{L}/u); if (firstAlphaOffset !== offset) return replacement; const firstAlpha = source.slice(firstAlphaOffset).match(/^\p{L}/u)?.[0]; if (!firstAlpha || !/^\p{Lu}$/u.test(firstAlpha)) return replacement; return replacement.replace(/^\p{L}/u, letter => letter.toLocaleUpperCase("fr")); };
 const $ = (id) => document.getElementById(id);
 let tab = "ask", history = [], busy = false;
 let activeWritingReview = null;
@@ -130,7 +131,7 @@ function checkWritingDetailed(q){
     [writingPattern("merçi"),()=>"merci","Merci is written without a cedilla."],
     [writingPattern("je ne comprends pas pas"),null,"Repeated adjacent pas is flagged for review; no automatic correction.",true],
   ];
-  for(const [re,rep,why,messageOnly=false] of checks){if(re.test(corrected)){re.lastIndex=0;const before=corrected;if(!messageOnly)corrected=corrected.replace(re,rep);suggestions.push({before,why,messageOnly});}}
+  for(const [re,rep,why,messageOnly=false] of checks){if(re.test(corrected)){re.lastIndex=0;const before=corrected;if(!messageOnly)corrected=corrected.replace(re,(...args)=>{const offset=args[args.length-2],source=args[args.length-1],replacement=typeof rep==="function"?rep(...args.slice(0,-2)):rep;return preserveSentenceInitialCase(source,offset,replacement);});suggestions.push({before,why,messageOnly});}}
   if(!suggestions.length)return {html:`<div class="fi-answer"><b>Text received</b><p>${esc(q)}</p><p>No issue from the small built-in check list was detected. That does not prove the sentence is fully correct; this is not a full grammar checker.</p></div>`,hasIssue:false,corrected:q,suggestions:[]};
   const hasCorrection = suggestions.some(s => !s.messageOnly);
   const heading = hasCorrection ? "Suggested text" : "Grammar note";
