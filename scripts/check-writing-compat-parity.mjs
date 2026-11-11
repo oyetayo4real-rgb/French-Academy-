@@ -7,7 +7,21 @@ import { checkSection12Rules } from "../features/french-section12-rules.mjs";
 
 const baseURL=process.env.FRENCH_ACADEMY_URL||"http://127.0.0.1:4173";
 const mainCompatSource=execFileSync("git",["show","75553fa1ff848714e753d3f8cd4217fb17553344:features/french-intelligence-compat.mjs"],{encoding:"utf8"});
-const goldenPaths=["tests/golden/legacy-v1.json","tests/golden/legacy-v2.json","tests/golden/legacy-v3.json"];
+const goldenPaths=["tests/golden/legacy-v1.json","tests/golden/legacy-v2.json","tests/golden/legacy-v3.json","tests/golden/legacy-v4.json"];
+const approvedV4Corrections=new Map([
+  ["Beacoup de gens arrivent.",["beaucoup de gens arrivent.","Beaucoup de gens arrivent."]],
+  ["Bonjor, madame.",["bonjour, madame.","Bonjour, madame."]],
+  ["BONJOR !",["bonjour !","Bonjour !"]],
+  ["Merçi beaucoup.",["merci beaucoup.","Merci beaucoup."]]
+]);
+function expectedMainWithApprovedV4(input,html){
+  const approved=approvedV4Corrections.get(input);
+  if(!approved)return html;
+  const before='<p class="fi-output">'+approved[0]+'</p>';
+  const after='<p class="fi-output">'+approved[1]+'</p>';
+  assert.equal(html.split(before).length-1,1,"approved v4 baseline output must occur exactly once for "+input);
+  return html.replace(before,after);
+}
 const goldenInputs=[];
 const safetyInputs=new Map();
 const cleanLegacyText=value=>typeof value==="string"&&value.includes("No issue from the small built-in check list was detected");
@@ -16,21 +30,29 @@ for(const path of goldenPaths){
   for(const groupName of ["clean","hardNegative","knownErrors"]){
     for(const row of groups[groupName]||[]){
       goldenInputs.push({source:path+":"+groupName+":"+row.index,input:row.sentence});
-      if(cleanLegacyText(row.output))safetyInputs.set(path+":"+groupName+":"+row.index,row.sentence);
+      if(path!=="tests/golden/legacy-v4.json"&&cleanLegacyText(row.output))safetyInputs.set(path+":"+groupName+":"+row.index,row.sentence);
     }
   }
   for(const row of frozen.inventory?.checkWritingCases||[]){
     const input=row.input??row.text??row.sentence,output=row.output??row.expected;
     if(typeof input==="string"){
       goldenInputs.push({source:path+":checkWritingCases:"+input,input});
-      if(cleanLegacyText(output)||output?.rule_id==="writing.no-listed-issue"||output?.kind==="no-issues")safetyInputs.set(path+":checkWritingCases:"+input,input);
+      if(path!=="tests/golden/legacy-v4.json"&&(cleanLegacyText(output)||output?.rule_id==="writing.no-listed-issue"||output?.kind==="no-issues"))safetyInputs.set(path+":checkWritingCases:"+input,input);
     }
   }
 }
 safetyInputs.set("characterization:clean sentence disclaimer","Bonjour, je m'appelle Léa.");
 assert.equal(safetyInputs.size,639,"The frozen legacy no-issue safety net must remain exactly 639 inputs.");
 const cases=[
-  {input:"Je leurs ai dit de partir",expected:"Je leur ai dit de partir",rule:"NR-03"},
+  {input:"Beacoup de gens arrivent.",expected:"Beaucoup de gens arrivent.",rule:"approved-v4:known-error:11"},
+  {input:"Bonjor, madame.",expected:"Bonjour, madame.",rule:"approved-v4:known-error:13"},
+  {input:"BONJOR !",expected:"Bonjour !",rule:"approved-v4:known-error:14"},
+  {input:"Merçi beaucoup.",expected:"Merci beaucoup.",rule:"approved-v4:known-error:15"},
+  {input:"beacoup",expected:"beaucoup",rule:"lowercase-input"},
+  {input:"2026 Beacoup de gens",expected:"2026 Beaucoup de gens",rule:"leading-digits"},
+  {input:"L'ecole",noIssue:true},
+  {input:"Ça va",noIssue:true},
+  {input:"Beaucoup de gens arrivent.",noIssue:true},  {input:"Je leurs ai dit de partir",expected:"Je leur ai dit de partir",rule:"NR-03"},
   {input:"Je suis 20 ans",expected:"J'ai 20 ans",rule:"legacy-age",legacyOnly:true},
   {input:"Je suis 20 ans et il et fatigué.",expected:"J'ai 20 ans et il est fatigué.",rule:"legacy+NR-09"},
   {input:"un vieux homme",expected:"un vieil homme",rule:"NR-05"},
@@ -91,14 +113,14 @@ try{
     const input=item.input;
     const mainApi=await pages.main.evaluate(value=>window.FrenchIntelligenceCore.checkWriting(value),input);
     const compatApi=await pages.compat.evaluate(value=>window.FrenchIntelligenceCore.checkWriting(value),input);
-    assert.equal(compatApi,mainApi,"publicCheckWriting differs from main-branch compatibility API for "+item.source+" input="+JSON.stringify(input));
+    assert.equal(compatApi,expectedMainWithApprovedV4(input,mainApi),"publicCheckWriting differs from main except the four owner-approved v4 capitalisation outputs for "+item.source+" input="+JSON.stringify(input));
     for(const page of Object.values(pages)){
       await page.locator("#fiInput").fill(input);
       await page.locator("#fiCheck").click();
     }
     const mainUI=await pages.main.locator("#fiAnswer").evaluate(node=>node.innerHTML);
     const compatUI=await pages.compat.locator("#fiAnswer").evaluate(node=>node.innerHTML);
-    assert.equal(compatUI,mainUI,"Writing UI differs from main-branch compatibility UI for "+item.source+" input="+JSON.stringify(input));
+    assert.equal(compatUI,expectedMainWithApprovedV4(input,mainUI),"Writing UI differs from main except the four owner-approved v4 capitalisation outputs for "+item.source+" input="+JSON.stringify(input));
     assert.equal(compatUI,compatApi,"Writing UI and public API must return identical markup for "+item.source);
     checked++;
   }

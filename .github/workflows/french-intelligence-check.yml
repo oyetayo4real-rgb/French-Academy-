@@ -22,6 +22,11 @@ on:
       - "scripts/check-french-intelligence-parity.mjs"
       - "scripts/check-golden-v3.mjs"
       - "scripts/generate-golden-v3.mjs"
+      - "scripts/check-golden-v4.mjs"
+      - "scripts/generate-golden-v4.mjs"
+      - ".github/workflows/golden-v4-update.yml"
+      - "tests/golden/legacy-v4.json"
+      - "tests/golden/legacy-v4.sha256"
       - "index.html"
       - "sw.js"
       - "docs/french-intelligence-linguistic-matrix.md"
@@ -139,7 +144,11 @@ jobs:
             scripts/generate-golden.mjs
             scripts/check-golden-integrity.mjs
             scripts/check-golden-v3.mjs
+            scripts/check-golden-v4.mjs
+            scripts/generate-golden-v4.mjs
             scripts/check-writing-compat-parity.mjs
+            tests/golden/legacy-v4.json
+            tests/golden/legacy-v4.sha256
             tests/golden/legacy-v1.json
           )
           missing=()
@@ -172,6 +181,8 @@ jobs:
         run: node scripts/check-golden-v2.mjs
       - name: Check approved golden v3 scope and checksum
         run: node scripts/check-golden-v3.mjs
+      - name: Check approved golden v4 scope and checksum
+        run: node scripts/check-golden-v4.mjs
       - name: Check engine integration contract
         run: node scripts/check-french-intelligence.mjs
       - name: Check Section 12 lookup and hint regressions
