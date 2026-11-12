@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "entryCount": 3000,
   "requestedCount": 3000,
   "minimumAccepted": 2800,
@@ -14,19 +14,53 @@
       "name": "kaikki.org-dictionary-French.jsonl",
       "sha256": "9053b1845fb3e045fa1fbe3f749122fa43e21b49bfa741cadd50255ae6ca0126",
       "extractDate": "2026-10-30",
-      "url": "https://kaikki.org/dictionary/French/kaikki.org-dictionary-French.jsonl",
-      "dumpDate": "2026-10-01"
+      "dumpDate": "2026-10-01",
+      "url": "https://kaikki.org/dictionary/French/kaikki.org-dictionary-French.jsonl"
     }
   },
-  "ranking": "freqlemfilms2 + freqlemlivres",
+  "ranking": "freqlemfilms2 + freqlemlivres; highest-frequency POS per lemma",
   "posDistribution": {
-    "noun": 1683,
-    "verb": 819,
-    "adjective": 394,
+    "noun": 1679,
+    "verb": 824,
+    "adjective": 393,
     "adverb": 104
   },
+  "qualityRules": {
+    "firstKaikkiEntryPerPos": true,
+    "formOnlyGlossesRemoved": true,
+    "spellingVariantsRemoved": true,
+    "registerLabels": [
+      "archaic",
+      "dated",
+      "rare",
+      "slang",
+      "colloquial",
+      "familiar",
+      "vulgar",
+      "offensive",
+      "derogatory",
+      "informal",
+      "literary"
+    ],
+    "childGlossPreferred": true,
+    "commonAlternatePosRatio": 0.1
+  },
+  "qualityStats": {
+    "homographRecordsIgnored": 1026,
+    "formOnlySensesDropped": 419,
+    "entriesSkippedNoUsableSenses": 400,
+    "variantOnlyEntriesSkipped": 26,
+    "registerTaggedSenses": 3683,
+    "entriesWithRegisterLabels": 279,
+    "parentGlossesReplacedBySubglosses": 0,
+    "secondaryPosGroups": 249,
+    "alternatePosRowsGrouped": 254,
+    "overridesApplied": 7,
+    "selectedEntries": 3000
+  },
+  "overridesApplied": 7,
   "sizes": {
-    "rawBytes": 2837474,
-    "gzipBytes": 242720
+    "rawBytes": 4677929,
+    "gzipBytes": 311701
   }
 }
