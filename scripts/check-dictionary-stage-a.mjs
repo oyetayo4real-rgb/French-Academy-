@@ -110,9 +110,15 @@ assert.ok(!importedData["oeil"]&&!importedData["coeur"],"nonstandard spelling en
 assert.ok(!JSON.stringify(importedData["chéri"]||{}).includes("Shar (shari'a)"),"chéri homograph contamination is removed");
 assert.ok(!(importedData["cuire"]?.[4]?.senses||[]).some(s=>/inflection of/i.test(s.meaning)),"cuire form-only sense removed");
 assert.ok(!(importedData["là"]?.[4]?.senses||[]).some(s=>/^referring to/i.test(s.meaning)),"là uses child glosses rather than descriptive parent glosses");
+assert.ok((importedData["final"]?.[4]?.senses||[]).every(s=>!/^expressing purpose/i.test(s.meaning)),"descriptive parent glosses are dropped in favour of child glosses");
+assert.ok((JSON.parse((await import("node:fs")).readFileSync(new URL("../data/dictionary/common-3000.meta.json",import.meta.url),"utf8")).qualityStats?.parentGlossesReplacedBySubglosses||0)>0,"hierarchical parent glosses were resolved to child glosses");
 for(const [word,entry] of Object.entries(importedData))assert.ok(!(entry[4].senses||[]).some(s=>/^(?:referring to|used to|indicating|expressing|denoting|relating to|pertaining to|describing|said of)\b/i.test(s.meaning)),word+" has no descriptive-only gloss");
 assert.ok(importedData["peu"]?.[1]==="adverb","peu primary learner-facing POS is adverb");
 assert.ok((importedData["peu"]?.[3]||"").includes("noun:"),"peu noun senses remain grouped in notes");
+assert.ok((importedData["plein"]?.[3]||"").includes("adverb:"),"plein adverb senses remain grouped in notes");
+assert.ok((importedData["plein"]?.[3]||"").includes("preposition:"),"plein preposition senses remain grouped in notes");
+assert.ok((importedData["plein"]?.[4]?.posGroups||[]).some(group=>group.pos==="preposition"),"plein preposition POS group is retained");
+assert.ok((importedData["là"]?.[4]?.reason||"").length>0,"là curated override remains sourced with a reason");
 assert.ok((importedData["même"]?.[3]||"").includes("adjective"),"même alternate common POS is grouped in notes");
 for(const [word,entry] of Object.entries(importedData))for(const sense of entry[4].senses||[]){
  const tags=(sense.tags||[]).map(x=>String(x).toLowerCase());

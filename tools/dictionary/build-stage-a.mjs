@@ -14,7 +14,7 @@ const META=process.env.META_FILE||path.join(ROOT,"data/dictionary/common-3000.me
 const LOCK=path.join(ROOT,"tools/dictionary/sources.lock.json");
 const OVERRIDES=path.join(ROOT,"tools/dictionary/overrides.json");
 const TARGET=3000,MINIMUM=2800,SOURCE="wiktionary-en via kaikki.org";
-const COMMON_POS_RATIO=0.10;
+const COMMON_POS_RATIO=0.01;
 const lock=JSON.parse(fs.readFileSync(LOCK,"utf8"));
 const overrides=JSON.parse(fs.readFileSync(OVERRIDES,"utf8"));
 const extractDate=lock.sources?.kaikki?.extractDate;
@@ -22,7 +22,8 @@ if(!extractDate)throw new Error("sources.lock.json must include sources.kaikki.e
 const normalize=value=>String(value??"").normalize("NFC").toLocaleLowerCase("fr").trim();
 const builtin=new Set(Object.keys(dictionary).map(normalize));
 const posMap=new Map([["NOM","noun"],["VER","verb"],["ADJ","adjective"],["ADV","adverb"]]);
-const wiktionaryPos=new Map([["noun","noun"],["verb","verb"],["adjective","adjective"],["adj","adjective"],["adverb","adverb"],["adv","adverb"]]);
+const wiktionaryPos=new Map([["noun","noun"],["verb","verb"],["adjective","adjective"],["adj","adjective"],["adverb","adverb"],["adv","adverb"],["preposition","preposition"],["pronoun","pronoun"],["conjunction","conjunction"],["interjection","interjection"],["determiner","determiner"],["numeral","numeral"],["article","article"],["particle","particle"]]);
+const notesOnlyPos=new Set(["preposition","pronoun","conjunction","interjection","determiner","numeral","article","particle"]);
 const FORM_ONLY=/\b(?:inflection of|plural of|feminine of|masculine of|form of|participle of|alternative form of|nonstandard spelling of|obsolete spelling of|misspelling of|superseded spelling of)\b/i;
 const VARIANT_ONLY=/\b(?:nonstandard spelling of|obsolete spelling of|misspelling of|superseded spelling of)\b/i;
 const REGISTER_LABELS=["archaic","dated","rare","slang","colloquial","familiar","vulgar","offensive","derogatory","informal","literary"];
@@ -50,19 +51,16 @@ function registerTags(tags){
  return REGISTER_LABELS.filter(label=>all.some(tag=>tag===label||tag.includes(label)));
 }
 function isDescriptiveParent(gloss){return /^(?:referring to|used to|indicating|expressing|denoting|relating to|pertaining to|describing|said of|of or relating to)\b/i.test(gloss.trim());}
+function unclearChildGloss(gloss){return /^(?:to|a|an|the|one|something|someone|thing|person|do|be|make|have|other|same|etc\.?|this|that)$/i.test(gloss.trim());}
 function senseGlosses(parent,child,hasChildren){
  const raw=child.glosses||child.raw_glosses||parent.glosses||parent.raw_glosses||[];
- const childGlosses=(Array.isArray(raw)?raw:[raw]).map(cleanGloss).filter(Boolean);
- if(!childGlosses.length)return [];
- let parentGloss="";
- if(hasChildren){
-  parentGloss=(parent.glosses||parent.raw_glosses||[]).map(cleanGloss).find(Boolean)||"";
-  stats.parentGlossesReplacedBySubglosses++;
- }
- return childGlosses.map(gloss=>{
-  if(parentGloss&&!isDescriptiveParent(parentGloss)&&gloss.length<12&&gloss.toLowerCase()!==parentGloss.toLowerCase())return parentGloss+": "+gloss;
-  return gloss;
- });
+ const glosses=(Array.isArray(raw)?raw:[raw]).map(cleanGloss).filter(Boolean);
+ if(!glosses.length)return [];
+ let parentGloss="",childGlosses=glosses;
+ if(hasChildren){parentGloss=(parent.glosses||parent.raw_glosses||[]).map(cleanGloss).find(Boolean)||"";stats.parentGlossesReplacedBySubglosses++;}
+ else if(glosses.length>1&&isDescriptiveParent(glosses[0])){parentGloss=glosses[0];childGlosses=glosses.slice(1);stats.parentGlossesReplacedBySubglosses++;}
+ else if(glosses.length===1&&isDescriptiveParent(glosses[0])&&glosses[0].includes(";")){const parts=glosses[0].split(";").map(x=>x.trim()).filter(Boolean);if(parts.length>1){parentGloss=parts.shift();childGlosses=parts;stats.parentGlossesReplacedBySubglosses++;}}
+ return childGlosses.map(gloss=>parentGloss&&!isDescriptiveParent(parentGloss)&&unclearChildGloss(gloss)&&gloss.toLowerCase()!==parentGloss.toLowerCase()?parentGloss+": "+gloss:gloss);
 }
 function entrySenses(record){
  const senses=[];
@@ -126,7 +124,7 @@ async function collectWiktionary(candidates){
   const pos=wiktionaryPos.get(normalize(record.pos));
   if(!pos)continue;
   const matching=candidateRows.filter(c=>posMap.get(c.pos)===pos);
-  if(!matching.length)continue;
+  if(!matching.length&&!notesOnlyPos.has(pos))continue;
   const key=wordKey+"\u0000"+pos;
   if(seenPos.has(key)){stats.homographRecordsIgnored++;continue;}
   seenPos.add(key);
@@ -142,7 +140,7 @@ async function collectWiktionary(candidates){
    if(tags.some(t=>t.includes("feminine")||t==="f"))forms.feminine.add(spelling);
    if(tags.some(t=>t.includes("plural")))forms.plural.add(spelling);
   }
-  matched.set(key,{senses,gender:masculine&&feminine?"m/f":masculine?"m":feminine?"f":null,forms});
+  matched.set(key,{pos,senses,frequency:matching.length?Math.max(...matching.map(x=>x.frequency)):null,gender:masculine&&feminine?"m/f":masculine?"m":feminine?"f":null,forms});
  }
  return matched;
 }
@@ -176,13 +174,22 @@ for(const rows of ordered){
   senses=override.meanings.slice(0,3).map(meaning=>({meaning:String(meaning),tags:[],registerTags:[],label:null,curated:true}));
   stats.overridesApplied++;
  }
- const alternate=[];
+ const alternate=[],alternatePosSeen=new Set();
  for(const candidate of rows){
   if(candidate===primary||candidate.frequency<primary.frequency*COMMON_POS_RATIO)continue;
   const pos=posMap.get(candidate.pos),match=matches.get(wordKey+"\u0000"+pos);
   if(!match?.senses?.length)continue;
   alternate.push({pos,frequency:Number(candidate.frequency.toFixed(2)),meanings:match.senses.map(senseText)});
+  alternatePosSeen.add(pos);
  }
+ for(const [matchKey,match] of matches){
+  if(!matchKey.startsWith(wordKey+"\u0000"))continue;
+  const pos=matchKey.slice(wordKey.length+1);
+  if(!notesOnlyPos.has(pos)||pos===primaryPos||alternatePosSeen.has(pos)||!match.senses?.length)continue;
+  alternate.push({pos,frequency:null,meanings:match.senses.map(senseText)});
+  alternatePosSeen.add(pos);
+ }
+ alternate.sort((a,b)=>a.pos.localeCompare(b.pos,"en"));
  if(alternate.length){stats.secondaryPosGroups++;stats.alternatePosRowsGrouped+=alternate.length;}
  const rawGender=primaryMatch?.gender||lexGender(primary);
  const gender=primaryPos==="noun"?rawGender:null;
