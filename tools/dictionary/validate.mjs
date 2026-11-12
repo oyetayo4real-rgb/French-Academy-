@@ -14,7 +14,7 @@ if(rawKeys.length!==keys.length) errors.push({error:"duplicate top-level JSON he
 const posCounts={};
 for (const key of keys) {
   const entry=data[key];
-  if (!key || typeof entry!=="object" || !Array.isArray(entry) || entry.length<5) { errors.push({headword:key,error:"entry must be an array with five fields"}); continue; }
+  if (!key || key.length<2 || typeof entry!=="object" || !Array.isArray(entry) || entry.length<5) { errors.push({headword:key,error:"entry must be an array with five fields"}); continue; }
   if (seen.has(normalize(key))) errors.push({headword:key,error:"duplicate headword"});
   seen.add(normalize(key));
   if (builtins.has(normalize(key))) errors.push({headword:key,error:"duplicates a built-in headword"});

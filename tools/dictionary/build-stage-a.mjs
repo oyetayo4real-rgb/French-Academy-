@@ -24,6 +24,7 @@ const builtin = new Set(Object.keys(dictionary).map(normalize));
 const posMap = new Map([["NOM","noun"],["VER","verb"],["ADJ","adjective"],["ADV","adverb"]]);
 const wiktionaryPos = new Map([["noun","noun"],["verb","verb"],["adjective","adjective"],["adj","adjective"],["adverb","adverb"],["adv","adverb"]]);
 const forbiddenTags = new Set(["obsolete","archaic","dated","rare","vulgar","offensive"]);
+const alwaysSkipSenseTags = new Set(["abbreviation","initialism","acronym","proper noun","proper-name"]);
 const forbiddenRecordTags = new Set(["proper noun","proper-name","abbreviation","initialism","acronym"]);
 
 function parseTsvLine(line) {
@@ -58,8 +59,10 @@ function entrySenses(record) {
   const senses=[];
   for (const sense of record.senses || []) {
     const tags=senseTags(sense);
+    if (tags.some(t=>[...alwaysSkipSenseTags].some(b=>t.includes(b)))) continue;
     const glosses=(sense.glosses || []).map(cleanGloss).filter(Boolean);
     if (!glosses.length) continue;
+    if (/^(abbreviation|initialism|acronym) of\b/i.test(glosses[0])) continue;
     senses.push({meaning:glosses[0],tags});
   }
   const ordinary=senses.filter(s=>!s.tags.some(t=>[...forbiddenTags].some(b=>t.includes(b))));
@@ -101,7 +104,7 @@ async function readLexique() {
     const form=(cells[indexes.form]||"").trim();
     const pos=(cells[indexes.pos]||"").trim().toUpperCase();
     if (!lemma || !form || !posMap.has(pos) || !/[\p{L}]/u.test(lemma)) continue;
-    if (lemma.length>48 || /[\d]/.test(lemma) || !/^[\p{L}'’ -]+$/u.test(lemma) || /^\p{Lu}/u.test(lemma)) continue;
+    if (lemma.length<2 || lemma.length>48 || /[\d]/.test(lemma) || !/^[\p{L}'’ -]+$/u.test(lemma) || /^\p{Lu}/u.test(lemma)) continue;
     const key=normalize(lemma)+"\u0000"+pos;
     const frequency=num(cells[indexes.films])+num(cells[indexes.books]);
     const item=grouped.get(key)||{lemma,pos,frequency:0,forms:[]};
