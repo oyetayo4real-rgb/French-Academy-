@@ -20,10 +20,10 @@
   },
   "ranking": "freqlemfilms2 + freqlemlivres; highest-frequency POS per lemma",
   "posDistribution": {
-    "noun": 1679,
+    "noun": 1678,
     "verb": 824,
     "adjective": 393,
-    "adverb": 104
+    "adverb": 105
   },
   "qualityRules": {
     "firstKaikkiEntryPerPos": true,
@@ -48,19 +48,20 @@
   "qualityStats": {
     "homographRecordsIgnored": 1026,
     "formOnlySensesDropped": 419,
-    "entriesSkippedNoUsableSenses": 400,
+    "entriesSkippedNoUsableSenses": 412,
     "variantOnlyEntriesSkipped": 26,
-    "registerTaggedSenses": 3683,
+    "registerTaggedSenses": 3676,
     "entriesWithRegisterLabels": 279,
     "parentGlossesReplacedBySubglosses": 0,
     "secondaryPosGroups": 249,
     "alternatePosRowsGrouped": 254,
+    "descriptiveGlossesDropped": 29,
     "overridesApplied": 7,
     "selectedEntries": 3000
   },
   "overridesApplied": 7,
   "sizes": {
-    "rawBytes": 4677929,
-    "gzipBytes": 311701
+    "rawBytes": 4677645,
+    "gzipBytes": 311671
   }
 }
