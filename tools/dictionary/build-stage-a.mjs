@@ -141,7 +141,11 @@ async function collectWiktionary(candidates) {
       const senses=entrySenses(record);
       if (!senses.length) continue;
       const key=normalize(candidate.lemma)+"\u0000"+candidate.pos;
-      const prior=matched.get(key)||{senses:[],forms:{feminine:new Set(),plural:new Set()}};
+      const prior=matched.get(key)||{senses:[],gender:null,forms:{feminine:new Set(),plural:new Set()}};
+      const genderTags=[...(record.tags||[]),...(record.senses||[]).flatMap(sense=>[...(sense.tags||[]),...(sense.raw_tags||[])])].map(tag=>String(tag).toLowerCase());
+      const masculine=genderTags.some(tag=>tag.includes("masculine"));
+      const feminine=genderTags.some(tag=>tag.includes("feminine"));
+      if(!prior.gender&&(masculine||feminine))prior.gender=masculine&&feminine?"m/f":masculine?"m":"f";
       for (const s of senses) if (!prior.senses.some(x=>x.meaning===s.meaning)) prior.senses.push(s);
       for (const form of record.forms||[]) {
         const spelling=String(form.form||"").trim();
@@ -178,8 +182,9 @@ for (const candidate of candidates) {
   const headword=candidate.lemma.normalize("NFC");
   if (Object.hasOwn(output,headword) || builtin.has(normalize(headword))) continue;
   const part=posMap.get(candidate.pos);
-  const lexGender=(candidate.forms.find(x=>normalize(x.form)===normalize(candidate.lemma))?.gender || candidate.forms.map(x=>x.gender).find(x=>/^(m|masc|masculin|f|fem|féminin)/i.test(x))) || null;
-  const gender=part==="noun" ? (match.gender || (lexGender ? (/^(f|fem|féminin)/i.test(lexGender) ? "f" : "m") : null)) : null;
+  const rawLexGender=(candidate.forms.find(x=>normalize(x.form)===normalize(candidate.lemma))?.gender || candidate.forms.map(x=>x.gender).find(x=>/^(m|masc|masculin|f|fem|féminin)/i.test(x))) || "";
+  const lexGender=/^(m\\s*\\/\\s*f|mf|masculin\\s*\\/\\s*féminin)/i.test(rawLexGender)?"m/f":/^(f|fem|féminin)/i.test(rawLexGender)?"f":/^(m|masc|masculin)/i.test(rawLexGender)?"m":null;
+  const gender=part==="noun" ? (match.gender || lexGender) : null;
   const lexFeminine=candidate.forms.filter(x=>x.form!==candidate.lemma && /^(f|fem|féminin)/i.test(x.gender)).map(x=>x.form);
   const lexPlural=candidate.forms.filter(x=>/^(p|plur)/i.test(x.number)).map(x=>x.form);
   const senses=match.senses.slice(0,3);
