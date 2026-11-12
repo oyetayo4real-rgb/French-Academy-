@@ -32,12 +32,20 @@ try{
       const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth);
       assert.equal(overflow,false,profile.name+" must not scroll horizontally at "+profile.viewport.width+"px");
     }
+    const unresolvedTypos=typos.filter(([input])=>!compat.lookup(input));
+    assert.ok(unresolvedTypos.length>0,"at least one typo must remain unresolved so the Did-you-mean UI is exercised");
     for(const [input,expected] of typos){
+      const existing=compat.lookup(input);
       await page.locator("#fiWord").fill(input);
       await page.locator("#fiLookup").click();
-      await page.locator("#fiAnswer").getByText("Did you mean").waitFor();
-      assert.ok((await page.locator("#fiAnswer").innerText()).includes(expected),profile.name+" typo "+input+" suggests "+expected);
-      assert.ok(await page.locator("#fiAnswer [data-fisuggest]").count()<=5);
+      if(existing){
+        await page.locator("#fiAnswer .fi-answer").waitFor({state:"visible"});
+        assert.ok((await page.locator("#fiAnswer").innerText()).includes(existing.word),profile.name+" displays recognized entry "+existing.word+" for "+input);
+      }else{
+        await page.locator("#fiAnswer").getByText("Did you mean").waitFor({state:"visible"});
+        assert.ok((await page.locator("#fiAnswer").innerText()).includes(expected),profile.name+" typo "+input+" suggests "+expected);
+        assert.ok(await page.locator("#fiAnswer [data-fisuggest]").count()<=5);
+      }
     }
     const linkContrast=await page.evaluate(()=>{
       const parse=value=>{const m=value.match(/[\d.]+/g)||[];return m.slice(0,3).map(Number)};
