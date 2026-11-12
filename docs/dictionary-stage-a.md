@@ -31,3 +31,9 @@ The generated entries are marked `source: "wiktionary-en via kaikki.org"`, `stat
 The generated data and metadata are `data/dictionary/common-3000.json` and `data/dictionary/common-3000.meta.json`. Pinned source hashes and extraction dates are recorded in `tools/dictionary/sources.lock.json`.
 
 This note records provenance and generation counts; it does not mark imported entries as linguistically reviewed. Stage 2 integration and acceptance checks remain separate.
+
+## Push-gated workflow verification
+
+On 2026-11-12, the Stage A workflow ran from the `feat/dictionary-stage-a` push gate and completed successfully (GitHub Actions run [#43210170689](https://github.com/oyetayo4real-rgb/French-Academy-/actions/runs/43210170689)). Both pinned source downloads returned HTTP 200; the JSONL endpoint was used, so the `.json` fallback was not needed. The workflow generated commit `4ec5e60f253428b2ddc145fa439be171760d8af7` with only the two files under `data/dictionary/`; the source lock already matched the downloaded SHA-256 values and was unchanged.
+
+The push trigger requires the exact `[build-dictionary]` marker in the head commit message. The workflow-generated commit message deliberately omits that marker, preventing a build loop.
