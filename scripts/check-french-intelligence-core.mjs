@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import importedDictionary from "../data/dictionary/common-3000.json" with { type: "json" };
 
 const source = readFileSync("features/french-intelligence-core-v1.mjs", "utf8");
 for (const forbidden of ["document.", "window.", "innerHTML", "<div", "<span", "<script", "localStorage", "fetch("]) {

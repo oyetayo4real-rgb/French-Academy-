@@ -12,6 +12,13 @@ on:
       - "scripts/check-m3-writing-highlights.mjs"
       - "scripts/check-tutor-retry-browser.mjs"
       - ".github/workflows/tutor-v2-tests.yml"
+      - "data/dictionary/**"
+      - "scripts/check-dictionary-stage-a.mjs"
+      - "scripts/check-dictionary-stage-a.browser.mjs"
+      - "scripts/check-french-intelligence-core.mjs"
+      - "scripts/check-french-intelligence-parity.mjs"
+      - "sw.js"
+      - "index.html"
 
 permissions:
   contents: read
@@ -75,6 +82,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - name: Verify imported dictionary registration and lookup exclusions
+        run: node scripts/check-dictionary-stage-a.mjs
       - name: Install pinned Playwright
         run: npm install --no-save playwright@1.56.1
       - name: Install Chromium
