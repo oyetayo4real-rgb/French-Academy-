@@ -22,7 +22,7 @@ export function registerImportedEntries(entries) {
   for (const [rawWord, entry] of rows) {
     if (!Array.isArray(entry) || entry.length < 5) continue;
     const metadata = entry[4];
-    if (!metadata || metadata.hint !== false || metadata.status !== "imported-unreviewed" || metadata.source !== IMPORTED_SOURCE) continue;
+    if (!metadata || metadata.hint !== false || !["imported-unreviewed","curated-draft"].includes(metadata.status) || metadata.source !== IMPORTED_SOURCE) continue;
     const word = String(rawWord).normalize("NFC").trim();
     const exact = word.toLocaleLowerCase("fr");
     if (!word || Object.hasOwn(dictionary, exact)) continue;
@@ -73,11 +73,12 @@ function findDictionaryEntry(word) {
 function importedResult(record, matches = undefined) {
   const [meaning, part, example, notes] = record.entry;
   const metadata = record.metadata;
-  return result("supported", 1, "dictionary.imported." + record.word, "Imported entry. From Wiktionary (CC BY-SA 4.0). Not yet reviewed.", {
+  const curatedDraft = metadata.status === "curated-draft";
+  return result("supported", 1, "dictionary.imported." + record.word, curatedDraft ? "Curated draft; needs French-speaker review. From Wiktionary (CC BY-SA 4.0)." : "Imported entry. From Wiktionary (CC BY-SA 4.0). Not yet reviewed.", {
     word: record.word, meaning, part, example: "", notes, builtIn: false, imported: true,
     sources: ["Wiktionary contributors via kaikki.org (CC BY-SA 4.0)"],
     importedStatus: metadata.status, source: metadata.source, licence: metadata.licence || "CC BY-SA 4.0",
-    extractDate: metadata.extractDate, gender: metadata.gender || null,
+    extractDate: metadata.extractDate, gender: metadata.gender || null, curatedDraftReason: metadata.reason || null,
     senses: Array.isArray(metadata.senses) ? metadata.senses.slice(0,3) : [],
     forms: metadata.forms || { feminine: [], plural: [] },
     lexiqueFrequency: Number(metadata.lexiqueFrequency) || 0,

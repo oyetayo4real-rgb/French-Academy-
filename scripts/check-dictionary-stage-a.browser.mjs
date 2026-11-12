@@ -1,9 +1,13 @@
 import { chromium } from "playwright";
+import fs from "node:fs";
 import assert from "node:assert/strict";
 import importedData from "../data/dictionary/common-3000.json" with { type: "json" };
 import * as compat from "../features/french-intelligence-compat.mjs";
 
 const baseURL=process.env.FRENCH_ACADEMY_URL||"http://127.0.0.1:4173";
+const sw=fs.readFileSync(new URL("../sw.js",import.meta.url),"utf8");
+const cacheVersion=sw.match(/const V="([^"]+)"/)?.[1];
+assert.ok(cacheVersion,"service worker cache version must be readable from sw.js");
 const ten=Object.keys(importedData).filter(word=>compat.lookup(word)?.imported).slice(0,10);
 const typos=[["bonjor","bonjour"],["maisonn","maison"],["chossir","choisir"],["beacoup","beaucoup"],["etudiant","étudiant"]];
 const browser=await chromium.launch({headless:true});
@@ -28,7 +32,10 @@ try{
       await page.locator("#fiAnswer .fi-imported-dictionary").waitFor({state:"visible"});
       const text=await page.locator("#fiAnswer").innerText();
       assert.ok(text.includes(word),profile.name+" displays "+word);
-      assert.match(text,/Imported entry\. From Wiktionary \(CC BY-SA 4\.0\)\. Not yet reviewed\./);
+      const status=importedData[word][4].status;
+      if(status==="curated-draft")assert.match(text,/Curated draft · needs French-speaker review/);
+      else assert.match(text,/Imported entry · not yet reviewed/);
+      for(const sense of importedData[word][4].senses||[])if(sense.label)assert.ok(text.includes("("+sense.label+")"),profile.name+" displays register label for "+word);
       const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth);
       assert.equal(overflow,false,profile.name+" must not scroll horizontally at "+profile.viewport.width+"px");
     }
@@ -63,11 +70,11 @@ try{
       await page.waitForFunction(()=>!!navigator.serviceWorker?.controller,{timeout:15000});
       await page.evaluate(()=>navigator.serviceWorker.ready);
       const cached=await page.evaluate(async()=>{
-        const cache=await caches.open("fa-v36");
+        const cache=await caches.open(cacheVersion);
         const response=await cache.match("/data/dictionary/common-3000.json");
         return !!response;
       });
-      assert.equal(cached,true,"dictionary JSON is precached in fa-v36");
+      assert.equal(cached,true,"dictionary JSON is precached in "+cacheVersion);
       await context.setOffline(true);
       await page.reload({waitUntil:"domcontentloaded",timeout:30000});
       await page.waitForFunction(()=>!!window.FrenchIntelligenceCore?.lookup,{timeout:20000});

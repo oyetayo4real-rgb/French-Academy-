@@ -48,8 +48,8 @@ function showAnswer(html){const out=$("fiAnswer");if(out)out.innerHTML=html;}
       return '<div class="fi-answer fi-imported-dictionary">'+matches.map(item=>{
         const meanings=(item.senses||[]).slice(0,3);
         const meaningHtml=meanings.length?'<ol>'+meanings.map(s=>{
-          const tags=(s.registerTags||s.tags||[]).filter(tag=>/obsolete|archaic|dated|rare|vulgar|offensive/i.test(tag));
-          return '<li>'+esc(s.meaning)+(tags.length?' <span class="fi-tag">'+esc(tags.join(', '))+'</span>':'')+'</li>';
+          const label=s.label?'<span class="fi-tag">('+esc(s.label)+')</span> ':"";
+          return '<li>'+label+esc(s.meaning)+'</li>';
         }).join('')+'</ol>':'<p>'+esc(item.meaning||d.meaning)+'</p>';
         const forms=item.forms||d.forms||{};
         return '<section class="fi-imported-entry"><h3>'+esc(item.word||d.word)+'</h3>'+meaningHtml+
@@ -57,7 +57,8 @@ function showAnswer(html){const out=$("fiAnswer");if(out)out.innerHTML=html;}
           ((item.gender||d.gender)?'<p class="fi-muted">Gender: '+esc(item.gender||d.gender)+'</p>':'')+
           ((forms.feminine||[]).length?'<p class="fi-muted">Feminine: '+esc(forms.feminine.join(', '))+'</p>':'')+
           ((forms.plural||[]).length?'<p class="fi-muted">Plural: '+esc(forms.plural.join(', '))+'</p>':'')+
-          '<span class="fi-tag">Imported entry. From Wiktionary (CC BY-SA 4.0). Not yet reviewed.</span></section>';
+          ((item.notes||d.notes)?'<p class="fi-muted">'+esc(item.notes||d.notes)+'</p>':'')+
+          '<span class="fi-tag">'+(item.importedStatus==="curated-draft"?"Curated draft · needs French-speaker review":"Imported entry · not yet reviewed")+'</span></section>';
       }).join('')+'</div>';
     }
     return `<div class="fi-answer"><h3 style="margin:0 0 6px">${esc(d.word)}</h3><div><b>Meaning:</b> ${esc(d.meaning)}</div><div class="fi-muted">Part of speech: ${esc(d.part)}</div><p><b>Example:</b> <i>${esc(d.example)}</i></p><p><b>Usage:</b> ${esc(d.notes)}</p><span class="fi-tag">Built-in entry</span></div>`;
@@ -359,7 +360,7 @@ function publicLookup(word) {
   if (value.status !== "supported") return null;
   const base={ word:value.word, meaning:value.meaning, part:value.part, example:value.example, notes:value.notes, builtIn:value.builtIn };
   if(!value.imported)return base;
-  return { ...base, imported:true, gender:value.gender, senses:value.senses, forms:value.forms, matches:value.matches, lexiqueFrequency:value.lexiqueFrequency, extractDate:value.extractDate, source:value.source, licence:value.licence };
+  return { ...base, imported:true, importedStatus:value.importedStatus, curatedDraftReason:value.curatedDraftReason, gender:value.gender, senses:value.senses, forms:value.forms, matches:value.matches, lexiqueFrequency:value.lexiqueFrequency, extractDate:value.extractDate, source:value.source, licence:value.licence };
 }
 function publicTranslate(text, direction) {
   const value = structuredCore.translate(text, direction);

@@ -6,7 +6,8 @@ import { dictionary } from "../features/french-data.mjs";
 import { VERB_PARADIGMS, REGULAR_ER_VERBS } from "../features/french-conjugation-paradigms.mjs";
 
 const importedCount=core.registerImportedEntries(importedData);
-assert.equal(importedCount,3000,"all generated entries register in the pure core");
+assert.equal(importedCount,Object.keys(importedData).length,"all generated entries register in the pure core");
+assert.equal(importedCount,3000,"Stage A rebuild retains 3,000 entries");
 const importedKeys=Object.keys(importedData);
 const ten=importedKeys.filter(word=>core.lookup(word).imported).slice(0,10);
 assert.equal(ten.length,10);
@@ -88,4 +89,32 @@ for(const [input,expected] of typos){
   assert.ok(suggestions.length<=5,input+" returns at most five suggestions");
 }
 console.log("PASS deterministic Did-you-mean suggestions: "+JSON.stringify(typos.map(([input])=>({input,suggestions:compat.dictionarySuggestions(input).map(x=>x.word)}))));
+for(const [input,canonical] of [["oeil","œil"],["coeur","cœur"]]){
+ const expected=dictionary[canonical];
+ assert.ok(expected,canonical+" must exist in the immutable built-in dictionary");
+ for(const [layer,name] of [[core,"core"],[compat,"compat"]]){
+  const result=layer.lookup(input);
+  assert.ok(result,name+" "+input+" resolves");
+  assert.equal(result.word,canonical,name+" "+input+" resolves to canonical built-in headword");
+  assert.equal(result.builtIn,true,name+" "+input+" must be built-in, not imported");
+  assert.equal(result.meaning,expected[0],name+" "+input+" meaning exactly matches built-in entry");
+  assert.equal(result.part,expected[1],name+" "+input+" POS exactly matches built-in entry");
+ }
+}
+for(const word of ["même","cent","véritable","là","chéri","peu","cuire"]){
+ const meta=importedData[word]?.[4];
+ assert.equal(meta?.status,"curated-draft",word+" is marked curated draft");
+ assert.ok(meta?.reason,word+" override includes a reason");
+}
+assert.ok(!importedData["oeil"]&&!importedData["coeur"],"nonstandard spelling entries are not imported");
+assert.ok(!JSON.stringify(importedData["chéri"]||{}).includes("Shar (shari'a)"),"chéri homograph contamination is removed");
+assert.ok(!(importedData["cuire"]?.[4]?.senses||[]).some(s=>/inflection of/i.test(s.meaning)),"cuire form-only sense removed");
+assert.ok(!(importedData["là"]?.[4]?.senses||[]).some(s=>/^referring to/i.test(s.meaning)),"là uses child glosses rather than descriptive parent glosses");
+assert.ok(importedData["peu"]?.[1]==="adverb","peu primary POS follows highest-frequency Lexique POS");
+assert.ok((importedData["même"]?.[3]||"").includes("adjective"),"même alternate common POS is grouped in notes");
+for(const [word,entry] of Object.entries(importedData))for(const sense of entry[4].senses||[]){
+ const tags=(sense.tags||[]).map(x=>String(x).toLowerCase());
+ if(tags.some(t=>t.includes("vulgar")||t.includes("offensive")))assert.ok(sense.label,word+" vulgar/offensive sense must be labelled");
+}
+console.log("PASS spelling-variant built-in identity, curated overrides, form-only exclusions, POS grouping and register labels");
 console.log("PASS Stage A imported dictionary core and compatibility acceptance");
