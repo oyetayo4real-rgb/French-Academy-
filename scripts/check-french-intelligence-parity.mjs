@@ -1,9 +1,14 @@
 import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
 import * as api from "../features/french-intelligence-compat.mjs";
+import importedDictionary from "../data/dictionary/common-3000.json" with { type: "json" };
 
 const goldenPath = "tests/golden/legacy-v4.json";
 const golden = JSON.parse(readFileSync(goldenPath, "utf8"));
+const importedSample=Object.keys(importedDictionary)[0];
+assert.ok(importedSample,"Stage A dictionary must be loaded before the full golden corpus runs");
+assert.equal(api.lookup(importedSample)?.imported,true,"compatibility adapter must register imported data before golden parity checks");
+console.log("IMPORTED DATA LOADED BEFORE GOLDEN CORPUS: "+Object.keys(importedDictionary).length+" entries");
 function exact(fn, label) {
   try { return fn(); }
   catch (error) { return { __threw: true, name: error && error.name || "Error", message: String(error && error.message || error), label }; }

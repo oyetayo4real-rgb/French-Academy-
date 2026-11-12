@@ -11,6 +11,34 @@ const preserveSentenceInitialCase = (source, offset, replacement) => { const fir
 
 import { dictionary, rules, phraseMap, phrasebookPairs, examples, persons } from "./french-data.mjs";
 
+const importedDictionary = new Map();
+const importedAccentIndex = new Map();
+const IMPORTED_SOURCE = "wiktionary-en via kaikki.org";
+
+export function registerImportedEntries(entries) {
+  importedDictionary.clear();
+  importedAccentIndex.clear();
+  const rows = entries && typeof entries === "object" ? Object.entries(entries) : [];
+  for (const [rawWord, entry] of rows) {
+    if (!Array.isArray(entry) || entry.length < 5) continue;
+    const metadata = entry[4];
+    if (!metadata || metadata.hint !== false || metadata.status !== "imported-unreviewed" || metadata.source !== IMPORTED_SOURCE) continue;
+    const word = String(rawWord).normalize("NFC").trim();
+    const exact = word.toLocaleLowerCase("fr");
+    if (!word || Object.hasOwn(dictionary, exact)) continue;
+    const record = { word, entry, metadata };
+    importedDictionary.set(exact, record);
+    const normalized = norm(word);
+    if (!importedAccentIndex.has(normalized)) importedAccentIndex.set(normalized, []);
+    importedAccentIndex.get(normalized).push(record);
+  }
+  for (const records of importedAccentIndex.values()) records.sort((a,b) =>
+    (Number(b.metadata.lexiqueFrequency) || 0) - (Number(a.metadata.lexiqueFrequency) || 0) ||
+    a.word.localeCompare(b.word, "fr")
+  );
+  return importedDictionary.size;
+}
+
 function norm(s){return String(s||"").replace(/[’‘‛ʼ＇]/g,"'").replace(/[＂“”„]/g,'"').toLocaleLowerCase("fr").normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim().replace(/\s+/g," ");}
 
 function phraseMatcher(re){
@@ -42,18 +70,41 @@ function findDictionaryEntry(word) {
   if (rev) return { word: rev, meaning: dictionary[rev][0], part: dictionary[rev][1], example: dictionary[rev][2], notes: dictionary[rev][3], builtIn: true };
   return null;
 }
+function importedResult(record, matches = undefined) {
+  const [meaning, part, example, notes] = record.entry;
+  const metadata = record.metadata;
+  return result("supported", 1, "dictionary.imported." + record.word, "Imported entry. From Wiktionary (CC BY-SA 4.0). Not yet reviewed.", {
+    word: record.word, meaning, part, example: "", notes, builtIn: false, imported: true,
+    sources: ["Wiktionary contributors via kaikki.org (CC BY-SA 4.0)"],
+    importedStatus: metadata.status, source: metadata.source, licence: metadata.licence || "CC BY-SA 4.0",
+    extractDate: metadata.extractDate, gender: metadata.gender || null,
+    senses: Array.isArray(metadata.senses) ? metadata.senses.slice(0,3) : [],
+    forms: metadata.forms || { feminine: [], plural: [] },
+    lexiqueFrequency: Number(metadata.lexiqueFrequency) || 0,
+    ...(matches ? { matches: matches.map(item => ({
+      word: item.word, meaning: item.entry[0], part: item.entry[1], gender: item.metadata.gender || null, forms: item.metadata.forms || { feminine: [], plural: [] },
+      senses: Array.isArray(item.metadata.senses) ? item.metadata.senses.slice(0,3) : [],
+      lexiqueFrequency: Number(item.metadata.lexiqueFrequency) || 0
+    })) } : {})
+  });
+}
 function lookup(word) {
-  const entry = findDictionaryEntry(word);
+  const input = String(word ?? "").trim();
+  const entry = findDictionaryEntry(input);
   if (entry) return result("supported", 1, "dictionary." + entry.word, entry.notes, entry);
-  if (!entry) {
-    const input = String(word ?? "").trim();
-    const normalized = normalizeOeLigature(input);
-    if (normalized !== input) {
-      const normalizedEntry = findDictionaryEntry(normalized);
-      if (normalizedEntry) return result("supported", 1, "dictionary." + normalizedEntry.word, normalizedEntry.notes, normalizedEntry);
-    }
+  const normalizedOe = normalizeOeLigature(input);
+  if (normalizedOe !== input) {
+    const normalizedEntry = findDictionaryEntry(normalizedOe);
+    if (normalizedEntry) return result("supported", 1, "dictionary." + normalizedEntry.word, normalizedEntry.notes, normalizedEntry);
   }
-  return result("unsupported", 0, "dictionary.no-match", "No built-in dictionary entry matched this input.", { query: String(word || "").trim() });
+  const exactKey = input.toLocaleLowerCase("fr");
+  const exactImported = importedDictionary.get(exactKey);
+  const normalizedMatches = importedAccentIndex.get(norm(input)) || [];
+  const isUnaccented = !/\p{M}/u.test(input.normalize("NFD"));
+  if (isUnaccented && normalizedMatches.length > 1) return importedResult(normalizedMatches[0], normalizedMatches);
+  if (exactImported) return importedResult(exactImported);
+  if (normalizedMatches.length) return importedResult(normalizedMatches[0], normalizedMatches.length > 1 ? normalizedMatches : undefined);
+  return result("unsupported", 0, "dictionary.no-match", "No built-in or imported dictionary entry matched this input.", { query: input });
 }
 function translate(text, direction) {
   const q = String(text || "").trim();
@@ -243,4 +294,4 @@ export function normalizeOeLigature(word) {
 
 export { lookup, translate, conjugate, answerQuestion, checkWriting, writingPattern };
 
-export const FrenchIntelligenceCoreV1 = Object.freeze({ lookup, translate, conjugate, answerQuestion, checkWriting });
+export const FrenchIntelligenceCoreV1 = Object.freeze({ lookup, translate, conjugate, answerQuestion, checkWriting, registerImportedEntries });

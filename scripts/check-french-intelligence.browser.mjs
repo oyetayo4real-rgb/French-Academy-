@@ -18,6 +18,7 @@ const requiredPrecachePaths = [
   "/features/french-intelligence-compat.mjs",
   "/features/french-section12-rules.mjs",
   "/features/french-vocabulary-m1.mjs",
+  "/data/dictionary/common-3000.json",
   "/index.html"
 ];
 for (const path of requiredPrecachePaths) {
