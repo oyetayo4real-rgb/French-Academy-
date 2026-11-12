@@ -18,8 +18,8 @@ try{
     page.on("pageerror",error=>results.push({profile:profile.name,error:error.message}));
     await page.goto(baseURL,{waitUntil:"networkidle",timeout:30000});
     await page.waitForFunction(()=>!!window.FrenchIntelligenceCore?.lookup,{timeout:20000});
-    if(await page.locator("#hfrenchint").count())await page.locator("#hfrenchint").first().click();
-    else await page.locator("#lgo").click().catch(()=>{});
+    if(await page.locator("#hfrenchint").count()===0)await page.locator("#lgo").click();
+    await page.locator("#hfrenchint").first().click();
     await page.locator("#fiWord").waitFor({state:"visible",timeout:15000});
     for(const word of ten){
       await page.locator("#fiWord").fill(word);
@@ -62,7 +62,8 @@ try{
       await context.setOffline(true);
       await page.reload({waitUntil:"domcontentloaded",timeout:30000});
       await page.waitForFunction(()=>!!window.FrenchIntelligenceCore?.lookup,{timeout:20000});
-      if(await page.locator("#hfrenchint").count())await page.locator("#hfrenchint").first().click();
+      if(await page.locator("#hfrenchint").count()===0)await page.locator("#lgo").click();
+      await page.locator("#hfrenchint").first().click();
       await page.locator("#fiWord").waitFor({state:"visible"});
       await page.locator("#fiWord").fill(ten[0]);
       await page.locator("#fiLookup").click();
