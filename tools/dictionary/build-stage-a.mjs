@@ -119,6 +119,7 @@ async function collectWiktionary(candidates){
  for await(const line of rl){
   lineNo++;if(!line.trim())continue;
   let record;try{record=JSON.parse(line);}catch(error){throw new Error("Invalid Wiktionary JSONL at line "+lineNo+": "+error.message);}
+  if(normalize(record.lang_code)!=="fr"||normalize(record.lang)!=="french")continue;
   const wordKey=normalize(record.word),candidateRows=byWord.get(wordKey);
   if(!candidateRows)continue;
   const pos=wiktionaryPos.get(normalize(record.pos));

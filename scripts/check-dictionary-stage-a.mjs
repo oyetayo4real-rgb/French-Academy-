@@ -118,6 +118,7 @@ assert.ok((importedData["peu"]?.[3]||"").includes("noun:"),"peu noun senses rema
 assert.ok((importedData["plein"]?.[3]||"").includes("adverb:"),"plein adverb senses remain grouped in notes");
 assert.ok((importedData["plein"]?.[3]||"").includes("preposition:"),"plein preposition senses remain grouped in notes");
 assert.ok((importedData["plein"]?.[4]?.posGroups||[]).some(group=>group.pos==="preposition"),"plein preposition POS group is retained");
+assert.ok((importedData["plein"]?.[4]?.posGroups||[]).some(group=>group.pos==="adverb"),"plein adverb POS group is retained");
 assert.ok((importedData["là"]?.[4]?.reason||"").length>0,"là curated override remains sourced with a reason");
 assert.ok((importedData["même"]?.[3]||"").includes("adjective"),"même alternate common POS is grouped in notes");
 for(const [word,entry] of Object.entries(importedData))for(const sense of entry[4].senses||[]){
