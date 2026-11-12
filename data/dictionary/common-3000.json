@@ -2354,7 +2354,7 @@
     }
   ],
   "cas": [
-    "case, situation; case; initialism of cote air santé (“air quality health index”): AQHI",
+    "case, situation; case; plural of CA",
     "noun (m)",
     "",
     "Imported lexical entry; meanings are unreviewed.",
@@ -2382,21 +2382,17 @@
           ]
         },
         {
-          "meaning": "initialism of cote air santé (“air quality health index”): AQHI",
+          "meaning": "plural of CA",
           "tags": [
-            "canada",
-            "abbreviation",
-            "alt-of",
-            "feminine",
-            "initialism"
+            "form-of",
+            "masculine",
+            "plural"
           ]
         }
       ],
       "forms": {
         "feminine": [],
-        "plural": [
-          "CASs"
-        ]
+        "plural": []
       }
     }
   ],
@@ -8591,7 +8587,7 @@
     }
   ],
   "cheval": [
-    "horse; ellipsis of cheval-vapeur (“horsepower”); ellipsis of cheval fiscal (“tax horsepower”)",
+    "horse; horse, H (narcotic)",
     "noun (m)",
     "",
     "Imported lexical entry; meanings are unreviewed.",
@@ -8611,21 +8607,10 @@
           ]
         },
         {
-          "meaning": "ellipsis of cheval-vapeur (“horsepower”)",
+          "meaning": "horse, H (narcotic)",
           "tags": [
-            "abbreviation",
-            "alt-of",
-            "ellipsis",
-            "masculine"
-          ]
-        },
-        {
-          "meaning": "ellipsis of cheval fiscal (“tax horsepower”)",
-          "tags": [
-            "abbreviation",
-            "alt-of",
-            "ellipsis",
-            "masculine"
+            "masculine",
+            "slang"
           ]
         }
       ],
@@ -11836,7 +11821,7 @@
     }
   ],
   "copain": [
-    "friend, chum, mate (UK), pal, buddy; ellipsis of petit copain: boyfriend (boy/man to whom one has a romantic attachment)",
+    "friend, chum, mate (UK), pal, buddy",
     "noun (m)",
     "",
     "Imported lexical entry; meanings are unreviewed.",
@@ -11852,16 +11837,6 @@
         {
           "meaning": "friend, chum, mate (UK), pal, buddy",
           "tags": [
-            "masculine"
-          ]
-        },
-        {
-          "meaning": "ellipsis of petit copain: boyfriend (boy/man to whom one has a romantic attachment)",
-          "tags": [
-            "abbreviation",
-            "alt-of",
-            "ellipsis",
-            "informal",
             "masculine"
           ]
         }
@@ -15876,7 +15851,7 @@
     }
   ],
   "boîte": [
-    "box (a container); tin, can; ellipsis of boîte de nuit (“club, nightclub”)",
+    "box (a container); tin, can; company, employer",
     "noun (f)",
     "",
     "Imported lexical entry; meanings are unreviewed.",
@@ -15902,12 +15877,9 @@
           ]
         },
         {
-          "meaning": "ellipsis of boîte de nuit (“club, nightclub”)",
+          "meaning": "company, employer",
           "tags": [
-            "abbreviation",
-            "alt-of",
             "colloquial",
-            "ellipsis",
             "feminine"
           ]
         }
@@ -17462,7 +17434,7 @@
     }
   ],
   "gauche": [
-    "the left, the left-hand side; the left (the left-wing political parties as a group; citizens holding left-wing views as; ellipsis of poing gauche (“left fist”)",
+    "the left, the left-hand side; the left (the left-wing political parties as a group; citizens holding left-wing views as",
     "noun",
     "",
     "Imported lexical entry; meanings are unreviewed.",
@@ -17485,15 +17457,6 @@
           "meaning": "the left (the left-wing political parties as a group; citizens holding left-wing views as",
           "tags": [
             "feminine"
-          ]
-        },
-        {
-          "meaning": "ellipsis of poing gauche (“left fist”)",
-          "tags": [
-            "abbreviation",
-            "alt-of",
-            "ellipsis",
-            "masculine"
           ]
         }
       ],
@@ -29729,33 +29692,6 @@
       }
     }
   ],
-  "a": [
-    "a, the name of the Latin-script letter A",
-    "noun (m)",
-    "",
-    "Imported lexical entry; meanings are unreviewed.",
-    {
-      "hint": false,
-      "source": "wiktionary-en via kaikki.org",
-      "extractDate": "2026-10-30",
-      "lexiqueFrequency": 140.01,
-      "status": "imported-unreviewed",
-      "licence": "CC BY-SA 4.0",
-      "gender": "m",
-      "senses": [
-        {
-          "meaning": "a, the name of the Latin-script letter A",
-          "tags": []
-        }
-      ],
-      "forms": {
-        "feminine": [],
-        "plural": [
-          "as"
-        ]
-      }
-    }
-  ],
   "régler": [
     "to sort out, to settle (a problem, a bill); to set, to adjust; to regulate",
     "verb",
@@ -31814,7 +31750,7 @@
     }
   ],
   "radio": [
-    "radio, tuner; short for radiographie; short for radiotélégramme",
+    "radio, tuner",
     "noun",
     "",
     "Imported lexical entry; meanings are unreviewed.",
@@ -31831,22 +31767,6 @@
           "meaning": "radio, tuner",
           "tags": [
             "feminine"
-          ]
-        },
-        {
-          "meaning": "short for radiographie",
-          "tags": [
-            "abbreviation",
-            "alt-of",
-            "feminine"
-          ]
-        },
-        {
-          "meaning": "short for radiotélégramme",
-          "tags": [
-            "abbreviation",
-            "alt-of",
-            "masculine"
           ]
         }
       ],
@@ -38580,39 +38500,6 @@
           "vous piquez",
           "vous piquiez",
           "vous piquâtes"
-        ]
-      }
-    }
-  ],
-  "mme": [
-    "abbreviation of Madame",
-    "noun (f)",
-    "",
-    "Imported lexical entry; meanings are unreviewed.",
-    {
-      "hint": false,
-      "source": "wiktionary-en via kaikki.org",
-      "extractDate": "2026-10-30",
-      "lexiqueFrequency": 114.88,
-      "status": "imported-unreviewed",
-      "licence": "CC BY-SA 4.0",
-      "gender": "f",
-      "senses": [
-        {
-          "meaning": "abbreviation of Madame",
-          "tags": [
-            "abbreviation",
-            "alt-of"
-          ]
-        }
-      ],
-      "forms": {
-        "feminine": [
-          "Mme"
-        ],
-        "plural": [
-          "Mmes",
-          "Mᵐᵉˢ"
         ]
       }
     }
@@ -46088,7 +45975,7 @@
     }
   ],
   "appareil": [
-    "apparatus, device; telephone",
+    "apparatus, device; telephone; aircraft",
     "noun (m)",
     "",
     "Imported lexical entry; meanings are unreviewed.",
@@ -46109,6 +45996,12 @@
         },
         {
           "meaning": "telephone",
+          "tags": [
+            "masculine"
+          ]
+        },
+        {
+          "meaning": "aircraft",
           "tags": [
             "masculine"
           ]
@@ -49128,35 +49021,6 @@
           "nettoyés",
           "simple imperative of avoir + past participle"
         ]
-      }
-    }
-  ],
-  "e": [
-    "abbreviation of est; east",
-    "noun (m)",
-    "",
-    "Imported lexical entry; meanings are unreviewed.",
-    {
-      "hint": false,
-      "source": "wiktionary-en via kaikki.org",
-      "extractDate": "2026-10-30",
-      "lexiqueFrequency": 89.9,
-      "status": "imported-unreviewed",
-      "licence": "CC BY-SA 4.0",
-      "gender": "m",
-      "senses": [
-        {
-          "meaning": "abbreviation of est; east",
-          "tags": [
-            "abbreviation",
-            "alt-of",
-            "masculine"
-          ]
-        }
-      ],
-      "forms": {
-        "feminine": [],
-        "plural": []
       }
     }
   ],
@@ -52633,41 +52497,6 @@
         "feminine": [],
         "plural": [
           "moteurs"
-        ]
-      }
-    }
-  ],
-  "m": [
-    "abbreviation of merde (“shit”)",
-    "noun (m)",
-    "",
-    "Imported lexical entry; meanings are unreviewed.",
-    {
-      "hint": false,
-      "source": "wiktionary-en via kaikki.org",
-      "extractDate": "2026-10-30",
-      "lexiqueFrequency": 84.64,
-      "status": "imported-unreviewed",
-      "licence": "CC BY-SA 4.0",
-      "gender": "m",
-      "senses": [
-        {
-          "meaning": "abbreviation of merde (“shit”)",
-          "tags": [
-            "abbreviation",
-            "alt-of",
-            "invariable",
-            "vulgar"
-          ],
-          "registerTags": [
-            "vulgar"
-          ]
-        }
-      ],
-      "forms": {
-        "feminine": [],
-        "plural": [
-          "m"
         ]
       }
     }
@@ -63295,34 +63124,6 @@
       }
     }
   ],
-  "o": [
-    "abbreviation of ouest; west",
-    "noun (m)",
-    "",
-    "Imported lexical entry; meanings are unreviewed.",
-    {
-      "hint": false,
-      "source": "wiktionary-en via kaikki.org",
-      "extractDate": "2026-10-30",
-      "lexiqueFrequency": 68.56,
-      "status": "imported-unreviewed",
-      "licence": "CC BY-SA 4.0",
-      "gender": "m",
-      "senses": [
-        {
-          "meaning": "abbreviation of ouest; west",
-          "tags": [
-            "abbreviation",
-            "alt-of"
-          ]
-        }
-      ],
-      "forms": {
-        "feminine": [],
-        "plural": []
-      }
-    }
-  ],
   "poule": [
     "hen (female chicken); chick, bird (woman); pool",
     "noun (f)",
@@ -64144,7 +63945,7 @@
     }
   ],
   "masque": [
-    "mask (a cover, or partial cover, for the face, used for disguise or protection); ellipsis of masque de grossesse",
+    "mask (a cover, or partial cover, for the face, used for disguise or protection)",
     "noun (m)",
     "",
     "Imported lexical entry; meanings are unreviewed.",
@@ -64160,15 +63961,6 @@
         {
           "meaning": "mask (a cover, or partial cover, for the face, used for disguise or protection)",
           "tags": [
-            "masculine"
-          ]
-        },
-        {
-          "meaning": "ellipsis of masque de grossesse",
-          "tags": [
-            "abbreviation",
-            "alt-of",
-            "ellipsis",
             "masculine"
           ]
         }
@@ -69823,34 +69615,6 @@
       }
     }
   ],
-  "c": [
-    "abbreviation of cavalier (“knight”): N",
-    "noun (m)",
-    "",
-    "Imported lexical entry; meanings are unreviewed.",
-    {
-      "hint": false,
-      "source": "wiktionary-en via kaikki.org",
-      "extractDate": "2026-10-30",
-      "lexiqueFrequency": 61.62,
-      "status": "imported-unreviewed",
-      "licence": "CC BY-SA 4.0",
-      "gender": "m",
-      "senses": [
-        {
-          "meaning": "abbreviation of cavalier (“knight”): N",
-          "tags": [
-            "abbreviation",
-            "alt-of"
-          ]
-        }
-      ],
-      "forms": {
-        "feminine": [],
-        "plural": []
-      }
-    }
-  ],
   "disputer": [
     "to dispute; to take part in",
     "verb",
@@ -71091,7 +70855,7 @@
     }
   ],
   "mille": [
-    "mile (abbreviation mi); short for mille nautique (“nautical mile”); bullseye",
+    "mile (abbreviation mi); bullseye",
     "noun (m)",
     "",
     "Imported lexical entry; meanings are unreviewed.",
@@ -71107,14 +70871,6 @@
         {
           "meaning": "mile (abbreviation mi)",
           "tags": [
-            "masculine"
-          ]
-        },
-        {
-          "meaning": "short for mille nautique (“nautical mile”)",
-          "tags": [
-            "abbreviation",
-            "alt-of",
             "masculine"
           ]
         },
@@ -72231,7 +71987,7 @@
     }
   ],
   "métro": [
-    "metro; subway (US), underground (UK), Tube (UK); clipping of métropole (“metropolis”); resident or native of metropolitan France",
+    "metro; subway (US), underground (UK), Tube (UK); resident or native of metropolitan France",
     "noun (m)",
     "",
     "Imported lexical entry; meanings are unreviewed.",
@@ -72247,15 +72003,6 @@
         {
           "meaning": "metro; subway (US), underground (UK), Tube (UK)",
           "tags": [
-            "masculine"
-          ]
-        },
-        {
-          "meaning": "clipping of métropole (“metropolis”)",
-          "tags": [
-            "abbreviation",
-            "alt-of",
-            "clipping",
             "masculine"
           ]
         },
@@ -72940,7 +72687,7 @@
     }
   ],
   "instrument": [
-    "instrument (means or agency for achieving an effect); instrument (person used as a mere tool for achieving a goal); ellipsis of instrument de musique (“musical instrument”)",
+    "instrument (means or agency for achieving an effect); instrument (person used as a mere tool for achieving a goal)",
     "noun (m)",
     "",
     "Imported lexical entry; meanings are unreviewed.",
@@ -72964,15 +72711,6 @@
           "tags": [
             "figuratively",
             "literary",
-            "masculine"
-          ]
-        },
-        {
-          "meaning": "ellipsis of instrument de musique (“musical instrument”)",
-          "tags": [
-            "abbreviation",
-            "alt-of",
-            "ellipsis",
             "masculine"
           ]
         }
@@ -80914,34 +80652,6 @@
       }
     }
   ],
-  "s": [
-    "abbreviation of sud; south",
-    "noun (m)",
-    "",
-    "Imported lexical entry; meanings are unreviewed.",
-    {
-      "hint": false,
-      "source": "wiktionary-en via kaikki.org",
-      "extractDate": "2026-10-30",
-      "lexiqueFrequency": 52.84,
-      "status": "imported-unreviewed",
-      "licence": "CC BY-SA 4.0",
-      "gender": "m",
-      "senses": [
-        {
-          "meaning": "abbreviation of sud; south",
-          "tags": [
-            "abbreviation",
-            "alt-of"
-          ]
-        }
-      ],
-      "forms": {
-        "feminine": [],
-        "plural": []
-      }
-    }
-  ],
   "nouvel": [
     "Form of nouveau (“new”) used before a masculine noun that starts with a vowel sound.",
     "adjective",
@@ -81558,39 +81268,6 @@
         ],
         "plural": [
           "liaisons"
-        ]
-      }
-    }
-  ],
-  "mlle": [
-    "abbreviation of Mademoiselle",
-    "noun (f)",
-    "",
-    "Imported lexical entry; meanings are unreviewed.",
-    {
-      "hint": false,
-      "source": "wiktionary-en via kaikki.org",
-      "extractDate": "2026-10-30",
-      "lexiqueFrequency": 52.24,
-      "status": "imported-unreviewed",
-      "licence": "CC BY-SA 4.0",
-      "gender": "f",
-      "senses": [
-        {
-          "meaning": "abbreviation of Mademoiselle",
-          "tags": [
-            "abbreviation",
-            "alt-of"
-          ]
-        }
-      ],
-      "forms": {
-        "feminine": [
-          "Mlle"
-        ],
-        "plural": [
-          "Mlles",
-          "Mˡˡᵉˢ"
         ]
       }
     }
@@ -88373,7 +88050,7 @@
     }
   ],
   "barre": [
-    "bar, cake, ingot; clipping of barre oblique: the slash mark ⟨/⟩; clipping of barre de fraction: the fraction slash ⟨⁄⟩",
+    "bar, cake, ingot; helm, tiller; bend sinister",
     "noun (f)",
     "",
     "Imported lexical entry; meanings are unreviewed.",
@@ -88393,20 +88070,14 @@
           ]
         },
         {
-          "meaning": "clipping of barre oblique: the slash mark ⟨/⟩",
+          "meaning": "helm, tiller",
           "tags": [
-            "abbreviation",
-            "alt-of",
-            "clipping",
             "feminine"
           ]
         },
         {
-          "meaning": "clipping of barre de fraction: the fraction slash ⟨⁄⟩",
+          "meaning": "bend sinister",
           "tags": [
-            "abbreviation",
-            "alt-of",
-            "clipping",
             "feminine"
           ]
         }
@@ -99356,37 +99027,6 @@
       }
     }
   ],
-  "com": [
-    "acronym of collectivité d'outre-mer (“overseas collectivity”)",
-    "noun (m)",
-    "",
-    "Imported lexical entry; meanings are unreviewed.",
-    {
-      "hint": false,
-      "source": "wiktionary-en via kaikki.org",
-      "extractDate": "2026-10-30",
-      "lexiqueFrequency": 41.17,
-      "status": "imported-unreviewed",
-      "licence": "CC BY-SA 4.0",
-      "gender": "m",
-      "senses": [
-        {
-          "meaning": "acronym of collectivité d'outre-mer (“overseas collectivity”)",
-          "tags": [
-            "abbreviation",
-            "acronym",
-            "alt-of",
-            "feminine",
-            "invariable"
-          ]
-        }
-      ],
-      "forms": {
-        "feminine": [],
-        "plural": []
-      }
-    }
-  ],
   "mars": [
     "March (month)",
     "noun (m)",
@@ -104074,7 +103714,7 @@
     }
   ],
   "paume": [
-    "palm (of the hand); ellipsis of jeu de paume (“real tennis”)",
+    "palm (of the hand)",
     "noun (f)",
     "",
     "Imported lexical entry; meanings are unreviewed.",
@@ -104090,15 +103730,6 @@
         {
           "meaning": "palm (of the hand)",
           "tags": [
-            "feminine"
-          ]
-        },
-        {
-          "meaning": "ellipsis of jeu de paume (“real tennis”)",
-          "tags": [
-            "abbreviation",
-            "alt-of",
-            "ellipsis",
             "feminine"
           ]
         }
@@ -109892,34 +109523,6 @@
       }
     }
   ],
-  "t": [
-    "abbreviation of tour (“rook”)",
-    "noun (m)",
-    "",
-    "Imported lexical entry; meanings are unreviewed.",
-    {
-      "hint": false,
-      "source": "wiktionary-en via kaikki.org",
-      "extractDate": "2026-10-30",
-      "lexiqueFrequency": 36.03,
-      "status": "imported-unreviewed",
-      "licence": "CC BY-SA 4.0",
-      "gender": "m",
-      "senses": [
-        {
-          "meaning": "abbreviation of tour (“rook”)",
-          "tags": [
-            "abbreviation",
-            "alt-of"
-          ]
-        }
-      ],
-      "forms": {
-        "feminine": [],
-        "plural": []
-      }
-    }
-  ],
   "communauté": [
     "community; commonwealth; one of the European Communities",
     "noun (f)",
@@ -115270,34 +114873,6 @@
       }
     }
   ],
-  "f": [
-    "abbreviation of fou (“bishop”)",
-    "noun (m)",
-    "",
-    "Imported lexical entry; meanings are unreviewed.",
-    {
-      "hint": false,
-      "source": "wiktionary-en via kaikki.org",
-      "extractDate": "2026-10-30",
-      "lexiqueFrequency": 33.74,
-      "status": "imported-unreviewed",
-      "licence": "CC BY-SA 4.0",
-      "gender": "m",
-      "senses": [
-        {
-          "meaning": "abbreviation of fou (“bishop”)",
-          "tags": [
-            "abbreviation",
-            "alt-of"
-          ]
-        }
-      ],
-      "forms": {
-        "feminine": [],
-        "plural": []
-      }
-    }
-  ],
   "ennuyeux": [
     "dull, boring, tedious, tiresome, monotonous; annoying",
     "adjective",
@@ -116352,7 +115927,7 @@
     }
   ],
   "tailleur": [
-    "tailor; suit; clipping of tailleur de pierre (“stonemason”)",
+    "tailor; suit",
     "noun (m)",
     "",
     "Imported lexical entry; meanings are unreviewed.",
@@ -116374,15 +115949,6 @@
         {
           "meaning": "suit",
           "tags": [
-            "masculine"
-          ]
-        },
-        {
-          "meaning": "clipping of tailleur de pierre (“stonemason”)",
-          "tags": [
-            "abbreviation",
-            "alt-of",
-            "clipping",
             "masculine"
           ]
         }
@@ -125775,6 +125341,387 @@
         ],
         "plural": [
           "ondes"
+        ]
+      }
+    }
+  ],
+  "sabot": [
+    "wooden shoe, clog; hoof",
+    "noun (m)",
+    "",
+    "Imported lexical entry; meanings are unreviewed.",
+    {
+      "hint": false,
+      "source": "wiktionary-en via kaikki.org",
+      "extractDate": "2026-10-30",
+      "lexiqueFrequency": 29.61,
+      "status": "imported-unreviewed",
+      "licence": "CC BY-SA 4.0",
+      "gender": "m",
+      "senses": [
+        {
+          "meaning": "wooden shoe, clog",
+          "tags": [
+            "masculine"
+          ]
+        },
+        {
+          "meaning": "hoof",
+          "tags": [
+            "masculine"
+          ]
+        }
+      ],
+      "forms": {
+        "feminine": [],
+        "plural": [
+          "sabots"
+        ]
+      }
+    }
+  ],
+  "défi": [
+    "challenge",
+    "noun (m)",
+    "",
+    "Imported lexical entry; meanings are unreviewed.",
+    {
+      "hint": false,
+      "source": "wiktionary-en via kaikki.org",
+      "extractDate": "2026-10-30",
+      "lexiqueFrequency": 29.6,
+      "status": "imported-unreviewed",
+      "licence": "CC BY-SA 4.0",
+      "gender": "m",
+      "senses": [
+        {
+          "meaning": "challenge",
+          "tags": [
+            "masculine"
+          ]
+        }
+      ],
+      "forms": {
+        "feminine": [],
+        "plural": [
+          "défis"
+        ]
+      }
+    }
+  ],
+  "remède": [
+    "remedy",
+    "noun (m)",
+    "",
+    "Imported lexical entry; meanings are unreviewed.",
+    {
+      "hint": false,
+      "source": "wiktionary-en via kaikki.org",
+      "extractDate": "2026-10-30",
+      "lexiqueFrequency": 29.59,
+      "status": "imported-unreviewed",
+      "licence": "CC BY-SA 4.0",
+      "gender": "m",
+      "senses": [
+        {
+          "meaning": "remedy",
+          "tags": [
+            "masculine"
+          ]
+        }
+      ],
+      "forms": {
+        "feminine": [],
+        "plural": [
+          "remèdes"
+        ]
+      }
+    }
+  ],
+  "historique": [
+    "historical (pertaining to history); historic (important or likely to be important to history and historians)",
+    "adjective",
+    "",
+    "Imported lexical entry; meanings are unreviewed.",
+    {
+      "hint": false,
+      "source": "wiktionary-en via kaikki.org",
+      "extractDate": "2026-10-30",
+      "lexiqueFrequency": 29.55,
+      "status": "imported-unreviewed",
+      "licence": "CC BY-SA 4.0",
+      "gender": null,
+      "senses": [
+        {
+          "meaning": "historical (pertaining to history)",
+          "tags": [
+            "relational"
+          ]
+        },
+        {
+          "meaning": "historic (important or likely to be important to history and historians)",
+          "tags": []
+        }
+      ],
+      "forms": {
+        "feminine": [],
+        "plural": [
+          "historiques"
+        ]
+      }
+    }
+  ],
+  "naïf": [
+    "naive, dewy-eyed; gullible",
+    "adjective",
+    "",
+    "Imported lexical entry; meanings are unreviewed.",
+    {
+      "hint": false,
+      "source": "wiktionary-en via kaikki.org",
+      "extractDate": "2026-10-30",
+      "lexiqueFrequency": 29.53,
+      "status": "imported-unreviewed",
+      "licence": "CC BY-SA 4.0",
+      "gender": null,
+      "senses": [
+        {
+          "meaning": "naive, dewy-eyed; gullible",
+          "tags": []
+        }
+      ],
+      "forms": {
+        "feminine": [
+          "naïve",
+          "naïves"
+        ],
+        "plural": [
+          "naïfs",
+          "naïves"
+        ]
+      }
+    }
+  ],
+  "tambour": [
+    "drum (instrument); tambour (sports / real tennis); revolving door",
+    "noun (m)",
+    "",
+    "Imported lexical entry; meanings are unreviewed.",
+    {
+      "hint": false,
+      "source": "wiktionary-en via kaikki.org",
+      "extractDate": "2026-10-30",
+      "lexiqueFrequency": 29.52,
+      "status": "imported-unreviewed",
+      "licence": "CC BY-SA 4.0",
+      "gender": "m",
+      "senses": [
+        {
+          "meaning": "drum (instrument)",
+          "tags": [
+            "masculine"
+          ]
+        },
+        {
+          "meaning": "tambour (sports / real tennis)",
+          "tags": [
+            "masculine"
+          ]
+        },
+        {
+          "meaning": "revolving door",
+          "tags": [
+            "masculine"
+          ]
+        }
+      ],
+      "forms": {
+        "feminine": [],
+        "plural": [
+          "tambours"
+        ]
+      }
+    }
+  ],
+  "mairie": [
+    "mayor’s office, mayoralty; town hall",
+    "noun (f)",
+    "",
+    "Imported lexical entry; meanings are unreviewed.",
+    {
+      "hint": false,
+      "source": "wiktionary-en via kaikki.org",
+      "extractDate": "2026-10-30",
+      "lexiqueFrequency": 29.5,
+      "status": "imported-unreviewed",
+      "licence": "CC BY-SA 4.0",
+      "gender": "f",
+      "senses": [
+        {
+          "meaning": "mayor’s office, mayoralty",
+          "tags": [
+            "feminine"
+          ]
+        },
+        {
+          "meaning": "town hall",
+          "tags": [
+            "feminine"
+          ]
+        }
+      ],
+      "forms": {
+        "feminine": [
+          "mairies"
+        ],
+        "plural": [
+          "mairies"
+        ]
+      }
+    }
+  ],
+  "mental": [
+    "mind; mental",
+    "adjective",
+    "",
+    "Imported lexical entry; meanings are unreviewed.",
+    {
+      "hint": false,
+      "source": "wiktionary-en via kaikki.org",
+      "extractDate": "2026-10-30",
+      "lexiqueFrequency": 29.5,
+      "status": "imported-unreviewed",
+      "licence": "CC BY-SA 4.0",
+      "gender": null,
+      "senses": [
+        {
+          "meaning": "mind; mental",
+          "tags": [
+            "relational"
+          ]
+        }
+      ],
+      "forms": {
+        "feminine": [
+          "mentale",
+          "mentales"
+        ],
+        "plural": [
+          "mentales",
+          "mentaux"
+        ]
+      }
+    }
+  ],
+  "mou": [
+    "soft, pliable, flabby, mushy, squishy; lacking vigor or strength; tardy, slow, slack, weak; (of humans) easy to persuade, convinc; pansy, spineless",
+    "adjective",
+    "",
+    "Imported lexical entry; meanings are unreviewed.",
+    {
+      "hint": false,
+      "source": "wiktionary-en via kaikki.org",
+      "extractDate": "2026-10-30",
+      "lexiqueFrequency": 29.49,
+      "status": "imported-unreviewed",
+      "licence": "CC BY-SA 4.0",
+      "gender": null,
+      "senses": [
+        {
+          "meaning": "soft, pliable, flabby, mushy, squishy",
+          "tags": []
+        },
+        {
+          "meaning": "lacking vigor or strength; tardy, slow, slack, weak; (of humans) easy to persuade, convinc",
+          "tags": [
+            "figuratively",
+            "of humans"
+          ]
+        },
+        {
+          "meaning": "pansy, spineless",
+          "tags": [
+            "derogatory",
+            "informal"
+          ]
+        }
+      ],
+      "forms": {
+        "feminine": [
+          "molle",
+          "molles"
+        ],
+        "plural": [
+          "molles",
+          "mous"
+        ]
+      }
+    }
+  ],
+  "pénombre": [
+    "penumbra; half-light, twilight, gloom",
+    "noun (f)",
+    "",
+    "Imported lexical entry; meanings are unreviewed.",
+    {
+      "hint": false,
+      "source": "wiktionary-en via kaikki.org",
+      "extractDate": "2026-10-30",
+      "lexiqueFrequency": 29.47,
+      "status": "imported-unreviewed",
+      "licence": "CC BY-SA 4.0",
+      "gender": "f",
+      "senses": [
+        {
+          "meaning": "penumbra",
+          "tags": [
+            "feminine"
+          ]
+        },
+        {
+          "meaning": "half-light, twilight, gloom",
+          "tags": [
+            "feminine"
+          ]
+        }
+      ],
+      "forms": {
+        "feminine": [
+          "pénombres"
+        ],
+        "plural": [
+          "pénombres"
+        ]
+      }
+    }
+  ],
+  "massif": [
+    "massive",
+    "adjective",
+    "",
+    "Imported lexical entry; meanings are unreviewed.",
+    {
+      "hint": false,
+      "source": "wiktionary-en via kaikki.org",
+      "extractDate": "2026-10-30",
+      "lexiqueFrequency": 29.46,
+      "status": "imported-unreviewed",
+      "licence": "CC BY-SA 4.0",
+      "gender": null,
+      "senses": [
+        {
+          "meaning": "massive",
+          "tags": []
+        }
+      ],
+      "forms": {
+        "feminine": [
+          "massive",
+          "massives"
+        ],
+        "plural": [
+          "massifs",
+          "massives"
         ]
       }
     }

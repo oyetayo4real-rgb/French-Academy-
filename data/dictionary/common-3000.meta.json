@@ -20,13 +20,13 @@
   },
   "ranking": "freqlemfilms2 + freqlemlivres",
   "posDistribution": {
-    "noun": 1688,
+    "noun": 1683,
     "verb": 819,
-    "adjective": 389,
+    "adjective": 394,
     "adverb": 104
   },
   "sizes": {
-    "rawBytes": 2839644,
-    "gzipBytes": 243214
+    "rawBytes": 2837138,
+    "gzipBytes": 242549
   }
 }
