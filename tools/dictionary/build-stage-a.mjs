@@ -22,7 +22,7 @@ if(!extractDate)throw new Error("sources.lock.json must include sources.kaikki.e
 const normalize=value=>String(value??"").normalize("NFC").toLocaleLowerCase("fr").trim();
 const builtin=new Set(Object.keys(dictionary).map(normalize));
 const posMap=new Map([["NOM","noun"],["VER","verb"],["ADJ","adjective"],["ADV","adverb"]]);
-const wiktionaryPos=new Map([["noun","noun"],["verb","verb"],["adjective","adjective"],["adj","adjective"],["adverb","adverb"],["adv","adverb"],["preposition","preposition"],["pronoun","pronoun"],["conjunction","conjunction"],["interjection","interjection"],["determiner","determiner"],["numeral","numeral"],["article","article"],["particle","particle"]]);
+const wiktionaryPos=new Map([["noun","noun"],["verb","verb"],["adjective","adjective"],["adj","adjective"],["adverb","adverb"],["adv","adverb"],["preposition","preposition"],["prep","preposition"],["pronoun","pronoun"],["conjunction","conjunction"],["interjection","interjection"],["determiner","determiner"],["numeral","numeral"],["article","article"],["particle","particle"]]);
 const notesOnlyPos=new Set(["preposition","pronoun","conjunction","interjection","determiner","numeral","article","particle"]);
 const FORM_ONLY=/\b(?:inflection of|plural of|feminine of|masculine of|form of|participle of|alternative form of|nonstandard spelling of|obsolete spelling of|misspelling of|superseded spelling of)\b/i;
 const VARIANT_ONLY=/\b(?:nonstandard spelling of|obsolete spelling of|misspelling of|superseded spelling of)\b/i;
@@ -31,7 +31,7 @@ const FORBIDDEN_RECORD_TAGS=["proper noun","proper-name","abbreviation","initial
 const stats={
  homographRecordsIgnored:0,formOnlySensesDropped:0,entriesSkippedNoUsableSenses:0,variantOnlyEntriesSkipped:0,
  registerTaggedSenses:0,entriesWithRegisterLabels:0,parentGlossesReplacedBySubglosses:0,
- secondaryPosGroups:0,alternatePosRowsGrouped:0,descriptiveGlossesDropped:0,overridesApplied:0,selectedEntries:0
+ secondaryPosGroups:0,alternatePosRowsGrouped:0,descriptiveGlossesDropped:0,notesOnlyPosRecordsByPos:{},notesOnlyPosUsableByPos:{},pleinPosRecords:[],overridesApplied:0,selectedEntries:0
 };
 function parseTsvLine(line){const fields=[];let value="",quoted=false;for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='"'){if(quoted&&line[i+1]==='"'){value+='"';i++;}else quoted=!quoted;}else if(ch==="\t"&&!quoted){fields.push(value);value="";}else value+=ch;}fields.push(value);return fields;}
 function columnIndex(header,...names){const normalized=new Map(header.map((v,i)=>[String(v).replace(/[^a-z0-9]/gi,"").toLowerCase(),i]));for(const name of names){const idx=normalized.get(name.replace(/[^a-z0-9]/gi,"").toLowerCase());if(idx!==undefined)return idx;}throw new Error("Missing Lexique column: "+names.join("/"));}
@@ -124,12 +124,15 @@ async function collectWiktionary(candidates){
   if(!candidateRows)continue;
   const pos=wiktionaryPos.get(normalize(record.pos));
   if(!pos)continue;
+  if(wordKey==="plein"&&stats.pleinPosRecords.length<20)stats.pleinPosRecords.push({lang_code:record.lang_code,lang:record.lang,pos:record.pos,tags:record.tags||[],glosses:(record.senses||[]).slice(0,4).map(s=>s.glosses||s.raw_glosses||[])});
+  if(notesOnlyPos.has(pos))stats.notesOnlyPosRecordsByPos[pos]=(stats.notesOnlyPosRecordsByPos[pos]||0)+1;
   const matching=candidateRows.filter(c=>posMap.get(c.pos)===pos);
   if(!matching.length&&!notesOnlyPos.has(pos))continue;
   const key=wordKey+"\u0000"+pos;
   if(seenPos.has(key)){stats.homographRecordsIgnored++;continue;}
   seenPos.add(key);
   if(!usableRecord(record))continue;
+  if(notesOnlyPos.has(pos))stats.notesOnlyPosUsableByPos[pos]=(stats.notesOnlyPosUsableByPos[pos]||0)+1;
   const senses=entrySenses(record);
   if(!senses.length){stats.entriesSkippedNoUsableSenses++;if((record.senses||[]).some(s=>(s.glosses||[]).some(g=>VARIANT_ONLY.test(String(g)))))stats.variantOnlyEntriesSkipped++;continue;}
   const genderTags=[...(record.tags||[]),...(record.senses||[]).flatMap(s=>[...(s.tags||[]),...(s.raw_tags||[])])].map(x=>String(x).toLowerCase());
