@@ -43,25 +43,25 @@
       "literary"
     ],
     "childGlossPreferred": true,
-    "commonAlternatePosRatio": 0.1
+    "commonAlternatePosRatio": 0.01
   },
   "qualityStats": {
     "homographRecordsIgnored": 1026,
-    "formOnlySensesDropped": 419,
-    "entriesSkippedNoUsableSenses": 412,
+    "formOnlySensesDropped": 420,
+    "entriesSkippedNoUsableSenses": 410,
     "variantOnlyEntriesSkipped": 26,
-    "registerTaggedSenses": 3676,
+    "registerTaggedSenses": 3678,
     "entriesWithRegisterLabels": 279,
-    "parentGlossesReplacedBySubglosses": 0,
-    "secondaryPosGroups": 249,
-    "alternatePosRowsGrouped": 254,
-    "descriptiveGlossesDropped": 29,
+    "parentGlossesReplacedBySubglosses": 7,
+    "secondaryPosGroups": 306,
+    "alternatePosRowsGrouped": 315,
+    "descriptiveGlossesDropped": 22,
     "overridesApplied": 7,
     "selectedEntries": 3000
   },
   "overridesApplied": 7,
   "sizes": {
-    "rawBytes": 4677645,
-    "gzipBytes": 311671
+    "rawBytes": 4690422,
+    "gzipBytes": 313528
   }
 }
