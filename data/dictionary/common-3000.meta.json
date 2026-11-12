@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "entryCount": 3000,
+  "requestedCount": 3000,
+  "minimumAccepted": 2800,
+  "sourceFiles": {
+    "lexique": {
+      "name": "Lexique383.tsv",
+      "sha256": "637ba37a767a66679c48371d673ece50cbf541b49a4e40e598963d4f3fbce52b",
+      "extractDate": "2019-06-04",
+      "url": "https://www.lexique.org/databases/Lexique383/Lexique383.tsv"
+    },
+    "wiktionary": {
+      "name": "kaikki.org-dictionary-French.jsonl",
+      "sha256": "9053b1845fb3e045fa1fbe3f749122fa43e21b49bfa741cadd50255ae6ca0126",
+      "extractDate": "2026-10-30",
+      "url": "https://kaikki.org/dictionary/French/kaikki.org-dictionary-French.jsonl",
+      "dumpDate": "2026-10-01"
+    }
+  },
+  "ranking": "freqlemfilms2 + freqlemlivres",
+  "posDistribution": {
+    "noun": 1688,
+    "verb": 819,
+    "adjective": 389,
+    "adverb": 104
+  },
+  "sizes": {
+    "rawBytes": 2839644,
+    "gzipBytes": 243214
+  }
+}
