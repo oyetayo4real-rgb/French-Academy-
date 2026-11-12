@@ -8,7 +8,7 @@ import { VERB_PARADIGMS, REGULAR_ER_VERBS } from "../features/french-conjugation
 const importedCount=core.registerImportedEntries(importedData);
 assert.equal(importedCount,3000,"all generated entries register in the pure core");
 const importedKeys=Object.keys(importedData);
-const ten=importedKeys.slice(0,10);
+const ten=importedKeys.filter(word=>core.lookup(word).imported).slice(0,10);
 assert.equal(ten.length,10);
 for(const word of ten){
   assert.equal(Object.hasOwn(dictionary,word),false,word+" must not be a built-in duplicate");

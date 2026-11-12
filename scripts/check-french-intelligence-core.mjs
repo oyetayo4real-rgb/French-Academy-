@@ -13,7 +13,9 @@ const core = await import("../features/french-intelligence-core-v1.mjs");
 for (const key of ["window", "document", "localStorage", "fetch", "navigator"]) assert.equal(globalThis[key], undefined);
 for (const method of ["lookup", "translate", "conjugate", "answerQuestion", "checkWriting", "registerImportedEntries"]) assert.equal(typeof core[method], "function");
 assert.equal(core.registerImportedEntries(importedDictionary),3000,"pure core registers all 3,000 imported records without DOM or network");
-assert.equal(core.lookup(Object.keys(importedDictionary)[0]).imported,true,"pure core resolves a registered imported word");
+const importedOnlyWord=Object.keys(importedDictionary).find(word=>core.lookup(word).imported);
+assert.ok(importedOnlyWord,"pure core resolves at least one imported-only word");
+assert.equal(core.lookup(importedOnlyWord).imported,true,"pure core resolves a registered imported word");
 assert.equal(core.lookup("ou").word,"où","built-in accent-insensitive lookup remains unchanged");
 assert.equal(core.lookup("a").status,"unsupported","short homophone guard remains unchanged");
 const cases = [

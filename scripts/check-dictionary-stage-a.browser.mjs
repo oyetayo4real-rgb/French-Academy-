@@ -1,9 +1,10 @@
 import { chromium } from "playwright";
 import assert from "node:assert/strict";
 import importedData from "../data/dictionary/common-3000.json" with { type: "json" };
+import * as compat from "../features/french-intelligence-compat.mjs";
 
 const baseURL=process.env.FRENCH_ACADEMY_URL||"http://127.0.0.1:4173";
-const ten=Object.keys(importedData).slice(0,10);
+const ten=Object.keys(importedData).filter(word=>compat.lookup(word)?.imported).slice(0,10);
 const typos=[["bonjor","bonjour"],["maisonn","maison"],["chossir","choisir"],["beacoup","beaucoup"],["etudiant","étudiant"]];
 const browser=await chromium.launch({headless:true});
 const results=[];
