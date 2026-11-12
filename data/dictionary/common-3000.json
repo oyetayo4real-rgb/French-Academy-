@@ -1627,7 +1627,7 @@
     "full, full up; plenty; solid",
     "adjective",
     "",
-    "Other common parts of speech: noun: full tank (of gas); downstroke (of a letter)",
+    "Other common parts of speech: noun: full tank (of gas); downstroke (of a letter) | preposition: (colloquial) in; all over; filling",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -1685,6 +1685,12 @@
           "meanings": [
             "full tank (of gas)",
             "downstroke (of a letter)"
+          ]
+        },
+        {
+          "pos": "preposition",
+          "meanings": [
+            "(colloquial) in; all over; filling"
           ]
         }
       ],
@@ -5701,7 +5707,7 @@
     "around",
     "adverb",
     "",
-    "",
+    "Other common parts of speech: preposition: around, about",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -5728,6 +5734,12 @@
               "registerTags": [],
               "label": null
             }
+          ]
+        },
+        {
+          "pos": "preposition",
+          "meanings": [
+            "around, about"
           ]
         }
       ],
@@ -11585,7 +11597,7 @@
     "beforehand; earlier",
     "adverb",
     "",
-    "Other common parts of speech: noun: front; forward",
+    "Other common parts of speech: noun: front; forward | preposition: before (in time); before (in space), in front of, ahead of",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -11619,6 +11631,13 @@
           "meanings": [
             "front",
             "forward"
+          ]
+        },
+        {
+          "pos": "preposition",
+          "meanings": [
+            "before (in time)",
+            "before (in space), in front of, ahead of"
           ]
         }
       ],
@@ -12408,7 +12427,7 @@
     "afterwards; (informal) that being said; Indicates the continuous aspect",
     "adverb",
     "",
-    "",
+    "Other common parts of speech: preposition: after, later than in time.; after, coming for, trying to get (someone).",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -12471,6 +12490,13 @@
               "registerTags": [],
               "label": null
             }
+          ]
+        },
+        {
+          "pos": "preposition",
+          "meanings": [
+            "after, later than in time.",
+            "after, coming for, trying to get (someone)."
           ]
         }
       ],
@@ -16290,7 +16316,7 @@
     "outside",
     "adverb",
     "",
-    "Other common parts of speech: noun: outside",
+    "Other common parts of speech: noun: outside | preposition: outside; outside of",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -16323,6 +16349,12 @@
           "pos": "noun",
           "meanings": [
             "outside"
+          ]
+        },
+        {
+          "pos": "preposition",
+          "meanings": [
+            "outside; outside of"
           ]
         }
       ],
@@ -23602,7 +23634,7 @@
     "near (a time or a place); close (to a time or a place)",
     "adverb",
     "",
-    "",
+    "Other common parts of speech: preposition: attached to, connects a person or an organisation delegated officially to a setting.",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -23629,6 +23661,12 @@
               "registerTags": [],
               "label": null
             }
+          ]
+        },
+        {
+          "pos": "preposition",
+          "meanings": [
+            "attached to, connects a person or an organisation delegated officially to a setting."
           ]
         }
       ],
@@ -38125,7 +38163,7 @@
     "on (it); on top (of it); upstairs",
     "adverb",
     "",
-    "Other common parts of speech: noun: upside; top side; the upper hand; advantage; dessus",
+    "Other common parts of speech: noun: upside; top side; the upper hand; advantage; dessus | preposition: (dated) on, on top of",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -38184,6 +38222,12 @@
             "upside; top side",
             "the upper hand; advantage",
             "dessus"
+          ]
+        },
+        {
+          "pos": "preposition",
+          "meanings": [
+            "(dated) on, on top of"
           ]
         }
       ],
@@ -42449,7 +42493,7 @@
     "behind",
     "adverb",
     "",
-    "Other common parts of speech: noun: rear of an object; bottom, bum, backside",
+    "Other common parts of speech: noun: rear of an object; bottom, bum, backside | preposition: behind; at the bottom of, behind (covertly responsible for)",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -42483,6 +42527,13 @@
           "meanings": [
             "rear of an object",
             "bottom, bum, backside"
+          ]
+        },
+        {
+          "pos": "preposition",
+          "meanings": [
+            "behind",
+            "at the bottom of, behind (covertly responsible for)"
           ]
         }
       ],
@@ -48763,7 +48814,7 @@
     "in front, at the front",
     "adverb",
     "",
-    "Other common parts of speech: noun: front",
+    "Other common parts of speech: noun: front | preposition: confronted with, faced with; in front of, before; outside",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -48796,6 +48847,14 @@
           "pos": "noun",
           "meanings": [
             "front"
+          ]
+        },
+        {
+          "pos": "preposition",
+          "meanings": [
+            "confronted with, faced with",
+            "in front of, before",
+            "outside"
           ]
         }
       ],
@@ -62642,7 +62701,7 @@
     "towards the inside; inwardly; internally",
     "adverb",
     "",
-    "Other common parts of speech: noun: interior, inside (of an object)",
+    "Other common parts of speech: noun: interior, inside (of an object) | preposition: inside, in, within",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -62675,6 +62734,12 @@
           "pos": "noun",
           "meanings": [
             "interior, inside (of an object)"
+          ]
+        },
+        {
+          "pos": "preposition",
+          "meanings": [
+            "inside, in, within"
           ]
         }
       ],
@@ -82261,7 +82326,7 @@
     "power (physical or figuratively); dominion (state within the British Empire)",
     "noun (f)",
     "",
-    "",
+    "Other common parts of speech: preposition: to the power of",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -82308,6 +82373,12 @@
               "registerTags": [],
               "label": null
             }
+          ]
+        },
+        {
+          "pos": "preposition",
+          "meanings": [
+            "to the power of"
           ]
         }
       ],
@@ -88671,7 +88742,7 @@
     "sour",
     "adjective",
     "",
-    "",
+    "Other common parts of speech: preposition: on, upon; on top of; from on top of",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -88698,6 +88769,14 @@
               "registerTags": [],
               "label": null
             }
+          ]
+        },
+        {
+          "pos": "preposition",
+          "meanings": [
+            "on, upon",
+            "on top of",
+            "from on top of"
           ]
         }
       ],
@@ -99625,7 +99704,7 @@
     "verse",
     "noun (m)",
     "",
-    "",
+    "Other common parts of speech: preposition: towards; to; around, circa (with a date or time)",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -99658,6 +99737,14 @@
               "registerTags": [],
               "label": null
             }
+          ]
+        },
+        {
+          "pos": "preposition",
+          "meanings": [
+            "towards",
+            "to",
+            "around, circa (with a date or time)"
           ]
         }
       ],
@@ -146754,7 +146841,7 @@
     "underside; bottom; disadvantage; (women's) underwear",
     "noun (m)",
     "",
-    "Other common parts of speech: adverb: underneath; beneath",
+    "Other common parts of speech: adverb: underneath; beneath | preposition: under; beneath",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -146831,6 +146918,12 @@
           "pos": "adverb",
           "meanings": [
             "underneath; beneath"
+          ]
+        },
+        {
+          "pos": "preposition",
+          "meanings": [
+            "under; beneath"
           ]
         }
       ],
@@ -181925,7 +182018,7 @@
     "(rare) lively, briskly, quickly; vigorously, sharply; deeply, profoundly",
     "adverb",
     "",
-    "",
+    "Other common parts of speech: preposition: roll on (something), bring on (something), can't wait for (something)",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -181984,6 +182077,12 @@
               "registerTags": [],
               "label": null
             }
+          ]
+        },
+        {
+          "pos": "preposition",
+          "meanings": [
+            "roll on (something), bring on (something), can't wait for (something)"
           ]
         }
       ],
@@ -186301,7 +186400,7 @@
     "reverse; inverse; back",
     "noun (m)",
     "",
-    "",
+    "Other common parts of speech: preposition: in relation to, toward; toward",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -186370,6 +186469,13 @@
               "registerTags": [],
               "label": null
             }
+          ]
+        },
+        {
+          "pos": "preposition",
+          "meanings": [
+            "in relation to, toward",
+            "toward"
           ]
         }
       ],
