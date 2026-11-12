@@ -183,7 +183,7 @@ for (const candidate of candidates) {
   if (Object.hasOwn(output,headword) || builtin.has(normalize(headword))) continue;
   const part=posMap.get(candidate.pos);
   const rawLexGender=(candidate.forms.find(x=>normalize(x.form)===normalize(candidate.lemma))?.gender || candidate.forms.map(x=>x.gender).find(x=>/^(m|masc|masculin|f|fem|féminin)/i.test(x))) || "";
-  const lexGender=/^(m\\s*\\/\\s*f|mf|masculin\\s*\\/\\s*féminin)/i.test(rawLexGender)?"m/f":/^(f|fem|féminin)/i.test(rawLexGender)?"f":/^(m|masc|masculin)/i.test(rawLexGender)?"m":null;
+  const lexGender=/^(m\s*\/\s*f|mf|masculin\s*\/\s*féminin)/i.test(rawLexGender)?"m/f":/^(f|fem|féminin)/i.test(rawLexGender)?"f":/^(m|masc|masculin)/i.test(rawLexGender)?"m":null;
   const gender=part==="noun" ? (match.gender || lexGender) : null;
   const lexFeminine=candidate.forms.filter(x=>x.form!==candidate.lemma && /^(f|fem|féminin)/i.test(x.gender)).map(x=>x.form);
   const lexPlural=candidate.forms.filter(x=>/^(p|plur)/i.test(x.number)).map(x=>x.form);
