@@ -101,7 +101,7 @@ async function readLexique() {
     const form=(cells[indexes.form]||"").trim();
     const pos=(cells[indexes.pos]||"").trim().toUpperCase();
     if (!lemma || !form || !posMap.has(pos) || !/[\p{L}]/u.test(lemma)) continue;
-    if (lemma.length>48 || /[\d]/.test(lemma) || !/^[\p{L}'’ -]+$/u.test(lemma)) continue;
+    if (lemma.length>48 || /[\d]/.test(lemma) || !/^[\p{L}'’ -]+$/u.test(lemma) || /^\p{Lu}/u.test(lemma)) continue;
     const key=normalize(lemma)+"\u0000"+pos;
     const frequency=num(cells[indexes.films])+num(cells[indexes.books]);
     const item=grouped.get(key)||{lemma,pos,frequency:0,forms:[]};
