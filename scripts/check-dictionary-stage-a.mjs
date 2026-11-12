@@ -110,7 +110,9 @@ assert.ok(!importedData["oeil"]&&!importedData["coeur"],"nonstandard spelling en
 assert.ok(!JSON.stringify(importedData["chéri"]||{}).includes("Shar (shari'a)"),"chéri homograph contamination is removed");
 assert.ok(!(importedData["cuire"]?.[4]?.senses||[]).some(s=>/inflection of/i.test(s.meaning)),"cuire form-only sense removed");
 assert.ok(!(importedData["là"]?.[4]?.senses||[]).some(s=>/^referring to/i.test(s.meaning)),"là uses child glosses rather than descriptive parent glosses");
-assert.ok(importedData["peu"]?.[1]==="adverb","peu primary POS follows highest-frequency Lexique POS");
+for(const [word,entry] of Object.entries(importedData))assert.ok(!(entry[4].senses||[]).some(s=>/^(?:referring to|used to|indicating|expressing|denoting|relating to|pertaining to|describing|said of)\b/i.test(s.meaning)),word+" has no descriptive-only gloss");
+assert.ok(importedData["peu"]?.[1]==="adverb","peu primary learner-facing POS is adverb");
+assert.ok((importedData["peu"]?.[3]||"").includes("noun:"),"peu noun senses remain grouped in notes");
 assert.ok((importedData["même"]?.[3]||"").includes("adjective"),"même alternate common POS is grouped in notes");
 for(const [word,entry] of Object.entries(importedData))for(const sense of entry[4].senses||[]){
  const tags=(sense.tags||[]).map(x=>String(x).toLowerCase());

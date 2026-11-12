@@ -46,12 +46,13 @@
   },
   "peu": {
     "status": "curated-draft",
-    "reason": "Owner-provided draft meanings; ensure the primary POS is frequency-ranked and meanings are idiomatic.",
+    "reason": "Owner-provided draft meanings; adverb is the primary learner-facing part of speech; retain noun senses under the POS-grouped notes.",
     "meanings": [
       "little",
       "few",
       "not much"
-    ]
+    ],
+    "part": "adverb"
   },
   "cuire": {
     "status": "curated-draft",

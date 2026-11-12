@@ -23,14 +23,14 @@ const normalize=value=>String(value??"").normalize("NFC").toLocaleLowerCase("fr"
 const builtin=new Set(Object.keys(dictionary).map(normalize));
 const posMap=new Map([["NOM","noun"],["VER","verb"],["ADJ","adjective"],["ADV","adverb"]]);
 const wiktionaryPos=new Map([["noun","noun"],["verb","verb"],["adjective","adjective"],["adj","adjective"],["adverb","adverb"],["adv","adverb"]]);
-const FORM_ONLY=/(?:inflection of|plural of|feminine of|masculine of|form of|participle of|alternative form of|nonstandard spelling of|obsolete spelling of|misspelling of|superseded spelling of)/i;
-const VARIANT_ONLY=/(?:nonstandard spelling of|obsolete spelling of|misspelling of|superseded spelling of)/i;
+const FORM_ONLY=/\b(?:inflection of|plural of|feminine of|masculine of|form of|participle of|alternative form of|nonstandard spelling of|obsolete spelling of|misspelling of|superseded spelling of)\b/i;
+const VARIANT_ONLY=/\b(?:nonstandard spelling of|obsolete spelling of|misspelling of|superseded spelling of)\b/i;
 const REGISTER_LABELS=["archaic","dated","rare","slang","colloquial","familiar","vulgar","offensive","derogatory","informal","literary"];
 const FORBIDDEN_RECORD_TAGS=["proper noun","proper-name","abbreviation","initialism","acronym"];
 const stats={
  homographRecordsIgnored:0,formOnlySensesDropped:0,entriesSkippedNoUsableSenses:0,variantOnlyEntriesSkipped:0,
  registerTaggedSenses:0,entriesWithRegisterLabels:0,parentGlossesReplacedBySubglosses:0,
- secondaryPosGroups:0,alternatePosRowsGrouped:0,overridesApplied:0,selectedEntries:0
+ secondaryPosGroups:0,alternatePosRowsGrouped:0,descriptiveGlossesDropped:0,overridesApplied:0,selectedEntries:0
 };
 function parseTsvLine(line){const fields=[];let value="",quoted=false;for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='"'){if(quoted&&line[i+1]==='"'){value+='"';i++;}else quoted=!quoted;}else if(ch==="\t"&&!quoted){fields.push(value);value="";}else value+=ch;}fields.push(value);return fields;}
 function columnIndex(header,...names){const normalized=new Map(header.map((v,i)=>[String(v).replace(/[^a-z0-9]/gi,"").toLowerCase(),i]));for(const name of names){const idx=normalized.get(name.replace(/[^a-z0-9]/gi,"").toLowerCase());if(idx!==undefined)return idx;}throw new Error("Missing Lexique column: "+names.join("/"));}
@@ -74,7 +74,7 @@ function entrySenses(record){
    if(!glosses.length)continue;
    const gloss=glosses.find(g=>!FORM_ONLY.test(g));
    if(!gloss){stats.formOnlySensesDropped++;continue;}
-   if(FORM_ONLY.test(gloss)){stats.formOnlySensesDropped++;continue;}
+   if(isDescriptiveParent(gloss)){stats.descriptiveGlossesDropped++;continue;}
    const labels=registerTags(tags);
    const label=labels.join(", ");
    const sense={meaning:gloss,tags,registerTags:labels,label:label||null};
@@ -164,10 +164,11 @@ const output={},posCounts={noun:0,verb:0,adjective:0,adverb:0};
 const selected=[];
 for(const rows of ordered){
  if(selected.length>=TARGET)break;
- const primary=rows[0],wordKey=normalize(primary.lemma),headword=primary.lemma.normalize("NFC");
+ const topRanked=rows[0],wordKey=normalize(topRanked.lemma),headword=topRanked.lemma.normalize("NFC");
+ const override=overrides[headword]||overrides[headword.toLocaleLowerCase("fr")];
+ const primary=(override?.part?rows.find(row=>posMap.get(row.pos)===override.part):null)||topRanked;
  if(Object.hasOwn(output,headword)||builtin.has(normalize(headword)))continue;
  const primaryPos=posMap.get(primary.pos),primaryMatch=matches.get(wordKey+"\u0000"+primaryPos);
- const override=overrides[headword]||overrides[headword.toLocaleLowerCase("fr")];
  if((!primaryMatch?.senses?.length)&&!override)continue;
  let senses=(primaryMatch?.senses||[]).slice(0,3);
  if(override){
@@ -176,11 +177,11 @@ for(const rows of ordered){
   stats.overridesApplied++;
  }
  const alternate=[];
- for(const candidate of rows.slice(1)){
-  if(candidate.frequency<primary.frequency*COMMON_POS_RATIO)continue;
+ for(const candidate of rows){
+  if(candidate===primary||candidate.frequency<primary.frequency*COMMON_POS_RATIO)continue;
   const pos=posMap.get(candidate.pos),match=matches.get(wordKey+"\u0000"+pos);
   if(!match?.senses?.length)continue;
-  alternate.push({pos,meanings:match.senses.map(senseText)});
+  alternate.push({pos,frequency:Number(candidate.frequency.toFixed(2)),meanings:match.senses.map(senseText)});
  }
  if(alternate.length){stats.secondaryPosGroups++;stats.alternatePosRowsGrouped+=alternate.length;}
  const rawGender=primaryMatch?.gender||lexGender(primary);

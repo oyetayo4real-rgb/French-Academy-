@@ -10,7 +10,7 @@ const rawKeys=[...raw.matchAll(/^  "((?:[^"\\]|\\.)+)": \[/gm)].map(m=>JSON.pars
 const errors=[];
 const normalize=s=>String(s).normalize("NFC").toLocaleLowerCase("fr").replace(/oe/g,"œ");
 const keys=Object.keys(data),builtins=new Set(Object.keys(builtin).map(normalize)),seen=new Set();
-const FORM_ONLY=/(?:inflection of|plural of|feminine of|masculine of|form of|participle of|alternative form of|nonstandard spelling of|obsolete spelling of|misspelling of|superseded spelling of)/i;
+const FORM_ONLY=/\b(?:inflection of|plural of|feminine of|masculine of|form of|participle of|alternative form of|nonstandard spelling of|obsolete spelling of|misspelling of|superseded spelling of)\b/i;
 if(rawKeys.length!==keys.length)errors.push({error:"duplicate top-level JSON headword keys",rawKeyCount:rawKeys.length,parsedKeyCount:keys.length});
 const posCounts={},meaningCounts={"1":0,"2":0,"3":0,other:0};let genderCount=0,registerTagged=0,curatedDraftCount=0;
 for(const key of keys){
