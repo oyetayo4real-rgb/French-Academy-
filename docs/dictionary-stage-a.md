@@ -1,39 +1,52 @@
 # Dictionary Stage A — generated dataset record
 
-Stage A contains **3,000 imported French lemmas**. The builder selects Lexique 3.83 lemmas by combined lemma frequency (`freqlemfilms2 + freqlemlivres`), filters to nouns, verbs, adjectives and adverbs, excludes existing built-in headwords, proper names and abbreviations, and requires a matching French entry with usable English glosses from the kaikki.org extract of English Wiktionary.
+Stage A contains **3,000 imported French lemmas**. The builder ranks Lexique 3.83 lemmas by combined lemma frequency ('freqlemfilms2 + freqlemlivres'), selects the highest-frequency primary POS, and retains common alternate POS in the notes field. Only the first French kaikki entry for each headword/POS is used; later same-POS homograph/etymology entries are not merged.
+
+## Quality rules
+
+- Form-only glosses (inflection, plural, feminine, masculine, form, participle, alternative form, nonstandard/obsolete/misspelling/superseded spelling) are removed; entries with no usable meaning are skipped.
+- Nonstandard spelling-only headwords such as 'oeil' and 'coeur' are excluded; lookup falls through to built-in 'œil' and 'cœur'.
+- Hierarchical senses prefer the child gloss; descriptive parent glosses are removed when they do not translate the word.
+- Register tags are retained and shown before each meaning, including slang, colloquial, familiar, vulgar, offensive, derogatory, informal, literary, archaic, dated and rare.
+- Seven owner-provided overrides are marked 'curated-draft' with a reason: 'même', 'cent', 'véritable', 'là', 'chéri', 'peu', 'cuire'.
+- Common alternate POS are grouped in the notes field; 'peu' is presented primarily as an adverb, with noun meanings retained in notes.
 
 ## Sources and provenance
 
 - **Lexique 3.83** — TSV: https://www.lexique.org/databases/Lexique383/Lexique383.tsv
-  - File date recorded by the distribution: 2019-06-04
   - Download size: 25,850,780 bytes
-  - SHA-256: `637ba37a767a66679c48371d673ece50cbf541b49a4e40e598963d4f3fbce52b`
+  - SHA-256: '637ba37a767a66679c48371d673ece50cbf541b49a4e40e598963d4f3fbce52b'
   - Licence: CC BY-SA 4.0
 - **kaikki.org French extract of English Wiktionary** — JSONL: https://kaikki.org/dictionary/French/kaikki.org-dictionary-French.jsonl
-  - Wiktionary dump date: 2026-10-01
-  - Extract date: 2026-10-30
+  - Dump date: 2026-10-01; extract date: 2026-10-30
   - Download size: 592,920,809 bytes
-  - SHA-256: `9053b1845fb3e045fa1fbe3f749122fa43e21b49bfa741cadd50255ae6ca0126`
+  - SHA-256: '9053b1845fb3e045fa1fbe3f749122fa43e21b49bfa741cadd50255ae6ca0126'
   - Adapted content is distributed under CC BY-SA 4.0 with Wiktionary attribution and share-alike obligations.
 
-The generated entries are marked `source: "wiktionary-en via kaikki.org"`, `status: "imported-unreviewed"`, and `hint: false`. Up to three cleaned English glosses are retained, each at most 90 characters. Restricted senses are omitted when an unrestricted sense exists; when only a restricted sense exists, its register tag is retained for display. Gender and feminine/plural forms are taken from Wiktionary tags or Lexique where available. No example sentences are imported.
+## Final rebuild
 
-## Final build result
-
-- Workflow: [Dictionary build run #43210170689](https://github.com/oyetayo4real-rgb/French-Academy-/actions/runs/43210170689)
-- Conclusion: success
+- Workflow: [Dictionary build run #43328868828](https://github.com/oyetayo4real-rgb/French-Academy-/actions/runs/43328868828)
+- Generated-data commit: '83224717451726e4a40c9f45312ebfe9a330b824'
 - Entries: 3,000
-- POS distribution: 1,683 nouns; 819 verbs; 394 adjectives; 104 adverbs
-- Raw JSON: 2,837,474 bytes
-- Gzipped JSON: 242,720 bytes
-- Dictionary compressed-size gate: below 400 KB
+- POS distribution: 1,678 nouns; 824 verbs; 393 adjectives; 105 adverbs
+- Entries with gender: 1,678
+- Meanings per entry: 1 = 1,080; 2 = 824; 3 = 1,096
+- Raw JSON: 4,693,988 bytes
+- Gzipped JSON: 314,296 bytes
+- Service-worker cache version is bumped to 'fa-v37' in the final integration commit; the dictionary JSON remains in the precache.
 
-The generated data and metadata are `data/dictionary/common-3000.json` and `data/dictionary/common-3000.meta.json`. Pinned source hashes and extraction dates are recorded in `tools/dictionary/sources.lock.json`.
+## Build quality counters
 
-This note records provenance and generation counts; it does not mark imported entries as linguistically reviewed. Stage 2 integration and acceptance checks remain separate.
+- Later same-POS Kaikki records ignored: 1,026
+- Form-only senses dropped: 421
+- Entries with no usable senses skipped: 411
+- Variant-only entries skipped: 26
+- Parent-to-child gloss resolutions: 7
+- Descriptive-only glosses dropped: 22
+- Entries with register-labelled senses: 279 (344 labelled senses)
+- Alternate-POS groups: 314 entries; 331 alternate-POS groups
+- Curated-draft overrides applied: 7
 
-## Push-gated workflow verification
+The 300 highest-frequency entries are listed in [Dictionary review — top 300](dictionary-review-top300.md) for French-speaker validation.
 
-On 2026-11-12, the Stage A workflow ran from the `feat/dictionary-stage-a` push gate and completed successfully (GitHub Actions run [#43210170689](https://github.com/oyetayo4real-rgb/French-Academy-/actions/runs/43210170689)). Both pinned source downloads returned HTTP 200; the JSONL endpoint was used, so the `.json` fallback was not needed. The workflow generated commit `4ec5e60f253428b2ddc145fa439be171760d8af7` with only the two files under `data/dictionary/`; the source lock already matched the downloaded SHA-256 values and was unchanged.
-
-The push trigger requires the exact `[build-dictionary]` marker in the head commit message. The workflow-generated commit message deliberately omits that marker, preventing a build loop.
+This data is imported and remains unreviewed except for the explicitly marked curated drafts. No example sentences are imported.

@@ -115,8 +115,8 @@ assert.ok((JSON.parse((await import("node:fs")).readFileSync(new URL("../data/di
 for(const [word,entry] of Object.entries(importedData))assert.ok(!(entry[4].senses||[]).some(s=>/^(?:referring to|used to|indicating|expressing|denoting|relating to|pertaining to|describing|said of)\b/i.test(s.meaning)),word+" has no descriptive-only gloss");
 assert.ok(importedData["peu"]?.[1]==="adverb","peu primary learner-facing POS is adverb");
 assert.ok((importedData["peu"]?.[3]||"").includes("noun:"),"peu noun senses remain grouped in notes");
-assert.ok((importedData["plein"]?.[3]||"").includes("adverb:"),"plein adverb senses remain grouped in notes");
 assert.ok((importedData["plein"]?.[3]||"").includes("preposition:"),"plein preposition senses remain grouped in notes");
+assert.ok((importedData["plein"]?.[4]?.posGroups||[]).some(group=>group.pos==="noun"),"plein noun senses remain grouped in notes");
 assert.ok((importedData["plein"]?.[4]?.posGroups||[]).some(group=>group.pos==="preposition"),"plein preposition POS group is retained");
 assert.ok((importedData["plein"]?.[4]?.posGroups||[]).some(group=>group.pos==="adverb"),"plein adverb POS group is retained");
 assert.ok((importedData["là"]?.[4]?.reason||"").length>0,"là curated override remains sourced with a reason");
