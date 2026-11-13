@@ -69,11 +69,11 @@ try{
     if(profile.name==="desktop"){
       await page.waitForFunction(()=>!!navigator.serviceWorker?.controller,{timeout:15000});
       await page.evaluate(()=>navigator.serviceWorker.ready);
-      const cached=await page.evaluate(async()=>{
-        const cache=await caches.open(cacheVersion);
+      const cached=await page.evaluate(async cacheName=>{
+        const cache=await caches.open(cacheName);
         const response=await cache.match("/data/dictionary/common-3000.json");
         return !!response;
-      });
+      },cacheVersion);
       assert.equal(cached,true,"dictionary JSON is precached in "+cacheVersion);
       await context.setOffline(true);
       await page.reload({waitUntil:"domcontentloaded",timeout:30000});
