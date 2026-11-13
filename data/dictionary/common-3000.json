@@ -1627,7 +1627,7 @@
     "full, full up; plenty; solid",
     "adjective",
     "",
-    "Other common parts of speech: noun: full tank (of gas); downstroke (of a letter) | preposition: (colloquial) in; all over; filling",
+    "Other common parts of speech: adverb: due; (colloquial) a lot, lots of, many | noun: full tank (of gas); downstroke (of a letter) | preposition: (colloquial) in; all over; filling",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -1678,6 +1678,13 @@
               "registerTags": [],
               "label": null
             }
+          ]
+        },
+        {
+          "pos": "adverb",
+          "meanings": [
+            "due",
+            "(colloquial) a lot, lots of, many"
           ]
         },
         {
@@ -7359,7 +7366,7 @@
     "possible",
     "adjective",
     "",
-    "Other common parts of speech: noun: the possible, feasible, what can be done, achieved etc.",
+    "Other common parts of speech: adverb: (archaic) possibly | noun: the possible, feasible, what can be done, achieved etc.",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -7386,6 +7393,12 @@
               "registerTags": [],
               "label": null
             }
+          ]
+        },
+        {
+          "pos": "adverb",
+          "meanings": [
+            "(archaic) possibly"
           ]
         },
         {
@@ -9002,7 +9015,7 @@
     "kind; style, look, type; genre",
     "noun (m)",
     "",
-    "",
+    "Other common parts of speech: adverb: (colloquial) like, kind of (approximation, softener, filler in informal speech); (colloquial) like (introducing a quotation, reaction, or imitation); (colloquial) for example, such as",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -9065,6 +9078,14 @@
               "registerTags": [],
               "label": null
             }
+          ]
+        },
+        {
+          "pos": "adverb",
+          "meanings": [
+            "(colloquial) like, kind of (approximation, softener, filler in informal speech)",
+            "(colloquial) like (introducing a quotation, reaction, or imitation)",
+            "(colloquial) for example, such as"
           ]
         }
       ],
@@ -12175,7 +12196,7 @@
     "hard, tough (difficult to penetrate); hard (not soft); hard, tough (not easy, difficult)",
     "adjective",
     "",
-    "Other common parts of speech: noun: firmness, solidity",
+    "Other common parts of speech: adverb: hard | noun: firmness, solidity",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -12226,6 +12247,12 @@
               "registerTags": [],
               "label": null
             }
+          ]
+        },
+        {
+          "pos": "adverb",
+          "meanings": [
+            "hard"
           ]
         },
         {
@@ -17722,7 +17749,7 @@
     "clear (see-through); clear (understandable); light (having a light shade, not dark) (of a color)",
     "adjective",
     "",
-    "Other common parts of speech: noun: light",
+    "Other common parts of speech: adverb: clearly | noun: light",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -17773,6 +17800,12 @@
               "registerTags": [],
               "label": null
             }
+          ]
+        },
+        {
+          "pos": "adverb",
+          "meanings": [
+            "clearly"
           ]
         },
         {
@@ -22822,7 +22855,7 @@
     "gold; or (yellow in heraldry)",
     "noun (m)",
     "",
-    "",
+    "Other common parts of speech: adverb: now, presently",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -22869,6 +22902,12 @@
               "registerTags": [],
               "label": null
             }
+          ]
+        },
+        {
+          "pos": "adverb",
+          "meanings": [
+            "now, presently"
           ]
         }
       ],
@@ -23680,7 +23719,7 @@
     "serious; solemn; low-pitched",
     "adjective",
     "",
-    "",
+    "Other common parts of speech: adverb: (slang, informal) much; a lot",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -23731,6 +23770,12 @@
               "registerTags": [],
               "label": null
             }
+          ]
+        },
+        {
+          "pos": "adverb",
+          "meanings": [
+            "(slang, informal) much; a lot"
           ]
         }
       ],
@@ -25006,7 +25051,7 @@
     "manner, way",
     "noun (f)",
     "",
-    "",
+    "Other common parts of speech: adverb: somewhat, kinda, sorta, a bit, a little",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -25037,6 +25082,12 @@
               "registerTags": [],
               "label": null
             }
+          ]
+        },
+        {
+          "pos": "adverb",
+          "meanings": [
+            "somewhat, kinda, sorta, a bit, a little"
           ]
         }
       ],
@@ -33094,7 +33145,7 @@
     "dry; dried, having had its moisture evaporated; lean, thin, skinny",
     "adjective",
     "",
-    "",
+    "Other common parts of speech: adverb: sharply, abruptly, quickly, swiftly, briskly",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -33145,6 +33196,12 @@
               "registerTags": [],
               "label": null
             }
+          ]
+        },
+        {
+          "pos": "adverb",
+          "meanings": [
+            "sharply, abruptly, quickly, swiftly, briskly"
           ]
         }
       ],
@@ -41078,7 +41135,7 @@
     "superb, great",
     "adjective",
     "",
-    "",
+    "Other common parts of speech: adverb: (informal) extremely, very (as an intensifier)",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -41109,6 +41166,12 @@
               "registerTags": [],
               "label": null
             }
+          ]
+        },
+        {
+          "pos": "adverb",
+          "meanings": [
+            "(informal) extremely, very (as an intensifier)"
           ]
         }
       ],
@@ -46335,7 +46398,7 @@
     "devil; (colloquial) rogue, (old) devil; hand truck",
     "noun (m)",
     "",
-    "",
+    "Other common parts of speech: adverb: (colloquial) the hell, on earth, intensifies interrogatives",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -46404,6 +46467,12 @@
               "registerTags": [],
               "label": null
             }
+          ]
+        },
+        {
+          "pos": "adverb",
+          "meanings": [
+            "(colloquial) the hell, on earth, intensifies interrogatives"
           ]
         }
       ],
@@ -56430,7 +56499,7 @@
     "wide, broad; large; generous",
     "adjective",
     "",
-    "Other common parts of speech: noun: open sea; width",
+    "Other common parts of speech: adverb: in a broad manner, extensively, wide | noun: open sea; width",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -56481,6 +56550,12 @@
               "registerTags": [],
               "label": null
             }
+          ]
+        },
+        {
+          "pos": "adverb",
+          "meanings": [
+            "in a broad manner, extensively, wide"
           ]
         },
         {
@@ -59986,7 +60061,7 @@
     "fast, rapid",
     "adjective",
     "",
-    "Other common parts of speech: noun: rapid (stretch of river); express (fast train)",
+    "Other common parts of speech: adverb: (informal) fast; rapidly; quickly | noun: rapid (stretch of river); express (fast train)",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -60013,6 +60088,12 @@
               "registerTags": [],
               "label": null
             }
+          ]
+        },
+        {
+          "pos": "adverb",
+          "meanings": [
+            "(informal) fast; rapidly; quickly"
           ]
         },
         {
@@ -72083,7 +72164,7 @@
     "thick; (informal, literary) stupid, thick",
     "adjective",
     "",
-    "",
+    "Other common parts of speech: adverb: thickly; densely",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -72136,6 +72217,12 @@
               ],
               "label": "informal, literary"
             }
+          ]
+        },
+        {
+          "pos": "adverb",
+          "meanings": [
+            "thickly; densely"
           ]
         }
       ],
@@ -79043,7 +79130,7 @@
     "drop, droplet; goutte; gout",
     "noun (f)",
     "",
-    "",
+    "Other common parts of speech: adverb: not, not at all, not a drop",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -79106,6 +79193,12 @@
               "registerTags": [],
               "label": null
             }
+          ]
+        },
+        {
+          "pos": "adverb",
+          "meanings": [
+            "not, not at all, not a drop"
           ]
         }
       ],
@@ -131211,7 +131304,7 @@
     "heap, stack; pillar; battery",
     "noun (f)",
     "",
-    "",
+    "Other common parts of speech: adverb: (colloquial) just, exactly; (colloquial) dead (of stopping etc.); on the dot, sharp (of time), smack",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -131274,6 +131367,13 @@
               "registerTags": [],
               "label": null
             }
+          ]
+        },
+        {
+          "pos": "adverb",
+          "meanings": [
+            "(colloquial) just, exactly",
+            "(colloquial) dead (of stopping etc.); on the dot, sharp (of time), smack"
           ]
         }
       ],
@@ -143869,7 +143969,7 @@
     "direct",
     "adjective",
     "",
-    "Other common parts of speech: noun: live broadcast, live reporting",
+    "Other common parts of speech: adverb: (colloquial) directly | noun: live broadcast, live reporting",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -143896,6 +143996,12 @@
               "registerTags": [],
               "label": null
             }
+          ]
+        },
+        {
+          "pos": "adverb",
+          "meanings": [
+            "(colloquial) directly"
           ]
         },
         {
@@ -148669,7 +148775,7 @@
     "(dated, vulgar, offensive) negro; (offensive) ghostwriter; (offensive) Black man or person",
     "noun (m)",
     "",
-    "Other common parts of speech: adjective: of the Blacks of Africa or of African arts; black (color)",
+    "Other common parts of speech: adjective: of the Blacks of Africa or of African arts; black (color) | adverb: (offensive) in the manner of Black people",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -148769,6 +148875,12 @@
           "meanings": [
             "of the Blacks of Africa or of African arts",
             "black (color)"
+          ]
+        },
+        {
+          "pos": "adverb",
+          "meanings": [
+            "(offensive) in the manner of Black people"
           ]
         }
       ],
@@ -170067,7 +170179,7 @@
     "severe, harsh; strict",
     "adjective",
     "",
-    "",
+    "Other common parts of speech: adverb: (slang) really, for real, genuinely, truly",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -170106,6 +170218,12 @@
               "registerTags": [],
               "label": null
             }
+          ]
+        },
+        {
+          "pos": "adverb",
+          "meanings": [
+            "(slang) really, for real, genuinely, truly"
           ]
         }
       ],
@@ -172349,7 +172467,7 @@
     "sweet, candy",
     "noun (m)",
     "",
-    "",
+    "Other common parts of speech: adverb: (slang) expensive",
     {
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
@@ -172380,6 +172498,12 @@
               "registerTags": [],
               "label": null
             }
+          ]
+        },
+        {
+          "pos": "adverb",
+          "meanings": [
+            "(slang) expensive"
           ]
         }
       ],

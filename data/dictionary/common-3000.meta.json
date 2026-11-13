@@ -47,92 +47,21 @@
   },
   "qualityStats": {
     "homographRecordsIgnored": 1026,
-    "formOnlySensesDropped": 421,
-    "entriesSkippedNoUsableSenses": 411,
+    "formOnlySensesDropped": 425,
+    "entriesSkippedNoUsableSenses": 415,
     "variantOnlyEntriesSkipped": 26,
-    "registerTaggedSenses": 3682,
+    "registerTaggedSenses": 3705,
     "entriesWithRegisterLabels": 279,
     "parentGlossesReplacedBySubglosses": 7,
-    "secondaryPosGroups": 314,
-    "alternatePosRowsGrouped": 331,
+    "secondaryPosGroups": 326,
+    "alternatePosRowsGrouped": 351,
     "descriptiveGlossesDropped": 22,
-    "notesOnlyPosRecordsByPos": {
-      "preposition": 37,
-      "particle": 2,
-      "article": 1
-    },
-    "notesOnlyPosUsableByPos": {
-      "preposition": 37,
-      "particle": 2,
-      "article": 1
-    },
-    "pleinPosRecords": [
-      {
-        "lang_code": "fr",
-        "lang": "French",
-        "pos": "adj",
-        "tags": [],
-        "glosses": [
-          [
-            "full, full up"
-          ],
-          [
-            "plenty"
-          ],
-          [
-            "solid"
-          ],
-          [
-            "full"
-          ]
-        ]
-      },
-      {
-        "lang_code": "fr",
-        "lang": "French",
-        "pos": "adv",
-        "tags": [],
-        "glosses": [
-          [
-            "due"
-          ],
-          [
-            "a lot, lots of, many"
-          ]
-        ]
-      },
-      {
-        "lang_code": "fr",
-        "lang": "French",
-        "pos": "noun",
-        "tags": [],
-        "glosses": [
-          [
-            "full tank (of gas)"
-          ],
-          [
-            "downstroke (of a letter)"
-          ]
-        ]
-      },
-      {
-        "lang_code": "fr",
-        "lang": "French",
-        "pos": "prep",
-        "tags": [],
-        "glosses": [
-          [
-            "in; all over; filling"
-          ]
-        ]
-      }
-    ],
     "overridesApplied": 7,
     "selectedEntries": 3000
   },
   "overridesApplied": 7,
   "sizes": {
-    "rawBytes": 4693988,
-    "gzipBytes": 314296
+    "rawBytes": 4698196,
+    "gzipBytes": 315072
   }
 }
