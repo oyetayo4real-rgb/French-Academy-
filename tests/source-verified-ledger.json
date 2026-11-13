@@ -91,14 +91,14 @@
       "input": "que (pronoun / ne...que)",
       "type": "pronoun / adverb",
       "gender": "",
-      "english": "whom, which; what; only",
-      "notes": "Relative pronoun (le livre que j'ai lu), interrogative pronoun (Que veux-tu ?), and ne...que meaning only. Row assumed to be the non-conjunction senses.",
+      "english": "whom, which; what (pronoun only; ne...que = only requires separate adverb group)",
+      "notes": "Relative and interrogative pronoun senses are partially Lexique-confirmed. The ne...que meaning 'only' is an adverbial construction and requires a separate POS group; it is not confirmed by the pronoun rows.",
       "example_fr": "Il n'a qu'un frère.",
       "example_en": "He has only one brother.",
       "engine_action": "add-missing",
-      "status": "lexique-confirmed",
+      "status": "reference-pending",
       "sources": [
-        "Lexique 3.83 pilot, french-engine-data (headword/POS/gender match)"
+        "Lexique 3.83 pilot, french-engine-data (pronoun headword/POS match only)"
       ],
       "teacher_review": "not required (owner decision)"
     },
@@ -837,7 +837,9 @@
       "negative": [
         "*s'elle vient"
       ],
-      "sources": []
+      "sources": [
+        "https://www.dictionnaire-academie.fr/article/A9S1537"
+      ]
     }
   ]
 }
