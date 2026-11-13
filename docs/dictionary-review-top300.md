@@ -2,7 +2,7 @@
 
 **Purpose:** human linguistic review of the 300 highest-frequency imported headwords. Mark each row **OK** or **Fix**; record corrections in the review notes before changing the source dataset. These entries remain imported, unreviewed, unless explicitly marked *curated draft*.
 
-**Ranking:** Lexique 3.83 combined lemma frequency ('freqlemfilms2 + freqlemlivres'). Meanings are English glosses from the pinned kaikki.org French extract of English Wiktionary. Labels such as '(vulgar)' and '(colloquial)' are intentional register warnings, not editorial decoration.
+**Ranking:** Lexique 3.83 combined lemma frequency (`freqlemfilms2 + freqlemlivres`). Meanings are English glosses from the pinned kaikki.org French extract of English Wiktionary. Labels such as `(vulgar)` and `(colloquial)` are intentional register warnings.
 
 | Rank | Headword | POS | Gender | Meanings | Flags | French-speaker review |
 |---:|---|---|---|---|---|---|
@@ -25,7 +25,7 @@
 | 17 | quitter | verb | — | to discharge somebody from an obligation; to leave, to quit; to part with somebody, to leave somebody | — | ☐ OK / ☐ Fix |
 | 18 | occuper | verb | — | to occupy, to take up; to employ; to be busy, to keep oneself busy | — | ☐ OK / ☐ Fix |
 | 19 | tourner | verb | — | to turn; to change (direction); to rotate; to spin; to go around; to circle (something); to revolve around; to orbit (a celestial body) | — | ☐ OK / ☐ Fix |
-| 20 | plein | adjective | — | full, full up; plenty; solid | other POS: noun, preposition | ☐ OK / ☐ Fix |
+| 20 | plein | adjective | — | full, full up; plenty; solid | other POS: adverb, noun, preposition | ☐ OK / ☐ Fix |
 | 21 | guerre | noun (f) | f | war | — | ☐ OK / ☐ Fix |
 | 22 | foutre | verb | — | (slang, vulgar) to do, to fuck around with, to dick around, to fritter, to tinker; (slang) to give; (slang) to put on/in (quickly), to shove, to stick, to stash | register: slang, vulgar; other POS: noun | ☐ OK / ☐ Fix |
 | 23 | paraître | verb | — | to appear (become visible); to be published; to appear, to seem | — | ☐ OK / ☐ Fix |
@@ -100,7 +100,7 @@
 | 92 | agir | verb | — | to act, to do (something); to work, to have an effect; (followed by sur) to act (on); to act, behave | — | ☐ OK / ☐ Fix |
 | 93 | bois | noun (m) | m | wood (substance making up the central part of the trunk and branches of a tree); wood (wood of a particular species of tree); wood, woodland (forested or wooded area) | — | ☐ OK / ☐ Fix |
 | 94 | pousser | verb | — | to push; to urge on, encourage; to grow | — | ☐ OK / ☐ Fix |
-| 95 | possible | adjective | — | possible | other POS: noun | ☐ OK / ☐ Fix |
+| 95 | possible | adjective | — | possible | other POS: adverb, noun | ☐ OK / ☐ Fix |
 | 96 | lettre | noun (f) | f | letter (written character); letter (written message); the literal meaning, the plain meaning of something | — | ☐ OK / ☐ Fix |
 | 97 | valoir | verb | — | to be worth; to earn, to win, to bring (something of value, ironic usage notwithstanding); to be equal to | — | ☐ OK / ☐ Fix |
 | 98 | chef | noun (m) | m | (literary) head; article, principal point; principal motive, charge, count of indictment | register: literary | ☐ OK / ☐ Fix |
@@ -122,7 +122,7 @@
 | 114 | reste | noun (m) | m | rest, remainder; a trace or vestige which remains; remainder | — | ☐ OK / ☐ Fix |
 | 115 | battre | verb | — | to beat; to defeat; to beat up; to fight | — | ☐ OK / ☐ Fix |
 | 116 | là-bas | adverb | — | there, over there; down there; yonder | — | ☐ OK / ☐ Fix |
-| 117 | genre | noun (m) | m | kind; style, look, type; genre | — | ☐ OK / ☐ Fix |
+| 117 | genre | noun (m) | m | kind; style, look, type; genre | other POS: adverb | ☐ OK / ☐ Fix |
 | 118 | coucher | verb | — | to lay, to lay down; to put to bed, to put up (a lodger); to go to bed | other POS: noun | ☐ OK / ☐ Fix |
 | 119 | emmener | verb | — | to take off, take away or out; to take (someone) along somewhere, to take (something) with (someone) | — | ☐ OK / ☐ Fix |
 | 120 | rouge | adjective | — | red (of a red color); red (left-wing, socialist); a supporter of the Republican Party | other POS: noun | ☐ OK / ☐ Fix |
@@ -165,7 +165,7 @@
 | 157 | sens | noun (m) | m | meaning, sense; sense, sensation; sense, intelligence | — | ☐ OK / ☐ Fix |
 | 158 | jambe | noun (f) | f | leg | — | ☐ OK / ☐ Fix |
 | 159 | parent | noun (m) | m | relative, relation, family member; parent; ancestors | other POS: adjective | ☐ OK / ☐ Fix |
-| 160 | dur | adjective | — | hard, tough (difficult to penetrate); hard (not soft); hard, tough (not easy, difficult) | other POS: noun | ☐ OK / ☐ Fix |
+| 160 | dur | adjective | — | hard, tough (difficult to penetrate); hard (not soft); hard, tough (not easy, difficult) | other POS: adverb, noun | ☐ OK / ☐ Fix |
 | 161 | vérité | noun (f) | f | truth | — | ☐ OK / ☐ Fix |
 | 162 | salle | noun (f) | f | hall; room (in a house); front of house (public area of a restaurant, theatre, etc.) | — | ☐ OK / ☐ Fix |
 | 163 | arme | noun (f) | f | weapon | — | ☐ OK / ☐ Fix |
@@ -236,7 +236,7 @@
 | 228 | parole | noun (f) | f | speech, language (the faculty of using spoken language to communicate or express thought,; word(s) utterance, expression (an orally articulated unit of discourse); voice, spoken word | — | ☐ OK / ☐ Fix |
 | 229 | couleur | noun (f) | f | color/colour; a flush; suit | — | ☐ OK / ☐ Fix |
 | 230 | maître | noun (m) | m | master; Military rank in the Navy, usually equivalent to the rank of sergent-chef in the Army, or; leader | — | ☐ OK / ☐ Fix |
-| 231 | clair | adjective | — | clear (see-through); clear (understandable); light (having a light shade, not dark) (of a color) | other POS: noun | ☐ OK / ☐ Fix |
+| 231 | clair | adjective | — | clear (see-through); clear (understandable); light (having a light shade, not dark) (of a color) | other POS: adverb, noun | ☐ OK / ☐ Fix |
 | 232 | ombre | noun (f) | f | shade, shadow; darkness; ghost | — | ☐ OK / ☐ Fix |
 | 233 | bleu | adjective | — | blue; very rare, underdone | other POS: noun | ☐ OK / ☐ Fix |
 | 234 | embrasser | verb | — | (dated) to hug, embrace (to affectionately wrap one's arms around another); to kiss (to touch with the lips) | register: dated | ☐ OK / ☐ Fix |
@@ -304,7 +304,7 @@
 | 296 | bonheur | noun (m) | m | goodhap, good fortune; happiness | — | ☐ OK / ☐ Fix |
 | 297 | habiter | verb | — | to live in, to occupy (to have as a home.); to live (in) | — | ☐ OK / ☐ Fix |
 | 298 | lancer | verb | — | to throw; to start, to launch; to call out, yell | other POS: noun | ☐ OK / ☐ Fix |
-| 299 | or | noun (m) | m | gold; or (yellow in heraldry) | — | ☐ OK / ☐ Fix |
+| 299 | or | noun (m) | m | gold; or (yellow in heraldry) | other POS: adverb | ☐ OK / ☐ Fix |
 | 300 | village | noun (m) | m | village; town, city | — | ☐ OK / ☐ Fix |
 
 ## Review protocol
@@ -316,4 +316,4 @@
 5. Check alternate-POS notes for completeness and sense separation.
 6. Record a proposed correction and a reliable French reference for each **Fix**.
 
-**Data status:** imported content is not a teacher-approved dictionary. The seven entries explicitly marked 'curated-draft' are owner-provided draft overrides and still require French-speaker review.
+**Data status:** imported content is not a teacher-approved dictionary. The seven entries explicitly marked `curated-draft` are owner-provided draft overrides and still require French-speaker review.
