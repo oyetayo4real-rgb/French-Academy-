@@ -19,7 +19,7 @@ const lock=JSON.parse(fs.readFileSync(LOCK,"utf8"));
 const overrides=JSON.parse(fs.readFileSync(OVERRIDES,"utf8"));
 const extractDate=lock.sources?.kaikki?.extractDate;
 if(!extractDate)throw new Error("sources.lock.json must include sources.kaikki.extractDate");
-const normalize=value=>String(value??"").normalize("NFC").toLocaleLowerCase("fr").trim();
+const normalize=value=>String(value??"").normalize("NFC").toLocaleLowerCase("fr").replace(/oe/g,"œ").trim();
 const builtin=new Set(Object.keys(dictionary).map(normalize));
 const posMap=new Map([["NOM","noun"],["VER","verb"],["ADJ","adjective"],["ADV","adverb"]]);
 const wiktionaryPos=new Map([["noun","noun"],["verb","verb"],["adjective","adjective"],["adj","adjective"],["adverb","adverb"],["adv","adverb"],["preposition","preposition"],["prep","preposition"],["pronoun","pronoun"],["conjunction","conjunction"],["interjection","interjection"],["determiner","determiner"],["numeral","numeral"],["article","article"],["particle","particle"]]);
@@ -70,8 +70,10 @@ function entrySenses(record){
    const tags=[...new Set([...(record.tags||[]),...senseTags(parent),...senseTags(child)].map(x=>String(x).toLocaleLowerCase("fr")))];
    const glosses=senseGlosses(parent,child,children.length>1||child!==parent);
    if(!glosses.length)continue;
-   const gloss=glosses.find(g=>!FORM_ONLY.test(g));
-   if(!gloss){stats.formOnlySensesDropped++;continue;}
+   const validGlosses=glosses.filter(g=>!FORM_ONLY.test(g));
+   stats.formOnlySensesDropped+=glosses.length-validGlosses.length;
+   const gloss=validGlosses[0];
+   if(!gloss)continue;
    if(isDescriptiveParent(gloss)){stats.descriptiveGlossesDropped++;continue;}
    const labels=registerTags(tags);
    const label=labels.join(", ");
@@ -81,6 +83,10 @@ function entrySenses(record){
   }
  }
  return senses.slice(0,3);
+}
+function recordHasOnlyVariantGlosses(record){
+ const glosses=(record.senses||[]).flatMap(parent=>[parent,...(parent.subsenses||[])]).flatMap(sense=>sense.glosses||sense.raw_glosses||[]).map(value=>cleanGloss(value)||String(value??"").trim()).filter(Boolean);
+ return glosses.length>0&&glosses.every(gloss=>VARIANT_ONLY.test(gloss));
 }
 function usableRecord(record){
  if(normalize(record.lang_code)!=="fr"||normalize(record.lang)!=="french")return false;
@@ -131,7 +137,7 @@ async function collectWiktionary(candidates){
   seenPos.add(key);
   if(!usableRecord(record))continue;
   const senses=entrySenses(record);
-  if(!senses.length){stats.entriesSkippedNoUsableSenses++;if((record.senses||[]).some(s=>(s.glosses||[]).some(g=>VARIANT_ONLY.test(String(g)))))stats.variantOnlyEntriesSkipped++;continue;}
+  if(!senses.length){stats.entriesSkippedNoUsableSenses++;if(recordHasOnlyVariantGlosses(record))stats.variantOnlyEntriesSkipped++;continue;}
   const genderTags=[...(record.tags||[]),...(record.senses||[]).flatMap(s=>[...(s.tags||[]),...(s.raw_tags||[])])].map(x=>String(x).toLowerCase());
   const masculine=genderTags.some(t=>t.includes("masculine")),feminine=genderTags.some(t=>t.includes("feminine"));
   const forms={feminine:new Set(),plural:new Set()};

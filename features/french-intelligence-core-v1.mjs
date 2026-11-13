@@ -25,7 +25,8 @@ export function registerImportedEntries(entries) {
     if (!metadata || metadata.hint !== false || !["imported-unreviewed","curated-draft"].includes(metadata.status) || metadata.source !== IMPORTED_SOURCE) continue;
     const word = String(rawWord).normalize("NFC").trim();
     const exact = word.toLocaleLowerCase("fr");
-    if (!word || Object.hasOwn(dictionary, exact)) continue;
+    const canonical = normalizeOeLigature(word).toLocaleLowerCase("fr");
+    if (!word || Object.hasOwn(dictionary, exact) || Object.hasOwn(dictionary, canonical)) continue;
     const record = { word, entry, metadata };
     importedDictionary.set(exact, record);
     const normalized = norm(word);

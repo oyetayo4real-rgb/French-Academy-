@@ -21,6 +21,7 @@ for(const key of keys){
  seen.add(normalized);
  if(builtins.has(normalized))errors.push({headword:key,error:"duplicates a built-in headword"});
  if(typeof entry[0]!=="string"||!entry[0].trim())errors.push({headword:key,error:"empty meaning"});
+ if(/[\[\]{}<>]|\{\{|\}\}|\[\[|\]\]/.test(entry[0]||""))errors.push({headword:key,error:"meaning contains markup"});
  if(typeof entry[1]!=="string"||!entry[1].trim())errors.push({headword:key,error:"empty part of speech"});
  if(entry[2]!=="")errors.push({headword:key,error:"Stage A must not contain example sentences"});
  const m=entry[4],status=m?.status;
@@ -39,9 +40,11 @@ for(const key of keys){
   const tags=(sense.tags||[]).map(x=>String(x).toLowerCase());
   const register=(sense.registerTags||[]).map(x=>String(x).toLowerCase());
   if(register.length)registerTagged++;
+  const hasLabel=typeof sense.label==="string"&&sense.label.trim().length>0;
   const vulgar=tags.some(t=>t.includes("vulgar")||t.includes("offensive"))||register.some(t=>t==="vulgar"||t==="offensive");
-  if(vulgar&&!(typeof sense.label==="string"&&sense.label.trim()))errors.push({headword:key,error:"vulgar/offensive sense missing register label"});
+  if((vulgar||register.length)&&!hasLabel)errors.push({headword:key,error:"register-tagged sense missing visible label"});
   if(sense.label&&!register.length)errors.push({headword:key,error:"register label has no registerTags"});
+  if(register.some(label=>!sense.label.toLowerCase().includes(label)))errors.push({headword:key,error:"register label omits a register tag"});
  }
  const pos=String(entry[1]).replace(/\s*\(.+\)$/,"");
  posCounts[pos]=(posCounts[pos]||0)+1;
@@ -63,4 +66,8 @@ console.log("QUALITY STATS: "+JSON.stringify(meta.qualityStats||{}));
 console.log("OVERRIDES APPLIED: "+(meta.overridesApplied??curatedDraftCount));
 console.log("SIZE: "+JSON.stringify(sizes));
 console.log("40 FIXED-SEED SAMPLE ENTRIES (FA-Dictionary-Stage-A-2026-11-12):");
-for(const key of sample.slice(0,40)){const e=data[key],m=e[4];console.log(JSON.stringify({headword:key,pos:e[1],gender:m.gender||null,meanings:m.senses.map(s=>({label:s.label||null,meaning:s.meaning}))}));}
+for(const key of sample.slice(0,40)){const e=data[key],m=e[4];console.log(JSON.stringify({headword:key,pos:e[1],gender:m.gender||null,label:m.senses.map(s=>s.label).filter(Boolean).join("; ")||null,meanings:m.senses.map(s=>({label:s.label||null,meaning:s.meaning})),frequency:m.lexiqueFrequency}));}
+const ranked=keys.map(headword=>({headword,entry:data[headword],meta:data[headword][4]})).sort((a,b)=>(Number(b.meta.lexiqueFrequency)||0)-(Number(a.meta.lexiqueFrequency)||0)||a.headword.localeCompare(b.headword,"fr"));
+function printProbe(label,rows){console.log(label+":");for(const row of rows){const m=row.meta;console.log(JSON.stringify({headword:row.headword,pos:row.entry[1],gender:m.gender||null,label:m.senses.map(s=>s.label).filter(Boolean).join("; ")||null,meanings:m.senses.map(s=>({label:s.label||null,meaning:s.meaning})),frequency:m.lexiqueFrequency}));}}
+printProbe("TOP 10 MOST FREQUENT OVERALL",ranked.slice(0,10));
+for(const pos of ["verb","adjective","adverb"])printProbe("TOP 10 "+pos.toUpperCase(),ranked.filter(row=>String(row.entry[1]).replace(/\\s*\\(.+\\)$/,"")===pos).slice(0,10));

@@ -3,6 +3,7 @@ import importedData from "../data/dictionary/common-3000.json" with { type: "jso
 import * as core from "../features/french-intelligence-core-v1.mjs";
 import * as compat from "../features/french-intelligence-compat.mjs";
 import { dictionary } from "../features/french-data.mjs";
+import goldenV4 from "../tests/golden/legacy-v4.json" with { type: "json" };
 import { VERB_PARADIGMS, REGULAR_ER_VERBS } from "../features/french-conjugation-paradigms.mjs";
 
 const importedCount=core.registerImportedEntries(importedData);
@@ -26,11 +27,14 @@ console.log("TEN IMPORTED LOOKUPS: "+JSON.stringify(ten));
 
 const norm=s=>String(s).toLocaleLowerCase("fr").normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim().replace(/\s+/g," ");
 const collisions=["ou","a","mur","sur","cote","pate","tache","du","mais","foret"];
+const goldenV4Lookups=new Map((goldenV4.inventory?.dictionary||[]).flatMap(row=>(row.variants||[]).map(variant=>[variant.input,variant.output])));
 const collisionReport=[];
 for(const input of collisions){
   const coreResult=core.lookup(input);
   const compatResult=compat.lookup(input);
-  const report={input,core:{status:coreResult.status,word:coreResult.word||null,builtIn:coreResult.builtIn??false,imported:coreResult.imported??false,matches:coreResult.matches?.map(x=>x.word)||[]},compat:compatResult?{word:compatResult.word,builtIn:compatResult.builtIn,imported:compatResult.imported,matches:compatResult.matches?.map(x=>x.word)||[]}:null};
+  const goldenExpected=goldenV4Lookups.get(input)||null;
+  const report={input,goldenV4:goldenExpected,core:{status:coreResult.status,word:coreResult.word||null,builtIn:coreResult.builtIn??false,imported:coreResult.imported??false,matches:coreResult.matches?.map(x=>x.word)||[]},compat:compatResult?{word:compatResult.word,builtIn:compatResult.builtIn,imported:compatResult.imported,matches:compatResult.matches?.map(x=>x.word)||[]}:null};
+  if(goldenExpected){const actual={word:coreResult.word,meaning:coreResult.meaning,part:coreResult.part,example:coreResult.example,notes:coreResult.notes,builtIn:coreResult.builtIn};assert.deepEqual(actual,goldenExpected,input+" remains byte-for-field compatible with golden v4");}
   collisionReport.push(report);
   assert.equal(compatResult?.word??null,coreResult.status==="supported"?coreResult.word:null,input+" core/compat primary lookup parity");
   if(coreResult.status==="supported"&&coreResult.imported)assert.equal(compatResult.imported,true,input+" imported collision must be displayed");
@@ -99,6 +103,9 @@ for(const [input,canonical] of [["oeil","œil"],["coeur","cœur"]]){
   assert.equal(result.builtIn,true,name+" "+input+" must be built-in, not imported");
   assert.equal(result.meaning,expected[0],name+" "+input+" meaning exactly matches built-in entry");
   assert.equal(result.part,expected[1],name+" "+input+" POS exactly matches built-in entry");
+  assert.equal(result.example,expected[2],name+" "+input+" example exactly matches built-in entry");
+  assert.equal(result.notes,expected[3],name+" "+input+" notes exactly match built-in entry");
+  assert.equal(dictionary[result.word],expected,name+" "+input+" resolves to the exact immutable built-in entry object");
  }
 }
 for(const word of ["même","cent","véritable","là","chéri","peu","cuire"]){

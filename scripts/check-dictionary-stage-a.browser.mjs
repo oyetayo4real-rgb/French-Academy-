@@ -9,7 +9,7 @@ const sw=fs.readFileSync(new URL("../sw.js",import.meta.url),"utf8");
 const cacheVersion=sw.match(/const V="([^"]+)"/)?.[1];
 assert.ok(cacheVersion,"service worker cache version must be readable from sw.js");
 const ten=Object.keys(importedData).filter(word=>compat.lookup(word)?.imported).slice(0,10);
-const typos=[["bonjor","bonjour"],["maisonn","maison"],["chossir","choisir"],["beacoup","beaucoup"],["etudiant","étudiant"]];
+const typos=[["bonjor","bonjour"],["maisonn","maison"],["maisson","maison"],["chossir","choisir"],["beacoup","beaucoup"],["etudiant","étudiant"]];
 const browser=await chromium.launch({headless:true});
 const results=[];
 try{
