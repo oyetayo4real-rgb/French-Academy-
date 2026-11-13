@@ -54,6 +54,22 @@ try{
         assert.ok(await page.locator("#fiAnswer [data-fisuggest]").count()<=5);
       }
     }
+    await page.locator("#fiWord").fill("même");
+    await page.locator("#fiLookup").click();
+    await page.locator("#fiAnswer .fi-imported-dictionary").waitFor({state:"visible"});
+    const memeSections=await page.locator("#fiAnswer .fi-pos-group").evaluateAll(nodes=>nodes.map(node=>({
+      pos:node.querySelector("h4")?.textContent?.trim()||"",
+      firstMeaning:node.querySelector("ol li")?.textContent?.trim()||"",
+      text:node.innerText
+    })));
+    const memeAdverb=memeSections.find(group=>group.pos==="adverb");
+    const memeAdjective=memeSections.find(group=>group.pos==="adjective");
+    assert.ok(memeAdverb,profile.name+" renders même adverb in its own POS section");
+    assert.match(memeAdverb.firstMeaning,/even/i,profile.name+" même adverb first meaning is even");
+    assert.ok(memeAdjective,profile.name+" renders même adjective in a separate POS section");
+    assert.match(memeAdjective.text,/same/i,profile.name+" même adjective section contains same");
+    assert.notEqual(memeSections.indexOf(memeAdverb),memeSections.indexOf(memeAdjective),profile.name+" même POS sections are distinct");
+
     const linkContrast=await page.evaluate(()=>{
       const parse=value=>{const m=value.match(/[\d.]+/g)||[];return m.slice(0,3).map(Number)};
       const luminance=rgb=>{const [r,g,b]=rgb.map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4});return .2126*r+.7152*g+.0722*b};

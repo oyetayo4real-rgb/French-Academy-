@@ -6,7 +6,11 @@
       "same",
       "even",
       "very, as in « le jour même »"
-    ]
+    ],
+    "meaningsByPos": {
+      "adverb": ["even"],
+      "adjective": ["same", "very, as in « le jour même »"]
+    }
   },
   "cent": {
     "status": "curated-draft",

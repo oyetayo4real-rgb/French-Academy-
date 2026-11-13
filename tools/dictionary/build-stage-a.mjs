@@ -11,6 +11,7 @@ const LEXIQUE=process.env.LEXIQUE_FILE||path.join(ROOT,"data/raw/Lexique383.tsv"
 const WIKTIONARY=process.env.WIKTIONARY_FILE||path.join(ROOT,"data/raw/kaikki.org-dictionary-French.jsonl");
 const OUTPUT=process.env.OUTPUT_FILE||path.join(ROOT,"data/dictionary/common-3000.json");
 const META=process.env.META_FILE||path.join(ROOT,"data/dictionary/common-3000.meta.json");
+const FREQUENCY_AUDIT=path.join(ROOT,"tools/dictionary/build-only/lexique-frequency.json");
 const LOCK=path.join(ROOT,"tools/dictionary/sources.lock.json");
 const OVERRIDES=path.join(ROOT,"tools/dictionary/overrides.json");
 const TARGET=3000,MINIMUM=2800,SOURCE="wiktionary-en via kaikki.org";
@@ -32,8 +33,12 @@ const FORBIDDEN_RECORD_TAGS=["proper noun","proper-name","abbreviation","initial
 const stats={
  homographRecordsIgnored:0,formOnlySensesDropped:0,entriesSkippedNoUsableSenses:0,variantOnlyEntriesSkipped:0,
  registerTaggedSenses:0,entriesWithRegisterLabels:0,parentGlossesReplacedBySubglosses:0,
- secondaryPosGroups:0,alternatePosRowsGrouped:0,descriptiveGlossesDropped:0,overridesApplied:0,selectedEntries:0
+ secondaryPosGroups:0,alternatePosRowsGrouped:0,descriptiveGlossesDropped:0,
+ overlongGlossesRejected:0,entriesDroppedBecauseOfOverlongGlosses:0,
+ overridesApplied:0,selectedEntries:0
 };
+const rejectedOverlongGlosses=new Set();
+let currentRecordOverlongRejected=false;
 function parseTsvLine(line){const fields=[];let value="",quoted=false;for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='"'){if(quoted&&line[i+1]==='"'){value+='"';i++;}else quoted=!quoted;}else if(ch==="\t"&&!quoted){fields.push(value);value="";}else value+=ch;}fields.push(value);return fields;}
 function columnIndex(header,...names){const normalized=new Map(header.map((v,i)=>[String(v).replace(/[^a-z0-9]/gi,"").toLowerCase(),i]));for(const name of names){const idx=normalized.get(name.replace(/[^a-z0-9]/gi,"").toLowerCase());if(idx!==undefined)return idx;}throw new Error("Missing Lexique column: "+names.join("/"));}
 function num(value){const n=Number(String(value??"0").replace(",","."));return Number.isFinite(n)?n:0;}
@@ -44,7 +49,12 @@ function cleanGloss(raw){
  s=s.replace(/'''?|''/g,"").replace(/&nbsp;/gi," ").replace(/&amp;/gi,"&").replace(/&quot;/gi,'"');
  s=s.replace(/<\/?[^>]+>/g," ").replace(/\s+/g," ").trim();
  if(!s||/[\[\]{}<>]/.test(s))return "";
- if(Array.from(s).length>90)return "";
+ if(Array.from(s).length>90){
+  const rejected=String(raw??"");
+  if(!rejectedOverlongGlosses.has(rejected)){rejectedOverlongGlosses.add(rejected);stats.overlongGlossesRejected++;}
+  currentRecordOverlongRejected=true;
+  return "";
+ }
  return s;
 }
 function senseTags(sense){return [...new Set([...(sense?.tags||[]),...(sense?.raw_tags||[])].map(x=>String(x).toLocaleLowerCase("fr")))];}
@@ -139,8 +149,14 @@ async function collectWiktionary(candidates){
   if(seenPos.has(key)){stats.homographRecordsIgnored++;continue;}
   seenPos.add(key);
   if(!usableRecord(record))continue;
+  currentRecordOverlongRejected=false;
   const senses=entrySenses(record);
-  if(!senses.length){stats.entriesSkippedNoUsableSenses++;if(recordHasOnlyVariantGlosses(record))stats.variantOnlyEntriesSkipped++;continue;}
+  if(!senses.length){
+   stats.entriesSkippedNoUsableSenses++;
+   if(currentRecordOverlongRejected)stats.entriesDroppedBecauseOfOverlongGlosses++;
+   if(recordHasOnlyVariantGlosses(record))stats.variantOnlyEntriesSkipped++;
+   continue;
+  }
   const genderTags=[...(record.tags||[]),...(record.senses||[]).flatMap(s=>[...(s.tags||[]),...(s.raw_tags||[])])].map(x=>String(x).toLowerCase());
   const masculine=genderTags.some(t=>t.includes("masculine")),feminine=genderTags.some(t=>t.includes("feminine"));
   const forms={feminine:new Set(),plural:new Set()};
@@ -159,6 +175,15 @@ function lexGender(candidate){
  return /^(m\s*\/\s*f|mf|masculin\s*\/\s*féminin)/i.test(raw)?"m/f":/^(f|fem|féminin)/i.test(raw)?"f":/^(m|masc|masculin)/i.test(raw)?"m":null;
 }
 function senseText(s){return (s.label?"("+s.label+") ":"")+s.meaning;}
+function posForms(pos,candidate,match){
+ if(pos!=="noun"&&pos!=="adjective")return {feminine:[],plural:[]};
+ const lexFeminine=(candidate?.forms||[]).filter(x=>x.form!==candidate.lemma&&/^(f|fem|féminin)/i.test(x.gender)).map(x=>x.form);
+ const lexPlural=(candidate?.forms||[]).filter(x=>/^(p|plur)/i.test(x.number)).map(x=>x.form);
+ return {
+  feminine:[...new Set([...(match?.forms?.feminine||[]),...lexFeminine])].sort(),
+  plural:[...new Set([...(match?.forms?.plural||[]),...lexPlural])].sort()
+ };
+}
 function sha256(file){return import("node:crypto").then(({createHash})=>new Promise((resolve,reject)=>{const hash=createHash("sha256");const stream=createReadStream(file);stream.on("data",chunk=>hash.update(chunk));stream.on("error",reject);stream.on("end",()=>resolve(hash.digest("hex")));}));}
 
 const candidates=await readLexique();
@@ -180,37 +205,50 @@ for(const rows of ordered){
  if((!primaryMatch?.senses?.length)&&!override)continue;
  let senses=(primaryMatch?.senses||[]).slice(0,3);
  if(override){
-  if(override.status!=="curated-draft"||!override.reason||!Array.isArray(override.meanings)||!override.meanings.length)throw new Error("Invalid curated override for "+headword);
-  senses=override.meanings.slice(0,3).map(meaning=>({meaning:String(meaning),tags:[],registerTags:[],label:null,curated:true}));
+  const primaryOverrideMeanings=override.meaningsByPos?.[primaryPos]||override.meanings;
+  if(override.status!=="curated-draft"||!override.reason||!Array.isArray(primaryOverrideMeanings)||!primaryOverrideMeanings.length)throw new Error("Invalid curated override for "+headword);
+  senses=primaryOverrideMeanings.slice(0,3).map(meaning=>({meaning:String(meaning),tags:[],registerTags:[],label:null,curated:true}));
   stats.overridesApplied++;
  }
  const alternate=[],alternatePosSeen=new Set();
  for(const candidate of rows){
   if(candidate===primary||candidate.frequency<primary.frequency*COMMON_POS_RATIO)continue;
   const pos=posMap.get(candidate.pos),match=matches.get(wordKey+"\u0000"+pos);
-  if(!match?.senses?.length)continue;
-  alternate.push({pos,meanings:match.senses});
+  const overrideMeanings=override?.meaningsByPos?.[pos];
+  const groupSenses=Array.isArray(overrideMeanings)
+   ?overrideMeanings.map(meaning=>({meaning:String(meaning),tags:[],registerTags:[],label:null,curated:true}))
+   :match?.senses;
+  if(!groupSenses?.length)continue;
+  alternate.push({pos,meanings:groupSenses,forms:posForms(pos,candidate,match)});
   alternatePosSeen.add(pos);
  }
  for(const [matchKey,match] of matches){
   if(!matchKey.startsWith(wordKey+"\u0000"))continue;
   const pos=matchKey.slice(wordKey.length+1);
   if(!notesOnlyPos.has(pos)||pos===primaryPos||alternatePosSeen.has(pos)||!match.senses?.length)continue;
-  alternate.push({pos,meanings:match.senses});
+  alternate.push({pos,meanings:match.senses,forms:posForms(pos,null,match)});
+  alternatePosSeen.add(pos);
+ }
+ for(const [pos,rawMeanings] of Object.entries(override?.meaningsByPos||{})){
+  if(pos===primaryPos||alternatePosSeen.has(pos)||!Array.isArray(rawMeanings)||!rawMeanings.length)continue;
+  const candidate=rows.find(row=>posMap.get(row.pos)===pos);
+  const match=matches.get(wordKey+"\u0000"+pos);
+  alternate.push({
+   pos,
+   meanings:rawMeanings.map(meaning=>({meaning:String(meaning),tags:[],registerTags:[],label:null,curated:true})),
+   forms:posForms(pos,candidate,match)
+  });
   alternatePosSeen.add(pos);
  }
  alternate.sort((a,b)=>a.pos.localeCompare(b.pos,"en"));
  if(alternate.length){stats.secondaryPosGroups++;stats.alternatePosRowsGrouped+=alternate.length;}
  const rawGender=primaryMatch?.gender||lexGender(primary);
  const gender=primaryPos==="noun"?rawGender:null;
- const inflectable=primaryPos==="noun"||primaryPos==="adjective";
- const lexFeminine=inflectable?primary.forms.filter(x=>x.form!==primary.lemma&&/^(f|fem|féminin)/i.test(x.gender)).map(x=>x.form):[];
- const lexPlural=inflectable?primary.forms.filter(x=>/^(p|plur)/i.test(x.number)).map(x=>x.form):[];
- const forms={feminine:inflectable?[...new Set([...(primaryMatch?[...primaryMatch.forms.feminine]:[]),...lexFeminine])].sort():[],plural:inflectable?[...new Set([...(primaryMatch?[...primaryMatch.forms.plural]:[]),...lexPlural])].sort():[]};
+ const forms=posForms(primaryPos,primary,primaryMatch);
  const notes=[];
  const meaning=senses.map(senseText).join("; ");
  const toPosGroup=(pos,groupSenses,groupForms={feminine:[],plural:[]})=>({pos,meanings:groupSenses.map(s=>({meaning:s.meaning,register:s.label||"neutral"})),forms:groupForms});
- const posGroups=[toPosGroup(primaryPos,senses,forms),...alternate.map(group=>toPosGroup(group.pos,group.meanings))];
+ const posGroups=[toPosGroup(primaryPos,senses,forms),...alternate.map(group=>toPosGroup(group.pos,group.meanings,group.forms))];
  const metadata={
   hint:false,source:SOURCE,extractDate,
   status:override?"curated-draft":"imported-unreviewed",
@@ -218,13 +256,21 @@ for(const rows of ordered){
   forms
  };
  output[headword]=[meaning,gender&&primaryPos==="noun"?"noun ("+gender+")":primaryPos,"",notes.join(" "),metadata];
- selected.push({headword,pos:primaryPos,frequency:primary.frequency});
+ selected.push({
+  headword,pos:primaryPos,frequency:primary.frequency,
+  posFrequencies:rows.map(row=>({pos:posMap.get(row.pos),frequency:row.frequency})).filter(row=>row.pos)
+ });
  posCounts[primaryPos]++;
  if(senses.some(s=>s.registerTags?.length))stats.entriesWithRegisterLabels++;
 }
-if(selected.length<MINIMUM)throw new Error("Only "+selected.length+" qualifying entries found; minimum is "+MINIMUM);
+if(selected.length<MINIMUM)throw new Error("Only "+selected.length+" qualifying entries found; minimum is "+MINIMUM+
+ "; overlong glosses rejected: "+stats.overlongGlossesRejected+
+ "; entries dropped because of overlong glosses: "+stats.entriesDroppedBecauseOfOverlongGlosses);
 stats.selectedEntries=selected.length;
 fs.mkdirSync(path.dirname(OUTPUT),{recursive:true});fs.mkdirSync(path.dirname(META),{recursive:true});
+fs.mkdirSync(path.dirname(FREQUENCY_AUDIT),{recursive:true});
+const frequencyAudit=Object.fromEntries(selected.map(row=>[row.headword,row.posFrequencies]));
+fs.writeFileSync(FREQUENCY_AUDIT,JSON.stringify(frequencyAudit,null,2)+"\n","utf8");
 const json=JSON.stringify(output,null,2)+"\n";fs.writeFileSync(OUTPUT,json,"utf8");
 const rawBytes=Buffer.byteLength(json),gzipBytes=gzipSync(Buffer.from(json),{level:9}).byteLength;
 const lexHash=await sha256(LEXIQUE),wikHash=await sha256(WIKTIONARY);
@@ -232,7 +278,6 @@ const meta={
  schemaVersion:3,entryCount:selected.length,requestedCount:TARGET,minimumAccepted:MINIMUM,
  sourceFiles:{lexique:{name:path.basename(LEXIQUE),sha256:lexHash,extractDate:lock.sources.lexique.extractDate,url:lock.sources.lexique.url},wiktionary:{name:path.basename(WIKTIONARY),sha256:wikHash,extractDate,dumpDate:lock.sources.kaikki.dumpDate,url:lock.sources.kaikki.url}},
  ranking:"freqlemfilms2 + freqlemlivres; highest-frequency POS per lemma",posDistribution:posCounts,
- rankingAudit:selected.map(row=>({headword:row.headword,primaryPos:row.pos,frequency:Number(row.frequency.toFixed(2))})),
  qualityRules:{firstKaikkiEntryPerPos:true,formOnlyGlossesRemoved:true,overlongGlossesRejected:true,explicitLigatureWhitelist:LIGATURES.size,neutralSensesFirst:true,formsOnlyForNounsAndAdjectives:true,registerLabels:REGISTER_LABELS,childGlossPreferred:true,commonAlternatePosRatio:COMMON_POS_RATIO},
  qualityStats:stats,overridesApplied:Object.keys(overrides).filter(word=>Object.hasOwn(output,word)).length,
  sizes:{rawBytes,gzipBytes}

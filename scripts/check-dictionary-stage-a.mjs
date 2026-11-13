@@ -5,6 +5,7 @@ import * as compat from "../features/french-intelligence-compat.mjs";
 import { dictionary } from "../features/french-data.mjs";
 import goldenV4 from "../tests/golden/legacy-v4.json" with { type: "json" };
 import { VERB_PARADIGMS, REGULAR_ER_VERBS } from "../features/french-conjugation-paradigms.mjs";
+import overrides from "../tools/dictionary/overrides.json" with { type: "json" };
 
 const importedCount=core.registerImportedEntries(importedData);
 assert.equal(importedCount,Object.keys(importedData).length,"all generated entries register in the pure core");
@@ -72,9 +73,9 @@ if(ambiguousGroup){
   const result=core.lookup(input);
   assert.equal(result.imported,true,"accent-less imported collision resolves after built-ins");
   assert.ok(result.matches.length>1,"all imported collisions are returned");
-  const expected=[...ambiguousGroup[1]].sort((a,b)=>(Number(importedData[b][4].lexiqueFrequency)||0)-(Number(importedData[a][4].lexiqueFrequency)||0)||a.localeCompare(b,"fr"));
-  assert.deepEqual(result.matches.map(x=>x.word),expected,"imported collision results sort by Lexique frequency");
-  console.log("PASS imported multi-match collision: "+JSON.stringify(result.matches.map(x=>({word:x.word,frequency:x.lexiqueFrequency}))));
+  const expected=[...ambiguousGroup[1]];
+  assert.deepEqual(result.matches.map(x=>x.word),expected,"imported collision results preserve builder Lexique-frequency insertion order");
+  console.log("PASS imported multi-match collision insertion order: "+JSON.stringify(result.matches.map(x=>x.word)));
 }else{
   console.log("NO MULTI-ENTRY IMPORTED ACCENT COLLISION IN THIS DATASET; built-in collision priority cases still passed.");
 }
@@ -108,11 +109,63 @@ for(const [input,canonical] of [["oeil","œil"],["coeur","cœur"]]){
   assert.equal(dictionary[result.word],expected,name+" "+input+" resolves to the exact immutable built-in entry object");
  }
 }
-for(const word of ["même","cent","véritable","là","chéri","peu","cuire"]){
- const meta=importedData[word]?.[4];
- assert.equal(meta?.status,"curated-draft",word+" is marked curated draft");
- assert.ok(meta?.reason,word+" override includes a reason");
+const ACCEPTED_MEANINGS={
+ "là":["there"],"même":["even"],"peu":["little","few"],"part":["share","part"],
+ "poser":["put","place"],"longtemps":["long time","for a long time"],"gros":["big","fat","large"],
+ "mois":["month"],"problème":["problem"],"long":["long"],"frère":["brother"],
+ "lever":["raise","lift"],"montrer":["show"],"peine":["sorrow","trouble","penalty"],
+ "servir":["serve"],"garder":["keep"],"quitter":["leave"],"occuper":["occupy"],
+ "tourner":["turn"],"plein":["full"],"guerre":["war"],"mettre":["put","place"],
+ "paraître":["appear","seem"],"payer":["pay"],"continuer":["continue"],
+ "suite":["continuation","sequel","following"],"blanc":["white"],"point":["point"],
+ "train":["train"],"minute":["minute"]
+};
+assert.equal(Object.keys(ACCEPTED_MEANINGS).length,30,"30-word acceptance list is complete");
+const normalizeEnglish=value=>String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("en");
+function posGroupMeanings(group){
+ const raw=Array.isArray(group.meanings)&&group.meanings.length?group.meanings:(Array.isArray(group.senses)?group.senses:[]);
+ return raw.map(item=>typeof item==="string"?item:item?.meaning||item?.gloss||"").filter(Boolean);
 }
+for(const [word,accepted] of Object.entries(ACCEPTED_MEANINGS)){
+ const result=core.lookup(word);
+ assert.equal(result.status,"supported",word+" combined lookup is supported");
+ if(word==="mettre"){
+  assert.equal(result.builtIn,true,"mettre must resolve through the built-in dictionary");
+  assert.equal(result.imported,false,"mettre must not be replaced by an imported duplicate");
+  assert.ok(accepted.some(term=>normalizeEnglish(result.meaning).includes(normalizeEnglish(term))),"mettre built-in meaning must satisfy the accept-list");
+  continue;
+ }
+ assert.equal(result.imported,true,word+" must resolve through the imported Stage A dictionary");
+ const meta=importedData[word]?.[4]||{};
+ const meanings=[importedData[word]?.[0],...(meta.senses||[]).map(s=>s.meaning),...(meta.posGroups||[]).flatMap(posGroupMeanings)].filter(Boolean).join(" ");
+ assert.ok(accepted.some(term=>normalizeEnglish(meanings).includes(normalizeEnglish(term))),
+  word+" must contain an independently accepted learner meaning; expected "+JSON.stringify(accepted)+", actual "+meanings);
+}
+const memeMeta=importedData["même"]?.[4]||{};
+const memeGroups=memeMeta.posGroups||[];
+const memeAdverb=memeGroups.find(group=>group.pos==="adverb");
+const memeAdjective=memeGroups.find(group=>group.pos==="adjective");
+assert.equal(importedData["même"]?.[1],"adverb","même primary POS is adverb");
+assert.ok(memeAdverb,"même has a distinct adverb POS group");
+assert.ok(normalizeEnglish(posGroupMeanings(memeAdverb)[0]).includes("even"),"même adverb first meaning is even");
+assert.ok(memeAdjective,"même has a separate adjective POS group");
+assert.ok(posGroupMeanings(memeAdjective).some(meaning=>normalizeEnglish(meaning).includes("same")),"même adjective group contains same");
+const memeHtml=compat.renderDictionaryHtml(compat.lookup("même"));
+assert.ok((memeHtml.match(/class="fi-pos-group"/g)||[]).length>=2,"même renders distinct POS sections");
+assert.match(memeHtml,/<h4>adverb<\/h4>/,"même rendered adverb section is distinct");
+assert.match(memeHtml,/<h4>adjective<\/h4>/,"même rendered adjective section is distinct");
+const legacyHtml=compat.renderDictionaryHtml({
+ imported:true,word:"legacy",part:"noun",
+ posGroups:[{pos:"noun",senses:[{meaning:"legacy noun sense",label:null}]}],
+ senses:[{meaning:"entry fallback sense",label:null}]
+});
+assert.ok(legacyHtml.includes("legacy noun sense"),"legacy POS groups without meanings fall back to their senses");
+assert.ok(!legacyHtml.includes("No reviewed meaning"),"legacy renderer never displays the missing-meanings placeholder");
+for(const word of ["même","cent","véritable","là","chéri","peu","cuire"]){
+ assert.equal(importedData[word]?.[4]?.status,"curated-draft",word+" is marked curated draft");
+ assert.ok(overrides[word]?.reason,word+" review reason remains in build-only override metadata, not learner payload");
+}
+
 assert.ok(!importedData["oeil"]&&!importedData["coeur"],"nonstandard spelling entries are not imported");
 assert.ok(!JSON.stringify(importedData["chéri"]||{}).includes("Shar (shari'a)"),"chéri homograph contamination is removed");
 assert.ok(!(importedData["cuire"]?.[4]?.senses||[]).some(s=>/inflection of/i.test(s.meaning)),"cuire form-only sense removed");
@@ -121,13 +174,12 @@ assert.ok((importedData["final"]?.[4]?.senses||[]).every(s=>!/^expressing purpos
 assert.ok((JSON.parse((await import("node:fs")).readFileSync(new URL("../data/dictionary/common-3000.meta.json",import.meta.url),"utf8")).qualityStats?.parentGlossesReplacedBySubglosses||0)>0,"hierarchical parent glosses were resolved to child glosses");
 for(const [word,entry] of Object.entries(importedData))assert.ok(!(entry[4].senses||[]).some(s=>/^(?:referring to|used to|indicating|expressing|denoting|relating to|pertaining to|describing|said of)\b/i.test(s.meaning)),word+" has no descriptive-only gloss");
 assert.ok(importedData["peu"]?.[1]==="adverb","peu primary learner-facing POS is adverb");
-assert.ok((importedData["peu"]?.[3]||"").includes("noun:"),"peu noun senses remain grouped in notes");
-assert.ok((importedData["plein"]?.[3]||"").includes("preposition:"),"plein preposition senses remain grouped in notes");
+assert.ok((importedData["peu"]?.[4]?.posGroups||[]).some(group=>group.pos==="noun"),"peu noun senses remain in a separate POS group");
+assert.ok(!(importedData["peu"]?.[3]||"").includes("noun:"),"peu POS groups are not hidden in notes");
 assert.ok((importedData["plein"]?.[4]?.posGroups||[]).some(group=>group.pos==="noun"),"plein noun senses remain grouped in notes");
 assert.ok((importedData["plein"]?.[4]?.posGroups||[]).some(group=>group.pos==="preposition"),"plein preposition POS group is retained");
 assert.ok((importedData["plein"]?.[4]?.posGroups||[]).some(group=>group.pos==="adverb"),"plein adverb POS group is retained");
-assert.ok((importedData["là"]?.[4]?.reason||"").length>0,"là curated override remains sourced with a reason");
-assert.ok((importedData["même"]?.[3]||"").includes("adjective"),"même alternate common POS is grouped in notes");
+assert.ok(overrides["là"]?.reason,"là curated override remains sourced in build-only override metadata");
 for(const [word,entry] of Object.entries(importedData))for(const sense of entry[4].senses||[]){
  const tags=(sense.tags||[]).map(x=>String(x).toLowerCase());
  const register=(sense.registerTags||[]).map(x=>String(x).toLowerCase());

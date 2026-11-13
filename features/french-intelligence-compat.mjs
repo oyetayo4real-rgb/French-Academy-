@@ -48,13 +48,17 @@ function showAnswer(html){const out=$("fiAnswer");if(out)out.innerHTML=html;}
       return '<div class="fi-answer fi-imported-dictionary">'+matches.map(item=>{
         const groups=Array.isArray(item.posGroups)&&item.posGroups.length?item.posGroups:[{pos:item.part,meanings:(item.senses||[]).map(s=>({meaning:s.meaning,register:s.label||"neutral"})),forms:item.forms||{feminine:[],plural:[]}}];
         const groupHtml=groups.map(group=>{
-          const meanings=(group.meanings||[]).slice(0,3);
+          const legacySenses=Array.isArray(group.senses)?group.senses:(Array.isArray(item.senses)?item.senses:[]);
+          const rawMeanings=Array.isArray(group.meanings)&&group.meanings.length?group.meanings:legacySenses;
+          const meanings=rawMeanings.map(s=>typeof s==="string"
+            ?{meaning:s,register:"neutral"}
+            :{meaning:s?.meaning||s?.gloss||"",register:s?.register||s?.label||"neutral"}).filter(s=>s.meaning).slice(0,3);
           const meaningHtml=meanings.length?'<ol>'+meanings.map(s=>{
             const register=s.register&&s.register!=="neutral"?'<span class="fi-tag">('+esc(s.register)+')</span> ':"";
             return '<li>'+register+esc(s.meaning)+'</li>';
-          }).join('')+'</ol>':'<p>No reviewed meaning is available for this part of speech.</p>';
-          const forms=group.forms||{};
-          return '<section class="fi-pos-group"><h4>'+esc(group.pos)+'</h4>'+meaningHtml+
+          }).join('')+'</ol>':((item.meaning||d.meaning)?'<p>'+esc(item.meaning||d.meaning)+'</p>':"");
+          const forms=group.forms||item.forms||{};
+          return '<section class="fi-pos-group"><h4>'+esc(group.pos||item.part||d.part||"Part of speech")+'</h4>'+meaningHtml+
             ((forms.feminine||[]).length?'<p class="fi-muted">Feminine: '+esc(forms.feminine.join(', '))+'</p>':'')+
             ((forms.plural||[]).length?'<p class="fi-muted">Plural: '+esc(forms.plural.join(', '))+'</p>':'')+'</section>';
         }).join('');
@@ -290,9 +294,14 @@ function didYouMean(query){
     if(normalized!==q&&!editDistanceAtMostOne(normalized,q))continue;
     candidates.push({word,imported:true});
   }
-  const unique=new Map();
-  for(const item of candidates){const prior=unique.get(item.word);if(!prior||item.frequency>prior.frequency)unique.set(item.word,item);}
-  return [...unique.values()].sort((a,b)=>Number(a.imported)-Number(b.imported)||b.frequency-a.frequency||a.word.localeCompare(b.word,"fr")).slice(0,5).map(({word})=>({word}));
+  const seen=new Set(),suggestions=[];
+  for(const item of candidates){
+    if(seen.has(item.word))continue;
+    seen.add(item.word);
+    suggestions.push({word:item.word});
+    if(suggestions.length===5)break;
+  }
+  return suggestions;
 }
 function suggestionHtml(query){
   const suggestions=didYouMean(query);
@@ -394,5 +403,5 @@ const api = Object.freeze({
   checkWriting: publicCheckWriting
 });
 if (typeof window !== "undefined") window.FrenchIntelligenceCore = api;
-export { publicLookup as lookup, publicTranslate as translate, publicConjugate as conjugate, publicAnswerQuestion as answerQuestion, publicCheckWriting as checkWriting, didYouMean as dictionarySuggestions };
+export { publicLookup as lookup, publicTranslate as translate, publicConjugate as conjugate, publicAnswerQuestion as answerQuestion, publicCheckWriting as checkWriting, dictionaryHtml as renderDictionaryHtml, didYouMean as dictionarySuggestions };
 export default api;
