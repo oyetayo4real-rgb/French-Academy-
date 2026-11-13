@@ -46,11 +46,11 @@
     "commonAlternatePosRatio": 0.01
   },
   "qualityStats": {
-    "homographRecordsIgnored": 1026,
-    "formOnlySensesDropped": 425,
-    "entriesSkippedNoUsableSenses": 415,
-    "variantOnlyEntriesSkipped": 26,
-    "registerTaggedSenses": 3705,
+    "homographRecordsIgnored": 1047,
+    "formOnlySensesDropped": 412,
+    "entriesSkippedNoUsableSenses": 395,
+    "variantOnlyEntriesSkipped": 8,
+    "registerTaggedSenses": 3708,
     "entriesWithRegisterLabels": 279,
     "parentGlossesReplacedBySubglosses": 7,
     "secondaryPosGroups": 326,
