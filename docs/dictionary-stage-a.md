@@ -52,3 +52,7 @@ Stage A contains **3,000 imported French lemmas**. The builder ranks Lexique 3.8
 The 300 highest-frequency entries are listed in [Dictionary review — top 300](dictionary-review-top300.md) for French-speaker validation.
 
 This data is imported and remains unreviewed except for the explicitly marked curated drafts. No example sentences are imported.
+
+## Lookup regression coverage
+
+The Stage A acceptance suite compares the core and compatibility layers for `ou`, `a`, `mur`, `sur`, `cote`, `pate`, `tache`, `du`, `mais` and `foret`. The frozen golden v4 dictionary inventory contains exact expected entries for `ou` (the built-in `où`) and `mais` (the built-in conjunction); those are checked field-for-field. The other probes are checked for core/compat primary-result parity. `oeil` and `coeur` are checked against the complete built-in canonical entry, including meaning, part of speech and `builtIn: true`.
