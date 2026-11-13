@@ -44,7 +44,7 @@ for(const key of keys){
   const vulgar=tags.some(t=>t.includes("vulgar")||t.includes("offensive"))||register.some(t=>t==="vulgar"||t==="offensive");
   if((vulgar||register.length)&&!hasLabel)errors.push({headword:key,error:"register-tagged sense missing visible label"});
   if(sense.label&&!register.length)errors.push({headword:key,error:"register label has no registerTags"});
-  if(register.some(label=>!sense.label.toLowerCase().includes(label)))errors.push({headword:key,error:"register label omits a register tag"});
+  if(register.some(label=>!String(sense.label||"").toLowerCase().includes(label)))errors.push({headword:key,error:"register label omits a register tag"});
  }
  const pos=String(entry[1]).replace(/\s*\(.+\)$/,"");
  posCounts[pos]=(posCounts[pos]||0)+1;

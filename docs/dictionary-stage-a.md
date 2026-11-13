@@ -25,25 +25,27 @@ Stage A contains **3,000 imported French lemmas**. The builder ranks Lexique 3.8
 
 ## Final rebuild
 
-- Workflow: [Dictionary build run #43412846477](https://github.com/oyetayo4real-rgb/French-Academy-/actions/runs/43412846477)
-- Generated-data commit: `1fd62ba77dfe614d65de89aabd13bd824017a2e8`
+- Workflow: [Dictionary build run #43414287310](https://github.com/oyetayo4real-rgb/French-Academy-/actions/runs/43414287310)
+- Generated-data commit: `dc19757ba0a03fc848c0c939ac6aa0f89bda7cc3`
 - Entries: 3,000
 - POS distribution: 1,678 nouns; 824 verbs; 393 adjectives; 105 adverbs
 - Entries with gender: 1,678
 - Meanings per entry: 1 = 1,080; 2 = 824; 3 = 1,096
 - Raw JSON: 4,698,196 bytes
 - Gzipped JSON: 315,072 bytes
-- Service-worker cache version: `fa-v37`; the dictionary JSON is in the precache.
+- Service-worker cache version: `fa-v37`; the dictionary JSON remains in the precache. The browser acceptance test reads this version directly from `sw.js`.
 
 ## Build quality counters
 
-- Later same-POS Kaikki records ignored: 1,026
-- Form-only senses dropped: 425
-- Entries with no usable senses skipped: 415
-- Variant-only entries skipped: 26
+- Later same-POS Kaikki records ignored: 1,047
+- Form-only gloss candidates dropped: 412
+- Entries with no usable senses skipped: 395
+- Variant-only entries skipped after sense inspection: 8
+- Built-in spelling aliases `oeil` and `coeur` excluded by canonical OE-ligature matching: 2
 - Parent-to-child gloss resolutions: 7
 - Descriptive-only glosses dropped: 22
-- Entries with register-labelled senses: 279 (3,705 labelled senses)
+- Entries with register-labelled senses: 279 (344 labelled senses)
+- Register-tagged sense-label assignments: 3,708
 - Alternate-POS groups: 326 entries; 351 alternate-POS groups
 - Curated-draft overrides applied: 7
 
