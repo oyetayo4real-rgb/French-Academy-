@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import importedDictionary from "../data/dictionary/common-3000.json" with { type: "json" };
 
 const source = readFileSync("features/french-intelligence-core-v1.mjs", "utf8");
 for (const forbidden of ["document.", "window.", "innerHTML", "<div", "<span", "<script", "localStorage", "fetch("]) {
@@ -10,7 +11,13 @@ for (const key of ["window", "document", "localStorage", "fetch", "navigator"]) 
 }
 const core = await import("../features/french-intelligence-core-v1.mjs");
 for (const key of ["window", "document", "localStorage", "fetch", "navigator"]) assert.equal(globalThis[key], undefined);
-for (const method of ["lookup", "translate", "conjugate", "answerQuestion", "checkWriting"]) assert.equal(typeof core[method], "function");
+for (const method of ["lookup", "translate", "conjugate", "answerQuestion", "checkWriting", "registerImportedEntries"]) assert.equal(typeof core[method], "function");
+assert.equal(core.registerImportedEntries(importedDictionary),3000,"pure core registers all 3,000 imported records without DOM or network");
+const importedOnlyWord=Object.keys(importedDictionary).find(word=>core.lookup(word).imported);
+assert.ok(importedOnlyWord,"pure core resolves at least one imported-only word");
+assert.equal(core.lookup(importedOnlyWord).imported,true,"pure core resolves a registered imported word");
+assert.equal(core.lookup("ou").word,"où","built-in accent-insensitive lookup remains unchanged");
+assert.equal(core.lookup("a").status,"unsupported","short homophone guard remains unchanged");
 const cases = [
   core.lookup("bonjour"), core.lookup("not-a-word"),
   core.translate("Thank you", "en-fr"), core.translate("not a known phrase", "en-fr"),

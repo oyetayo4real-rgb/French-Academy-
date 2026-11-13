@@ -1,4 +1,6 @@
 import * as structuredCore from "./french-intelligence-core-v1.mjs";
+import importedDictionary from "../data/dictionary/common-3000.json" with { type: "json" };
+structuredCore.registerImportedEntries(importedDictionary);
 import { checkSection12Rules } from "./french-section12-rules.mjs";
 /* Exact legacy HTML renderer extracted from the golden source. Keep its output byte-stable. */
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -11,7 +13,7 @@ let activeWritingReview = null;
 import { dictionary, rules, phraseMap, phrasebookPairs, examples, persons } from "./french-data.mjs";
 
 function rootStyle(){return `<style>
-  .fi-wrap{color:var(--tx,#1d2433);font:inherit}.fi-hero{padding:20px;border-radius:18px;background:linear-gradient(135deg,#172554,#3730a3 65%,#6d28d9);color:#fff;margin:12px 0}.fi-hero h1{font:700 26px Georgia,serif;margin:4px 0}.fi-hero p{margin:6px 0;opacity:.9}.fi-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}.fi-tab{width:100%;text-align:left;background:var(--card,#fff);color:var(--tx,#1d2433);border:1px solid var(--bd,#e5e1d8);padding:12px;min-height:76px}.fi-tab.active{border:2px solid var(--ac,#1d4ed8);background:rgba(59,130,246,.1)}.fi-panel{background:var(--card,#fff);border:1px solid var(--bd,#e5e1d8);border-radius:14px;padding:14px;margin:10px 0}.fi-label{display:block;font-weight:650;margin:8px 0 4px}.fi-input{display:block;width:100%;box-sizing:border-box;max-width:100%;font:inherit;padding:12px;border:1px solid var(--bd,#e5e1d8);border-radius:10px;background:var(--bg,#f7f5f0);color:var(--tx,#1d2433);margin:6px 0}.fi-output{white-space:pre-wrap;line-height:1.7;overflow-wrap:anywhere}.fi-muted{font-size:13px;color:var(--mu,#6b7280)}.fi-result{padding:12px 0;border-top:1px solid var(--bd,#e5e1d8)}.fi-tag{display:inline-block;padding:2px 8px;border-radius:20px;background:var(--bg,#f7f5f0);font-size:12px;margin:2px}.fi-answer{background:var(--bg,#f7f5f0);border-radius:10px;padding:12px;margin-top:10px}.fi-row{display:flex;gap:8px;flex-wrap:wrap}.fi-row button{flex:1;min-width:120px}.fi-note{border-left:3px solid var(--ac,#1d4ed8);padding:8px 10px;background:var(--bg,#f7f5f0);font-size:13px}.fi-back{margin:4px 0}.fi-source{font-size:12px;color:var(--mu,#6b7280)}${tab==="verbs"?".fi-conjugation-table{width:100%;table-layout:fixed;border-collapse:collapse}.fi-conjugation-table th,.fi-conjugation-table td{height:44px;min-height:44px;padding:8px 6px;border-bottom:1px solid var(--bd,#e5e1d8);text-align:left;vertical-align:middle;overflow-wrap:anywhere}.fi-conjugation-table th{width:34%;font-weight:600}.fi-conjugation-table td{font-weight:650}.fi-conjugation-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.fi-conjugation-heading h3{margin:0;overflow-wrap:anywhere}.fi-status{display:inline-flex;align-items:center;border:1px solid var(--bd,#d1d5db);border-radius:999px;padding:3px 9px;font-size:12px;color:var(--mu,#6b7280);white-space:nowrap}.fi-conjugation-footer{margin:10px 0 0;font-size:12px;color:var(--mu,#6b7280)}@media(max-width:420px){.fi-panel{min-width:0;max-width:100%;box-sizing:border-box}.fi-panel .fi-input{box-sizing:border-box;max-width:100%}.fi-conjugation,.fi-conjugation-table{min-width:0;max-width:100%;box-sizing:border-box}.fi-conjugation-table th{width:32%}.fi-conjugation-table th,.fi-conjugation-table td{padding:8px 4px;font-size:14px}}":""}@media(max-width:420px){.fi-grid{grid-template-columns:1fr}.fi-hero{padding:16px}.fi-hero h1{font-size:23px}}</style>`;}
+  .fi-wrap{color:var(--tx,#1d2433);font:inherit}.fi-hero{padding:20px;border-radius:18px;background:linear-gradient(135deg,#172554,#3730a3 65%,#6d28d9);color:#fff;margin:12px 0}.fi-hero h1{font:700 26px Georgia,serif;margin:4px 0}.fi-hero p{margin:6px 0;opacity:.9}.fi-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}.fi-tab{width:100%;text-align:left;background:var(--card,#fff);color:var(--tx,#1d2433);border:1px solid var(--bd,#e5e1d8);padding:12px;min-height:76px}.fi-tab.active{border:2px solid var(--ac,#1d4ed8);background:rgba(59,130,246,.1)}.fi-panel{background:var(--card,#fff);border:1px solid var(--bd,#e5e1d8);border-radius:14px;padding:14px;margin:10px 0}.fi-label{display:block;font-weight:650;margin:8px 0 4px}.fi-input{display:block;width:100%;box-sizing:border-box;max-width:100%;font:inherit;padding:12px;border:1px solid var(--bd,#e5e1d8);border-radius:10px;background:var(--bg,#f7f5f0);color:var(--tx,#1d2433);margin:6px 0}.fi-output{white-space:pre-wrap;line-height:1.7;overflow-wrap:anywhere}.fi-muted{font-size:13px;color:var(--mu,#6b7280)}.fi-result{padding:12px 0;border-top:1px solid var(--bd,#e5e1d8)}.fi-tag{display:inline-block;padding:2px 8px;border-radius:20px;background:var(--bg,#f7f5f0);font-size:12px;margin:2px}.fi-answer{background:var(--bg,#f7f5f0);border-radius:10px;padding:12px;margin-top:10px}.fi-row{display:flex;gap:8px;flex-wrap:wrap}.fi-row button{flex:1;min-width:120px}.fi-note{border-left:3px solid var(--ac,#1d4ed8);padding:8px 10px;background:var(--bg,#f7f5f0);font-size:13px}.fi-back{margin:4px 0}.fi-source{font-size:12px;color:var(--mu,#6b7280)}.fi-wrap a{color:inherit;text-decoration:underline;text-decoration-thickness:.08em;text-underline-offset:3px}.fi-dict-suggestions{display:flex;flex-wrap:wrap;gap:6px;min-width:0;max-width:100%}.fi-dict-suggestions button{max-width:100%;white-space:normal;overflow-wrap:anywhere;color:var(--tx,#1d2433);background:var(--card,#fff);border:1px solid var(--bd,#e5e1d8);border-radius:8px;padding:6px 10px}.fi-imported-entry{min-width:0;max-width:100%;overflow-wrap:anywhere}.fi-imported-entry+ .fi-imported-entry{border-top:1px solid var(--bd,#e5e1d8);margin-top:12px;padding-top:12px}${tab==="verbs"?".fi-conjugation-table{width:100%;table-layout:fixed;border-collapse:collapse}.fi-conjugation-table th,.fi-conjugation-table td{height:44px;min-height:44px;padding:8px 6px;border-bottom:1px solid var(--bd,#e5e1d8);text-align:left;vertical-align:middle;overflow-wrap:anywhere}.fi-conjugation-table th{width:34%;font-weight:600}.fi-conjugation-table td{font-weight:650}.fi-conjugation-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.fi-conjugation-heading h3{margin:0;overflow-wrap:anywhere}.fi-status{display:inline-flex;align-items:center;border:1px solid var(--bd,#d1d5db);border-radius:999px;padding:3px 9px;font-size:12px;color:var(--mu,#6b7280);white-space:nowrap}.fi-conjugation-footer{margin:10px 0 0;font-size:12px;color:var(--mu,#6b7280)}@media(max-width:420px){.fi-panel{min-width:0;max-width:100%;box-sizing:border-box}.fi-panel .fi-input{box-sizing:border-box;max-width:100%}.fi-conjugation,.fi-conjugation-table{min-width:0;max-width:100%;box-sizing:border-box}.fi-conjugation-table th{width:32%}.fi-conjugation-table th,.fi-conjugation-table td{padding:8px 4px;font-size:14px}}":""}@media(max-width:420px){.fi-grid{grid-template-columns:1fr}.fi-hero{padding:16px}.fi-hero h1{font-size:23px}}</style>`;}
   function header(){return rootStyle()+`<div class="fi-wrap"><button class="g fi-back" id="fiHome">← Back to French Academy</button><div class="fi-hero"><div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase">${tab==="verbs"?"Local-first":"Local-first · No API key"}</div><h1>🇫🇷 French Intelligence</h1><p>Your French language workbench: dictionary, grammar, translation support, conjugation and writing help.</p></div>${tab==="verbs"?"":`<div class="fi-note"><b>Transparent mode:</b> core features run in your browser. They do not call Gemini or require an AI API key. Built-in word data and phrase translations are limited; complex answers are not generated by a large language model.</div>`}<div class="fi-grid">`+
     [["ask","💬","Ask & explain","Grammar and language questions"],["dict","📖","Dictionary","Meaning and usage"],["translate","🌍","Translate","Phrase-based support"],["verbs","🔤","Conjugate","Common verb forms"],["correct","✍️","Writing check","Catch common mistakes"],["grammar","📘","Grammar guide","Clear rule explanations"]].map(([id,icon,name,desc])=>`<button class="fi-tab ${tab===id?"active":""}" data-fitab="${id}"><b>${icon} ${name}</b><div class="fi-muted">${desc}</div></button>`).join("")+`</div><div id="fiBody"></div>${tab==="verbs"?"":`<p class="fi-source">No account or API key is used by this module. Reference links are offered for further checking; external dictionary websites may have their own terms.</p>`}</div>`;}
   function panel(label,placeholder,id="fiInput"){return `<label class="fi-label" for="${id}">${label}</label><textarea class="fi-input" id="${id}" rows="3" placeholder="${placeholder}"></textarea>`;}
@@ -40,7 +42,34 @@ function lookup(word){
   return null;
 }
 function showAnswer(html){const out=$("fiAnswer");if(out)out.innerHTML=html;}
-  function dictionaryHtml(d){return `<div class="fi-answer"><h3 style="margin:0 0 6px">${esc(d.word)}</h3><div><b>Meaning:</b> ${esc(d.meaning)}</div><div class="fi-muted">Part of speech: ${esc(d.part)}</div><p><b>Example:</b> <i>${esc(d.example)}</i></p><p><b>Usage:</b> ${esc(d.notes)}</p><span class="fi-tag">Built-in entry</span></div>`;}
+  function dictionaryHtml(d){
+    if(d.imported){
+      const matches=Array.isArray(d.matches)&&d.matches.length>1?d.matches:[d];
+      return '<div class="fi-answer fi-imported-dictionary">'+matches.map(item=>{
+        const groups=Array.isArray(item.posGroups)&&item.posGroups.length?item.posGroups:[{pos:item.part,meanings:(item.senses||[]).map(s=>({meaning:s.meaning,register:s.label||"neutral"})),forms:item.forms||{feminine:[],plural:[]}}];
+        const groupHtml=groups.map(group=>{
+          const legacySenses=Array.isArray(group.senses)?group.senses:(Array.isArray(item.senses)?item.senses:[]);
+          const rawMeanings=Array.isArray(group.meanings)&&group.meanings.length?group.meanings:legacySenses;
+          const meanings=rawMeanings.map(s=>typeof s==="string"
+            ?{meaning:s,register:"neutral"}
+            :{meaning:s?.meaning||s?.gloss||"",register:s?.register||s?.label||"neutral"}).filter(s=>s.meaning).slice(0,3);
+          const meaningHtml=meanings.length?'<ol>'+meanings.map(s=>{
+            const register=s.register&&s.register!=="neutral"?'<span class="fi-tag">('+esc(s.register)+')</span> ':"";
+            return '<li>'+register+esc(s.meaning)+'</li>';
+          }).join('')+'</ol>':((item.meaning||d.meaning)?'<p>'+esc(item.meaning||d.meaning)+'</p>':"");
+          const forms=group.forms||item.forms||{};
+          return '<section class="fi-pos-group"><h4>'+esc(group.pos||item.part||d.part||"Part of speech")+'</h4>'+meaningHtml+
+            ((forms.feminine||[]).length?'<p class="fi-muted">Feminine: '+esc(forms.feminine.join(', '))+'</p>':'')+
+            ((forms.plural||[]).length?'<p class="fi-muted">Plural: '+esc(forms.plural.join(', '))+'</p>':'')+'</section>';
+        }).join('');
+        return '<section class="fi-imported-entry"><h3>'+esc(item.word||d.word)+'</h3>'+groupHtml+
+          ((item.gender||d.gender)?'<p class="fi-muted">Gender: '+esc(item.gender||d.gender)+'</p>':'')+
+          ((item.notes||d.notes)?'<p class="fi-muted">'+esc(item.notes||d.notes)+'</p>':'')+
+          '<span class="fi-tag">'+(item.importedStatus==="curated-draft"?"Curated draft · needs French-speaker review":"Imported entry · not yet reviewed")+'</span></section>';
+      }).join('')+'</div>';
+    }
+    return `<div class="fi-answer"><h3 style="margin:0 0 6px">${esc(d.word)}</h3><div><b>Meaning:</b> ${esc(d.meaning)}</div><div class="fi-muted">Part of speech: ${esc(d.part)}</div><p><b>Example:</b> <i>${esc(d.example)}</i></p><p><b>Usage:</b> ${esc(d.notes)}</p><span class="fi-tag">Built-in entry</span></div>`;
+  }
 function phraseMatcher(re){
   let source=re.source;
   if(source.startsWith("\\b"))source="(?<![\\p{L}\\p{N}_])"+source.slice(2);
@@ -236,9 +265,51 @@ function unifiedCheckWriting(q){
   return '<div class="fi-answer"><b>'+(hasCorrection?"Suggested text":"Grammar note")+'</b>'+output+'<b>Why these changes?</b>'+notes+action+'</div>';
 }
 
+function editDistanceAtMostOne(left,right){
+  const a=Array.from(left),b=Array.from(right);
+  if(Math.abs(a.length-b.length)>1)return false;
+  let i=0,j=0,edits=0;
+  while(i<a.length&&j<b.length){
+    if(a[i]===b[j]){i++;j++;continue;}
+    if(++edits>1)return false;
+    if(a.length>b.length)i++;else if(b.length>a.length)j++;else{i++;j++;}
+  }
+  if(i<a.length||j<b.length)edits++;
+  return edits<=1;
+}
+function didYouMean(query){
+  const q=norm(query);
+  if(!q)return [];
+  const candidates=[];
+  for(const [word,entry] of Object.entries(dictionary)){
+    const normalized=norm(word);
+    if(word.toLocaleLowerCase("fr")===String(query).toLocaleLowerCase("fr"))continue;
+    if(normalized!==q&&!editDistanceAtMostOne(normalized,q))continue;
+    candidates.push({word});
+  }
+  for(const [word,entry] of Object.entries(importedDictionary)){
+    const normalized=norm(word);
+    if(word.toLocaleLowerCase("fr")===String(query).toLocaleLowerCase("fr"))continue;
+    if(normalized!==q&&!editDistanceAtMostOne(normalized,q))continue;
+    candidates.push({word,imported:true});
+  }
+  const seen=new Set(),suggestions=[];
+  for(const item of candidates){
+    if(seen.has(item.word))continue;
+    seen.add(item.word);
+    suggestions.push({word:item.word});
+    if(suggestions.length===5)break;
+  }
+  return suggestions;
+}
+function suggestionHtml(query){
+  const suggestions=didYouMean(query);
+  if(!suggestions.length)return "";
+  return '<div class="fi-result"><b>Did you mean</b><div class="fi-dict-suggestions">'+suggestions.map(item=>'<button type="button" data-fisuggest="'+esc(item.word)+'">'+esc(item.word)+'</button>').join('')+'</div></div>';
+}
 function runAction(id){
     if(id==="fiAsk"){const q=$("fiInput")?.value||"";showAnswer(answerQuestion(q));}
-    if(id==="fiLookup"){const q=$("fiWord")?.value||"";const d=lookup(q);showAnswer(d?dictionaryHtml(d):`<div class="fi-answer">No built-in entry for <b>${esc(q)}</b>. No definition has been fabricated. Check <a href="https://www.dictionnaire-academie.fr/" target="_blank" rel="noopener noreferrer">Académie française</a>, <a href="https://www.cnrtl.fr/definition/${encodeURIComponent(q)}" target="_blank" rel="noopener noreferrer">CNRTL/TLFi</a> or <a href="https://fr.wiktionary.org/wiki/${encodeURIComponent(q)}" target="_blank" rel="noopener noreferrer">Wiktionnaire</a>.</div>`);}
+    if(id==="fiLookup"){const q=$("fiWord")?.value||"";const d=publicLookup(q);showAnswer(d?dictionaryHtml(d):`<div class="fi-answer">No built-in or imported entry for <b>${esc(q)}</b>. No definition has been fabricated. ${suggestionHtml(q)}<div class="fi-result">Check <a href="https://www.dictionnaire-academie.fr/" target="_blank" rel="noopener noreferrer">Académie française</a>, <a href="https://www.cnrtl.fr/definition/${encodeURIComponent(q)}" target="_blank" rel="noopener noreferrer">CNRTL/TLFi</a> or <a href="https://fr.wiktionary.org/wiki/${encodeURIComponent(q)}" target="_blank" rel="noopener noreferrer">Wiktionnaire</a>.</div></div>`);}
     if(id==="fiTranslate"){showAnswer(translate($("fiInput")?.value||"",$("fiDirection")?.value||"fr-en"));}
     if(id==="fiConjugate"){
       const tense=$("fiTense")?.value||"present";
@@ -277,6 +348,7 @@ function runAction(id){
   if (typeof document !== "undefined" && typeof window !== "undefined") {
   document.addEventListener("click",(e)=>{
     const t=e.target instanceof Element?e.target.closest("button"):null;if(!t)return;
+    if(t.hasAttribute("data-fisuggest")){const value=t.getAttribute("data-fisuggest")||"";const input=$("fiWord");if(input){input.value=value;runAction("fiLookup");}return;}
     if(t.id==="hfrenchint"){open();return;}
     if(t.id==="fiHome"){if(typeof window.FAExitFrenchIntelligence==="function"){window.FAExitFrenchIntelligence();return;}location.reload();return;const app=$("app");if(app)app.innerHTML='<div class="card">Return to the home screen using your app navigation.</div>';return;}
     if(t.dataset.fitab){tab=t.dataset.fitab;const app=$("app");if(app)app.innerHTML=header();renderBody();return;}
@@ -297,7 +369,9 @@ const legacyRenderer = Object.freeze({ lookup, translate, conjugate, answerQuest
 function publicLookup(word) {
   const value = structuredCore.lookup(word);
   if (value.status !== "supported") return null;
-  return { word: value.word, meaning: value.meaning, part: value.part, example: value.example, notes: value.notes, builtIn: value.builtIn };
+  const base={ word:value.word, meaning:value.meaning, part:value.part, example:value.example, notes:value.notes, builtIn:value.builtIn };
+  if(!value.imported)return base;
+  return { ...base, imported:true, importedStatus:value.importedStatus, gender:value.gender, senses:value.senses, forms:value.forms, posGroups:value.posGroups, matches:value.matches, extractDate:value.extractDate, source:value.source, licence:value.licence };
 }
 function publicTranslate(text, direction) {
   const value = structuredCore.translate(text, direction);
@@ -328,5 +402,5 @@ const api = Object.freeze({
   checkWriting: publicCheckWriting
 });
 if (typeof window !== "undefined") window.FrenchIntelligenceCore = api;
-export { publicLookup as lookup, publicTranslate as translate, publicConjugate as conjugate, publicAnswerQuestion as answerQuestion, publicCheckWriting as checkWriting };
+export { publicLookup as lookup, publicTranslate as translate, publicConjugate as conjugate, publicAnswerQuestion as answerQuestion, publicCheckWriting as checkWriting, dictionaryHtml as renderDictionaryHtml, didYouMean as dictionarySuggestions };
 export default api;
