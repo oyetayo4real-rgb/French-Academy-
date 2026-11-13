@@ -130,7 +130,13 @@ assert.ok((importedData["là"]?.[4]?.reason||"").length>0,"là curated override 
 assert.ok((importedData["même"]?.[3]||"").includes("adjective"),"même alternate common POS is grouped in notes");
 for(const [word,entry] of Object.entries(importedData))for(const sense of entry[4].senses||[]){
  const tags=(sense.tags||[]).map(x=>String(x).toLowerCase());
+ const register=(sense.registerTags||[]).map(x=>String(x).toLowerCase());
  if(tags.some(t=>t.includes("vulgar")||t.includes("offensive")))assert.ok(sense.label,word+" vulgar/offensive sense must be labelled");
+ if(register.length){
+  assert.ok(sense.label,word+" register-tagged sense must have a visible label");
+  const visible=sense.label.toLocaleLowerCase("fr").split(/,\s*/);
+  for(const tag of register)assert.ok(visible.includes(tag),word+" visible label must include register tag "+tag);
+ }
 }
 console.log("PASS spelling-variant built-in identity, curated overrides, form-only exclusions, POS grouping and register labels");
 console.log("PASS Stage A imported dictionary core and compatibility acceptance");
