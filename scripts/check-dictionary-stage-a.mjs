@@ -81,7 +81,7 @@ if(ambiguousGroup){
 
 const typos=[
   ["bonjor","bonjour"],
-  ["maisonn","maison"],
+  ["maisonn","maison"],["maisson","maison"],
   ["chossir","choisir"],
   ["beacoup","beaucoup"],
   ["etudiant","étudiant"]
