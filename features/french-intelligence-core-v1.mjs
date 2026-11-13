@@ -33,10 +33,7 @@ export function registerImportedEntries(entries) {
     if (!importedAccentIndex.has(normalized)) importedAccentIndex.set(normalized, []);
     importedAccentIndex.get(normalized).push(record);
   }
-  for (const records of importedAccentIndex.values()) records.sort((a,b) =>
-    (Number(b.metadata.lexiqueFrequency) || 0) - (Number(a.metadata.lexiqueFrequency) || 0) ||
-    a.word.localeCompare(b.word, "fr")
-  );
+  // Object insertion order is the builder's Lexique-frequency order; ranking figures stay in build metadata only.
   return importedDictionary.size;
 }
 
@@ -79,14 +76,15 @@ function importedResult(record, matches = undefined) {
     word: record.word, meaning, part, example: "", notes, builtIn: false, imported: true,
     sources: ["Wiktionary contributors via kaikki.org (CC BY-SA 4.0)"],
     importedStatus: metadata.status, source: metadata.source, licence: metadata.licence || "CC BY-SA 4.0",
-    extractDate: metadata.extractDate, gender: metadata.gender || null, curatedDraftReason: metadata.reason || null,
+    extractDate: metadata.extractDate, gender: metadata.gender || null,
     senses: Array.isArray(metadata.senses) ? metadata.senses.slice(0,3) : [],
     forms: metadata.forms || { feminine: [], plural: [] },
-    lexiqueFrequency: Number(metadata.lexiqueFrequency) || 0,
+    posGroups: Array.isArray(metadata.posGroups) ? metadata.posGroups : [],
     ...(matches ? { matches: matches.map(item => ({
-      word: item.word, meaning: item.entry[0], part: item.entry[1], gender: item.metadata.gender || null, forms: item.metadata.forms || { feminine: [], plural: [] },
+      word: item.word, meaning: item.entry[0], part: item.entry[1], gender: item.metadata.gender || null,
+      forms: item.metadata.forms || { feminine: [], plural: [] },
       senses: Array.isArray(item.metadata.senses) ? item.metadata.senses.slice(0,3) : [],
-      lexiqueFrequency: Number(item.metadata.lexiqueFrequency) || 0
+      posGroups: Array.isArray(item.metadata.posGroups) ? item.metadata.posGroups : []
     })) } : {})
   });
 }

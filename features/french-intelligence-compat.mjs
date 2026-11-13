@@ -46,17 +46,20 @@ function showAnswer(html){const out=$("fiAnswer");if(out)out.innerHTML=html;}
     if(d.imported){
       const matches=Array.isArray(d.matches)&&d.matches.length>1?d.matches:[d];
       return '<div class="fi-answer fi-imported-dictionary">'+matches.map(item=>{
-        const meanings=(item.senses||[]).slice(0,3);
-        const meaningHtml=meanings.length?'<ol>'+meanings.map(s=>{
-          const label=s.label?'<span class="fi-tag">('+esc(s.label)+')</span> ':"";
-          return '<li>'+label+esc(s.meaning)+'</li>';
-        }).join('')+'</ol>':'<p>'+esc(item.meaning||d.meaning)+'</p>';
-        const forms=item.forms||d.forms||{};
-        return '<section class="fi-imported-entry"><h3>'+esc(item.word||d.word)+'</h3>'+meaningHtml+
-          '<p class="fi-muted">Part of speech: '+esc(item.part||d.part)+'</p>'+
+        const groups=Array.isArray(item.posGroups)&&item.posGroups.length?item.posGroups:[{pos:item.part,meanings:(item.senses||[]).map(s=>({meaning:s.meaning,register:s.label||"neutral"})),forms:item.forms||{feminine:[],plural:[]}}];
+        const groupHtml=groups.map(group=>{
+          const meanings=(group.meanings||[]).slice(0,3);
+          const meaningHtml=meanings.length?'<ol>'+meanings.map(s=>{
+            const register=s.register&&s.register!=="neutral"?'<span class="fi-tag">('+esc(s.register)+')</span> ':"";
+            return '<li>'+register+esc(s.meaning)+'</li>';
+          }).join('')+'</ol>':'<p>No reviewed meaning is available for this part of speech.</p>';
+          const forms=group.forms||{};
+          return '<section class="fi-pos-group"><h4>'+esc(group.pos)+'</h4>'+meaningHtml+
+            ((forms.feminine||[]).length?'<p class="fi-muted">Feminine: '+esc(forms.feminine.join(', '))+'</p>':'')+
+            ((forms.plural||[]).length?'<p class="fi-muted">Plural: '+esc(forms.plural.join(', '))+'</p>':'')+'</section>';
+        }).join('');
+        return '<section class="fi-imported-entry"><h3>'+esc(item.word||d.word)+'</h3>'+groupHtml+
           ((item.gender||d.gender)?'<p class="fi-muted">Gender: '+esc(item.gender||d.gender)+'</p>':'')+
-          ((forms.feminine||[]).length?'<p class="fi-muted">Feminine: '+esc(forms.feminine.join(', '))+'</p>':'')+
-          ((forms.plural||[]).length?'<p class="fi-muted">Plural: '+esc(forms.plural.join(', '))+'</p>':'')+
           ((item.notes||d.notes)?'<p class="fi-muted">'+esc(item.notes||d.notes)+'</p>':'')+
           '<span class="fi-tag">'+(item.importedStatus==="curated-draft"?"Curated draft · needs French-speaker review":"Imported entry · not yet reviewed")+'</span></section>';
       }).join('')+'</div>';
@@ -285,11 +288,11 @@ function didYouMean(query){
     const normalized=norm(word);
     if(word.toLocaleLowerCase("fr")===String(query).toLocaleLowerCase("fr"))continue;
     if(normalized!==q&&!editDistanceAtMostOne(normalized,q))continue;
-    candidates.push({word,frequency:Number(entry?.[4]?.lexiqueFrequency)||0,imported:true});
+    candidates.push({word,imported:true});
   }
   const unique=new Map();
   for(const item of candidates){const prior=unique.get(item.word);if(!prior||item.frequency>prior.frequency)unique.set(item.word,item);}
-  return [...unique.values()].sort((a,b)=>b.frequency-a.frequency||a.word.localeCompare(b.word,"fr")).slice(0,5);
+  return [...unique.values()].sort((a,b)=>Number(a.imported)-Number(b.imported)||b.frequency-a.frequency||a.word.localeCompare(b.word,"fr")).slice(0,5).map(({word})=>({word}));
 }
 function suggestionHtml(query){
   const suggestions=didYouMean(query);
@@ -360,7 +363,7 @@ function publicLookup(word) {
   if (value.status !== "supported") return null;
   const base={ word:value.word, meaning:value.meaning, part:value.part, example:value.example, notes:value.notes, builtIn:value.builtIn };
   if(!value.imported)return base;
-  return { ...base, imported:true, importedStatus:value.importedStatus, curatedDraftReason:value.curatedDraftReason, gender:value.gender, senses:value.senses, forms:value.forms, matches:value.matches, lexiqueFrequency:value.lexiqueFrequency, extractDate:value.extractDate, source:value.source, licence:value.licence };
+  return { ...base, imported:true, importedStatus:value.importedStatus, gender:value.gender, senses:value.senses, forms:value.forms, posGroups:value.posGroups, matches:value.matches, extractDate:value.extractDate, source:value.source, licence:value.licence };
 }
 function publicTranslate(text, direction) {
   const value = structuredCore.translate(text, direction);
