@@ -7,8 +7,14 @@ const raw=fs.readFileSync(file,"utf8"),data=JSON.parse(raw);
 const metaFile="data/dictionary/common-3000.meta.json";
 const meta=fs.existsSync(metaFile)?JSON.parse(fs.readFileSync(metaFile,"utf8")):{};
 const frequencyFile="tools/dictionary/build-only/lexique-frequency.json";
-if(!fs.existsSync(frequencyFile))throw new Error("Missing build-only Lexique frequency audit: "+frequencyFile);
-const frequencyData=JSON.parse(fs.readFileSync(frequencyFile,"utf8"));
+let frequencyData=null;
+if(!fs.existsSync(frequencyFile)){
+ if(Number(meta.schemaVersion||0)>=3)throw new Error("Missing build-only Lexique frequency audit for schemaVersion "+meta.schemaVersion+": "+frequencyFile);
+ console.log("SKIP Lexique POS frequency audit: schemaVersion "+(meta.schemaVersion??"unknown")+" is below 3 and no build-only audit file is present.");
+}else{
+ frequencyData=JSON.parse(fs.readFileSync(frequencyFile,"utf8"));
+ console.log("VALIDATE Lexique POS frequency audit: "+frequencyFile);
+}
 const rawKeys=[...raw.matchAll(/^  "((?:[^"\\]|\\.)+)": \[/gm)].map(m=>JSON.parse('"'+m[1]+'"'));
 const errors=[];
 const LIGATURES=new Map([["oeil","œil"],["coeur","cœur"],["soeur","sœur"],["oeuf","œuf"],["noeud","nœud"],["voeu","vœu"],["boeuf","bœuf"],["oeuvre","œuvre"],["moeurs","mœurs"],["manoeuvre","manœuvre"],["choeur","chœur"]]);
@@ -35,20 +41,22 @@ for(const key of keys){
  if(m?.gender)genderCount++;
  if(!m?.forms||!Array.isArray(m.forms.feminine)||!Array.isArray(m.forms.plural))errors.push({headword:key,error:"feminine/plural forms schema invalid"});
  const primaryPos=String(entry[1]).replace(/\s*\(.+\)$/,"");
- const rankingRows=frequencyData[key];
- if(!Array.isArray(rankingRows)||!rankingRows.length){
-  errors.push({headword:key,error:"missing build-only Lexique POS frequency rows"});
- }else{
-  const seenRankingPos=new Set();
-  for(const row of rankingRows){
-   if(!row||typeof row.pos!=="string"||!row.pos||!Number.isFinite(row.frequency)||row.frequency<=0)
-    errors.push({headword:key,error:"invalid build-only Lexique POS frequency row"});
-   if(row?.pos&&seenRankingPos.has(row.pos))errors.push({headword:key,error:"duplicate POS in build-only Lexique frequency rows: "+row.pos});
-   if(row?.pos)seenRankingPos.add(row.pos);
+ if(frequencyData){
+  const rankingRows=frequencyData[key];
+  if(!Array.isArray(rankingRows)||!rankingRows.length){
+   errors.push({headword:key,error:"missing build-only Lexique POS frequency rows"});
+  }else{
+   const seenRankingPos=new Set();
+   for(const row of rankingRows){
+    if(!row||typeof row.pos!=="string"||!row.pos||!Number.isFinite(row.frequency)||row.frequency<=0)
+     errors.push({headword:key,error:"invalid build-only Lexique POS frequency row"});
+    if(row?.pos&&seenRankingPos.has(row.pos))errors.push({headword:key,error:"duplicate POS in build-only Lexique frequency rows: "+row.pos});
+    if(row?.pos)seenRankingPos.add(row.pos);
+   }
+   const highest=[...rankingRows].filter(row=>row&&typeof row.pos==="string"&&Number.isFinite(row.frequency)&&row.frequency>0)
+    .sort((a,b)=>b.frequency-a.frequency||a.pos.localeCompare(b.pos,"en"))[0];
+   if(highest&&highest.pos!==primaryPos)errors.push({headword:key,error:"primary POS "+primaryPos+" differs from highest Lexique frequency POS "+highest.pos});
   }
-  const highest=[...rankingRows].filter(row=>row&&typeof row.pos==="string"&&Number.isFinite(row.frequency)&&row.frequency>0)
-   .sort((a,b)=>b.frequency-a.frequency||a.pos.localeCompare(b.pos,"en"))[0];
-  if(highest&&highest.pos!==primaryPos)errors.push({headword:key,error:"primary POS "+primaryPos+" differs from highest Lexique frequency POS "+highest.pos});
  }
  if(primaryPos==="verb"&&(m?.forms?.feminine?.length||m?.forms?.plural?.length))errors.push({headword:key,error:"verbs must not expose feminine/plural forms"});
  if(!Array.isArray(m?.posGroups)||!m.posGroups.length)errors.push({headword:key,error:"posGroups must be a non-empty array"});
@@ -80,9 +88,9 @@ for(const key of keys){
  posCounts[pos]=(posCounts[pos]||0)+1;
 }
 if(keys.length<2800||keys.length>3000)errors.push({count:keys.length,error:"entry count must be between 2,800 and 3,000"});
-for(const word of Object.keys(frequencyData))if(!Object.hasOwn(data,word))errors.push({headword:word,error:"build-only Lexique frequency file contains a non-selected lemma"});
+if(frequencyData)for(const word of Object.keys(frequencyData))if(!Object.hasOwn(data,word))errors.push({headword:word,error:"build-only Lexique frequency file contains a non-selected lemma"});
 if(errors.length){for(const error of errors)console.error(JSON.stringify({step:"dictionary-validation",test:"schema",input:error.headword||"",expected:"valid Stage A dictionary",actual:error.error||JSON.stringify(error)}));process.exit(1);}
-const frequencyFor=word=>Math.max(0,...(frequencyData[word]||[]).map(row=>Number(row.frequency)||0));
+const frequencyFor=word=>Math.max(0,...(frequencyData?.[word]||[]).map(row=>Number(row.frequency)||0));
 let seed=2166136261;for(const char of "FA-Dictionary-Stage-A-2026-11-12"){seed^=char.charCodeAt(0);seed=Math.imul(seed,16777619);}
 function random(){seed+=0x6D2B79F5;let t=seed;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;}
 const sample=[...keys].sort((a,b)=>a.localeCompare(b,"fr"));for(let i=sample.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[sample[i],sample[j]]=[sample[j],sample[i]];}

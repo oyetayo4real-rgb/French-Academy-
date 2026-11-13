@@ -51,7 +51,7 @@ function phraseMatcher(re){
 function result(status, confidence, rule_id, explanation, fields = {}) {
   return { status, confidence, rule_id, explanation, sources: ["built-in French reference set"], ...fields };
 }
-function findDictionaryEntry(word) {
+function findDictionaryEntry(word, { accentInsensitive = true } = {}) {
   const q = String(word || "").trim();
   if (!q) return null;
   const exactInput = q.toLocaleLowerCase("fr");
@@ -59,7 +59,7 @@ function findDictionaryEntry(word) {
   if (exactInput === "a" || exactInput === "à") return null;
   let foundKey = q.toLocaleLowerCase("fr");
   let found = dictionary[foundKey];
-  if (!found) {
+  if (!found && accentInsensitive) {
     const key = Object.keys(dictionary).find(k => norm(k) === norm(q));
     if (key) { foundKey = key; found = dictionary[key]; }
   }
@@ -90,19 +90,23 @@ function importedResult(record, matches = undefined) {
 }
 function lookup(word) {
   const input = String(word ?? "").trim();
-  const entry = findDictionaryEntry(input);
-  if (entry) return result("supported", 1, "dictionary." + entry.word, entry.notes, entry);
+  // Exact built-in spellings retain priority. An exact imported spelling must not be
+  // hidden by a different built-in word that only matches after accent folding.
+  const exactEntry = findDictionaryEntry(input, { accentInsensitive: false });
+  if (exactEntry) return result("supported", 1, "dictionary." + exactEntry.word, exactEntry.notes, exactEntry);
   const normalizedOe = normalizeOeLigature(input);
   if (normalizedOe !== input) {
-    const normalizedEntry = findDictionaryEntry(normalizedOe);
+    const normalizedEntry = findDictionaryEntry(normalizedOe, { accentInsensitive: false });
     if (normalizedEntry) return result("supported", 1, "dictionary." + normalizedEntry.word, normalizedEntry.notes, normalizedEntry);
   }
   const exactKey = input.toLocaleLowerCase("fr");
   const exactImported = importedDictionary.get(exactKey);
+  if (exactImported) return importedResult(exactImported);
+  const foldedEntry = findDictionaryEntry(input);
+  if (foldedEntry) return result("supported", 1, "dictionary." + foldedEntry.word, foldedEntry.notes, foldedEntry);
   const normalizedMatches = importedAccentIndex.get(norm(input)) || [];
   const isUnaccented = !/\p{M}/u.test(input.normalize("NFD"));
   if (isUnaccented && normalizedMatches.length > 1) return importedResult(normalizedMatches[0], normalizedMatches);
-  if (exactImported) return importedResult(exactImported);
   if (normalizedMatches.length) return importedResult(normalizedMatches[0], normalizedMatches.length > 1 ? normalizedMatches : undefined);
   return result("unsupported", 0, "dictionary.no-match", "No built-in or imported dictionary entry matched this input.", { query: input });
 }

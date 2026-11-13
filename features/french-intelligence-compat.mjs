@@ -285,8 +285,7 @@ function didYouMean(query){
     const normalized=norm(word);
     if(word.toLocaleLowerCase("fr")===String(query).toLocaleLowerCase("fr"))continue;
     if(normalized!==q&&!editDistanceAtMostOne(normalized,q))continue;
-    const metadata=entry[4]&&typeof entry[4]==="object"?entry[4]:{};
-    candidates.push({word,frequency:Number(metadata.lemmaFrequency)||0,imported:false});
+    candidates.push({word});
   }
   for(const [word,entry] of Object.entries(importedDictionary)){
     const normalized=norm(word);

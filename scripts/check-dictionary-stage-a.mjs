@@ -161,10 +161,49 @@ const legacyHtml=compat.renderDictionaryHtml({
 });
 assert.ok(legacyHtml.includes("legacy noun sense"),"legacy POS groups without meanings fall back to their senses");
 assert.ok(!legacyHtml.includes("No reviewed meaning"),"legacy renderer never displays the missing-meanings placeholder");
-for(const word of ["même","cent","véritable","là","chéri","peu","cuire"]){
+// owner-provided override words (interim eight): the owner has supplied seven overrides;
+// eighth word: none yet. Do not infer or invent an eighth.
+const OWNER_OVERRIDE_ACCEPTED_FIRST_MEANINGS={
+ "même":["even"],
+ "cent":["hundred","one hundred"],
+ "véritable":["real","genuine","true"],
+ "là":["there"],
+ "chéri":["darling","dear","beloved"],
+ "peu":["little","few","not much"],
+ "cuire":["to cook","to bake","to burn"]
+};
+const OWNER_OVERRIDE_WORDS=Object.keys(OWNER_OVERRIDE_ACCEPTED_FIRST_MEANINGS);
+assert.deepEqual(OWNER_OVERRIDE_WORDS,["même","cent","véritable","là","chéri","peu","cuire"]);
+for(const word of OWNER_OVERRIDE_WORDS){
  assert.equal(importedData[word]?.[4]?.status,"curated-draft",word+" is marked curated draft");
  assert.ok(overrides[word]?.reason,word+" review reason remains in build-only override metadata, not learner payload");
+ const coreResult=core.lookup(word);
+ assert.equal(coreResult.status,"supported",word+" combined core lookup renders");
+ assert.equal(coreResult.imported,true,word+" resolves to its exact imported override");
+ assert.equal(coreResult.word,word,word+" exact override spelling wins over accent-folded built-in entries");
+ const compatResult=compat.lookup(word);
+ assert.ok(compatResult?.imported,word+" compatibility lookup returns the imported override");
+ assert.equal(compatResult.word,word,word+" compatibility lookup preserves the exact override spelling");
+ const groups=Array.isArray(compatResult.posGroups)?compatResult.posGroups:[];
+ const primaryPos=String(compatResult.part||"").replace(/\s*\(.+\)$/,"");
+ const primaryGroup=groups.find(group=>group.pos===primaryPos)||groups[0];
+ assert.ok(primaryGroup,word+" has a primary POS group");
+ const firstMeaning=posGroupMeanings(primaryGroup)[0]||String(compatResult.meaning||"").split(";")[0];
+ const accepted=OWNER_OVERRIDE_ACCEPTED_FIRST_MEANINGS[word];
+ assert.ok(accepted.some(value=>normalizeEnglish(firstMeaning).includes(normalizeEnglish(value))),
+  word+" first rendered meaning must match owner-override acceptance list "+JSON.stringify(accepted)+"; got "+firstMeaning);
+ const html=compat.renderDictionaryHtml(compatResult);
+ assert.ok(html.includes("fi-imported-dictionary"),word+" renders the imported dictionary result");
+ assert.doesNotMatch(html,/(?:importedStatus|extractDate|lexiqueFrequency|lemmaFrequency|curatedDraftReason|licence|metadata|\bhint\b|\breason\b)\s*[:=]/i,
+  word+" rendered HTML must not expose internal metadata fields");
+ if(groups.length>1){
+  const renderedPos=[...html.matchAll(/<h4>([^<]+)<\/h4>/g)].map(match=>match[1]);
+  assert.deepEqual(renderedPos,groups.map(group=>group.pos),word+" renders each POS group as a distinct section");
+  assert.equal(new Set(renderedPos).size,groups.length,word+" POS section headings are distinct");
+ }
 }
+assert.equal(OWNER_OVERRIDE_WORDS.length,7,"seven documented owner overrides are tested; eighth remains none yet");
+
 
 assert.ok(!importedData["oeil"]&&!importedData["coeur"],"nonstandard spelling entries are not imported");
 assert.ok(!JSON.stringify(importedData["chéri"]||{}).includes("Shar (shari'a)"),"chéri homograph contamination is removed");
