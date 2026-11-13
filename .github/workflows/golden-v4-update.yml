@@ -1,0 +1,66 @@
+name: Approved French Intelligence golden v4
+on:
+  push:
+    branches:
+      - feat/golden-v4-capitalisation
+    paths:
+      - "scripts/generate-golden-v4.mjs"
+      - "scripts/check-golden-v4.mjs"
+      - "scripts/check-french-intelligence-parity.mjs"
+      - "docs/golden-changes.md"
+      - "tests/golden/legacy-v4.json"
+      - "tests/golden/legacy-v4.sha256"
+      - ".github/workflows/golden-v4-update.yml"
+  pull_request:
+    paths:
+      - "scripts/generate-golden-v4.mjs"
+      - "scripts/check-golden-v4.mjs"
+      - "scripts/check-french-intelligence-parity.mjs"
+      - "docs/golden-changes.md"
+      - "tests/golden/legacy-v4.json"
+      - "tests/golden/legacy-v4.sha256"
+      - ".github/workflows/golden-v4-update.yml"
+permissions:
+  contents: write
+jobs:
+  generate:
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[generate-v4]')
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Generate v4 from v3 with only the four owner-approved capitalization outputs
+        run: node scripts/generate-golden-v4.mjs --write
+      - name: Verify v4 exact delta, checksum and immutable historical references
+        run: node scripts/check-golden-v4.mjs
+      - name: Commit only the approved v4 golden files
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/golden/legacy-v4.json tests/golden/legacy-v4.sha256
+          if git diff --cached --quiet; then
+            echo "Approved v4 golden is unchanged; no commit is needed."
+            exit 0
+          fi
+          git commit -m "APPROVED GOLDEN V4 UPDATE"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+  verify:
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && !contains(github.event.head_commit.message, '[generate-v4]'))
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify v4 exact delta, checksum and immutable historical references
+        run: node scripts/check-golden-v4.mjs
+      - name: Verify exact compatibility parity against v4
+        run: node scripts/check-french-intelligence-parity.mjs

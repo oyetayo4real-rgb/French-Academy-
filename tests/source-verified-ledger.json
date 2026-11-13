@@ -5,7 +5,8 @@
   "status_values": [
     "source-verified",
     "lexique-confirmed",
-    "reference-pending"
+    "reference-pending",
+    "lexique-partial"
   ],
   "rows": [
     {
@@ -96,7 +97,7 @@
       "example_fr": "Il n'a qu'un frère.",
       "example_en": "He has only one brother.",
       "engine_action": "add-missing",
-      "status": "reference-pending",
+      "status": "lexique-partial",
       "sources": [
         "Lexique 3.83 pilot, french-engine-data (pronoun headword/POS match only)"
       ],

@@ -1,0 +1,65 @@
+{
+  "même": {
+    "status": "curated-draft",
+    "reason": "Owner-provided draft meanings; validate contextual adjective and adverb senses with a French speaker.",
+    "meanings": [
+      "same",
+      "even",
+      "very, as in « le jour même »"
+    ]
+  },
+  "cent": {
+    "status": "curated-draft",
+    "reason": "Owner-provided draft meanings; distinguish the numeral, noun, and currency use.",
+    "meanings": [
+      "hundred",
+      "one hundred",
+      "cent, coin"
+    ]
+  },
+  "véritable": {
+    "status": "curated-draft",
+    "reason": "Owner-provided draft meanings; verify nuance and usage with a French speaker.",
+    "meanings": [
+      "real",
+      "genuine",
+      "true"
+    ]
+  },
+  "là": {
+    "status": "curated-draft",
+    "reason": "Owner-provided draft meanings; verify spatial and discourse uses with a French speaker.",
+    "meanings": [
+      "there",
+      "(over) there",
+      "at that point, then"
+    ]
+  },
+  "chéri": {
+    "status": "curated-draft",
+    "reason": "Owner-provided draft meanings; remove homograph contamination and verify register.",
+    "meanings": [
+      "darling",
+      "dear",
+      "beloved"
+    ]
+  },
+  "peu": {
+    "status": "curated-draft",
+    "reason": "Curated learner meanings only; primary POS is selected from Lexique frequency and is never overridden.",
+    "meanings": [
+      "little",
+      "few",
+      "not much"
+    ]
+  },
+  "cuire": {
+    "status": "curated-draft",
+    "reason": "Owner-provided draft meanings; exclude inflection-only senses and verify the verb's cooking and burning senses.",
+    "meanings": [
+      "to cook",
+      "to bake",
+      "to burn, as of skin"
+    ]
+  }
+}

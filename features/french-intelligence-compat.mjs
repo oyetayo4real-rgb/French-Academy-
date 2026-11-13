@@ -1,0 +1,395 @@
+import * as structuredCore from "./french-intelligence-core-v1.mjs";
+import importedDictionary from "../data/dictionary/common-3000.json" with { type: "json" };
+structuredCore.registerImportedEntries(importedDictionary);
+import { checkSection12Rules } from "./french-section12-rules.mjs";
+/* Exact legacy HTML renderer extracted from the golden source. Keep its output byte-stable. */
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const writingPattern = (source, flags = "gi") => new RegExp("(?<![\\p{L}\\p{N}_'’\\-])(?:" + source + ")(?![\\p{L}\\p{N}_'’\\-])", flags.includes("u") ? flags : flags + "u");
+const preserveInitialCase = (match, replacement) => match && /^\p{Lu}/u.test(match) ? replacement.charAt(0).toLocaleUpperCase("fr") + replacement.slice(1) : replacement;
+const preserveSentenceInitialCase = (source, offset, replacement) => { const firstAlphaOffset = source.search(/\p{L}/u); if (firstAlphaOffset !== offset) return replacement; const firstAlpha = source.slice(firstAlphaOffset).match(/^\p{L}/u)?.[0]; if (!firstAlpha || !/^\p{Lu}$/u.test(firstAlpha)) return replacement; return replacement.replace(/^\p{L}/u, letter => letter.toLocaleUpperCase("fr")); };
+const $ = (id) => document.getElementById(id);
+let tab = "ask", history = [], busy = false;
+let activeWritingReview = null;
+import { dictionary, rules, phraseMap, phrasebookPairs, examples, persons } from "./french-data.mjs";
+
+function rootStyle(){return `<style>
+  .fi-wrap{color:var(--tx,#1d2433);font:inherit}.fi-hero{padding:20px;border-radius:18px;background:linear-gradient(135deg,#172554,#3730a3 65%,#6d28d9);color:#fff;margin:12px 0}.fi-hero h1{font:700 26px Georgia,serif;margin:4px 0}.fi-hero p{margin:6px 0;opacity:.9}.fi-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}.fi-tab{width:100%;text-align:left;background:var(--card,#fff);color:var(--tx,#1d2433);border:1px solid var(--bd,#e5e1d8);padding:12px;min-height:76px}.fi-tab.active{border:2px solid var(--ac,#1d4ed8);background:rgba(59,130,246,.1)}.fi-panel{background:var(--card,#fff);border:1px solid var(--bd,#e5e1d8);border-radius:14px;padding:14px;margin:10px 0}.fi-label{display:block;font-weight:650;margin:8px 0 4px}.fi-input{display:block;width:100%;box-sizing:border-box;max-width:100%;font:inherit;padding:12px;border:1px solid var(--bd,#e5e1d8);border-radius:10px;background:var(--bg,#f7f5f0);color:var(--tx,#1d2433);margin:6px 0}.fi-output{white-space:pre-wrap;line-height:1.7;overflow-wrap:anywhere}.fi-muted{font-size:13px;color:var(--mu,#6b7280)}.fi-result{padding:12px 0;border-top:1px solid var(--bd,#e5e1d8)}.fi-tag{display:inline-block;padding:2px 8px;border-radius:20px;background:var(--bg,#f7f5f0);font-size:12px;margin:2px}.fi-answer{background:var(--bg,#f7f5f0);border-radius:10px;padding:12px;margin-top:10px}.fi-row{display:flex;gap:8px;flex-wrap:wrap}.fi-row button{flex:1;min-width:120px}.fi-note{border-left:3px solid var(--ac,#1d4ed8);padding:8px 10px;background:var(--bg,#f7f5f0);font-size:13px}.fi-back{margin:4px 0}.fi-source{font-size:12px;color:var(--mu,#6b7280)}.fi-wrap a{color:inherit;text-decoration:underline;text-decoration-thickness:.08em;text-underline-offset:3px}.fi-dict-suggestions{display:flex;flex-wrap:wrap;gap:6px;min-width:0;max-width:100%}.fi-dict-suggestions button{max-width:100%;white-space:normal;overflow-wrap:anywhere;color:var(--tx,#1d2433);background:var(--card,#fff);border:1px solid var(--bd,#e5e1d8);border-radius:8px;padding:6px 10px}.fi-imported-entry{min-width:0;max-width:100%;overflow-wrap:anywhere}.fi-imported-entry+ .fi-imported-entry{border-top:1px solid var(--bd,#e5e1d8);margin-top:12px;padding-top:12px}${tab==="verbs"?".fi-conjugation-table{width:100%;table-layout:fixed;border-collapse:collapse}.fi-conjugation-table th,.fi-conjugation-table td{height:44px;min-height:44px;padding:8px 6px;border-bottom:1px solid var(--bd,#e5e1d8);text-align:left;vertical-align:middle;overflow-wrap:anywhere}.fi-conjugation-table th{width:34%;font-weight:600}.fi-conjugation-table td{font-weight:650}.fi-conjugation-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.fi-conjugation-heading h3{margin:0;overflow-wrap:anywhere}.fi-status{display:inline-flex;align-items:center;border:1px solid var(--bd,#d1d5db);border-radius:999px;padding:3px 9px;font-size:12px;color:var(--mu,#6b7280);white-space:nowrap}.fi-conjugation-footer{margin:10px 0 0;font-size:12px;color:var(--mu,#6b7280)}@media(max-width:420px){.fi-panel{min-width:0;max-width:100%;box-sizing:border-box}.fi-panel .fi-input{box-sizing:border-box;max-width:100%}.fi-conjugation,.fi-conjugation-table{min-width:0;max-width:100%;box-sizing:border-box}.fi-conjugation-table th{width:32%}.fi-conjugation-table th,.fi-conjugation-table td{padding:8px 4px;font-size:14px}}":""}@media(max-width:420px){.fi-grid{grid-template-columns:1fr}.fi-hero{padding:16px}.fi-hero h1{font-size:23px}}</style>`;}
+  function header(){return rootStyle()+`<div class="fi-wrap"><button class="g fi-back" id="fiHome">← Back to French Academy</button><div class="fi-hero"><div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase">${tab==="verbs"?"Local-first":"Local-first · No API key"}</div><h1>🇫🇷 French Intelligence</h1><p>Your French language workbench: dictionary, grammar, translation support, conjugation and writing help.</p></div>${tab==="verbs"?"":`<div class="fi-note"><b>Transparent mode:</b> core features run in your browser. They do not call Gemini or require an AI API key. Built-in word data and phrase translations are limited; complex answers are not generated by a large language model.</div>`}<div class="fi-grid">`+
+    [["ask","💬","Ask & explain","Grammar and language questions"],["dict","📖","Dictionary","Meaning and usage"],["translate","🌍","Translate","Phrase-based support"],["verbs","🔤","Conjugate","Common verb forms"],["correct","✍️","Writing check","Catch common mistakes"],["grammar","📘","Grammar guide","Clear rule explanations"]].map(([id,icon,name,desc])=>`<button class="fi-tab ${tab===id?"active":""}" data-fitab="${id}"><b>${icon} ${name}</b><div class="fi-muted">${desc}</div></button>`).join("")+`</div><div id="fiBody"></div>${tab==="verbs"?"":`<p class="fi-source">No account or API key is used by this module. Reference links are offered for further checking; external dictionary websites may have their own terms.</p>`}</div>`;}
+  function panel(label,placeholder,id="fiInput"){return `<label class="fi-label" for="${id}">${label}</label><textarea class="fi-input" id="${id}" rows="3" placeholder="${placeholder}"></textarea>`;}
+  function renderBody(){
+    const b=$("fiBody");if(!b)return;
+    if(tab==="ask")b.innerHTML=`<div class="fi-panel"><h2>Ask about French</h2>${panel("Your question","Example: Why do we say « j'ai vingt ans » instead of « je suis vingt ans » ?")}<button id="fiAsk">Explain</button><div id="fiAnswer" class="fi-output"></div><div class="fi-muted">This first version uses curated grammar explanations and local language patterns, not unrestricted generative AI.</div></div><div class="fi-panel"><b>Try one of these</b><div class="fi-row">${["Explain ne … pas","When do I use tu and vous?","Explain passé composé","Why is maison feminine?"].map((x,i)=>`<button class="g" data-fiprompt="${i}">${x}</button>`).join("")}</div></div>`;
+    else if(tab==="dict")b.innerHTML=`<div class="fi-panel"><h2>French reference dictionary</h2><p class="fi-muted">Search built-in entries for common words and expressions. If an entry is missing, open trusted reference sources instead of inventing a definition.</p><input class="fi-input" id="fiWord" placeholder="Enter a French or English word…" autocomplete="off"><button id="fiLookup" style="width:100%">Look up word</button><div id="fiAnswer" class="fi-output"></div><div class="fi-result"><b>Reference sources</b><p><a href="https://www.dictionnaire-academie.fr/" target="_blank" rel="noopener noreferrer">Académie française dictionary</a> · <a href="https://www.cnrtl.fr/definition/" target="_blank" rel="noopener noreferrer">CNRTL / TLFi</a> · <a href="https://fr.wiktionary.org/" target="_blank" rel="noopener noreferrer">Wiktionnaire</a></p></div></div>`;
+    else if(tab==="translate")b.innerHTML=`<div class="fi-panel"><h2>Translation assistant</h2><label class="fi-label" for="fiDirection">Direction</label><select class="fi-input" id="fiDirection"><option value="fr-en">French → English</option><option value="en-fr">English → French (phrasebook coverage)</option></select>${panel("Text to translate","Enter a phrase or short sentence…")}<button id="fiTranslate">Translate</button><div id="fiAnswer" class="fi-output"></div><div class="fi-note">The local phrasebook handles common phrases and known vocabulary. For long or unfamiliar text, use a trusted translation service and review the result.</div></div><div class="fi-panel"><b>Useful phrasebook</b>${examples.map(x=>`<div class="fi-result"><div>${esc(x[0])}</div><div class="fi-muted">${esc(x[1])}</div><button class="g" data-fiexample="${esc(x[0])}">Use phrase</button></div>`).join("")}</div>`;
+    else if(tab==="verbs")b.innerHTML=`<div class="fi-panel"><h2>Verb conjugator · present tense</h2><input class="fi-input" id="fiVerb" value="être" placeholder="Infinitive, e.g. parler"><label class="fi-label" for="fiTense">Tense</label><select class="fi-input" id="fiTense" aria-label="Conjugation tense"><option value="present" selected>Present</option><option value="imparfait">Imparfait</option><option value="futur">Futur</option><option value="conditionnel">Conditionnel</option><option value="passé composé">Passé composé</option></select><button id="fiConjugate">Conjugate</button><div id="fiAnswer"></div></div>`;
+    else if(tab==="correct")b.innerHTML=`<div class="fi-panel"><h2>French writing checker</h2>${panel("Paste your French text","Write or paste a sentence…")}<button id="fiCheck">Check writing</button><div id="fiAnswer" class="fi-output"></div><div class="fi-note">This checks a small set of common patterns. It is not a full grammar checker and may miss errors or flag text that is valid in context.</div></div>`;
+    else b.innerHTML=`<div class="fi-panel"><h2>French grammar guide</h2><input class="fi-input" id="fiRuleSearch" placeholder="Filter rules…"><div id="fiRules">${ruleHtml(rules)}</div></div>`;
+  }
+  function ruleHtml(list){return list.map((r,i)=>`<details class="fi-result"><summary><b>${esc(r.title)}</b></summary><p class="fi-output">${esc(r.body)}</p><button class="g" data-firule="${i}">Ask about this rule</button></details>`).join("");}
+  function norm(s){return String(s||"").replace(/[’‘‛ʼ＇]/g,"'").replace(/[＂“”„]/g,'"').toLocaleLowerCase("fr").normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim().replace(/\s+/g," ");}
+function lookup(word){
+  const q=String(word||"").trim();if(!q)return null;
+  const exactInput=q.toLocaleLowerCase("fr");
+  // Avoid accent-insensitive homophone collisions and reverse-gloss false positives.
+  if(exactInput==="a"||exactInput==="à")return null;
+  let foundKey=exactInput;
+  let found=dictionary[foundKey];
+  if(!found){const key=Object.keys(dictionary).find(k=>norm(k)===norm(q));if(key){foundKey=key;found=dictionary[key];}}
+  if(found)return {word:foundKey,meaning:found[0],part:found[1],example:found[2],notes:found[3],builtIn:true};
+  const rev=Object.keys(dictionary).find(k=>norm(dictionary[k][0].split(";")[0])===norm(q));
+  if(rev)return {word:rev,meaning:dictionary[rev][0],part:dictionary[rev][1],example:dictionary[rev][2],notes:dictionary[rev][3],builtIn:true};
+  return null;
+}
+function showAnswer(html){const out=$("fiAnswer");if(out)out.innerHTML=html;}
+  function dictionaryHtml(d){
+    if(d.imported){
+      const matches=Array.isArray(d.matches)&&d.matches.length>1?d.matches:[d];
+      return '<div class="fi-answer fi-imported-dictionary">'+matches.map(item=>{
+        const meanings=(item.senses||[]).slice(0,3);
+        const meaningHtml=meanings.length?'<ol>'+meanings.map(s=>{
+          const label=s.label?'<span class="fi-tag">('+esc(s.label)+')</span> ':"";
+          return '<li>'+label+esc(s.meaning)+'</li>';
+        }).join('')+'</ol>':'<p>'+esc(item.meaning||d.meaning)+'</p>';
+        const forms=item.forms||d.forms||{};
+        return '<section class="fi-imported-entry"><h3>'+esc(item.word||d.word)+'</h3>'+meaningHtml+
+          '<p class="fi-muted">Part of speech: '+esc(item.part||d.part)+'</p>'+
+          ((item.gender||d.gender)?'<p class="fi-muted">Gender: '+esc(item.gender||d.gender)+'</p>':'')+
+          ((forms.feminine||[]).length?'<p class="fi-muted">Feminine: '+esc(forms.feminine.join(', '))+'</p>':'')+
+          ((forms.plural||[]).length?'<p class="fi-muted">Plural: '+esc(forms.plural.join(', '))+'</p>':'')+
+          ((item.notes||d.notes)?'<p class="fi-muted">'+esc(item.notes||d.notes)+'</p>':'')+
+          '<span class="fi-tag">'+(item.importedStatus==="curated-draft"?"Curated draft · needs French-speaker review":"Imported entry · not yet reviewed")+'</span></section>';
+      }).join('')+'</div>';
+    }
+    return `<div class="fi-answer"><h3 style="margin:0 0 6px">${esc(d.word)}</h3><div><b>Meaning:</b> ${esc(d.meaning)}</div><div class="fi-muted">Part of speech: ${esc(d.part)}</div><p><b>Example:</b> <i>${esc(d.example)}</i></p><p><b>Usage:</b> ${esc(d.notes)}</p><span class="fi-tag">Built-in entry</span></div>`;
+  }
+function phraseMatcher(re){
+  let source=re.source;
+  if(source.startsWith("\\b"))source="(?<![\\p{L}\\p{N}_])"+source.slice(2);
+  if(source.endsWith("\\b"))source=source.slice(0,-2)+"(?![\\p{L}\\p{N}_])";
+  const groups={a:"[aàáâäãå]",c:"[cç]",e:"[eéèêë]",i:"[iîï]",o:"[oôö]",u:"[uùûü]",y:"[yÿ]",n:"[nñ]"};
+  source=source.replace(/[àáâäãåçéèêëîïôöùûüÿñ]/gi,ch=>{const base=ch.normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLowerCase();return groups[base]||ch;});
+  return new RegExp(source,re.flags.includes("u")?re.flags:re.flags+"u");
+}
+function translate(text,direction){
+  const q=String(text||"").trim();if(!q)return "Enter some text first.";
+  if(direction==="fr-en"){
+    const value=structuredCore.translate(q,"fr-en");
+    if(value.status==="supported")return '<div class="fi-answer"><b>English:</b><div class="fi-output">'+esc(value.translation)+'</div><p class="fi-muted">Every word in the input is covered by a local phrase pattern.</p></div>';
+    const hints=(value.vocabularyHints||[]).map(x=>'<li><b>'+esc(x.word)+'</b>: '+esc(x.meaning)+'</li>').join("");
+    return '<div class="fi-answer"><b>Ambiguous — no full translation offered</b><p>'+esc(value.explanation)+'</p>'+(hints?'<p>Vocabulary hints:</p><ul>'+hints+'</ul>':'<p>No vocabulary hints are available for this input.</p>')+'</div>';
+  }
+  const pairs={"hello":"bonjour","good morning":"bonjour","good evening":"bonsoir","goodbye":"au revoir","thank you":"merci","thank you very much":"merci beaucoup","please":"s'il vous plaît","yes":"oui","no":"non","i am":"je suis","i have":"j'ai","i would like":"je voudrais","i don't understand":"je ne comprends pas","where is the station":"où est la gare","how are you":"comment allez-vous","my name is":"je m'appelle","i love you":"je t'aime","see you tomorrow":"à demain","see you soon":"à bientôt","i speak french":"je parle français","i am learning french":"j'apprends le français","i need help":"j'ai besoin d'aide","i am hungry":"j'ai faim","i am thirsty":"j'ai soif","i am tired":"je suis fatigué(e)","i am happy":"je suis heureux/heureuse","where is the bathroom":"où sont les toilettes","how much does it cost":"combien ça coûte","i don't know":"je ne sais pas","i understand":"je comprends","i am sorry":"je suis désolé(e)","excuse me":"excusez-moi","see you later":"à plus tard","have a nice day":"bonne journée","good night":"bonne nuit","what time is it":"quelle heure est-il","i need a doctor":"j'ai besoin d'un médecin","can you help me":"pouvez-vous m'aider","i would like water":"je voudrais de l'eau","i agree":"je suis d'accord"};
+  const exact=Object.keys(pairs).find(k=>norm(k)===norm(q));if(exact)return '<div class="fi-answer"><b>French:</b> '+esc(pairs[exact])+'<p class="fi-muted">Known phrasebook match.</p></div>';
+  return '<div class="fi-answer">This phrase is not in the local phrasebook yet. I won\'t guess a full translation. Try a shorter phrase, or use <a href="https://www.deepl.com/translator#en/fr/'+encodeURIComponent(q)+'" target="_blank" rel="noopener noreferrer">DeepL</a> or <a href="https://translate.google.com/?sl=en&tl=fr&text='+encodeURIComponent(q)+'" target="_blank" rel="noopener noreferrer">Google Translate</a> and review the result.</div>';
+}
+function conjugate(raw, options = undefined){
+  const value=structuredCore.conjugate(raw, options);
+  const tense=options?.tense ?? "present";
+  if(tense==="present"){
+    if(!value || value.status!=="supported")return null;
+    return {v:value.v,forms:[...value.forms],type:value.type};
+  }
+  return value;
+}
+function answerQuestion(q){
+  const n=norm(q);
+  if(!q.trim())return "Type a question first.";
+  if(/depuis/.test(n)&&/pendant/.test(n))return "<b>Depuis vs pendant</b><p><i>Depuis</i> usually links a past starting point to a situation continuing now: <i>J'habite ici depuis trois ans</i> (I've lived here for three years). <i>Pendant</i> frames a duration: <i>J'ai étudié pendant deux heures</i> (I studied for two hours). Context and tense determine the best translation.</p>";
+  if(/savoir/.test(n)&&/connaitre|connaître/.test(n))return "<b>Savoir vs connaître</b><p>Use <i>savoir</i> for facts or skills: <i>Je sais la réponse</i>; <i>Je sais nager</i>. Use <i>connaître</i> for familiarity: <i>Je connais cette ville</i>; <i>Je connais Marie</i>.</p>";
+  if(/y\b/.test(n)&&/en\b/.test(n)&&/(pronoun|pronom|difference|différence|use|utilis)/.test(n))return "<b>Y vs en</b><p><i>Y</i> often replaces <i>à</i> + thing/place: <i>Je vais à Paris → J'y vais</i>. <i>En</i> often replaces <i>de</i> + thing or a quantity: <i>Je parle de ce livre → J'en parle</i>; <i>J'en veux deux</i>. Pronoun choice depends on the verb's construction and meaning.</p>";
+  if(/conditionnel|conditional/.test(n))return "<b>Conditional for polite requests and hypotheses</b><p><i>Je voudrais un café</i> is a polite request; <i>Pourriez-vous m'aider ?</i> means “Could you help me?” In a common hypothesis: <i>Si j'avais le temps, je voyagerais</i>. Do not put the conditional directly after <i>si</i> in this pattern.</p>";
+
+  const matched=rules.find(r=>n.includes(norm(r.title).replace("ne ... pas","ne"))|| (n.includes("negation")&&r.title.startsWith("Negation")) || (n.includes("tu")&&n.includes("vous")&&r.title==="Tu and vous"));
+  if(matched)return `<b>${esc(matched.title)}</b><p>${esc(matched.body)}</p>`;
+  if(/maison/.test(n)&&/(feminin|gender|genre|why|pourquoi)/.test(n))return "<b>Why is “maison” feminine?</b><p>In French, grammatical gender is a property of each noun and is not always predictable from meaning. Learn it together with its article: <i>la maison</i>. The ending -on does not reliably tell you a noun's gender.</p>";
+  if(/\b(?:âge|age|ans|years old)\b/u.test(n)&&(/[?？]/u.test(String(q))||/^(?:how|what|quel(?:le)?|comment|à quel|at what)\b/u.test(n))&&/(?:\bhow old\b|\bwhat (?:is|was) (?:my|your|his|her) age\b|\b(?:my|your|his|her) age\b|\bquel(?:le)? (?:âge|age)\b|\bà quel(?:le)? (?:âge|age)\b|\bat what age\b|\bsay (?:my|your|his|her) age\b|\bask about age\b|\bexpress age\b|\bhow many years old\b)/u.test(n))return "<b>Talking about age</b><p>French uses <i>avoir</i> (to have), not <i>être</i> (to be): <i>J'ai vingt ans</i> literally means “I have twenty years.”</p>";
+  if(/translate|translation|tradui|meaning|signif/.test(n)){const d=lookup(q.replace(/^(what does|meaning of|translate)\s+/i,"").replace(/[?!.]$/,""));if(d)return dictionaryHtml(d);}
+  if(/grammar|grammaire|tense|temps verbal/.test(n))return "Choose the Grammar Guide to browse ten core rules, or ask about a specific structure (for example, “Explain passé composé”).";
+  if(/bonjour|salut|merci|au revoir/.test(n)){const d=lookup(q.replace(/[?!.]$/,""));if(d)return dictionaryHtml(d);}
+  return "I can answer from the built-in French reference set, grammar guide, common phrases and conjugation rules. I couldn't match this question confidently yet, so I won't invent an answer. Try asking about ne…pas, tu/vous, passé composé, adjective agreement, or a word in the dictionary. For deeper open-ended questions, this no-key version currently needs an optional on-device language model.";
+}
+function checkWritingDetailed(q){
+  let suggestions=[],corrected=q;
+  const subjunctiveVerbs = [
+    { name: "être", indicative: ["suis","es","est","sommes","êtes","sont"], subjunctive: ["sois","sois","soit","soyons","soyez","soient"] },
+    { name: "avoir", indicative: ["ai","as","a","avons","avez","ont"], subjunctive: ["aie","aies","ait","ayons","ayez","aient"] },
+    { name: "aller", indicative: ["vais","vas","va","allons","allez","vont"], subjunctive: ["aille","ailles","aille","allions","alliez","aillent"] },
+    { name: "faire", indicative: ["fais","fais","fait","faisons","faites","font"], subjunctive: ["fasse","fasses","fasse","fassions","fassiez","fassent"] },
+    { name: "pouvoir", indicative: ["peux","peux","peut","pouvons","pouvez","peuvent"], subjunctive: ["puisse","puisses","puisse","puissions","puissiez","puissent"] },
+    { name: "savoir", indicative: ["sais","sais","sait","savons","savez","savent"], subjunctive: ["sache","saches","sache","sachions","sachiez","sachent"] },
+    { name: "vouloir", indicative: ["veux","veux","veut","voulons","voulez","veulent"], subjunctive: ["veuille","veuilles","veuille","voulions","vouliez","veuillent"] }
+  ];
+  const subjunctiveTriggers = "(?:bien\\s+que|bien\\s+qu['’]|quoique|quoiqu['’]|pour\\s+que|pour\\s+qu['’]|afin\\s+que|afin\\s+qu['’]|avant\\s+que|avant\\s+qu['’]|à\\s+moins\\s+que|à\\s+moins\\s+qu['’]|jusqu['’]à\\s+ce\\s+que|jusqu['’]à\\s+ce\\s+qu['’]|sans\\s+que|sans\\s+qu['’])";
+  const indicativeForms = [...new Set(subjunctiveVerbs.flatMap(v => v.indicative))].sort((a,b) => b.length-a.length).join("|");
+  // Unicode-aware word boundaries; apostrophes remain part of French elisions.
+  // Hyphen is intentionally omitted from the blocked boundary class, so it separates words.
+  const subjunctivePattern = new RegExp("(?<![\\p{L}\\p{N}_'’])(" + subjunctiveTriggers + ")\\s*(j['’]|je|tu|il|elle|nous|vous|ils|elles)\\s*(" + indicativeForms + ")(?![\\p{L}\\p{N}_'’])", "giu");
+  const infinitiveIrregulars = new Set(["être","avoir","faire","aller","venir","tenir","prendre","mettre","dire","lire","écrire","boire","voir","pouvoir","vouloir","devoir","savoir","connaître","comprendre","apprendre","sortir","partir","dormir","ouvrir","offrir","recevoir","courir","vivre","suivre","naître","mourir","croire","rire","sourire"]);
+  const isInfinitive = word => /(?:er|ir|re|oir)$/iu.test(word) || infinitiveIrregulars.has(word.toLocaleLowerCase("fr"));
+  corrected = corrected.replace(subjunctivePattern, (match, trigger, subject, verb, offset, source) => {
+    const subjectLower = subject.toLocaleLowerCase("fr");
+    const subjectIndex = ({je:0,"j'":0,"j’":0,tu:1,il:2,elle:2,nous:3,vous:4,ils:5,elles:5})[subjectLower];
+    const verbRule = subjunctiveVerbs.find(v => v.indicative.includes(verb.toLocaleLowerCase("fr")));
+    if (subjectIndex === undefined || !verbRule) return match;
+    const nextWord = source.slice(offset + match.length).match(/^\s+([\p{L}]+)(?![\p{L}])/u)?.[1];
+    if (verbRule.name === "aller" && nextWord && isInfinitive(nextWord)) {
+      suggestions.push({before: match, why: "After this conjunction the subjunctive is required. Because aller is followed by an infinitive, do not change vais/vas/va/allons/allez/vont to aille. Rewrite using the infinitive verb's own subjunctive (for example, « pour que je comprenne »).", messageOnly: true});
+      return match;
+    }
+    suggestions.push({before: match, why: "After this conjunction, use the subjunctive mood rather than the indicative in this clause."});
+    const form = verbRule.subjunctive[subjectIndex];
+    const elided = subjectLower === "j'" || subjectLower === "j’";
+    const replacement = elided ? subject + form : subjectLower === "je" && /^[aeiouàâäéèêëîïôöùûüÿœ]/iu.test(form) ? "j'" + form : subject + " " + form;
+    return match.slice(0, match.length - subject.length - verb.length - (elided ? 0 : 1)) + replacement;
+  });
+  const checks=[
+    [writingPattern("je suis (\\d+) ans(?!\\s+(?:plus|moins)\\b)"),(m,n)=>preserveInitialCase(m,"j'ai "+n+" ans"),"French uses avoir for age."],
+    [writingPattern("je suis faim"),(m)=>preserveInitialCase(m,"j'ai faim"),"French says avoir faim (to be hungry)."],
+    [writingPattern("je suis soif"),(m)=>preserveInitialCase(m,"j'ai soif"),"French says avoir soif (to be thirsty)."],
+    [writingPattern("sa va(?!-et-vient)"),(m)=>preserveInitialCase(m,"ça va"),"The expression is ça va, with ç; preserve the compound va-et-vient."],
+    [writingPattern("beacoup"),()=>"beaucoup","Spelling: beaucoup."],
+    [writingPattern("bonjor"),()=>"bonjour","Spelling: bonjour."],
+    [writingPattern("merçi"),()=>"merci","Merci is written without a cedilla."],
+    [writingPattern("je ne comprends pas pas"),null,"Repeated adjacent pas is flagged for review; no automatic correction.",true],
+  ];
+  for(const [re,rep,why,messageOnly=false] of checks){if(re.test(corrected)){re.lastIndex=0;const before=corrected;if(!messageOnly)corrected=corrected.replace(re,(...args)=>{const offset=args[args.length-2],source=args[args.length-1],replacement=typeof rep==="function"?rep(...args.slice(0,-2)):rep;return preserveSentenceInitialCase(source,offset,replacement);});suggestions.push({before,why,messageOnly});}}
+  if(!suggestions.length)return {html:`<div class="fi-answer"><b>Text received</b><p>${esc(q)}</p><p>No issue from the small built-in check list was detected. That does not prove the sentence is fully correct; this is not a full grammar checker.</p></div>`,hasIssue:false,corrected:q,suggestions:[]};
+  const hasCorrection = suggestions.some(s => !s.messageOnly);
+  const heading = hasCorrection ? "Suggested text" : "Grammar note";
+  const output = hasCorrection ? `<p class="fi-output">${esc(corrected)}</p>` : "";
+  const action = hasCorrection ? `<button id="fiUseCorrection" class="g">Use corrected text</button>` : "";
+  return {html:'<div class="fi-answer"><b>'+heading+'</b>'+output+'<b>Why these changes?</b>'+suggestions.map(s=>'<div class="fi-result">'+esc(s.why)+'<div class="fi-muted">Original: '+esc(s.before)+'</div></div>').join("")+action+'</div>',hasIssue:true,corrected,suggestions};
+}
+function checkWriting(q){return checkWritingDetailed(q).html;}
+
+function renderFindingHighlights(text, findings) {
+  const ordered = findings.map((item, index) => ({ item, index }))
+    .filter(({ item }) => Array.isArray(item.span) && item.span.length === 2)
+    .sort((a, b) => a.item.span[0] - b.item.span[0] || b.item.span[1] - a.item.span[1]);
+  let html = "", cursor = 0;
+  for (const { item } of ordered) {
+    const start = Number(item.span[0]), end = Number(item.span[1]);
+    if (!Number.isInteger(start) || !Number.isInteger(end) || start < cursor || end <= start || end > text.length) continue;
+    const found = text.slice(start, end);
+    if (found !== item.found) continue;
+    html += esc(text.slice(cursor, start));
+    html += '<mark class="fi-highlight-mark" tabindex="0" data-start="' + start +
+      '" data-end="' + end + '" data-rule-id="' + esc(item.ruleId) +
+      '" aria-label="' + esc("Flagged text: " + found) + '">' + esc(found) + "</mark>";
+    cursor = end;
+  }
+  html += esc(text.slice(cursor));
+  return html;
+}
+
+function unifiedCheckWriting(q){
+  const legacy=checkWritingDetailed(q);
+  const textAfterLegacy=legacy.corrected;
+  const visibleRuleFindings=checkSection12Rules(textAfterLegacy);
+  const coreResult=structuredCore.checkWriting(textAfterLegacy);
+  let corrected=typeof coreResult?.corrected==="string"?coreResult.corrected:textAfterLegacy;
+  const coreSuggestions=Array.isArray(coreResult?.suggestions)?coreResult.suggestions:[];
+  const ruleFindings=[],seenRules=new Set();
+  for(let pass=0;pass<4;pass++){
+    const findings=checkSection12Rules(corrected);
+    if(!findings.length)break;
+    const fresh=findings.filter(item=>{
+      const key=[item.ruleId,item.kind,item.found,item.suggestion||"",item.explanation].join("|");
+      if(seenRules.has(key))return false;
+      seenRules.add(key);return true;
+    });
+    ruleFindings.push(...fresh);
+    const corrections=findings.filter(item=>item.kind==="correction").sort((a,b)=>b.span[0]-a.span[0]);
+    if(!corrections.length)break;
+    let next=corrected;
+    for(const item of corrections)next=next.slice(0,item.span[0])+item.suggestion+next.slice(item.span[1]);
+    if(next===corrected)break;
+    corrected=next;
+  }
+  const legacySuggestionKeys=new Set(legacy.suggestions.map(item=>[item.before??"",item.why??"",!!item.messageOnly].join("|")));
+  const distinctCoreSuggestions=coreSuggestions.filter(item=>!legacySuggestionKeys.has([item.before??"",item.why??"",!!item.messageOnly].join("|")));
+  const coreRuleKeys=new Set(distinctCoreSuggestions.filter(item=>item.ruleId).map(item=>[item.ruleId,item.before??item.found??"",item.why??item.explanation??""].join("|")));
+  const coreMessageExplanations=new Set([...legacy.suggestions,...coreSuggestions].filter(item=>item.messageOnly).map(item=>item.why??item.explanation??""));
+  const extraRuleSuggestions=ruleFindings.filter(item=>!coreRuleKeys.has([item.ruleId,item.found,item.explanation].join("|"))&&!coreMessageExplanations.has(item.explanation)).map(item=>({
+    before:item.found,why:item.explanation,messageOnly:item.kind==="review",ruleId:item.ruleId,suggestion:item.suggestion
+  }));
+  const allSuggestions=[...legacy.suggestions,...distinctCoreSuggestions,...extraRuleSuggestions];
+  if(!allSuggestions.length&&!visibleRuleFindings.length){activeWritingReview=null;return legacy.html;}
+  if(legacy.hasIssue&&!distinctCoreSuggestions.length&&!extraRuleSuggestions.length&&!visibleRuleFindings.length){activeWritingReview=null;return legacy.html;}
+
+  const hasCorrection=allSuggestions.some(item=>!item.messageOnly)||visibleRuleFindings.some(item=>item.kind==="correction");
+  const output=hasCorrection?'<p class="fi-output">'+esc(corrected)+'</p>':"";
+  const action=hasCorrection?'<button id="fiUseCorrection" class="g">Use corrected text</button>':"";
+
+  if(visibleRuleFindings.length){
+    activeWritingReview={baseText:textAfterLegacy,findings:visibleRuleFindings};
+    const legacyNotes=legacy.suggestions.map(item=>{
+      const before=item.before??"",why=item.why??"";
+      return '<div class="fi-result">'+esc(why)+'<div class="fi-muted">Original: '+esc(before)+'</div></div>';
+    }).join("");
+    const coreNotes=distinctCoreSuggestions.filter(item=>!item.ruleId).map(item=>{
+      const before=item.before??item.found??"",why=item.why??item.explanation??"";
+      return '<div class="fi-result">'+esc(why)+'<div class="fi-muted">Original: '+esc(before)+'</div></div>';
+    }).join("");
+    const highlightStyles='<style id="fi-writing-highlight-styles">.fi-highlight-block{margin:10px 0;padding:12px;border:1px solid var(--bd,#e5e1d8);border-radius:10px;background:var(--card,#fff);min-width:0;max-width:100%;box-sizing:border-box}.fi-highlight-text{white-space:pre-wrap;line-height:1.7;overflow-wrap:anywhere;min-width:0;max-width:100%}.fi-highlight-mark{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;min-width:44px;min-height:44px;padding:0 4px;background:#fff3b0;color:#111827;text-decoration:underline;text-decoration-thickness:2px;text-decoration-color:#7c2d12;text-underline-offset:3px;border-bottom:2px solid #7c2d12;border-radius:3px;cursor:help}.fi-highlight-mark:focus-visible{outline:3px solid #1d4ed8;outline-offset:2px}.fi-finding{border-top:1px solid var(--bd,#e5e1d8);padding:10px 0;min-width:0;overflow-wrap:anywhere}.fi-finding-summary{display:flex;gap:8px;flex-wrap:wrap;align-items:baseline}.fi-finding-found{font-weight:700}.fi-finding-arrow{color:var(--mu,#6b7280)}.fi-apply{min-height:44px;min-width:76px;margin-top:6px}.fi-apply:focus-visible{outline:3px solid var(--ac,#1d4ed8);outline-offset:2px}@media(max-width:420px){.fi-highlight-block,.fi-highlight-text,.fi-finding{min-width:0;max-width:100%;box-sizing:border-box}.fi-highlight-text{overflow-wrap:anywhere}.fi-apply{min-height:44px}}</style>';
+    const label=textAfterLegacy!==q?"Text after the first fix":"Text with highlighted findings";
+    const highlighted='<div class="fi-highlight-block"><b>'+label+'</b><div class="fi-highlight-text">'+
+      renderFindingHighlights(textAfterLegacy,visibleRuleFindings)+'</div></div>';
+    const findingRows=visibleRuleFindings.map((item,index)=>{
+      const suggestion=item.kind==="correction"?(item.suggestion||""):"Review only — no automatic correction";
+      const apply=item.kind==="correction"
+        ?'<button type="button" class="g fi-apply" data-fiapply="'+index+'" aria-label="'+esc("Apply: "+item.found+" to "+item.suggestion)+'">Apply</button>'
+        :"";
+      return '<div class="fi-finding"><div class="fi-finding-summary"><span class="fi-finding-found">'+esc(item.found)+'</span><span class="fi-finding-arrow" aria-hidden="true">→</span><span>'+esc(suggestion)+'</span></div><p class="fi-muted">'+esc(item.explanation)+'</p>'+apply+'</div>';
+    }).join("");
+    return highlightStyles+'<div class="fi-answer"><b>'+(hasCorrection?"Suggested text":"Grammar note")+'</b>'+
+      (legacyNotes||coreNotes?'<b>Why these changes?</b>'+legacyNotes+coreNotes:"")+
+      highlighted+'<b>Section 12 findings</b>'+findingRows+output+action+'</div>';
+  }
+
+  activeWritingReview=null;
+  if(!allSuggestions.length)return legacy.html;
+  const notes=allSuggestions.map(item=>{
+    const before=item.before??item.found??"";
+    const why=item.why??item.explanation??"";
+    return '<div class="fi-result">'+esc(why)+'<div class="fi-muted">Original: '+esc(before)+'</div></div>';
+  }).join("");
+  return '<div class="fi-answer"><b>'+(hasCorrection?"Suggested text":"Grammar note")+'</b>'+output+'<b>Why these changes?</b>'+notes+action+'</div>';
+}
+
+function editDistanceAtMostOne(left,right){
+  const a=Array.from(left),b=Array.from(right);
+  if(Math.abs(a.length-b.length)>1)return false;
+  let i=0,j=0,edits=0;
+  while(i<a.length&&j<b.length){
+    if(a[i]===b[j]){i++;j++;continue;}
+    if(++edits>1)return false;
+    if(a.length>b.length)i++;else if(b.length>a.length)j++;else{i++;j++;}
+  }
+  if(i<a.length||j<b.length)edits++;
+  return edits<=1;
+}
+function didYouMean(query){
+  const q=norm(query);
+  if(!q)return [];
+  const candidates=[];
+  for(const [word,entry] of Object.entries(dictionary)){
+    const normalized=norm(word);
+    if(word.toLocaleLowerCase("fr")===String(query).toLocaleLowerCase("fr"))continue;
+    if(normalized!==q&&!editDistanceAtMostOne(normalized,q))continue;
+    const metadata=entry[4]&&typeof entry[4]==="object"?entry[4]:{};
+    candidates.push({word,frequency:Number(metadata.lemmaFrequency)||0,imported:false});
+  }
+  for(const [word,entry] of Object.entries(importedDictionary)){
+    const normalized=norm(word);
+    if(word.toLocaleLowerCase("fr")===String(query).toLocaleLowerCase("fr"))continue;
+    if(normalized!==q&&!editDistanceAtMostOne(normalized,q))continue;
+    candidates.push({word,frequency:Number(entry?.[4]?.lexiqueFrequency)||0,imported:true});
+  }
+  const unique=new Map();
+  for(const item of candidates){const prior=unique.get(item.word);if(!prior||item.frequency>prior.frequency)unique.set(item.word,item);}
+  return [...unique.values()].sort((a,b)=>b.frequency-a.frequency||a.word.localeCompare(b.word,"fr")).slice(0,5);
+}
+function suggestionHtml(query){
+  const suggestions=didYouMean(query);
+  if(!suggestions.length)return "";
+  return '<div class="fi-result"><b>Did you mean</b><div class="fi-dict-suggestions">'+suggestions.map(item=>'<button type="button" data-fisuggest="'+esc(item.word)+'">'+esc(item.word)+'</button>').join('')+'</div></div>';
+}
+function runAction(id){
+    if(id==="fiAsk"){const q=$("fiInput")?.value||"";showAnswer(answerQuestion(q));}
+    if(id==="fiLookup"){const q=$("fiWord")?.value||"";const d=publicLookup(q);showAnswer(d?dictionaryHtml(d):`<div class="fi-answer">No built-in or imported entry for <b>${esc(q)}</b>. No definition has been fabricated. ${suggestionHtml(q)}<div class="fi-result">Check <a href="https://www.dictionnaire-academie.fr/" target="_blank" rel="noopener noreferrer">Académie française</a>, <a href="https://www.cnrtl.fr/definition/${encodeURIComponent(q)}" target="_blank" rel="noopener noreferrer">CNRTL/TLFi</a> or <a href="https://fr.wiktionary.org/wiki/${encodeURIComponent(q)}" target="_blank" rel="noopener noreferrer">Wiktionnaire</a>.</div></div>`);}
+    if(id==="fiTranslate"){showAnswer(translate($("fiInput")?.value||"",$("fiDirection")?.value||"fr-en"));}
+    if(id==="fiConjugate"){
+      const tense=$("fiTense")?.value||"present";
+      const r=conjugate($("fiVerb")?.value||"",{tense});
+      if(tense==="present"){
+        showAnswer(r?`<div class="fi-answer"><h3>${esc(r.v)} — present tense</h3><div class="fi-muted">${esc(r.type)}</div><table><tbody>${r.forms.map((f,i)=>`<tr><td>${esc(persons[i])}</td><td><b>${esc(f)}</b></td></tr>`).join("")}</tbody></table></div>`:`<div class="fi-answer">No conjugation pattern is available for this verb. Try être, avoir, aller, faire, venir, prendre, pouvoir, vouloir, devoir, savoir, dire or a regular -er verb such as parler.</div>`);
+      }else if(!r||r.status!=="supported"){
+        showAnswer(`<div class="fi-answer"><h3>Verb conjugator</h3><div class="fi-note">${esc(r?.explanation||"No Lexique-verified forms are available for this verb and tense.")}</div></div>`);
+      }else{
+        const labels=["je","tu","il / elle / on","nous","vous","ils / elles"];
+        const elides=(form)=>/^[aeiouyàâäéèêëîïôöùûüÿœ]/iu.test(form)||((r.v==="habiter")&&/^h/iu.test(form));
+        const rows=r.forms.map((form,i)=>{
+          let pronoun=labels[i],phrase=form;
+          if(tense==="passé composé"&&r.auxiliary==="être"&&Array.isArray(r.participleForms)){
+            const [masculineSingular,feminineSingular,masculinePlural,femininePlural]=r.participleForms;
+            phrase= i===0 ? "suis "+masculineSingular+"(e)"
+              : i===1 ? "es "+masculineSingular+"(e)"
+              : i===2 ? "est "+masculineSingular+" / est "+feminineSingular+" / est "+masculineSingular+"(e)"
+              : i===3 ? "sommes "+masculineSingular+"(e)s"
+              : i===4 ? "êtes "+masculineSingular+"(e)(s)"
+              : "sont "+masculinePlural+" / sont "+femininePlural;
+          }else if(i===0&&elides(form.split(/\s+/u)[0])){
+            pronoun="j'";
+          }
+          return `<tr><th scope="row">${esc(pronoun)}</th><td>${esc(phrase)}</td></tr>`;
+        }).join("");
+        const verified=r.source==="lexique-verified";
+        const badge=verified?"Verified":"Rule-based";
+        const footer=verified?"Checked against Lexique 3.83.":"Standard conjugation rule; not yet checked against Lexique.";
+        showAnswer(`<div class="fi-answer fi-conjugation"><div class="fi-conjugation-heading"><h3>${tense==="present"?esc(r.v)+" · "+esc(tense):"Verb conjugator"}</h3><span class="fi-status">${badge}</span></div><table class="fi-conjugation-table"><tbody>${rows}</tbody></table><p class="fi-conjugation-footer">${footer}</p></div>`);
+      }
+    }
+    if(id==="fiCheck"){const q=$("fiInput")?.value||"";showAnswer(q.trim()?unifiedCheckWriting(q):"Paste some text first.");}
+  }
+  function open(){tab="ask";history=[];const app=$("app");if(!app)return;app.innerHTML=header();renderBody();window.scrollTo(0,0);}
+  if (typeof document !== "undefined" && typeof window !== "undefined") {
+  document.addEventListener("click",(e)=>{
+    const t=e.target instanceof Element?e.target.closest("button"):null;if(!t)return;
+    if(t.hasAttribute("data-fisuggest")){const value=t.getAttribute("data-fisuggest")||"";const input=$("fiWord");if(input){input.value=value;runAction("fiLookup");}return;}
+    if(t.id==="hfrenchint"){open();return;}
+    if(t.id==="fiHome"){if(typeof window.FAExitFrenchIntelligence==="function"){window.FAExitFrenchIntelligence();return;}location.reload();return;const app=$("app");if(app)app.innerHTML='<div class="card">Return to the home screen using your app navigation.</div>';return;}
+    if(t.dataset.fitab){tab=t.dataset.fitab;const app=$("app");if(app)app.innerHTML=header();renderBody();return;}
+    if(t.dataset.fiprompt){const prompts=["Explain ne … pas","When do I use tu and vous?","Explain passé composé","Why is maison feminine?"];const input=$("fiInput");if(input)input.value=prompts[Number(t.dataset.fiprompt)]||"";return;}
+    if(t.dataset.fiexample){const input=$("fiInput");if(input)input.value=t.dataset.fiexample;return;}
+    if(t.dataset.firule){tab="ask";const app=$("app");if(app)app.innerHTML=header();renderBody();const input=$("fiInput");if(input)input.value=rules[Number(t.dataset.firule)]?.title||"";return;}
+    if(t.hasAttribute("data-fiapply")){const review=activeWritingReview;const index=Number(t.dataset.fiapply);const item=review?.findings[index];const target=$("fiInput");if(review&&item&&item.kind==="correction"&&target){target.value=review.baseText.slice(0,item.span[0])+item.suggestion+review.baseText.slice(item.span[1]);activeWritingReview=null;runAction("fiCheck");}return;}
+    if(t.id==="fiUseCorrection"){const out=$("fiAnswer");const target=$("fiInput");const p=out?.querySelector(".fi-output");if(target&&p)target.value=p.textContent;return;}
+    runAction(t.id);
+  });
+  document.addEventListener("input",(e)=>{if(e.target?.id==="fiRuleSearch"){const q=norm(e.target.value);const f=rules.filter(r=>norm(r.title+" "+r.body).includes(q));const out=$("fiRules");if(out)out.innerHTML=ruleHtml(f);}});
+  document.addEventListener("keydown",(e)=>{if(e.target?.id==="fiWord"&&e.key==="Enter"){e.preventDefault();runAction("fiLookup");}});
+  window.FrenchIntelligenceOpen=open;
+  }
+
+
+const legacyRenderer = Object.freeze({ lookup, translate, conjugate, answerQuestion, checkWriting });
+function publicLookup(word) {
+  const value = structuredCore.lookup(word);
+  if (value.status !== "supported") return null;
+  const base={ word:value.word, meaning:value.meaning, part:value.part, example:value.example, notes:value.notes, builtIn:value.builtIn };
+  if(!value.imported)return base;
+  return { ...base, imported:true, importedStatus:value.importedStatus, curatedDraftReason:value.curatedDraftReason, gender:value.gender, senses:value.senses, forms:value.forms, matches:value.matches, lexiqueFrequency:value.lexiqueFrequency, extractDate:value.extractDate, source:value.source, licence:value.licence };
+}
+function publicTranslate(text, direction) {
+  const value = structuredCore.translate(text, direction);
+  if (direction === "fr-en") {
+    if (value.status === "supported") return '<div class="fi-answer"><b>English:</b><div class="fi-output">'+esc(value.translation)+'</div><p class="fi-muted">Every word in the input is covered by a local phrase pattern.</p></div>';
+    const hints = (value.vocabularyHints || []).map(x => '<li><b>'+esc(x.word)+'</b>: '+esc(x.meaning)+'</li>').join("");
+    return '<div class="fi-answer"><b>Ambiguous — no full translation offered</b><p>'+esc(value.explanation)+'</p>'+(hints?'<p>Vocabulary hints:</p><ul>'+hints+'</ul>':'<p>No vocabulary hints are available for this input.</p>')+'</div>';
+  }
+  return legacyRenderer.translate(text, direction);
+}
+function publicConjugate(raw) {
+  const value = structuredCore.conjugate(raw);
+  if (value.status !== "supported") return null;
+  return { v: value.v, forms: value.forms, type: value.type };
+}
+function publicAnswerQuestion(q) {
+  structuredCore.answerQuestion(q);
+  return legacyRenderer.answerQuestion(q);
+}
+function publicCheckWriting(q) {
+  return unifiedCheckWriting(q);
+}
+const api = Object.freeze({
+  lookup: publicLookup,
+  translate: publicTranslate,
+  conjugate: publicConjugate,
+  answerQuestion: publicAnswerQuestion,
+  checkWriting: publicCheckWriting
+});
+if (typeof window !== "undefined") window.FrenchIntelligenceCore = api;
+export { publicLookup as lookup, publicTranslate as translate, publicConjugate as conjugate, publicAnswerQuestion as answerQuestion, publicCheckWriting as checkWriting, didYouMean as dictionarySuggestions };
+export default api;

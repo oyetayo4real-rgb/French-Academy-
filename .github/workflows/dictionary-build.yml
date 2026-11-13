@@ -1,0 +1,121 @@
+name: Dictionary build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'feat/dictionary-*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    if: >-
+      startsWith(github.ref, 'refs/heads/feat/dictionary-') &&
+      (github.event_name == 'workflow_dispatch' ||
+       contains(github.event.head_commit.message, '[build-dictionary]'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout selected dictionary branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Download Lexique and latest available kaikki extract
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p data/raw data/dictionary
+          download() {
+            local url="$1" destination="$2" result status final_url bytes
+            local temp="${destination}.download"
+            if result=$(curl -sSL --retry 4 --retry-all-errors --retry-delay 3 --connect-timeout 30 \
+              -o "$temp" -w $'%{http_code}\n%{url_effective}\n%{size_download}' "$url"); then
+              status=$(printf '%s' "$result" | sed -n '1p')
+              final_url=$(printf '%s' "$result" | sed -n '2p')
+              bytes=$(printf '%s' "$result" | sed -n '3p')
+            else
+              status=$(printf '%s' "$result" | sed -n '1p' || true)
+              final_url=$(printf '%s' "$result" | sed -n '2p' || true)
+              bytes=$(wc -c < "$temp" 2>/dev/null || printf '0')
+            fi
+            printf 'DOWNLOAD status=%s final_url=%s bytes=%s requested_url=%s\n' "${status:-000}" "${final_url:-unresolved}" "${bytes:-0}" "$url"
+            if [ "${status:-000}" = "200" ]; then
+              mv "$temp" "$destination"
+              printf '%s\n' "$final_url" > data/raw/kaikki-source-url.txt
+              return 0
+            fi
+            rm -f "$temp"
+            return 1
+          }
+          download 'https://www.lexique.org/databases/Lexique383/Lexique383.tsv' data/raw/Lexique383.tsv
+          WIKTIONARY_DEST=data/raw/kaikki.org-dictionary-French.jsonl
+          if ! download 'https://kaikki.org/dictionary/French/kaikki.org-dictionary-French.jsonl' "$WIKTIONARY_DEST"; then
+            if ! download 'https://kaikki.org/dictionary/French/kaikki.org-dictionary-French.json' "$WIKTIONARY_DEST"; then
+              echo 'ERROR: Neither kaikki JSONL nor .json endpoint returned HTTP 200.'
+              exit 1
+            fi
+          fi
+          sha256sum data/raw/Lexique383.tsv "$WIKTIONARY_DEST"
+
+      - name: Establish first-run source lock or verify pinned hashes
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum data/raw/Lexique383.tsv data/raw/kaikki.org-dictionary-French.jsonl > /tmp/dictionary-source-sha256.txt
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const lockPath='tools/dictionary/sources.lock.json';
+          const lock=JSON.parse(fs.readFileSync(lockPath,'utf8'));
+          const lines=fs.readFileSync('/tmp/dictionary-source-sha256.txt','utf8').trim().split(/\n/);
+          const hashes=Object.fromEntries(lines.map(line=>{const m=line.match(/^([a-f0-9]{64})\s+(.+)$/);return [m[2].includes('Lexique383.tsv')?'lexique':'kaikki',m[1]];}));
+          const sourceUrl=fs.readFileSync('data/raw/kaikki-source-url.txt','utf8').trim();
+          lock.sources.kaikki.url=sourceUrl;
+          const empty=Object.keys(hashes).every(name=>!lock.sources[name].sha256);
+          if(empty){
+            for(const name of Object.keys(hashes)) lock.sources[name].sha256=hashes[name];
+            lock.lockedAt=new Date().toISOString();
+            fs.writeFileSync(lockPath,JSON.stringify(lock,null,2)+'\n');
+            console.log('SOURCE LOCK ESTABLISHED: '+JSON.stringify(hashes));
+          } else {
+            for(const name of Object.keys(hashes)){
+              if(lock.sources[name].sha256!==hashes[name]){
+                throw new Error('Pinned source checksum mismatch for '+name+': expected '+lock.sources[name].sha256+' actual '+hashes[name]);
+              }
+            }
+            console.log('SOURCE LOCK VERIFIED: '+JSON.stringify(hashes));
+          }
+          NODE
+
+      - name: Build Stage A dictionary
+        run: node tools/dictionary/build-stage-a.mjs
+
+      - name: Validate Stage A dictionary
+        run: node tools/dictionary/validate.mjs data/dictionary/common-3000.json
+
+      - name: Print raw and gzipped sizes
+        run: |
+          node --input-type=module -e "import fs from 'node:fs'; const m=JSON.parse(fs.readFileSync('data/dictionary/common-3000.meta.json','utf8')); console.log('Dictionary raw bytes: '+m.sizes.rawBytes); console.log('Dictionary gzip bytes: '+m.sizes.gzipBytes);"
+
+      - name: Commit only generated dictionary files and source lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- data/dictionary/ tools/dictionary/sources.lock.json
+          if git diff --cached --quiet; then
+            echo 'No generated data or lock changes to commit.'
+            exit 0
+          fi
+          git diff --cached --name-only
+          git commit -m 'Dictionary Stage A data (generated)'
+          git push origin "HEAD:${GITHUB_REF_NAME}"

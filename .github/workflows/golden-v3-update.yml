@@ -1,0 +1,72 @@
+name: Approved French Intelligence golden v3
+on:
+  push:
+    branches:
+      - feat/french-intelligence-engine
+    paths:
+      - "features/french-conjugation-paradigms.mjs"
+      - "features/french-section12-rules.mjs"
+      - "scripts/check-section12-regressions.mjs"
+      - "scripts/generate-golden-v3.mjs"
+      - "scripts/check-golden-v3.mjs"
+      - "scripts/check-french-intelligence-parity.mjs"
+      - "scripts/check-french-intelligence-correctness.mjs"
+      - "docs/golden-changes.md"
+      - "tests/golden/legacy-v3.json"
+      - "tests/golden/legacy-v3.sha256"
+      - ".github/workflows/golden-v3-update.yml"
+  pull_request:
+    paths:
+      - "features/french-conjugation-paradigms.mjs"
+      - "features/french-section12-rules.mjs"
+      - "scripts/check-section12-regressions.mjs"
+      - "scripts/generate-golden-v3.mjs"
+      - "scripts/check-golden-v3.mjs"
+      - "scripts/check-french-intelligence-parity.mjs"
+      - "scripts/check-french-intelligence-correctness.mjs"
+      - "docs/golden-changes.md"
+      - "tests/golden/legacy-v3.json"
+      - "tests/golden/legacy-v3.sha256"
+      - ".github/workflows/golden-v3-update.yml"
+permissions:
+  contents: write
+jobs:
+  generate:
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[generate-v3]')
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Generate v3 from v2 with only the approved courir label correction
+        run: node scripts/generate-golden-v3.mjs --write
+      - name: Verify v3 checksum and exact one-field difference
+        run: node scripts/check-golden-v3.mjs
+      - name: Commit approved golden v3 files
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/golden/legacy-v3.json tests/golden/legacy-v3.sha256
+          if git diff --cached --quiet; then
+            echo "Approved v3 golden is unchanged; no commit is needed."
+            exit 0
+          fi
+          git commit -m "APPROVED GOLDEN UPDATE"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+  verify:
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && !contains(github.event.head_commit.message, '[generate-v3]'))
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify v3 checksum and exact one-field difference
+        run: node scripts/check-golden-v3.mjs
+      - name: Verify compatibility output parity
+        run: node scripts/check-french-intelligence-parity.mjs

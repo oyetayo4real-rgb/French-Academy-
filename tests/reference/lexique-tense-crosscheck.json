@@ -1,0 +1,3663 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "repository": "oyetayo4real-rgb/french-engine-data",
+    "commit": "db8d7c00ba68f4c1f3bf1344e80370825492405e",
+    "path": "data/pilot-300.json",
+    "blobSha": "fb49f3d60d0f83397ff086dfce1b82171557483e",
+    "lemmaCount": 300,
+    "licence": "CC BY-SA 4.0"
+  },
+  "reference": {
+    "path": "tests/reference/tense-reference.json",
+    "verbCount": 111
+  },
+  "method": "A tense is cross-checked only when every generated form is present in the Lexique pilot. Futur/conditionnel variants are accepted when one complete candidate array matches. For passé composé with avoir, only the masculine-singular participle is generated and checked; with être, all four agreement forms are generated and checked. Verbs absent from the 300-lemma pilot are not cross-checkable and remain unsupported for that tense.",
+  "summary": {
+    "imparfait": {
+      "matched": 45,
+      "mismatched": 14,
+      "notInPilot": 52
+    },
+    "futur": {
+      "matched": 36,
+      "mismatched": 23,
+      "notInPilot": 52
+    },
+    "conditionnel": {
+      "matched": 10,
+      "mismatched": 49,
+      "notInPilot": 52
+    },
+    "passé composé": {
+      "matched": 59,
+      "mismatched": 0,
+      "notInPilot": 52
+    }
+  },
+  "verbs": [
+    {
+      "verb": "être",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "été"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "avoir",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "eu"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "aller",
+      "auxiliary": "être",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "allé",
+            "allée",
+            "allés",
+            "allées"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "faire",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "fait"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "venir",
+      "auxiliary": "être",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "viendrions"
+          ],
+          "missingByVariant": [
+            [
+              "viendrions"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "venu",
+            "venue",
+            "venus",
+            "venues"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "prendre",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "prendrions"
+          ],
+          "missingByVariant": [
+            [
+              "prendrions"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "pris"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "pouvoir",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "pu"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "vouloir",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "mismatched",
+          "missingForms": [
+            "voudrons"
+          ],
+          "missingByVariant": [
+            [
+              "voudrons"
+            ]
+          ]
+        },
+        "conditionnel": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "voulu"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "devoir",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "dû"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "savoir",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "saurions"
+          ],
+          "missingByVariant": [
+            [
+              "saurions"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "su"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "dire",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "dirions"
+          ],
+          "missingByVariant": [
+            [
+              "dirions"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "dit"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "écrire",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "mismatched",
+          "missingForms": [
+            "écrivions"
+          ],
+          "missingByVariant": [
+            [
+              "écrivions"
+            ]
+          ]
+        },
+        "futur": {
+          "status": "mismatched",
+          "missingForms": [
+            "écrirons",
+            "écrirez",
+            "écriront"
+          ],
+          "missingByVariant": [
+            [
+              "écrirons",
+              "écrirez",
+              "écriront"
+            ]
+          ]
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "écririons",
+            "écririez",
+            "écriraient"
+          ],
+          "missingByVariant": [
+            [
+              "écririons",
+              "écririez",
+              "écriraient"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "écrit"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "lire",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "boire",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "dormir",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "mismatched",
+          "missingForms": [
+            "dormirons",
+            "dormiront"
+          ],
+          "missingByVariant": [
+            [
+              "dormirons",
+              "dormiront"
+            ]
+          ]
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "dormirions",
+            "dormiriez",
+            "dormiraient"
+          ],
+          "missingByVariant": [
+            [
+              "dormirions",
+              "dormiriez",
+              "dormiraient"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "dormi"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "partir",
+      "auxiliary": "être",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "partirions",
+            "partiriez"
+          ],
+          "missingByVariant": [
+            [
+              "partirions",
+              "partiriez"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "parti",
+            "partie",
+            "partis",
+            "parties"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "sortir",
+      "auxiliary": "être",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "sortirions",
+            "sortiriez"
+          ],
+          "missingByVariant": [
+            [
+              "sortirions",
+              "sortiriez"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "sorti",
+            "sortie",
+            "sortis",
+            "sorties"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "mettre",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "mettrions"
+          ],
+          "missingByVariant": [
+            [
+              "mettrions"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "mis"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "recevoir",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "ouvrir",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "mismatched",
+          "missingForms": [
+            "ouvrions",
+            "ouvriez"
+          ],
+          "missingByVariant": [
+            [
+              "ouvrions",
+              "ouvriez"
+            ]
+          ]
+        },
+        "futur": {
+          "status": "mismatched",
+          "missingForms": [
+            "ouvrirons",
+            "ouvrirez"
+          ],
+          "missingByVariant": [
+            [
+              "ouvrirons",
+              "ouvrirez"
+            ]
+          ]
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "ouvririons",
+            "ouvririez"
+          ],
+          "missingByVariant": [
+            [
+              "ouvririons",
+              "ouvririez"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "ouvert"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "croire",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "mismatched",
+          "missingForms": [
+            "croirons"
+          ],
+          "missingByVariant": [
+            [
+              "croirons"
+            ]
+          ]
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "croirions"
+          ],
+          "missingByVariant": [
+            [
+              "croirions"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "cru"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "courir",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "connaître",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "connaîtrions",
+            "connaîtriez"
+          ],
+          "missingByVariant": [
+            [
+              "connaîtrions",
+              "connaîtriez"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "connu"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "comprendre",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "mismatched",
+          "missingForms": [
+            "comprendrons"
+          ],
+          "missingByVariant": [
+            [
+              "comprendrons"
+            ]
+          ]
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "comprendrions"
+          ],
+          "missingByVariant": [
+            [
+              "comprendrions"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "compris"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "apprendre",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "apprendrions",
+            "apprendriez",
+            "apprendraient"
+          ],
+          "missingByVariant": [
+            [
+              "apprendrions",
+              "apprendriez",
+              "apprendraient"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "appris"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "surprendre",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "reprendre",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "voir",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "vu"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "vivre",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "vivrions",
+            "vivriez"
+          ],
+          "missingByVariant": [
+            [
+              "vivrions",
+              "vivriez"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "vécu"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "suivre",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "mismatched",
+          "missingForms": [
+            "suivras"
+          ],
+          "missingByVariant": [
+            [
+              "suivras"
+            ]
+          ]
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "suivrions",
+            "suivriez"
+          ],
+          "missingByVariant": [
+            [
+              "suivrions",
+              "suivriez"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "suivi"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "tenir",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "tiendrions",
+            "tiendriez"
+          ],
+          "missingByVariant": [
+            [
+              "tiendrions",
+              "tiendriez"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "tenu"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "obtenir",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "devenir",
+      "auxiliary": "être",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "mismatched",
+          "missingForms": [
+            "deveniez"
+          ],
+          "missingByVariant": [
+            [
+              "deveniez"
+            ]
+          ]
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "deviendrions",
+            "deviendriez"
+          ],
+          "missingByVariant": [
+            [
+              "deviendrions",
+              "deviendriez"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "devenu",
+            "devenue",
+            "devenus",
+            "devenues"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "revenir",
+      "auxiliary": "être",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "reviendrions"
+          ],
+          "missingByVariant": [
+            [
+              "reviendrions"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "revenu",
+            "revenue",
+            "revenus",
+            "revenues"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "retenir",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "mourir",
+      "auxiliary": "être",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "mismatched",
+          "missingForms": [
+            "mourions",
+            "mouriez"
+          ],
+          "missingByVariant": [
+            [
+              "mourions",
+              "mouriez"
+            ]
+          ]
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "mourrions",
+            "mourriez"
+          ],
+          "missingByVariant": [
+            [
+              "mourrions",
+              "mourriez"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "mort",
+            "morte",
+            "morts",
+            "mortes"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "promettre",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "permettre",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "remettre",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "conduire",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "envoyer",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "acheter",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "lever",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "préférer",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "espérer",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "appeler",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "appellerions",
+            "appelleriez",
+            "appelleraient"
+          ],
+          "missingByVariant": [
+            [
+              "appellerions",
+              "appelleriez",
+              "appelleraient"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "appelé"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "jeter",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "payer",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "voyager",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "changer",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "mismatched",
+          "missingForms": [
+            "changions",
+            "changiez"
+          ],
+          "missingByVariant": [
+            [
+              "changions",
+              "changiez"
+            ]
+          ]
+        },
+        "futur": {
+          "status": "mismatched",
+          "missingForms": [
+            "changerons"
+          ],
+          "missingByVariant": [
+            [
+              "changerons"
+            ]
+          ]
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "changerions",
+            "changeriez",
+            "changeraient"
+          ],
+          "missingByVariant": [
+            [
+              "changerions",
+              "changeriez",
+              "changeraient"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "changé"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "partager",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "ranger",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "manger",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "mangerions",
+            "mangeriez",
+            "mangeraient"
+          ],
+          "missingByVariant": [
+            [
+              "mangerions",
+              "mangeriez",
+              "mangeraient"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "mangé"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "lancer",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "placer",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "avancer",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "commencer",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "mismatched",
+          "missingForms": [
+            "commenceras",
+            "commencerez"
+          ],
+          "missingByVariant": [
+            [
+              "commenceras",
+              "commencerez"
+            ]
+          ]
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "commencerions",
+            "commenceriez",
+            "commenceraient"
+          ],
+          "missingByVariant": [
+            [
+              "commencerions",
+              "commenceriez",
+              "commenceraient"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "commencé"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "finir",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "mismatched",
+          "missingForms": [
+            "finissiez"
+          ],
+          "missingByVariant": [
+            [
+              "finissiez"
+            ]
+          ]
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "finirions",
+            "finiriez"
+          ],
+          "missingByVariant": [
+            [
+              "finirions",
+              "finiriez"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "fini"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "choisir",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "réussir",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "grandir",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "remplir",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "obéir",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "réfléchir",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "vendre",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "attendre",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "attendrions",
+            "attendriez"
+          ],
+          "missingByVariant": [
+            [
+              "attendrions",
+              "attendriez"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "attendu"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "entendre",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "entendrions",
+            "entendriez"
+          ],
+          "missingByVariant": [
+            [
+              "entendrions",
+              "entendriez"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "entendu"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "répondre",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "mismatched",
+          "missingForms": [
+            "répondions"
+          ],
+          "missingByVariant": [
+            [
+              "répondions"
+            ]
+          ]
+        },
+        "futur": {
+          "status": "mismatched",
+          "missingForms": [
+            "répondras",
+            "répondrons",
+            "répondront"
+          ],
+          "missingByVariant": [
+            [
+              "répondras",
+              "répondrons",
+              "répondront"
+            ]
+          ]
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "répondrions",
+            "répondriez",
+            "répondraient"
+          ],
+          "missingByVariant": [
+            [
+              "répondrions",
+              "répondriez",
+              "répondraient"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "répondu"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "perdre",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "mismatched",
+          "missingForms": [
+            "perdiez"
+          ],
+          "missingByVariant": [
+            [
+              "perdiez"
+            ]
+          ]
+        },
+        "futur": {
+          "status": "mismatched",
+          "missingForms": [
+            "perdront"
+          ],
+          "missingByVariant": [
+            [
+              "perdront"
+            ]
+          ]
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "perdrions",
+            "perdriez",
+            "perdraient"
+          ],
+          "missingByVariant": [
+            [
+              "perdrions",
+              "perdriez",
+              "perdraient"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "perdu"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "rendre",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "rendrions",
+            "rendriez",
+            "rendraient"
+          ],
+          "missingByVariant": [
+            [
+              "rendrions",
+              "rendriez",
+              "rendraient"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "rendu"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "descendre",
+      "auxiliary": "être",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "parler",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "parlerions",
+            "parleriez"
+          ],
+          "missingByVariant": [
+            [
+              "parlerions",
+              "parleriez"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "parlé"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "aimer",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "mismatched",
+          "missingForms": [
+            "aimerons"
+          ],
+          "missingByVariant": [
+            [
+              "aimerons"
+            ]
+          ]
+        },
+        "conditionnel": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "aimé"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "travailler",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "mismatched",
+          "missingForms": [
+            "travailleront"
+          ],
+          "missingByVariant": [
+            [
+              "travailleront"
+            ]
+          ]
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "travaillerions",
+            "travailleriez",
+            "travailleraient"
+          ],
+          "missingByVariant": [
+            [
+              "travaillerions",
+              "travailleriez",
+              "travailleraient"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "travaillé"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "habiter",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "étudier",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "jouer",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "mismatched",
+          "missingForms": [
+            "jouerons"
+          ],
+          "missingByVariant": [
+            [
+              "jouerons"
+            ]
+          ]
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "jouerions",
+            "joueriez",
+            "joueraient"
+          ],
+          "missingByVariant": [
+            [
+              "jouerions",
+              "joueriez",
+              "joueraient"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "joué"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "regarder",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "mismatched",
+          "missingForms": [
+            "regarderons",
+            "regarderez"
+          ],
+          "missingByVariant": [
+            [
+              "regarderons",
+              "regarderez"
+            ]
+          ]
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "regarderions",
+            "regarderiez",
+            "regarderaient"
+          ],
+          "missingByVariant": [
+            [
+              "regarderions",
+              "regarderiez",
+              "regarderaient"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "regardé"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "écouter",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "mismatched",
+          "missingForms": [
+            "écouterons",
+            "écouterez"
+          ],
+          "missingByVariant": [
+            [
+              "écouterons",
+              "écouterez"
+            ]
+          ]
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "écouterais",
+            "écouterions",
+            "écouteriez",
+            "écouteraient"
+          ],
+          "missingByVariant": [
+            [
+              "écouterais",
+              "écouterais",
+              "écouterions",
+              "écouteriez",
+              "écouteraient"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "écouté"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "demander",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "demanderions",
+            "demanderaient"
+          ],
+          "missingByVariant": [
+            [
+              "demanderions",
+              "demanderaient"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "demandé"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "chercher",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "mismatched",
+          "missingForms": [
+            "chercheras",
+            "chercherez"
+          ],
+          "missingByVariant": [
+            [
+              "chercheras",
+              "chercherez"
+            ]
+          ]
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "chercherions",
+            "chercheriez",
+            "chercheraient"
+          ],
+          "missingByVariant": [
+            [
+              "chercherions",
+              "chercheriez",
+              "chercheraient"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "cherché"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "donner",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "donnerions"
+          ],
+          "missingByVariant": [
+            [
+              "donnerions"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "donné"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "porter",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "mismatched",
+          "missingForms": [
+            "porterons"
+          ],
+          "missingByVariant": [
+            [
+              "porterons"
+            ]
+          ]
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "porterions",
+            "porteriez"
+          ],
+          "missingByVariant": [
+            [
+              "porterions",
+              "porteriez"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "porté"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "penser",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "mismatched",
+          "missingForms": [
+            "penserons"
+          ],
+          "missingByVariant": [
+            [
+              "penserons"
+            ]
+          ]
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "penserions",
+            "penseriez"
+          ],
+          "missingByVariant": [
+            [
+              "penserions",
+              "penseriez"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "pensé"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "trouver",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "trouvé"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "utiliser",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "visiter",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "aider",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "mismatched",
+          "missingForms": [
+            "aidions"
+          ],
+          "missingByVariant": [
+            [
+              "aidions"
+            ]
+          ]
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "aiderions",
+            "aideraient"
+          ],
+          "missingByVariant": [
+            [
+              "aiderions",
+              "aideraient"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "aidé"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "marcher",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "mismatched",
+          "missingForms": [
+            "marchiez"
+          ],
+          "missingByVariant": [
+            [
+              "marchiez"
+            ]
+          ]
+        },
+        "futur": {
+          "status": "mismatched",
+          "missingForms": [
+            "marcheras",
+            "marcherons",
+            "marcherez"
+          ],
+          "missingByVariant": [
+            [
+              "marcheras",
+              "marcherons",
+              "marcherez"
+            ]
+          ]
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "marcherions",
+            "marcheriez",
+            "marcheraient"
+          ],
+          "missingByVariant": [
+            [
+              "marcherions",
+              "marcheriez",
+              "marcheraient"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "marché"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "terminer",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "continuer",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "montrer",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "garder",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "oublier",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "mismatched",
+          "missingForms": [
+            "oubliions",
+            "oubliiez"
+          ],
+          "missingByVariant": [
+            [
+              "oubliions",
+              "oubliiez"
+            ]
+          ]
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "oublierions",
+            "oublieriez",
+            "oublieraient"
+          ],
+          "missingByVariant": [
+            [
+              "oublierions",
+              "oublieriez",
+              "oublieraient"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "oublié"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "présenter",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "expliquer",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "organiser",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "préparer",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "fermer",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "toucher",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "chanter",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "danser",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "cuisiner",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "déjeuner",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "dîner",
+      "auxiliary": "avoir",
+      "lexiqueLemmaPresent": false,
+      "tenses": {
+        "imparfait": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "futur": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "conditionnel": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        },
+        "passé composé": {
+          "status": "not-in-pilot",
+          "missingForms": []
+        }
+      }
+    },
+    {
+      "verb": "arriver",
+      "auxiliary": "être",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "arriverions",
+            "arriveriez"
+          ],
+          "missingByVariant": [
+            [
+              "arriverions",
+              "arriveriez"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "arrivé",
+            "arrivée",
+            "arrivés",
+            "arrivées"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "rester",
+      "auxiliary": "être",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "resterions"
+          ],
+          "missingByVariant": [
+            [
+              "resterions"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "resté",
+            "restée",
+            "restés",
+            "restées"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "tomber",
+      "auxiliary": "être",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "mismatched",
+          "missingForms": [
+            "tombions",
+            "tombiez"
+          ],
+          "missingByVariant": [
+            [
+              "tombions",
+              "tombiez"
+            ]
+          ]
+        },
+        "futur": {
+          "status": "mismatched",
+          "missingForms": [
+            "tomberons"
+          ],
+          "missingByVariant": [
+            [
+              "tomberons"
+            ]
+          ]
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "tomberions",
+            "tomberiez"
+          ],
+          "missingByVariant": [
+            [
+              "tomberions",
+              "tomberiez"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "tombé",
+            "tombée",
+            "tombés",
+            "tombées"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "entrer",
+      "auxiliary": "être",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "mismatched",
+          "missingForms": [
+            "entriez"
+          ],
+          "missingByVariant": [
+            [
+              "entriez"
+            ]
+          ]
+        },
+        "futur": {
+          "status": "mismatched",
+          "missingForms": [
+            "entrerons"
+          ],
+          "missingByVariant": [
+            [
+              "entrerons"
+            ]
+          ]
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "entrerais",
+            "entrerions",
+            "entreriez",
+            "entreraient"
+          ],
+          "missingByVariant": [
+            [
+              "entrerais",
+              "entrerais",
+              "entrerions",
+              "entreriez",
+              "entreraient"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "entré",
+            "entrée",
+            "entrés",
+            "entrées"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "monter",
+      "auxiliary": "être",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "mismatched",
+          "missingForms": [
+            "montiez"
+          ],
+          "missingByVariant": [
+            [
+              "montiez"
+            ]
+          ]
+        },
+        "futur": {
+          "status": "mismatched",
+          "missingForms": [
+            "monterons",
+            "monterez",
+            "monteront"
+          ],
+          "missingByVariant": [
+            [
+              "monterons",
+              "monterez",
+              "monteront"
+            ]
+          ]
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "monterais",
+            "monterions",
+            "monteriez",
+            "monteraient"
+          ],
+          "missingByVariant": [
+            [
+              "monterais",
+              "monterais",
+              "monterions",
+              "monteriez",
+              "monteraient"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "monté",
+            "montée",
+            "montés",
+            "montées"
+          ]
+        }
+      }
+    },
+    {
+      "verb": "passer",
+      "auxiliary": "être",
+      "lexiqueLemmaPresent": true,
+      "tenses": {
+        "imparfait": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "futur": {
+          "status": "matched",
+          "missingForms": [],
+          "selectedVariant": 0
+        },
+        "conditionnel": {
+          "status": "mismatched",
+          "missingForms": [
+            "passerions"
+          ],
+          "missingByVariant": [
+            [
+              "passerions"
+            ]
+          ]
+        },
+        "passé composé": {
+          "status": "matched",
+          "missingForms": [],
+          "checkedForms": [
+            "passé",
+            "passée",
+            "passés",
+            "passées"
+          ]
+        }
+      }
+    }
+  ]
+}
