@@ -3899,12 +3899,6 @@
       "frequency": 158.42000000000002
     }
   ],
-  "campagne": [
-    {
-      "pos": "noun",
-      "frequency": 158.35
-    }
-  ],
   "chaise": [
     {
       "pos": "noun",
@@ -4335,12 +4329,6 @@
     {
       "pos": "verb",
       "frequency": 147.05
-    }
-  ],
-  "détail": [
-    {
-      "pos": "noun",
-      "frequency": 146.93
     }
   ],
   "crever": [
@@ -7569,12 +7557,6 @@
     {
       "pos": "verb",
       "frequency": 88.99000000000001
-    }
-  ],
-  "club": [
-    {
-      "pos": "noun",
-      "frequency": 88.93
     }
   ],
   "attente": [
@@ -10903,12 +10885,6 @@
       "frequency": 16.37
     }
   ],
-  "test": [
-    {
-      "pos": "noun",
-      "frequency": 60.99
-    }
-  ],
   "talon": [
     {
       "pos": "noun",
@@ -11267,12 +11243,6 @@
       "frequency": 58.84
     }
   ],
-  "week-end": [
-    {
-      "pos": "noun",
-      "frequency": 58.83
-    }
-  ],
   "exercer": [
     {
       "pos": "verb",
@@ -11577,12 +11547,6 @@
     {
       "pos": "noun",
       "frequency": 57.05
-    }
-  ],
-  "prétexte": [
-    {
-      "pos": "noun",
-      "frequency": 56.949999999999996
     }
   ],
   "volant": [
@@ -12001,12 +11965,6 @@
     {
       "pos": "noun",
       "frequency": 55.14999999999999
-    }
-  ],
-  "habit": [
-    {
-      "pos": "noun",
-      "frequency": 55.14
     }
   ],
   "comporter": [
@@ -15755,12 +15713,6 @@
       "frequency": 19.27
     }
   ],
-  "raccompagner": [
-    {
-      "pos": "verb",
-      "frequency": 40.29
-    }
-  ],
   "prolonger": [
     {
       "pos": "verb",
@@ -18027,16 +17979,6 @@
       "frequency": 33.7
     }
   ],
-  "coupé": [
-    {
-      "pos": "adjective",
-      "frequency": 33.68
-    },
-    {
-      "pos": "noun",
-      "frequency": 4.17
-    }
-  ],
   "signature": [
     {
       "pos": "noun",
@@ -19957,6 +19899,68 @@
     {
       "pos": "noun",
       "frequency": 29.240000000000002
+    }
+  ],
+  "narine": [
+    {
+      "pos": "noun",
+      "frequency": 29.22
+    }
+  ],
+  "caporal": [
+    {
+      "pos": "noun",
+      "frequency": 29.21
+    }
+  ],
+  "roche": [
+    {
+      "pos": "noun",
+      "frequency": 29.189999999999998
+    }
+  ],
+  "probable": [
+    {
+      "pos": "adjective",
+      "frequency": 29.16
+    }
+  ],
+  "complice": [
+    {
+      "pos": "noun",
+      "frequency": 29.14
+    },
+    {
+      "pos": "adjective",
+      "frequency": 23.72
+    }
+  ],
+  "confusion": [
+    {
+      "pos": "noun",
+      "frequency": 29.14
+    }
+  ],
+  "teint": [
+    {
+      "pos": "noun",
+      "frequency": 29.130000000000003
+    },
+    {
+      "pos": "adjective",
+      "frequency": 4.84
+    }
+  ],
+  "pasteur": [
+    {
+      "pos": "noun",
+      "frequency": 29.089999999999996
+    }
+  ],
+  "brigade": [
+    {
+      "pos": "noun",
+      "frequency": 29.08
     }
   ]
 }

@@ -20,15 +20,21 @@
   },
   "ranking": "freqlemfilms2 + freqlemlivres; highest-frequency POS per lemma",
   "posDistribution": {
-    "noun": 1677,
-    "verb": 826,
+    "noun": 1678,
+    "verb": 825,
     "adjective": 393,
     "adverb": 104
   },
   "qualityRules": {
     "firstKaikkiEntryPerPos": true,
     "formOnlyGlossesRemoved": true,
+    "metaGlossesRejected": true,
     "overlongGlossesRejected": true,
+    "maxMeaningCharacters": 70,
+    "maxMeaningsPerPos": 3,
+    "maxMeaningsPerEntry": 5,
+    "lowRegisterFallbackRequiresFewerThanTwoNeutralMeanings": true,
+    "caseAndTokenSetDeduplication": true,
     "explicitLigatureWhitelist": 11,
     "neutralSensesFirst": true,
     "formsOnlyForNounsAndAdjectives": true,
@@ -43,30 +49,36 @@
       "offensive",
       "derogatory",
       "informal",
-      "literary"
+      "literary",
+      "figurative",
+      "regional",
+      "nautical",
+      "obsolete"
     ],
     "childGlossPreferred": true,
     "commonAlternatePosRatio": 0.01
   },
   "qualityStats": {
     "homographRecordsIgnored": 1026,
-    "formOnlySensesDropped": 415,
-    "entriesSkippedNoUsableSenses": 719,
+    "formOnlySensesDropped": 404,
+    "entriesSkippedNoUsableSenses": 1110,
     "variantOnlyEntriesSkipped": 17,
-    "registerTaggedSenses": 3652,
-    "entriesWithRegisterLabels": 236,
+    "registerTaggedSenses": 4588,
+    "entriesWithRegisterLabels": 217,
     "parentGlossesReplacedBySubglosses": 6,
-    "secondaryPosGroups": 321,
-    "alternatePosRowsGrouped": 346,
+    "secondaryPosGroups": 320,
+    "alternatePosRowsGrouped": 339,
     "descriptiveGlossesDropped": 20,
-    "overlongGlossesRejected": 801,
-    "entriesDroppedBecauseOfOverlongGlosses": 320,
-    "overridesApplied": 7,
+    "overlongGlossesRejected": 1671,
+    "entriesDroppedBecauseOfOverlongGlosses": 655,
+    "nearDuplicateSensesRemoved": 702,
+    "lowRegisterSensesSkipped": 1076,
+    "overridesApplied": 13,
     "selectedEntries": 3000
   },
-  "overridesApplied": 7,
+  "overridesApplied": 13,
   "sizes": {
-    "rawBytes": 3944851,
-    "gzipBytes": 234984
+    "rawBytes": 3849430,
+    "gzipBytes": 225422
   }
 }
