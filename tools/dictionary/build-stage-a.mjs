@@ -349,24 +349,26 @@ const normalizeMeaning=value=>String(value||"").normalize("NFD").replace(/\p{M}/
 if(MUST_HAVE_FIRST_MEANINGS.length!==30)throw new Error("Stage A must-have list must contain exactly 30 words");
 const mustHaveAudit=[];
 for(const [word,pos,accepted,source] of MUST_HAVE_FIRST_MEANINGS){
- let first="",passed=false,detail="";
+ let first="",firstPos="",passed=false,detail="";
  if(source==="builtin"){
   const entry=dictionary[word];
   first=entry?.[0]||"(missing built-in)";
-  passed=!!entry&&String(entry[1]).includes(pos)&&accepted.some(term=>normalizeMeaning(first).includes(normalizeMeaning(term)));
+  firstPos=String(entry?.[1]||"(missing)").replace(/\\s*\\(.+\\)$/,"");
+  passed=!!entry&&firstPos.includes(pos)&&accepted.some(term=>normalizeMeaning(first).includes(normalizeMeaning(term)));
   detail="immutable built-in";
  }else{
   const entry=output[word];
   const group=entry?.[4]?.posGroups?.[0];
+  firstPos=group?.pos||"(missing)";
   first=group?.meanings?.[0]?.meaning||"(missing)";
-  passed=!!entry&&!!group&&accepted.some(term=>normalizeMeaning(first).includes(normalizeMeaning(term)));
-  detail=entry?(group?"group "+pos:"missing POS group "+pos):"missing headword";
+  passed=!!entry&&!!group&&group.pos===pos&&accepted.some(term=>normalizeMeaning(first).includes(normalizeMeaning(term)));
+  detail=entry?(group?"first group "+group.pos+"; expected "+pos:"missing first POS group"):"missing headword";
  }
- mustHaveAudit.push({word,firstMeaning:first,status:passed?"PASS":"FAIL",detail});
+ mustHaveAudit.push({word,firstPos,firstMeaning:first,status:passed?"PASS":"FAIL",detail});
 }
 console.log("MUST-HAVE FIRST-MEANING AUDIT (30)");
-console.log("word | first meaning | status");
-for(const row of mustHaveAudit)console.log(row.word+" | "+row.firstMeaning+" | "+row.status);
+console.log("word | first POS group | first meaning | status");
+for(const row of mustHaveAudit)console.log(row.word+" | "+row.firstPos+" | "+row.firstMeaning+" | "+row.status);
 const mustHaveFailures=mustHaveAudit.filter(row=>row.status==="FAIL");
 function diagnoseSourceRecord(record){
  const rows=[],deduped=[];
@@ -428,7 +430,7 @@ function printSourceDiagnostic(word,records,reason){
   }
  }
 }
-const mustHaveFailures=mustHaveAudit.filter(row=>row.status==="FAIL");
+
 if(mustHaveFailures.length){
  console.log("MUST-HAVE SOURCE DIAGNOSTICS");
  for(const row of mustHaveFailures)printSourceDiagnostic(row.word,matches.mustHaveSourceRecords?.get(row.word)||[],row.detail);
