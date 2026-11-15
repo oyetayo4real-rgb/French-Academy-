@@ -101,9 +101,14 @@ function lookup(word) {
   }
   const exactKey = input.toLocaleLowerCase("fr");
   const exactImported = importedDictionary.get(exactKey);
-  if (exactImported) return importedResult(exactImported);
   const foldedEntry = findDictionaryEntry(input);
+  // Preserve the checkpoint's built-in accent-fold precedence, except for an
+  // exact curated draft. Unreviewed imports must never shadow built-in spellings.
+  if (exactImported?.metadata.status === "curated-draft" && foldedEntry) {
+    return importedResult(exactImported);
+  }
   if (foldedEntry) return result("supported", 1, "dictionary." + foldedEntry.word, foldedEntry.notes, foldedEntry);
+  if (exactImported) return importedResult(exactImported);
   const normalizedMatches = importedAccentIndex.get(norm(input)) || [];
   const isUnaccented = !/\p{M}/u.test(input.normalize("NFD"));
   if (isUnaccented && normalizedMatches.length > 1) return importedResult(normalizedMatches[0], normalizedMatches);

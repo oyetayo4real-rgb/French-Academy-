@@ -205,6 +205,22 @@ for(const word of OWNER_OVERRIDE_WORDS){
 assert.equal(OWNER_OVERRIDE_WORDS.length,7,"seven documented owner overrides are tested; eighth remains none yet");
 
 
+for (const [input, canonical] of [["sur", "sûr"], ["fatigue", "fatigué"]]) {
+ for (const [layer, name] of [[core, "core"], [compat, "compat"]]) {
+  const result = layer.lookup(input);
+  assert.equal(result?.word, canonical, name + " " + input + " preserves checkpoint built-in accent-fold lookup");
+  assert.equal(result?.builtIn, true, name + " " + input + " resolves to the built-in entry");
+  assert.equal(result?.imported, false, name + " " + input + " must not be shadowed by imported-unreviewed data");
+ }
+}
+for (const [layer, name] of [[core, "core"], [compat, "compat"]]) {
+ const result = layer.lookup("la");
+ assert.equal(result?.word, "la", name + " exact la remains the built-in article, not là");
+ assert.equal(result?.builtIn, true, name + " exact la remains built-in");
+ assert.equal(result?.imported, false, name + " exact la is not the curated là override");
+}
+assert.equal(core.lookup("là")?.word, "là", "exact curated-draft là remains the sole accent-fold exception");
+assert.equal(core.lookup("là")?.importedStatus, "curated-draft", "là exception is restricted to curated-draft status");
 assert.ok(!importedData["oeil"]&&!importedData["coeur"],"nonstandard spelling entries are not imported");
 assert.ok(!JSON.stringify(importedData["chéri"]||{}).includes("Shar (shari'a)"),"chéri homograph contamination is removed");
 assert.ok(!(importedData["cuire"]?.[4]?.senses||[]).some(s=>/inflection of/i.test(s.meaning)),"cuire form-only sense removed");
