@@ -93,11 +93,11 @@ function lookup(word) {
   // Exact built-in spellings retain priority. An exact imported spelling must not be
   // hidden by a different built-in word that only matches after accent folding.
   const exactEntry = findDictionaryEntry(input, { accentInsensitive: false });
-  if (exactEntry) return result("supported", 1, "dictionary." + exactEntry.word, exactEntry.notes, exactEntry);
+  if (exactEntry) return result("supported", 1, "dictionary." + exactEntry.word, exactEntry.notes, { ...exactEntry, imported: false });
   const normalizedOe = normalizeOeLigature(input);
   if (normalizedOe !== input) {
     const normalizedEntry = findDictionaryEntry(normalizedOe, { accentInsensitive: false });
-    if (normalizedEntry) return result("supported", 1, "dictionary." + normalizedEntry.word, normalizedEntry.notes, normalizedEntry);
+    if (normalizedEntry) return result("supported", 1, "dictionary." + normalizedEntry.word, normalizedEntry.notes, { ...normalizedEntry, imported: false });
   }
   const exactKey = input.toLocaleLowerCase("fr");
   const exactImported = importedDictionary.get(exactKey);
@@ -107,7 +107,7 @@ function lookup(word) {
   if (exactImported?.metadata.status === "curated-draft" && foldedEntry) {
     return importedResult(exactImported);
   }
-  if (foldedEntry) return result("supported", 1, "dictionary." + foldedEntry.word, foldedEntry.notes, foldedEntry);
+  if (foldedEntry) return result("supported", 1, "dictionary." + foldedEntry.word, foldedEntry.notes, { ...foldedEntry, imported: false });
   if (exactImported) return importedResult(exactImported);
   const normalizedMatches = importedAccentIndex.get(norm(input)) || [];
   const isUnaccented = !/\p{M}/u.test(input.normalize("NFD"));
