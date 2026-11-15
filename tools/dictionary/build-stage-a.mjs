@@ -205,6 +205,7 @@ for(const rows of ordered){
  if((!primaryMatch?.senses?.length)&&!override)continue;
  let senses=(primaryMatch?.senses||[]).slice(0,3);
  if(override){
+  // POS-specific curated meanings must drive the generated primary senses when supplied.
   const primaryOverrideMeanings=override.meaningsByPos?.[primaryPos]||override.meanings;
   if(override.status!=="curated-draft"||!override.reason||!Array.isArray(primaryOverrideMeanings)||!primaryOverrideMeanings.length)throw new Error("Invalid curated override for "+headword);
   senses=primaryOverrideMeanings.slice(0,3).map(meaning=>({meaning:String(meaning),tags:[],registerTags:[],label:null,curated:true}));

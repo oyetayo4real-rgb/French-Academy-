@@ -43,8 +43,12 @@ for(const input of collisions){
 assert.equal(core.lookup("ou").word,"où","golden v3/v4 ou lookup remains the built-in où entry");
 assert.equal(core.lookup("ou").builtIn,true);
 assert.equal(core.lookup("a").status,"unsupported","short a homophone guard remains unchanged");
-assert.equal(core.lookup("sur").word,"sûr","built-in accent-insensitive result wins");
+assert.equal(core.lookup("la").word,"la","exact built-in la must remain distinct from là");
+assert.equal(core.lookup("la").builtIn,true);
+assert.equal(core.lookup("sur").word,"sûr","built-in accent-insensitive result wins over exact imported-unreviewed sur");
 assert.equal(core.lookup("sur").builtIn,true);
+assert.equal(core.lookup("fatigue").word,"fatigué","built-in accent-insensitive result wins over exact imported-unreviewed fatigue");
+assert.equal(core.lookup("fatigue").builtIn,true);
 assert.equal(core.lookup("cote").word,"côté","built-in accent-insensitive result wins");
 assert.equal(core.lookup("cote").builtIn,true);
 assert.equal(core.lookup("mais").word,"mais","built-in exact result wins");
@@ -174,13 +178,24 @@ const OWNER_OVERRIDE_ACCEPTED_FIRST_MEANINGS={
 };
 const OWNER_OVERRIDE_WORDS=Object.keys(OWNER_OVERRIDE_ACCEPTED_FIRST_MEANINGS);
 assert.deepEqual(OWNER_OVERRIDE_WORDS,["même","cent","véritable","là","chéri","peu","cuire"]);
+const accentFoldBuiltInKey=word=>Object.keys(dictionary).find(key=>norm(key)===norm(word))||null;
+const CURATED_ACCENT_FOLD_COLLISIONS=OWNER_OVERRIDE_WORDS.filter(word=>{
+ const key=accentFoldBuiltInKey(word);
+ return key!==null&&key!==word;
+});
+assert.deepEqual(CURATED_ACCENT_FOLD_COLLISIONS,["là"],"only là collides with an accent-fold-only built-in key");
 for(const word of OWNER_OVERRIDE_WORDS){
  assert.equal(importedData[word]?.[4]?.status,"curated-draft",word+" is marked curated draft");
  assert.ok(overrides[word]?.reason,word+" review reason remains in build-only override metadata, not learner payload");
  const coreResult=core.lookup(word);
  assert.equal(coreResult.status,"supported",word+" combined core lookup renders");
- assert.equal(coreResult.imported,true,word+" resolves to its exact imported override");
- assert.equal(coreResult.word,word,word+" exact override spelling wins over accent-folded built-in entries");
+ if(CURATED_ACCENT_FOLD_COLLISIONS.includes(word)){
+  assert.equal(coreResult.imported,true,word+" curated draft wins over accent-fold-only built-in "+accentFoldBuiltInKey(word));
+  assert.equal(coreResult.word,word,word+" exact curated headword is selected for its collision");
+ }else{
+  assert.equal(coreResult.imported,true,word+" exact imported curated entry remains available without a built-in collision");
+  assert.equal(coreResult.word,word,word+" exact imported headword is selected");
+ }
  const compatResult=compat.lookup(word);
  assert.ok(compatResult?.imported,word+" compatibility lookup returns the imported override");
  assert.equal(compatResult.word,word,word+" compatibility lookup preserves the exact override spelling");
