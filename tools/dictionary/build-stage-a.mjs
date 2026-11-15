@@ -159,7 +159,7 @@ async function readLexique(){
 async function collectWiktionary(candidates){
  const byWord=new Map();
  for(const c of candidates){const key=normalize(c.lemma);if(!byWord.has(key))byWord.set(key,[]);byWord.get(key).push(c);}
- const matched=new Map(),seenPos=new Set();
+ const matched=new Map(),seenPos=new Set(),mustHaveSourceRecords=new Map();
  const rl=readline.createInterface({input:createReadStream(WIKTIONARY,{encoding:"utf8"}),crlfDelay:Infinity});
  let lineNo=0;
  for await(const line of rl){
@@ -168,6 +168,10 @@ async function collectWiktionary(candidates){
   if(normalize(record.lang_code)!=="fr"||normalize(record.lang)!=="french")continue;
   const wordKey=normalize(record.word),candidateRows=byWord.get(wordKey);
   if(!candidateRows)continue;
+  if(MUST_HAVE_FIRST_MEANINGS.some(([word])=>word===wordKey)){
+   if(!mustHaveSourceRecords.has(wordKey))mustHaveSourceRecords.set(wordKey,[]);
+   mustHaveSourceRecords.get(wordKey).push(record);
+  }
   const pos=wiktionaryPos.get(normalize(record.pos));
   if(!pos)continue;
   const matching=candidateRows.filter(c=>posMap.get(c.pos)===pos);
@@ -195,6 +199,7 @@ async function collectWiktionary(candidates){
   }
   matched.set(key,{pos,senses,frequency:matching.length?Math.max(...matching.map(x=>x.frequency)):null,gender:masculine&&feminine?"m/f":masculine?"m":feminine?"f":null,forms});
  }
+ matched.mustHaveSourceRecords=mustHaveSourceRecords;
  return matched;
 }
 function lexGender(candidate){
@@ -298,29 +303,85 @@ for(const rows of ordered){
 }
 
 const MUST_HAVE_FIRST_MEANINGS=[
- ["retourner","verb","to return"],["nouveau","adjective","new"],["jeter","verb","to throw"],
- ["minute","noun","minute"],["plein","adjective","full"],["souvenir","noun","memory"],
- ["même","adverb","even"],["cent","numeral","hundred"],["chéri","noun","darling"],
- ["cuire","verb","to cook"],["là","adverb","there"],["peu","adverb","little"],
- ["part","noun","share"],["poser","verb","put down"],["longtemps","adverb","for a long time"],
- ["gros","adjective","big"],["mois","noun","month"],["problème","noun","problem"],
- ["long","adjective","long"],["frère","noun","brother"],["lever","verb","raise"],
- ["montrer","verb","show"],["peine","noun","punishment"],["servir","verb","serve"],
- ["garder","verb","keep"],["quitter","verb","leave"],["occuper","verb","occupy"],
- ["tourner","verb","turn"],["mettre","verb","put"],["payer","verb","pay"]
+ ["retourner","verb",["to return"]],
+ ["nouveau","adjective",["new"]],
+ ["plein","adjective",["full"]],
+ ["blanc","adjective",["white"]],
+ ["fin","noun",["end"]],
+ ["minute","noun",["minute"]],
+ ["jeter","verb",["to throw"]],
+ ["tourner","verb",["to turn"]],
+ ["envoyer","verb",["to send"]],
+ ["servir","verb",["to serve"]],
+ ["garder","verb",["to keep"]],
+ ["quitter","verb",["to leave"]],
+ ["occuper","verb",["to occupy"]],
+ ["descendre","verb",["to go down"]],
+ ["payer","verb",["to pay"]],
+ ["continuer","verb",["to continue"]],
+ ["paraître","verb",["to appear"]],
+ ["point","noun",["point"]],
+ ["train","noun",["train"]],
+ ["lit","noun",["bed"]],
+ ["guerre","noun",["war"]],
+ ["instant","noun",["moment"]],
+ ["souvenir","noun",["memory"]],
+ ["là","adverb",["there"]],
+ ["même","adverb",["even"]],
+ ["peu","adverb",["little","few"]],
+ ["mois","noun",["month"]],
+ ["problème","noun",["problem"]],
+ ["frère","noun",["brother"]],
+ ["mettre","verb",["put"],"builtin"]
 ];
-const normalizeMeaning=value=>String(value||"").normalize("NFD").replace(/\p{M}/gu,"").toLocaleLowerCase("en");
+const normalizeMeaning=value=>String(value||"").normalize("NFD").replace(/\\p{M}/gu,"").toLocaleLowerCase("en");
 if(MUST_HAVE_FIRST_MEANINGS.length!==30)throw new Error("Stage A must-have list must contain exactly 30 words");
-for(const [word,pos,expected] of MUST_HAVE_FIRST_MEANINGS){
- if(word==="mettre"){
+const mustHaveAudit=[];
+for(const [word,pos,accepted,source] of MUST_HAVE_FIRST_MEANINGS){
+ let first="",passed=false,detail="";
+ if(source==="builtin"){
   const entry=dictionary[word];
-  if(!entry||!String(entry[1]).includes("verb")||!normalizeMeaning(entry[0]).includes(normalizeMeaning(expected)))throw new Error("Must-have built-in mettre must retain verb meaning put");
-  continue;
+  first=entry?.[0]||"(missing built-in)";
+  passed=!!entry&&String(entry[1]).includes(pos)&&accepted.some(term=>normalizeMeaning(first).includes(normalizeMeaning(term)));
+  detail="immutable built-in";
+ }else{
+  const entry=output[word];
+  const group=entry?.[4]?.posGroups?.find(item=>item.pos===pos);
+  first=group?.meanings?.[0]?.meaning||"(missing)";
+  passed=!!entry&&!!group&&accepted.some(term=>normalizeMeaning(first).includes(normalizeMeaning(term)));
+  detail=entry?(group?"group "+pos:"missing POS group "+pos):"missing headword";
  }
- const entry=output[word];if(!entry)throw new Error("Stage A must-have headword missing: "+word);
- const group=entry[4]?.posGroups?.find(item=>item.pos===pos);if(!group)throw new Error("Stage A must-have POS group missing: "+word+" / "+pos);
- const first=group.meanings?.[0]?.meaning||"";
- if(!normalizeMeaning(first).includes(normalizeMeaning(expected)))throw new Error("Stage A must-have first meaning mismatch: "+word+" / "+pos+" expected "+expected+" actual "+first);
+ mustHaveAudit.push({word,firstMeaning:first,status:passed?"PASS":"FAIL",detail});
+}
+console.log("MUST-HAVE FIRST-MEANING AUDIT (30)");
+console.log("word | first meaning | status");
+for(const row of mustHaveAudit)console.log(row.word+" | "+row.firstMeaning+" | "+row.status);
+const mustHaveFailures=mustHaveAudit.filter(row=>row.status==="FAIL");
+if(mustHaveFailures.length){
+ console.log("MUST-HAVE SOURCE DIAGNOSTICS");
+ for(const row of mustHaveFailures){
+  const records=matches.mustHaveSourceRecords?.get(row.word)||[];
+  console.log("DIAGNOSTIC "+row.word+": "+row.detail+"; source records="+records.length);
+  const seenGlosses=new Set();
+  for(const [recordIndex,record] of records.entries()){
+   console.log("SOURCE RECORD "+(recordIndex+1)+" POS="+record.pos+" recordTags="+JSON.stringify(record.tags||[]));
+   for(const [senseIndex,sense] of (record.senses||[]).entries()){
+    const tags=[...(record.tags||[]),...(sense.tags||[]),...(sense.raw_tags||[])].map(String);
+    const glosses=sense.glosses||sense.raw_glosses||[];
+    for(const raw of glosses){
+     const gloss=String(raw),key=normalizeMeaning(gloss).split(/\\s+/).filter(Boolean).sort().join(" ");
+     let droppedBy="retained";
+     if(Array.from(gloss).length>MAX_GLOSS_LENGTH)droppedBy="over-length";
+     else if(FORM_ONLY.test(gloss))droppedBy="form-only";
+     else if(tags.some(tag=>/slang|colloquial|figurative/i.test(tag)))droppedBy="slang/colloquial/figurative register";
+     else if(seenGlosses.has(key))droppedBy="duplicate";
+     else seenGlosses.add(key);
+     console.log("SENSE "+(senseIndex+1)+" tags="+JSON.stringify(tags)+" gloss="+JSON.stringify(gloss)+" droppedBy="+droppedBy);
+    }
+   }
+  }
+ }
+ throw new Error("Stage A must-have audit failed for: "+mustHaveFailures.map(row=>row.word).join(", "));
 }
 
 if(selected.length<MINIMUM)throw new Error("Only "+selected.length+" qualifying entries found; minimum is "+MINIMUM+

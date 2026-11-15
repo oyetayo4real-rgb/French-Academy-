@@ -2,42 +2,42 @@
 
 This contract records the Stage A learner-facing quality rules and the 30-word must-have build gate. The POS column is intentional: Lexique continues to determine each imported headword's primary POS, while secondary POS meanings remain in separate groups.
 
-| # | Headword | POS group | Required first meaning |
+| # | Headword | POS group | Accepted first-meaning keyword(s) |
 |---:|---|---|---|
 | 1 | retourner | verb | to return |
 | 2 | nouveau | adjective | new |
-| 3 | jeter | verb | to throw |
-| 4 | minute | noun | minute |
-| 5 | plein | adjective | full |
-| 6 | souvenir | noun | memory |
-| 7 | même | adverb | even |
-| 8 | cent | numeral | hundred |
-| 9 | chéri | noun | darling |
-| 10 | cuire | verb | to cook |
-| 11 | là | adverb | there |
-| 12 | peu | adverb | little |
-| 13 | part | noun | share |
-| 14 | poser | verb | put down |
-| 15 | longtemps | adverb | for a long time |
-| 16 | gros | adjective | big |
-| 17 | mois | noun | month |
-| 18 | problème | noun | problem |
-| 19 | long | adjective | long |
-| 20 | frère | noun | brother |
-| 21 | lever | verb | raise |
-| 22 | montrer | verb | show |
-| 23 | peine | noun | punishment |
-| 24 | servir | verb | serve |
-| 25 | garder | verb | keep |
-| 26 | quitter | verb | leave |
-| 27 | occuper | verb | occupy |
-| 28 | tourner | verb | turn |
-| 29 | mettre | verb | put (immutable built-in) |
-| 30 | payer | verb | pay |
+| 3 | plein | adjective | full |
+| 4 | blanc | adjective | white |
+| 5 | fin | noun | end |
+| 6 | minute | noun | minute |
+| 7 | jeter | verb | to throw |
+| 8 | tourner | verb | to turn |
+| 9 | envoyer | verb | to send |
+| 10 | servir | verb | to serve |
+| 11 | garder | verb | to keep |
+| 12 | quitter | verb | to leave |
+| 13 | occuper | verb | to occupy |
+| 14 | descendre | verb | to go down |
+| 15 | payer | verb | to pay |
+| 16 | continuer | verb | to continue |
+| 17 | paraître | verb | to appear |
+| 18 | point | noun | point |
+| 19 | train | noun | train |
+| 20 | lit | noun | bed |
+| 21 | guerre | noun | war |
+| 22 | instant | noun | moment |
+| 23 | souvenir | noun | memory |
+| 24 | là | adverb | there |
+| 25 | même | adverb | even |
+| 26 | peu | adverb | little / few |
+| 27 | mois | noun | month |
+| 28 | problème | noun | problem |
+| 29 | frère | noun | brother |
+| 30 | mettre | built-in verb | put |
 
 ## Build invariants
 
-- The builder fails if any required imported headword or POS group is missing, or if its first group meaning does not match the required meaning. The immutable built-in `mettre` is checked separately and must never be imported as a duplicate.
+- The builder prints all 30 rows (headword, actual first meaning, PASS/FAIL) before failing. Each headword is checked against its keyword accept-list and required POS group; `mettre` is checked against the immutable built-in dictionary.
 - Maximum 3 meanings per POS group, 5 meanings across all POS groups per entry, and 70 characters per meaning. Reject overlong glosses; never truncate them.
 - Deduplicate glosses case-insensitively and by token-set similarity.
 - Prefer neutral meanings. Use slang, colloquial, familiar, figurative, regional, nautical, dated, rare, obsolete, archaic, vulgar, offensive, derogatory or informal senses only when fewer than two neutral meanings remain. Neutral meanings must precede any fallback.

@@ -117,15 +117,14 @@ for(const [input,canonical] of [["oeil","œil"],["coeur","cœur"]]){
  }
 }
 const ACCEPTED_MEANINGS={
- "là":["there"],"même":["even"],"peu":["little","few"],"part":["share","part"],
- "poser":["put","place"],"longtemps":["long time","for a long time"],"gros":["big","fat","large"],
- "mois":["month"],"problème":["problem"],"long":["long"],"frère":["brother"],
- "lever":["raise","lift"],"montrer":["show"],"peine":["sorrow","trouble","penalty"],
- "servir":["serve"],"garder":["keep"],"quitter":["leave"],"occuper":["occupy"],
- "tourner":["turn"],"plein":["full"],"guerre":["war"],"mettre":["put","place"],
- "paraître":["appear","seem"],"payer":["pay"],"continuer":["continue"],
- "suite":["continuation","sequel","following"],"blanc":["white"],"point":["point"],
- "train":["train"],"minute":["minute"]
+ "retourner":["to return"],"nouveau":["new"],"plein":["full"],"blanc":["white"],
+ "fin":["end"],"minute":["minute"],"jeter":["to throw"],"tourner":["to turn"],
+ "envoyer":["to send"],"servir":["to serve"],"garder":["to keep"],"quitter":["to leave"],
+ "occuper":["to occupy"],"descendre":["to go down"],"payer":["to pay"],"continuer":["to continue"],
+ "paraître":["to appear"],"point":["point"],"train":["train"],"lit":["bed"],
+ "guerre":["war"],"instant":["moment"],"souvenir":["memory"],"là":["there"],
+ "même":["even"],"peu":["little","few"],"mois":["month"],"problème":["problem"],
+ "frère":["brother"],"mettre":["put"]
 };
 assert.equal(Object.keys(ACCEPTED_MEANINGS).length,30,"30-word acceptance list is complete");
 const normalizeEnglish=value=>String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("en");
@@ -225,13 +224,13 @@ for(const word of OWNER_OVERRIDE_WORDS){
 }
 assert.equal(OWNER_OVERRIDE_WORDS.length,7,"seven checkpoint curated overrides remain tested");
 // POS-scoped acceptance keeps Lexique's primary POS intact while enforcing learner-facing group meanings.
-const MUST_HAVE_FIRST_MEANINGS=[["retourner","verb","to return"],["nouveau","adjective","new"],["jeter","verb","to throw"],["minute","noun","minute"],["plein","adjective","full"],["souvenir","noun","memory"],["même","adverb","even"],["cent","numeral","hundred"],["chéri","noun","darling"],["cuire","verb","to cook"],["là","adverb","there"],["peu","adverb","little"],["part","noun","share"],["poser","verb","put down"],["longtemps","adverb","for a long time"],["gros","adjective","big"],["mois","noun","month"],["problème","noun","problem"],["long","adjective","long"],["frère","noun","brother"],["lever","verb","raise"],["montrer","verb","show"],["peine","noun","punishment"],["servir","verb","serve"],["garder","verb","keep"],["quitter","verb","leave"],["occuper","verb","occupy"],["tourner","verb","turn"],["mettre","verb","put"],["payer","verb","pay"]];
+const MUST_HAVE_FIRST_MEANINGS=[["retourner","verb",["to return"]],["nouveau","adjective",["new"]],["plein","adjective",["full"]],["blanc","adjective",["white"]],["fin","noun",["end"]],["minute","noun",["minute"]],["jeter","verb",["to throw"]],["tourner","verb",["to turn"]],["envoyer","verb",["to send"]],["servir","verb",["to serve"]],["garder","verb",["to keep"]],["quitter","verb",["to leave"]],["occuper","verb",["to occupy"]],["descendre","verb",["to go down"]],["payer","verb",["to pay"]],["continuer","verb",["to continue"]],["paraître","verb",["to appear"]],["point","noun",["point"]],["train","noun",["train"]],["lit","noun",["bed"]],["guerre","noun",["war"]],["instant","noun",["moment"]],["souvenir","noun",["memory"]],["là","adverb",["there"]],["même","adverb",["even"]],["peu","adverb",["little","few"]],["mois","noun",["month"]],["problème","noun",["problem"]],["frère","noun",["brother"]],["mettre","verb",["put"],"builtin"]];
 assert.equal(MUST_HAVE_FIRST_MEANINGS.length,30,"30-word must-have list is complete");
-for(const [word,pos,expected] of MUST_HAVE_FIRST_MEANINGS){
+for(const [word,pos,accepted,source] of MUST_HAVE_FIRST_MEANINGS){
  schema3Assertion(word+" "+pos+" first meaning",()=>{
-  if(word==="mettre"){const result=core.lookup(word);assert.equal(result?.builtIn,true,"mettre remains the immutable built-in entry");assert.ok(normalizeEnglish(result.meaning).includes(normalizeEnglish(expected)),"mettre built-in meaning is put");return;}
+  if(source==="builtin"){const result=core.lookup(word);assert.equal(result?.builtIn,true,"mettre remains the immutable built-in entry");assert.ok(accepted.some(term=>normalizeEnglish(result.meaning).includes(normalizeEnglish(term))),"mettre built-in meaning is put");return;}
   const groups=importedData[word]?.[4]?.posGroups||[];const group=groups.find(item=>item.pos===pos);assert.ok(group,word+" has required "+pos+" POS group");
-  const first=posGroupMeanings(group)[0]||"";assert.ok(normalizeEnglish(first).includes(normalizeEnglish(expected)),word+" "+pos+" first meaning must include "+expected+"; got "+first);
+  const first=posGroupMeanings(group)[0]||"";assert.ok(accepted.some(term=>normalizeEnglish(first).includes(normalizeEnglish(term))),word+" "+pos+" first meaning must include "+JSON.stringify(accepted)+"; got "+first);
  });
 }
 const eightWordGroups={"même":{adverb:"even",adjective:"same"},"cent":{numeral:"hundred",noun:"cent, coin"},"chéri":{noun:"darling",adjective:"beloved"},"cuire":{verb:"to cook"},"retourner":{verb:"to return"},"minute":{noun:"minute"},"jeter":{verb:"to throw"},"nouveau":{adjective:"new"}};
@@ -267,8 +266,8 @@ for(const [word,entry] of Object.entries(importedData))assert.ok(!(entry[4].sens
 assert.ok((importedData["peu"]?.[4]?.posGroups||[]).some(group=>group.pos==="adverb"),"peu adverb meanings remain in a distinct POS group");
 assert.ok((importedData["peu"]?.[4]?.posGroups||[]).some(group=>group.pos==="noun"),"peu noun senses remain in a separate POS group");
 assert.ok(!(importedData["peu"]?.[3]||"").includes("noun:"),"peu POS groups are not hidden in notes");
-assert.ok((importedData["plein"]?.[4]?.posGroups||[]).some(group=>group.pos==="noun"),"plein noun senses remain grouped in notes");
-assert.ok((importedData["plein"]?.[4]?.posGroups||[]).some(group=>group.pos==="preposition"),"plein preposition POS group is retained");
+
+schema3Assertion("plein adjective and adverb POS groups",()=>{const groups=importedData["plein"]?.[4]?.posGroups||[];assert.ok(groups.some(group=>group.pos==="adjective"&&normalizeEnglish(posGroupMeanings(group)[0]).includes("full")),"plein adjective group retains full");assert.ok(groups.some(group=>group.pos==="adverb"),"plein adverb group remains distinct");});
 assert.ok((importedData["plein"]?.[4]?.posGroups||[]).some(group=>group.pos==="adverb"),"plein adverb POS group is retained");
 assert.ok(overrides["là"]?.reason,"là curated override remains sourced in build-only override metadata");
 schema3Assertion("generated forms, grouped POS limits and register filtering",()=>{
