@@ -174,7 +174,7 @@ assert.ok(!legacyHtml.includes("No reviewed meaning"),"legacy renderer never dis
 // Curated overrides: seven pre-existing owner entries, six existing Stage A priorities, and fifteen restored common headwords.
 const OWNER_OVERRIDE_ACCEPTED_FIRST_MEANINGS={
  "même":["even"],"cent":["cent, coin"],"véritable":["real","genuine","true"],"là":["there"],
- "chéri":["darling","dear","beloved"],"peu":["a small amount"],"cuire":["to cook","to bake","to burn"],
+ "chéri":["darling","dear","beloved"],"peu":["little","few"],"cuire":["to cook","to bake","to burn"],
  "retourner":["to return"],"minute":["minute"],"jeter":["to throw"],"nouveau":["new"],"souvenir":["memory"],"quitter":["to leave"],
  "liberté":["freedom","liberty"],"campagne":["countryside","campaign"],"crime":["crime"],"détail":["detail"],
  "trottoir":["sidewalk","pavement"],"club":["club"],"rivière":["river"],"test":["test"],"septembre":["september"],
@@ -245,6 +245,7 @@ schema3Assertion("là descriptive parent gloss removed",()=>assert.ok(!(imported
 schema3Assertion("descriptive parent glosses removed",()=>assert.ok((importedData["final"]?.[4]?.senses||[]).every(s=>!/^expressing purpose/i.test(s.meaning)),"descriptive parent glosses are dropped in favour of child glosses"));
 schema3Assertion("parent gloss replacement statistic",()=>assert.ok(generatedMeta.qualityStats?.parentGlossesReplacedBySubglosses>0,"hierarchical parent glosses were resolved to child glosses"));
 schema3Assertion("dataset contains no descriptive-only glosses",()=>{for(const [word,entry] of Object.entries(importedData))assert.ok(!(entry[4].senses||[]).some(s=>/^(?:referring to|used to|indicating|expressing|denoting|relating to|pertaining to|describing|said of)\b/i.test(s.meaning)),word+" has no descriptive-only gloss");});
+schema3Assertion("peu first group adverb little",()=>{const pg=importedData["peu"]?.[4]?.posGroups||[];assert.equal(pg[0]?.pos,"adverb");assert.ok(normalizeEnglish(pg[0]?.meanings?.[0]?.meaning).includes("little"));});
 schema3Assertion("peu adverb POS group",()=>assert.ok((importedData["peu"]?.[4]?.posGroups||[]).some(group=>group.pos==="adverb"),"peu adverb meanings remain in a distinct POS group"));
 schema3Assertion("peu noun POS group",()=>assert.ok((importedData["peu"]?.[4]?.posGroups||[]).some(group=>group.pos==="noun"),"peu noun senses remain in a separate POS group"));
 schema3Assertion("peu groups are not hidden in notes",()=>assert.ok(!(importedData["peu"]?.[3]||"").includes("noun:"),"peu POS groups are not hidden in notes"));

@@ -16,7 +16,7 @@ const LOCK=path.join(ROOT,"tools/dictionary/sources.lock.json");
 const OVERRIDES=path.join(ROOT,"tools/dictionary/overrides.json");
 const TARGET=3000,MINIMUM=2800,SOURCE="wiktionary-en via kaikki.org";
 const COMMON_POS_RATIO=0.01;
-const DISPLAY_ORDER_EXCEPTIONS=Object.freeze({nouveau:"adjective",souvenir:"noun"});
+const DISPLAY_ORDER_EXCEPTIONS=Object.freeze(JSON.parse(fs.readFileSync(path.join(ROOT,"tools/dictionary/display-order.json"),"utf8")));
 const lock=JSON.parse(fs.readFileSync(LOCK,"utf8"));
 const overrides=JSON.parse(fs.readFileSync(OVERRIDES,"utf8"));
 const extractDate=lock.sources?.kaikki?.extractDate;

@@ -90,18 +90,18 @@
     "status": "curated-draft",
     "reason": "Curated learner meanings only; primary POS is selected from Lexique frequency and is never overridden.",
     "meanings": [
-      "little",
-      "few",
-      "not much"
+      "little; not much",
+      "few (peu de gens)",
+      "not very (peu probable)"
     ],
     "meaningsByPos": {
-      "noun": [
-        "a small amount"
-      ],
       "adverb": [
-        "little",
-        "few",
-        "not very much"
+        "little; not much",
+        "few (peu de gens)",
+        "not very (peu probable)"
+      ],
+      "noun": [
+        "the little; a little (le peu que je sais)"
       ]
     }
   },

@@ -20,7 +20,7 @@ const errors=[];
 const LIGATURES=new Map([["oeil","œil"],["coeur","cœur"],["soeur","sœur"],["oeuf","œuf"],["noeud","nœud"],["voeu","vœu"],["boeuf","bœuf"],["oeuvre","œuvre"],["moeurs","mœurs"],["manoeuvre","manœuvre"],["choeur","chœur"]]);
 const normalize=s=>{const key=String(s).normalize("NFC").toLocaleLowerCase("fr");return LIGATURES.get(key)||key;};
 const keys=Object.keys(data),builtins=new Set(Object.keys(builtin).map(normalize)),seen=new Set();
-const DISPLAY_ORDER_EXCEPTIONS=Object.freeze({nouveau:"adjective",souvenir:"noun"});
+const DISPLAY_ORDER_EXCEPTIONS=Object.freeze(JSON.parse(fs.readFileSync("tools/dictionary/display-order.json","utf8")));
 const FORM_ONLY=/\b(?:inflection of|plural of|feminine of|masculine of|form of|participle of|alternative form of|nonstandard spelling of|obsolete spelling of|misspelling of|superseded spelling of|etymology(?:\s+\d+)?|see also|derived terms?|related terms?|translations?|pronunciation|synonyms?|antonyms?)\b/i;
 if(rawKeys.length!==keys.length)errors.push({error:"duplicate top-level JSON headword keys",rawKeyCount:rawKeys.length,parsedKeyCount:keys.length});
 const posCounts={},meaningCounts={"1":0,"2":0,"3":0,other:0};let genderCount=0,registerTagged=0,curatedDraftCount=0;
