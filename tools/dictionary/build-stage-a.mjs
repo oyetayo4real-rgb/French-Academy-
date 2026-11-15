@@ -156,6 +156,39 @@ async function readLexique(){
  return [...grouped.values()].filter(x=>x.frequency>0&&!builtin.has(normalize(x.lemma)))
   .sort((a,b)=>b.frequency-a.frequency||normalize(a.lemma).localeCompare(normalize(b.lemma),"fr")||a.pos.localeCompare(b.pos));
 }
+const MUST_HAVE_FIRST_MEANINGS=[
+ ["retourner","verb",["to return"]],
+ ["nouveau","adjective",["new"]],
+ ["plein","adjective",["full"]],
+ ["blanc","adjective",["white"]],
+ ["fin","noun",["end"]],
+ ["minute","noun",["minute"]],
+ ["jeter","verb",["to throw"]],
+ ["tourner","verb",["to turn"]],
+ ["envoyer","verb",["to send"]],
+ ["servir","verb",["to serve"]],
+ ["garder","verb",["to keep"]],
+ ["quitter","verb",["to leave"]],
+ ["occuper","verb",["to occupy"]],
+ ["descendre","verb",["to go down"]],
+ ["payer","verb",["to pay"]],
+ ["continuer","verb",["to continue"]],
+ ["paraître","verb",["to appear"]],
+ ["point","noun",["point"]],
+ ["train","noun",["train"]],
+ ["lit","noun",["bed"]],
+ ["guerre","noun",["war"]],
+ ["instant","noun",["moment"]],
+ ["souvenir","noun",["memory"]],
+ ["là","adverb",["there"]],
+ ["même","adverb",["even"]],
+ ["peu","adverb",["little","few"]],
+ ["mois","noun",["month"]],
+ ["problème","noun",["problem"]],
+ ["frère","noun",["brother"]],
+ ["mettre","verb",["put"],"builtin"]
+];
+
 async function collectWiktionary(candidates){
  const byWord=new Map();
  for(const c of candidates){const key=normalize(c.lemma);if(!byWord.has(key))byWord.set(key,[]);byWord.get(key).push(c);}
@@ -302,38 +335,7 @@ for(const rows of ordered){
  if(primarySenses.some(sense=>sense.registerTags?.length))stats.entriesWithRegisterLabels++;
 }
 
-const MUST_HAVE_FIRST_MEANINGS=[
- ["retourner","verb",["to return"]],
- ["nouveau","adjective",["new"]],
- ["plein","adjective",["full"]],
- ["blanc","adjective",["white"]],
- ["fin","noun",["end"]],
- ["minute","noun",["minute"]],
- ["jeter","verb",["to throw"]],
- ["tourner","verb",["to turn"]],
- ["envoyer","verb",["to send"]],
- ["servir","verb",["to serve"]],
- ["garder","verb",["to keep"]],
- ["quitter","verb",["to leave"]],
- ["occuper","verb",["to occupy"]],
- ["descendre","verb",["to go down"]],
- ["payer","verb",["to pay"]],
- ["continuer","verb",["to continue"]],
- ["paraître","verb",["to appear"]],
- ["point","noun",["point"]],
- ["train","noun",["train"]],
- ["lit","noun",["bed"]],
- ["guerre","noun",["war"]],
- ["instant","noun",["moment"]],
- ["souvenir","noun",["memory"]],
- ["là","adverb",["there"]],
- ["même","adverb",["even"]],
- ["peu","adverb",["little","few"]],
- ["mois","noun",["month"]],
- ["problème","noun",["problem"]],
- ["frère","noun",["brother"]],
- ["mettre","verb",["put"],"builtin"]
-];
+
 const normalizeMeaning=value=>String(value||"").normalize("NFD").replace(/\p{M}/gu,"").toLocaleLowerCase("en");
 if(MUST_HAVE_FIRST_MEANINGS.length!==30)throw new Error("Stage A must-have list must contain exactly 30 words");
 const mustHaveAudit=[];
