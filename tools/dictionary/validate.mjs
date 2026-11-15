@@ -20,7 +20,7 @@ const errors=[];
 const LIGATURES=new Map([["oeil","œil"],["coeur","cœur"],["soeur","sœur"],["oeuf","œuf"],["noeud","nœud"],["voeu","vœu"],["boeuf","bœuf"],["oeuvre","œuvre"],["moeurs","mœurs"],["manoeuvre","manœuvre"],["choeur","chœur"]]);
 const normalize=s=>{const key=String(s).normalize("NFC").toLocaleLowerCase("fr");return LIGATURES.get(key)||key;};
 const keys=Object.keys(data),builtins=new Set(Object.keys(builtin).map(normalize)),seen=new Set();
-const FORM_ONLY=/\b(?:inflection of|plural of|feminine of|masculine of|form of|participle of|alternative form of|nonstandard spelling of|obsolete spelling of|misspelling of|superseded spelling of)\b/i;
+const FORM_ONLY=/\b(?:inflection of|plural of|feminine of|masculine of|form of|participle of|alternative form of|nonstandard spelling of|obsolete spelling of|misspelling of|superseded spelling of|etymology(?:\s+\d+)?|see also|derived terms?|related terms?|translations?|pronunciation|synonyms?|antonyms?)\b/i;
 if(rawKeys.length!==keys.length)errors.push({error:"duplicate top-level JSON headword keys",rawKeyCount:rawKeys.length,parsedKeyCount:keys.length});
 const posCounts={},meaningCounts={"1":0,"2":0,"3":0,other:0};let genderCount=0,registerTagged=0,curatedDraftCount=0;
 for(const key of keys){
@@ -36,8 +36,9 @@ for(const key of keys){
  if(entry[2]!=="")errors.push({headword:key,error:"Stage A must not contain example sentences"});
  const m=entry[4],status=m?.status;
  if(!m||m.hint!==false||!["imported-unreviewed","curated-draft"].includes(status)||m.source!=="wiktionary-en via kaikki.org"||typeof m.extractDate!=="string")errors.push({headword:key,error:"required imported metadata missing"});
- if(status==="curated-draft")curatedDraftCount++;
- for(const forbidden of ["reason","lexiqueFrequency","lexiqueCode","cgram"])if(Object.hasOwn(m||{},forbidden))errors.push({headword:key,error:"learner payload exposes internal field "+forbidden});
+ if(status==="curated-draft"){curatedDraftCount++;if(typeof m?.curationNote!=="string"||!m.curationNote.trim())errors.push({headword:key,error:"curated draft must retain curationNote in generated data"});}
+ else if(Object.hasOwn(m||{},"curationNote"))errors.push({headword:key,error:"unreviewed entry must not contain curationNote"});
+ for(const forbidden of ["reason","lexiqueFrequency","lemmaFrequency","lexiqueCode","cgram"])if(Object.hasOwn(m||{},forbidden))errors.push({headword:key,error:"learner payload exposes internal field "+forbidden});
  if(m?.gender)genderCount++;
  if(!m?.forms||!Array.isArray(m.forms.feminine)||!Array.isArray(m.forms.plural))errors.push({headword:key,error:"feminine/plural forms schema invalid"});
  const primaryPos=String(entry[1]).replace(/\s*\(.+\)$/,"");
@@ -60,19 +61,32 @@ for(const key of keys){
  }
  if(primaryPos==="verb"&&(m?.forms?.feminine?.length||m?.forms?.plural?.length))errors.push({headword:key,error:"verbs must not expose feminine/plural forms"});
  if(!Array.isArray(m?.posGroups)||!m.posGroups.length)errors.push({headword:key,error:"posGroups must be a non-empty array"});
+ let totalPosGroupMeanings=0;
  for(const group of m?.posGroups||[]){
+  totalPosGroupMeanings+=(group.meanings||[]).length;
+  if((group.meanings||[]).length>3)errors.push({headword:key,error:"POS group exceeds three meanings"});
   if(typeof group.pos!=="string"||!Array.isArray(group.meanings)||!group.meanings.length||!group.forms||!Array.isArray(group.forms.feminine)||!Array.isArray(group.forms.plural))errors.push({headword:key,error:"posGroups schema must be {pos, meanings:[{meaning,register}], forms}"});
-  for(const item of group.meanings||[])if(typeof item.meaning!=="string"||!item.meaning.trim()||typeof item.register!=="string"||!item.register.trim())errors.push({headword:key,error:"posGroups meaning/register malformed"});
+  for(const item of group.meanings||[]){
+   if(typeof item.meaning!=="string"||!item.meaning.trim()||typeof item.register!=="string"||!item.register.trim())errors.push({headword:key,error:"posGroups meaning/register malformed"});
+   if(Array.from(item.meaning||"").length>70)errors.push({headword:key,error:"POS group gloss exceeds 70 characters"});
+   if(FORM_ONLY.test(item.meaning||""))errors.push({headword:key,error:"POS group contains source metadata gloss"});
+  }
+  const groupPos=String(group.pos||"");
+  if(groupPos!=="noun"&&groupPos!=="adjective"&&((group.forms?.feminine||[]).length||(group.forms?.plural||[]).length))errors.push({headword:key,error:"only noun/adjective POS groups may expose forms"});
+  const validForm=value=>/^[\p{L}]+(?:[-'’][\p{L}]+)*$/u.test(String(value||""));
+  for(const form of [...(group.forms?.feminine||[]),...(group.forms?.plural||[])])if(!validForm(form))errors.push({headword:key,error:"invalid POS-group form spelling: "+form});
   if(group.pos==="verb"&&(group.forms?.feminine?.length||group.forms?.plural?.length))errors.push({headword:key,error:"verb POS group must not expose feminine/plural forms"});
  }
+ if(totalPosGroupMeanings>5)errors.push({headword:key,error:"entry exceeds five meanings across POS groups"});
  if(m?.posGroups?.[0]?.pos!==primaryPos)errors.push({headword:key,error:"primary POS group must match Lexique-ranked entry POS"});
  if(!Array.isArray(m?.senses)||m.senses.length<1||m.senses.length>3)errors.push({headword:key,error:"must contain one to three senses"});
  const senseCount=m?.senses?.length||0;meaningCounts[String(senseCount)]??(meaningCounts.other++);if(senseCount>=1&&senseCount<=3)meaningCounts[String(senseCount)]++;
  for(const sense of m?.senses||[]){
   const gloss=sense.meaning;
   if(typeof gloss!=="string"||!gloss.trim())errors.push({headword:key,error:"empty gloss"});
+  if(Array.from(gloss||"").length>70)errors.push({headword:key,error:"gloss exceeds 70 characters (builder must reject, never truncate)"});
   if(FORM_ONLY.test(gloss||""))errors.push({headword:key,error:"form-only gloss: "+gloss});
-  if(Array.from(gloss||"").length>90)errors.push({headword:key,error:"gloss exceeds 90 characters (builder must reject, never truncate)"});
+  
   if((m?.senses||[]).filter(x=>String(x.meaning||"").trim().toLocaleLowerCase("fr")===String(gloss||"").trim().toLocaleLowerCase("fr")).length>1)errors.push({headword:key,error:"duplicate gloss"});
   if(/[\[\]{}<>]|\{\{|\}\}|\[\[|\]\]/.test(gloss||""))errors.push({headword:key,error:"gloss contains markup"});
   const tags=(sense.tags||[]).map(x=>String(x).toLowerCase());

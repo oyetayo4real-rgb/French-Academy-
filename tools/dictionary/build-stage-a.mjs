@@ -28,13 +28,15 @@ const wiktionaryPos=new Map([["noun","noun"],["verb","verb"],["adjective","adjec
 const notesOnlyPos=new Set(["adverb","preposition","pronoun","conjunction","interjection","determiner","numeral","article","particle"]);
 const FORM_ONLY=/\b(?:inflection of|plural of|feminine of|masculine of|form of|participle of|alternative form of|nonstandard spelling of|obsolete spelling of|misspelling of|superseded spelling of)\b/i;
 const VARIANT_ONLY=/\b(?:nonstandard spelling of|obsolete spelling of|misspelling of|superseded spelling of)\b/i;
-const REGISTER_LABELS=["archaic","dated","rare","slang","colloquial","familiar","vulgar","offensive","derogatory","informal","literary"];
+const REGISTER_LABELS=["archaic","dated","rare","slang","colloquial","familiar","vulgar","offensive","derogatory","informal","literary","figurative","regional","nautical","obsolete"];
+const LOW_VALUE_REGISTERS=new Set(["slang","colloquial","familiar","figurative","regional","nautical","dated","rare","obsolete","archaic","vulgar","offensive","derogatory","informal"]);
+const MAX_MEANINGS_PER_POS=3,MAX_MEANINGS_PER_ENTRY=5,MAX_GLOSS_LENGTH=70;
 const FORBIDDEN_RECORD_TAGS=["proper noun","proper-name","abbreviation","initialism","acronym"];
 const stats={
  homographRecordsIgnored:0,formOnlySensesDropped:0,entriesSkippedNoUsableSenses:0,variantOnlyEntriesSkipped:0,
  registerTaggedSenses:0,entriesWithRegisterLabels:0,parentGlossesReplacedBySubglosses:0,
  secondaryPosGroups:0,alternatePosRowsGrouped:0,descriptiveGlossesDropped:0,
- overlongGlossesRejected:0,entriesDroppedBecauseOfOverlongGlosses:0,
+ overlongGlossesRejected:0,entriesDroppedBecauseOfOverlongGlosses:0,nearDuplicateSensesRemoved:0,lowRegisterSensesSkipped:0,
  overridesApplied:0,selectedEntries:0
 };
 const rejectedOverlongGlosses=new Set();
@@ -49,7 +51,8 @@ function cleanGloss(raw){
  s=s.replace(/'''?|''/g,"").replace(/&nbsp;/gi," ").replace(/&amp;/gi,"&").replace(/&quot;/gi,'"');
  s=s.replace(/<\/?[^>]+>/g," ").replace(/\s+/g," ").trim();
  if(!s||/[\[\]{}<>]/.test(s))return "";
- if(Array.from(s).length>90){
+ if(/\b(?:etymology(?:\s+\d+)?|see also|derived terms?|related terms?|translations?|pronunciation|synonyms?|antonyms?)\b/i.test(s))return "";
+ if(Array.from(s).length>MAX_GLOSS_LENGTH){
   const rejected=String(raw??"");
   if(!rejectedOverlongGlosses.has(rejected)){rejectedOverlongGlosses.add(rejected);stats.overlongGlossesRejected++;}
   currentRecordOverlongRejected=true;
@@ -74,6 +77,26 @@ function senseGlosses(parent,child,hasChildren){
  else if(glosses.length===1&&isDescriptiveParent(glosses[0])&&glosses[0].includes(";")){const parts=glosses[0].split(";").map(x=>x.trim()).filter(Boolean);if(parts.length>1){parentGloss=parts.shift();childGlosses=parts;stats.parentGlossesReplacedBySubglosses++;}}
  return childGlosses.map(gloss=>parentGloss&&!isDescriptiveParent(parentGloss)&&unclearChildGloss(gloss)&&gloss.toLowerCase()!==parentGloss.toLowerCase()?parentGloss+": "+gloss:gloss);
 }
+function normalizedGloss(value){return String(value||"").normalize("NFD").replace(/\p{M}/gu,"").toLocaleLowerCase("fr").replace(/[^\p{L}\p{N}]+/gu," ").trim();}
+function tokenSet(value){return new Set(normalizedGloss(value).split(/\s+/).filter(Boolean));}
+function nearDuplicateGloss(a,b){
+ const left=tokenSet(a),right=tokenSet(b);if(!left.size||!right.size)return false;
+ let overlap=0;for(const token of left)if(right.has(token))overlap++;
+ const union=new Set([...left,...right]).size;
+ return overlap/union>=0.82||(overlap/Math.min(left.size,right.size)>=0.92&&Math.abs(left.size-right.size)<=1);
+}
+function dedupeSenses(items){
+ const result=[];
+ for(const sense of items){
+  const existing=result.find(item=>normalizedGloss(item.meaning)===normalizedGloss(sense.meaning)||nearDuplicateGloss(item.meaning,sense.meaning));
+  if(!existing){result.push({...sense});continue;}
+  stats.nearDuplicateSensesRemoved++;
+  existing.tags=[...new Set([...(existing.tags||[]),...(sense.tags||[])])];
+  existing.registerTags=[...new Set([...(existing.registerTags||[]),...(sense.registerTags||[])])];
+  existing.label=existing.registerTags.join(", ")||null;
+ }
+ return result;
+}
 function entrySenses(record){
  const senses=[];
  for(const parent of record.senses||[]){
@@ -82,25 +105,24 @@ function entrySenses(record){
    const tags=[...new Set([...(record.tags||[]),...senseTags(parent),...senseTags(child)].map(x=>String(x).toLocaleLowerCase("fr")))];
    const glosses=senseGlosses(parent,child,children.length>1||child!==parent);
    if(!glosses.length)continue;
-   const validGlosses=glosses.filter(g=>!FORM_ONLY.test(g));
-   stats.formOnlySensesDropped+=glosses.length-validGlosses.length;
-   const gloss=validGlosses[0];
-   if(!gloss)continue;
+   const formOnlyCount=glosses.filter(g=>FORM_ONLY.test(g)).length;
+   const overlongCount=glosses.filter(g=>Array.from(g).length>MAX_GLOSS_LENGTH).length;
+   stats.formOnlySensesDropped+=formOnlyCount;stats.overlongGlossesRejected+=overlongCount;
+   const validGlosses=glosses.filter(g=>!FORM_ONLY.test(g)&&Array.from(g).length<=MAX_GLOSS_LENGTH);
+   const gloss=validGlosses[0];if(!gloss)continue;
    if(isDescriptiveParent(gloss)){stats.descriptiveGlossesDropped++;continue;}
-   const labels=registerTags(tags);
-   const label=labels.join(", ");
-   const sense={meaning:gloss,tags,registerTags:labels,label:label||null};
+   const labels=registerTags(tags),label=labels.join(", ");
+   senses.push({meaning:gloss,tags,registerTags:labels,label:label||null});
    if(labels.length)stats.registerTaggedSenses++;
-   const duplicate=senses.find(x=>x.meaning.trim().toLocaleLowerCase("fr")===sense.meaning.trim().toLocaleLowerCase("fr"));
-   if(duplicate){
-    duplicate.tags=[...new Set([...duplicate.tags,...sense.tags])];
-    duplicate.registerTags=[...new Set([...duplicate.registerTags,...sense.registerTags])];
-    duplicate.label=duplicate.registerTags.join(", ")||null;
-   }else senses.push(sense);
   }
  }
- senses.sort((a,b)=>Number(a.registerTags.length>0)-Number(b.registerTags.length));
- return senses.slice(0,3);
+ const deduped=dedupeSenses(senses);
+ const neutral=deduped.filter(sense=>!(sense.registerTags||[]).some(label=>LOW_VALUE_REGISTERS.has(label)));
+ const fallback=deduped.filter(sense=>(sense.registerTags||[]).some(label=>LOW_VALUE_REGISTERS.has(label)));
+ const selected=neutral.length>=2?neutral:[...neutral,...fallback];
+ stats.lowRegisterSensesSkipped+=deduped.length-selected.length;
+ selected.sort((a,b)=>Number((a.registerTags||[]).length>0)-Number((b.registerTags||[]).length>0));
+ return selected.slice(0,MAX_MEANINGS_PER_POS);
 }
 function recordHasOnlyVariantGlosses(record){
  const glosses=(record.senses||[]).flatMap(parent=>[parent,...(parent.subsenses||[])]).flatMap(sense=>sense.glosses||sense.raw_glosses||[]).map(value=>cleanGloss(value)||String(value??"").trim()).filter(Boolean);
@@ -182,12 +204,10 @@ function lexGender(candidate){
 function senseText(s){return (s.label?"("+s.label+") ":"")+s.meaning;}
 function posForms(pos,candidate,match){
  if(pos!=="noun"&&pos!=="adjective")return {feminine:[],plural:[]};
- const lexFeminine=(candidate?.forms||[]).filter(x=>x.form!==candidate.lemma&&/^(f|fem|féminin)/i.test(x.gender)).map(x=>x.form);
- const lexPlural=(candidate?.forms||[]).filter(x=>/^(p|plur)/i.test(x.number)).map(x=>x.form);
- return {
-  feminine:[...new Set([...(match?.forms?.feminine||[]),...lexFeminine])].sort(),
-  plural:[...new Set([...(match?.forms?.plural||[]),...lexPlural])].sort()
- };
+ const validForm=value=>{const form=String(value||"").normalize("NFC").trim();return form!==candidate?.lemma&&/^[\p{L}]+(?:[-'’][\p{L}]+)*$/u.test(form);};
+ const lexFeminine=(candidate?.forms||[]).filter(x=>/^(f|fem|féminin)/i.test(x.gender)).map(x=>x.form).filter(validForm);
+ const lexPlural=(candidate?.forms||[]).filter(x=>/^(p|plur)/i.test(x.number)).map(x=>x.form).filter(validForm);
+ return {feminine:[...new Set([...(match?.forms?.feminine||[]),...lexFeminine].filter(validForm))].sort(),plural:[...new Set([...(match?.forms?.plural||[]),...lexPlural].filter(validForm))].sort()};
 }
 function sha256(file){return import("node:crypto").then(({createHash})=>new Promise((resolve,reject)=>{const hash=createHash("sha256");const stream=createReadStream(file);stream.on("data",chunk=>hash.update(chunk));stream.on("error",reject);stream.on("end",()=>resolve(hash.digest("hex")));}));}
 
@@ -231,8 +251,10 @@ for(const rows of ordered){
  for(const [matchKey,match] of matches){
   if(!matchKey.startsWith(wordKey+"\u0000"))continue;
   const pos=matchKey.slice(wordKey.length+1);
-  if(!notesOnlyPos.has(pos)||pos===primaryPos||alternatePosSeen.has(pos)||!match.senses?.length)continue;
-  alternate.push({pos,meanings:match.senses,forms:posForms(pos,null,match)});
+  if(!notesOnlyPos.has(pos)||pos===primaryPos||alternatePosSeen.has(pos)||(!match.senses?.length&&!override?.meaningsByPos?.[pos]?.length))continue;
+  const overrideMeanings=override?.meaningsByPos?.[pos];
+  const groupMeanings=Array.isArray(overrideMeanings)?overrideMeanings.map(meaning=>({meaning:String(meaning),tags:[],registerTags:[],label:null,curated:true})):match.senses;
+  alternate.push({pos,meanings:groupMeanings,forms:posForms(pos,null,match)});
   alternatePosSeen.add(pos);
  }
  for(const [pos,rawMeanings] of Object.entries(override?.meaningsByPos||{})){
@@ -246,29 +268,61 @@ for(const rows of ordered){
   });
   alternatePosSeen.add(pos);
  }
- alternate.sort((a,b)=>a.pos.localeCompare(b.pos,"en"));
- if(alternate.length){stats.secondaryPosGroups++;stats.alternatePosRowsGrouped+=alternate.length;}
+ alternate.sort((a,b)=>Number(!override?.meaningsByPos?.[a.pos])-Number(!override?.meaningsByPos?.[b.pos])||a.pos.localeCompare(b.pos,"en"));
+ 
  const rawGender=primaryMatch?.gender||lexGender(primary);
  const gender=primaryPos==="noun"?rawGender:null;
  const forms=posForms(primaryPos,primary,primaryMatch);
  const notes=[];
- const meaning=senses.map(senseText).join("; ");
  const toPosGroup=(pos,groupSenses,groupForms={feminine:[],plural:[]})=>({pos,meanings:groupSenses.map(s=>({meaning:s.meaning,register:s.label||"neutral"})),forms:groupForms});
- const posGroups=[toPosGroup(primaryPos,senses,forms),...alternate.map(group=>toPosGroup(group.pos,group.meanings,group.forms))];
+ let remaining=MAX_MEANINGS_PER_ENTRY;
+ const boundedGroups=[{pos:primaryPos,meanings:senses,forms},...alternate].map(group=>{
+  const meanings=dedupeSenses(group.meanings||[]).slice(0,MAX_MEANINGS_PER_POS).slice(0,remaining);
+  remaining-=meanings.length;
+  return {...group,meanings};
+ }).filter(group=>group.meanings.length);
+ if(!boundedGroups.length||!boundedGroups[0].meanings.length)throw new Error("No bounded primary meanings for "+headword);
+ const primarySenses=boundedGroups[0].meanings;
+ const meaning=primarySenses.map(senseText).join("; ");
+ const posGroups=boundedGroups.map(group=>toPosGroup(group.pos,group.meanings,group.forms));
+ if(boundedGroups.length>1){stats.secondaryPosGroups++;stats.alternatePosRowsGrouped+=boundedGroups.length-1;}
  const metadata={
-  hint:false,source:SOURCE,extractDate,
-  status:override?"curated-draft":"imported-unreviewed",
-  licence:"CC BY-SA 4.0",gender,senses,posGroups,
-  forms
+  hint:false,source:SOURCE,extractDate,status:override?"curated-draft":"imported-unreviewed",
+  licence:"CC BY-SA 4.0",gender,senses:primarySenses,posGroups,forms:boundedGroups[0].forms,
+  ...(override?.reason?{curationNote:String(override.reason)}:{})
  };
- output[headword]=[meaning,gender&&primaryPos==="noun"?"noun ("+gender+")":primaryPos,"",notes.join(" "),metadata];
- selected.push({
-  headword,pos:primaryPos,frequency:primary.frequency,
-  posFrequencies:rows.map(row=>({pos:posMap.get(row.pos),frequency:row.frequency})).filter(row=>row.pos)
- });
+ output[headword]=[meaning,gender&&primaryPos==="noun"?"noun ("+gender+")":primaryPos,"","",metadata];
+ selected.push({headword,pos:primaryPos,frequency:primary.frequency,posFrequencies:rows.map(row=>({pos:posMap.get(row.pos),frequency:row.frequency})).filter(row=>row.pos)});
  posCounts[primaryPos]++;
- if(senses.some(s=>s.registerTags?.length))stats.entriesWithRegisterLabels++;
+ if(primarySenses.some(sense=>sense.registerTags?.length))stats.entriesWithRegisterLabels++;
 }
+
+const MUST_HAVE_FIRST_MEANINGS=[
+ ["retourner","verb","to return"],["nouveau","adjective","new"],["jeter","verb","to throw"],
+ ["minute","noun","minute"],["plein","adjective","full"],["souvenir","noun","memory"],
+ ["même","adverb","even"],["cent","numeral","hundred"],["chéri","noun","darling"],
+ ["cuire","verb","to cook"],["là","adverb","there"],["peu","adverb","little"],
+ ["part","noun","share"],["poser","verb","put down"],["longtemps","adverb","for a long time"],
+ ["gros","adjective","big"],["mois","noun","month"],["problème","noun","problem"],
+ ["long","adjective","long"],["frère","noun","brother"],["lever","verb","raise"],
+ ["montrer","verb","show"],["peine","noun","punishment"],["servir","verb","serve"],
+ ["garder","verb","keep"],["quitter","verb","leave"],["occuper","verb","occupy"],
+ ["tourner","verb","turn"],["mettre","verb","put"],["payer","verb","pay"]
+];
+const normalizeMeaning=value=>String(value||"").normalize("NFD").replace(/\p{M}/gu,"").toLocaleLowerCase("en");
+if(MUST_HAVE_FIRST_MEANINGS.length!==30)throw new Error("Stage A must-have list must contain exactly 30 words");
+for(const [word,pos,expected] of MUST_HAVE_FIRST_MEANINGS){
+ if(word==="mettre"){
+  const entry=dictionary[word];
+  if(!entry||!String(entry[1]).includes("verb")||!normalizeMeaning(entry[0]).includes(normalizeMeaning(expected)))throw new Error("Must-have built-in mettre must retain verb meaning put");
+  continue;
+ }
+ const entry=output[word];if(!entry)throw new Error("Stage A must-have headword missing: "+word);
+ const group=entry[4]?.posGroups?.find(item=>item.pos===pos);if(!group)throw new Error("Stage A must-have POS group missing: "+word+" / "+pos);
+ const first=group.meanings?.[0]?.meaning||"";
+ if(!normalizeMeaning(first).includes(normalizeMeaning(expected)))throw new Error("Stage A must-have first meaning mismatch: "+word+" / "+pos+" expected "+expected+" actual "+first);
+}
+
 if(selected.length<MINIMUM)throw new Error("Only "+selected.length+" qualifying entries found; minimum is "+MINIMUM+
  "; overlong glosses rejected: "+stats.overlongGlossesRejected+
  "; entries dropped because of overlong glosses: "+stats.entriesDroppedBecauseOfOverlongGlosses);
@@ -284,7 +338,7 @@ const meta={
  schemaVersion:3,entryCount:selected.length,requestedCount:TARGET,minimumAccepted:MINIMUM,
  sourceFiles:{lexique:{name:path.basename(LEXIQUE),sha256:lexHash,extractDate:lock.sources.lexique.extractDate,url:lock.sources.lexique.url},wiktionary:{name:path.basename(WIKTIONARY),sha256:wikHash,extractDate,dumpDate:lock.sources.kaikki.dumpDate,url:lock.sources.kaikki.url}},
  ranking:"freqlemfilms2 + freqlemlivres; highest-frequency POS per lemma",posDistribution:posCounts,
- qualityRules:{firstKaikkiEntryPerPos:true,formOnlyGlossesRemoved:true,overlongGlossesRejected:true,explicitLigatureWhitelist:LIGATURES.size,neutralSensesFirst:true,formsOnlyForNounsAndAdjectives:true,registerLabels:REGISTER_LABELS,childGlossPreferred:true,commonAlternatePosRatio:COMMON_POS_RATIO},
+ qualityRules:{firstKaikkiEntryPerPos:true,formOnlyGlossesRemoved:true,metaGlossesRejected:true,overlongGlossesRejected:true,maxMeaningCharacters:MAX_GLOSS_LENGTH,maxMeaningsPerPos:MAX_MEANINGS_PER_POS,maxMeaningsPerEntry:MAX_MEANINGS_PER_ENTRY,lowRegisterFallbackRequiresFewerThanTwoNeutralMeanings:true,caseAndTokenSetDeduplication:true,explicitLigatureWhitelist:LIGATURES.size,neutralSensesFirst:true,formsOnlyForNounsAndAdjectives:true,registerLabels:REGISTER_LABELS,childGlossPreferred:true,commonAlternatePosRatio:COMMON_POS_RATIO},
  qualityStats:stats,overridesApplied:Object.keys(overrides).filter(word=>Object.hasOwn(output,word)).length,
  sizes:{rawBytes,gzipBytes}
 };

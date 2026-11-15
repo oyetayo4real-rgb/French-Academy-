@@ -57,14 +57,20 @@ function showAnswer(html){const out=$("fiAnswer");if(out)out.innerHTML=html;}
             const register=s.register&&s.register!=="neutral"?'<span class="fi-tag">('+esc(s.register)+')</span> ':"";
             return '<li>'+register+esc(s.meaning)+'</li>';
           }).join('')+'</ol>':((item.meaning||d.meaning)?'<p>'+esc(item.meaning||d.meaning)+'</p>':"");
+          const pos=String(group.pos||item.part||d.part||"").toLocaleLowerCase("fr");
           const forms=group.forms||item.forms||{};
+          const isVerb=pos==="verb";
+          const showForms=pos==="noun"||pos==="adjective";
+          const validForm=value=>/^[\p{L}]+(?:[-'’][\p{L}]+)*$/u.test(String(value||""));
+          const feminine=showForms?(forms.feminine||[]).filter(validForm):[];
+          const plural=showForms?(forms.plural||[]).filter(validForm):[];
           return '<section class="fi-pos-group"><h4>'+esc(group.pos||item.part||d.part||"Part of speech")+'</h4>'+meaningHtml+
-            ((forms.feminine||[]).length?'<p class="fi-muted">Feminine: '+esc(forms.feminine.join(', '))+'</p>':'')+
-            ((forms.plural||[]).length?'<p class="fi-muted">Plural: '+esc(forms.plural.join(', '))+'</p>':'')+'</section>';
+            (isVerb?'<p class="fi-muted">See the Conjugate tool for forms.</p>':'')+
+            (feminine.length?'<p class="fi-muted">Feminine: '+esc(feminine.join(', '))+'</p>':'')+
+            (plural.length?'<p class="fi-muted">Plural: '+esc(plural.join(', '))+'</p>':'')+'</section>';
         }).join('');
         return '<section class="fi-imported-entry"><h3>'+esc(item.word||d.word)+'</h3>'+groupHtml+
           ((item.gender||d.gender)?'<p class="fi-muted">Gender: '+esc(item.gender||d.gender)+'</p>':'')+
-          ((item.notes||d.notes)?'<p class="fi-muted">'+esc(item.notes||d.notes)+'</p>':'')+
           '<span class="fi-tag">'+(item.importedStatus==="curated-draft"?"Curated draft · needs French-speaker review":"Imported entry · not yet reviewed")+'</span></section>';
       }).join('')+'</div>';
     }
