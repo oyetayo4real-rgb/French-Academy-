@@ -150,6 +150,7 @@ const memeGroups=memeMeta.posGroups||[];
 const memeAdverb=memeGroups.find(group=>group.pos==="adverb");
 const memeAdjective=memeGroups.find(group=>group.pos==="adjective");
 assert.equal(importedData["même"]?.[1],"adverb","même primary POS is adverb");
+assert.equal(importedData["même"]?.[0],"even","même generated primary meaning follows the adverb-specific curated override");
 assert.ok(memeAdverb,"même has a distinct adverb POS group");
 assert.ok(normalizeEnglish(posGroupMeanings(memeAdverb)[0]).includes("even"),"même adverb first meaning is even");
 assert.ok(memeAdjective,"même has a separate adjective POS group");
