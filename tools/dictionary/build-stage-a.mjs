@@ -16,6 +16,7 @@ const LOCK=path.join(ROOT,"tools/dictionary/sources.lock.json");
 const OVERRIDES=path.join(ROOT,"tools/dictionary/overrides.json");
 const TARGET=3000,MINIMUM=2800,SOURCE="wiktionary-en via kaikki.org";
 const COMMON_POS_RATIO=0.01;
+const DISPLAY_ORDER_EXCEPTIONS=Object.freeze({nouveau:"adjective",souvenir:"noun"});
 const lock=JSON.parse(fs.readFileSync(LOCK,"utf8"));
 const overrides=JSON.parse(fs.readFileSync(OVERRIDES,"utf8"));
 const extractDate=lock.sources?.kaikki?.extractDate;
@@ -192,7 +193,7 @@ const MUST_HAVE_FIRST_MEANINGS=[
 async function collectWiktionary(candidates){
  const byWord=new Map();
  for(const c of candidates){const key=normalize(c.lemma);if(!byWord.has(key))byWord.set(key,[]);byWord.get(key).push(c);}
- const matched=new Map(),seenPos=new Set(),mustHaveSourceRecords=new Map();
+ const matched=new Map(),seenPos=new Set(),mustHaveSourceRecords=new Map(),sourceRecordsByWord=new Map();
  const rl=readline.createInterface({input:createReadStream(WIKTIONARY,{encoding:"utf8"}),crlfDelay:Infinity});
  let lineNo=0;
  for await(const line of rl){
@@ -201,6 +202,8 @@ async function collectWiktionary(candidates){
   if(normalize(record.lang_code)!=="fr"||normalize(record.lang)!=="french")continue;
   const wordKey=normalize(record.word),candidateRows=byWord.get(wordKey);
   if(!candidateRows)continue;
+  if(!sourceRecordsByWord.has(wordKey))sourceRecordsByWord.set(wordKey,[]);
+  sourceRecordsByWord.get(wordKey).push(record);
   if(MUST_HAVE_FIRST_MEANINGS.some(([word])=>word===wordKey)){
    if(!mustHaveSourceRecords.has(wordKey))mustHaveSourceRecords.set(wordKey,[]);
    mustHaveSourceRecords.get(wordKey).push(record);
@@ -233,6 +236,7 @@ async function collectWiktionary(candidates){
   matched.set(key,{pos,senses,frequency:matching.length?Math.max(...matching.map(x=>x.frequency)):null,gender:masculine&&feminine?"m/f":masculine?"m":feminine?"f":null,forms});
  }
  matched.mustHaveSourceRecords=mustHaveSourceRecords;
+ matched.sourceRecordsByWord=sourceRecordsByWord;
  return matched;
 }
 function lexGender(candidate){
@@ -255,15 +259,20 @@ console.log("LEXIQUE POS CANDIDATES: "+candidates.length);
 const matches=await collectWiktionary(candidates);
 const groups=new Map();
 for(const candidate of candidates){const key=normalize(candidate.lemma);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(candidate);}
-const ordered=[...groups.values()].map(rows=>rows.sort((a,b)=>b.frequency-a.frequency||a.pos.localeCompare(b.pos))).sort((a,b)=>b[0].frequency-a[0].frequency||normalize(a[0].lemma).localeCompare(normalize(b[0].lemma),"fr"));
+const requiredOverrideWords=new Set(Object.keys(overrides).map(normalize));
+const missingOverrideCandidates=Object.keys(overrides).filter(word=>!groups.has(normalize(word)));
+if(missingOverrideCandidates.length)throw new Error("Curated overrides missing Lexique lemma candidates: "+missingOverrideCandidates.join(", "));
+const ordered=[...groups.values()].map(rows=>rows.sort((a,b)=>b.frequency-a.frequency||a.pos.localeCompare(b.pos))).sort((a,b)=>Number(requiredOverrideWords.has(normalize(b[0].lemma)))-Number(requiredOverrideWords.has(normalize(a[0].lemma)))||b[0].frequency-a[0].frequency||normalize(a[0].lemma).localeCompare(normalize(b[0].lemma),"fr"));
 const output={},posCounts={noun:0,verb:0,adjective:0,adverb:0};
 const selected=[];
 for(const rows of ordered){
  if(selected.length>=TARGET)break;
  const topRanked=rows[0],wordKey=normalize(topRanked.lemma),headword=topRanked.lemma.normalize("NFC");
  const override=overrides[headword]||overrides[headword.toLocaleLowerCase("fr")];
- const primary=topRanked;
+ const displayPos=DISPLAY_ORDER_EXCEPTIONS[wordKey];
+ const primary=displayPos?(rows.find(candidate=>posMap.get(candidate.pos)===displayPos)||null):topRanked;
  if(Object.hasOwn(output,headword)||builtin.has(normalize(headword)))continue;
+ if(!primary)throw new Error("Display-order exception POS "+displayPos+" is absent from Lexique candidates for "+headword);
  const primaryPos=posMap.get(primary.pos),primaryMatch=matches.get(wordKey+"\u0000"+primaryPos);
  if((!primaryMatch?.senses?.length)&&!override)continue;
  let senses=(primaryMatch?.senses||[]).slice(0,3);
@@ -308,7 +317,7 @@ for(const rows of ordered){
  }
  alternate.sort((a,b)=>Number(!override?.meaningsByPos?.[a.pos])-Number(!override?.meaningsByPos?.[b.pos])||a.pos.localeCompare(b.pos,"en"));
  
- const rawGender=primaryMatch?.gender||lexGender(primary);
+ const rawGender=override?.gender||primaryMatch?.gender||lexGender(primary);
  const gender=primaryPos==="noun"?rawGender:null;
  const forms=posForms(primaryPos,primary,primaryMatch);
  const notes=[];
@@ -330,7 +339,7 @@ for(const rows of ordered){
   ...(override?.reason?{curationNote:String(override.reason)}:{})
  };
  output[headword]=[meaning,gender&&primaryPos==="noun"?"noun ("+gender+")":primaryPos,"","",metadata];
- selected.push({headword,pos:primaryPos,frequency:primary.frequency,posFrequencies:rows.map(row=>({pos:posMap.get(row.pos),frequency:row.frequency})).filter(row=>row.pos)});
+ selected.push({headword,pos:primaryPos,frequency:topRanked.frequency,posFrequencies:rows.map(row=>({pos:posMap.get(row.pos),frequency:row.frequency})).filter(row=>row.pos)});
  posCounts[primaryPos]++;
  if(primarySenses.some(sense=>sense.registerTags?.length))stats.entriesWithRegisterLabels++;
 }
@@ -348,7 +357,7 @@ for(const [word,pos,accepted,source] of MUST_HAVE_FIRST_MEANINGS){
   detail="immutable built-in";
  }else{
   const entry=output[word];
-  const group=entry?.[4]?.posGroups?.find(item=>item.pos===pos);
+  const group=entry?.[4]?.posGroups?.[0];
   first=group?.meanings?.[0]?.meaning||"(missing)";
   passed=!!entry&&!!group&&accepted.some(term=>normalizeMeaning(first).includes(normalizeMeaning(term)));
   detail=entry?(group?"group "+pos:"missing POS group "+pos):"missing headword";
@@ -425,33 +434,66 @@ if(mustHaveFailures.length){
  for(const row of mustHaveFailures)printSourceDiagnostic(row.word,matches.mustHaveSourceRecords?.get(row.word)||[],row.detail);
  throw new Error("Stage A must-have audit failed for: "+mustHaveFailures.map(row=>row.word).join(", "));
 }
+const coupeRows=groups.get(normalize("coupé"))||[];
+const coupeRecords=matches.sourceRecordsByWord?.get(normalize("coupé"))||[];
+console.log("COUPÉ BUILD AUDIT: "+JSON.stringify({included:Object.hasOwn(output,"coupé"),lexiqueCandidates:coupeRows.map(row=>({pos:posMap.get(row.pos),frequency:row.frequency})),sourceRecords:coupeRecords.map(record=>({pos:record.pos,onlyVariant:recordHasOnlyVariantGlosses(record),usable:usableRecord(record)})),conclusion:Object.hasOwn(output,"coupé")?"included with source-supported POS sense":coupeRows.length?"not selected; see rejection ledger":"not a Lexique lemma candidate; no supported ADJ/NOM lemma row"}));
 if(!mustHaveFailures.some(row=>row.word==="retourner")){
  const retourner=mustHaveAudit.find(row=>row.word==="retourner");
  printSourceDiagnostic("retourner",matches.mustHaveSourceRecords?.get("retourner")||[],
   "root-cause audit; generated first meaning="+(retourner?.firstMeaning||"missing"));
 }
 
+const rejectionLedger={};
+for(const [wordKey,rows] of groups){
+ const headword=rows[0].lemma.normalize("NFC");
+ if(Object.hasOwn(output,headword))continue;
+ const reasons=new Set(),records=matches.sourceRecordsByWord?.get(wordKey)||[];
+ if(!records.length)reasons.add("no usable senses");
+ for(const record of records){
+  if(!usableRecord(record)){reasons.add("no usable senses");continue;}
+  if(recordHasOnlyVariantGlosses(record))reasons.add("variant-only");
+  const diagnosis=diagnoseSourceRecord(record);
+  if(!diagnosis.length)reasons.add("no usable senses");
+  for(const row of diagnosis){
+   if(row.droppedBy==="no-usable-gloss")reasons.add("no usable senses");
+   else if(row.droppedBy==="form-only")reasons.add("form-only");
+   else if(row.droppedBy==="over-length")reasons.add("over-length");
+   else if(row.droppedBy==="descriptive-parent")reasons.add("descriptive");
+   else if(row.droppedBy==="duplicate")reasons.add("duplicate");
+   else if(LOW_VALUE_REGISTERS.has(row.droppedBy))reasons.add("low-register");
+  }
+ }
+ if(reasons.size)rejectionLedger[headword]=[...reasons].sort();
+}
+const rejectionPath=path.join(ROOT,"tools/dictionary/build-only/rejections.json");
+fs.writeFileSync(rejectionPath,JSON.stringify(rejectionLedger,null,2)+"\n","utf8");
+console.log("REJECTION LEDGER: "+Object.keys(rejectionLedger).length+" headwords -> "+rejectionPath);
+const missingCurated=Object.keys(overrides).filter(word=>!Object.hasOwn(output,word));
+if(missingCurated.length)throw new Error("Curated override headwords were not selected: "+missingCurated.join(", "));
 if(selected.length<MINIMUM)throw new Error("Only "+selected.length+" qualifying entries found; minimum is "+MINIMUM+
  "; overlong glosses rejected: "+stats.overlongGlossesRejected+
  "; entries dropped because of overlong glosses: "+stats.entriesDroppedBecauseOfOverlongGlosses);
 stats.selectedEntries=selected.length;
 fs.mkdirSync(path.dirname(OUTPUT),{recursive:true});fs.mkdirSync(path.dirname(META),{recursive:true});
 fs.mkdirSync(path.dirname(FREQUENCY_AUDIT),{recursive:true});
+selected.sort((a,b)=>b.frequency-a.frequency||normalize(a.headword).localeCompare(normalize(b.headword),"fr"));
+const orderedOutput=Object.fromEntries(selected.map(row=>[row.headword,output[row.headword]]));
 const frequencyAudit=Object.fromEntries(selected.map(row=>[row.headword,row.posFrequencies]));
 fs.writeFileSync(FREQUENCY_AUDIT,JSON.stringify(frequencyAudit,null,2)+"\n","utf8");
-const json=JSON.stringify(output,null,2)+"\n";fs.writeFileSync(OUTPUT,json,"utf8");
+const json=JSON.stringify(orderedOutput,null,2)+"\n";fs.writeFileSync(OUTPUT,json,"utf8");
 const rawBytes=Buffer.byteLength(json),gzipBytes=gzipSync(Buffer.from(json),{level:9}).byteLength;
 const lexHash=await sha256(LEXIQUE),wikHash=await sha256(WIKTIONARY);
 const meta={
  schemaVersion:3,entryCount:selected.length,requestedCount:TARGET,minimumAccepted:MINIMUM,
  sourceFiles:{lexique:{name:path.basename(LEXIQUE),sha256:lexHash,extractDate:lock.sources.lexique.extractDate,url:lock.sources.lexique.url},wiktionary:{name:path.basename(WIKTIONARY),sha256:wikHash,extractDate,dumpDate:lock.sources.kaikki.dumpDate,url:lock.sources.kaikki.url}},
- ranking:"freqlemfilms2 + freqlemlivres; highest-frequency POS per lemma",posDistribution:posCounts,
+ ranking:"freqlemfilms2 + freqlemlivres; highest-frequency POS per lemma except explicit learner display-order exceptions",displayOrderExceptions:DISPLAY_ORDER_EXCEPTIONS,posDistribution:posCounts,
  qualityRules:{firstKaikkiEntryPerPos:true,formOnlyGlossesRemoved:true,metaGlossesRejected:true,overlongGlossesRejected:true,maxMeaningCharacters:MAX_GLOSS_LENGTH,maxMeaningsPerPos:MAX_MEANINGS_PER_POS,maxMeaningsPerEntry:MAX_MEANINGS_PER_ENTRY,lowRegisterFallbackRequiresFewerThanTwoNeutralMeanings:true,caseAndTokenSetDeduplication:true,explicitLigatureWhitelist:LIGATURES.size,neutralSensesFirst:true,formsOnlyForNounsAndAdjectives:true,registerLabels:REGISTER_LABELS,childGlossPreferred:true,commonAlternatePosRatio:COMMON_POS_RATIO},
  qualityStats:stats,overridesApplied:Object.keys(overrides).filter(word=>Object.hasOwn(output,word)).length,
  sizes:{rawBytes,gzipBytes}
 };
 fs.writeFileSync(META,JSON.stringify(meta,null,2)+"\n","utf8");
 console.log("BUILT ENTRIES: "+selected.length);
+console.log("TOTAL POS GROUPS: "+selected.reduce((count,row)=>count+(output[row.headword]?.[4]?.posGroups?.length||0),0));
 console.log("POS: "+JSON.stringify(posCounts));
 console.log("QUALITY STATS: "+JSON.stringify(stats));
 console.log("OVERRIDES APPLIED: "+meta.overridesApplied);

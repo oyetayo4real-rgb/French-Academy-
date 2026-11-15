@@ -167,7 +167,7 @@
   },
   "nouveau": {
     "status": "curated-draft",
-    "reason": "Preserve the Lexique-ranked noun primary POS while retaining the common adjective meaning in its own POS group.",
+    "reason": "Explicit display-order exception: adjective first for the learner-facing meaning new; Lexique frequencies remain unchanged.",
     "meanings": [
       "new person",
       "new thing"
@@ -185,7 +185,7 @@
   },
   "souvenir": {
     "status": "curated-draft",
-    "reason": "Preserve the Lexique-ranked verb primary POS while retaining the common noun meaning memory in its own POS group.",
+    "reason": "Explicit display-order exception: noun first for the learner-facing meaning memory; Lexique frequencies remain unchanged.",
     "meanings": [
       "to remember"
     ],
@@ -212,6 +212,213 @@
         "to leave",
         "to quit",
         "to depart"
+      ]
+    }
+  },
+  "liberté": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review; verify nuance and usage.",
+    "gender": "f",
+    "meanings": [
+      "freedom",
+      "liberty"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "freedom",
+        "liberty"
+      ]
+    }
+  },
+  "campagne": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review; verify both common senses.",
+    "gender": "f",
+    "meanings": [
+      "countryside",
+      "campaign"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "countryside",
+        "campaign"
+      ]
+    }
+  },
+  "crime": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review.",
+    "gender": "m",
+    "meanings": [
+      "crime"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "crime"
+      ]
+    }
+  },
+  "détail": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review.",
+    "gender": "m",
+    "meanings": [
+      "detail"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "detail"
+      ]
+    }
+  },
+  "trottoir": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review; verify regional equivalents.",
+    "gender": "m",
+    "meanings": [
+      "sidewalk",
+      "pavement"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "sidewalk",
+        "pavement"
+      ]
+    }
+  },
+  "club": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review; verify contextual senses.",
+    "gender": "m",
+    "meanings": [
+      "club"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "club"
+      ]
+    }
+  },
+  "rivière": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review.",
+    "gender": "f",
+    "meanings": [
+      "river"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "river"
+      ]
+    }
+  },
+  "test": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review; verify context-specific uses.",
+    "gender": "m",
+    "meanings": [
+      "test"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "test"
+      ]
+    }
+  },
+  "septembre": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review.",
+    "gender": "m",
+    "meanings": [
+      "September"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "September"
+      ]
+    }
+  },
+  "week-end": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review; retain French headword spelling.",
+    "gender": "m",
+    "meanings": [
+      "weekend"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "weekend"
+      ]
+    }
+  },
+  "prétexte": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review; verify distinction between pretext and excuse.",
+    "gender": "m",
+    "meanings": [
+      "pretext",
+      "excuse"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "pretext",
+        "excuse"
+      ]
+    }
+  },
+  "habit": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review; clothing sense, not the English homograph.",
+    "gender": "m",
+    "meanings": [
+      "outfit",
+      "clothes"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "outfit",
+        "clothes"
+      ]
+    }
+  },
+  "musée": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review.",
+    "gender": "m",
+    "meanings": [
+      "museum"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "museum"
+      ]
+    }
+  },
+  "impatience": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review.",
+    "gender": "f",
+    "meanings": [
+      "impatience"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "impatience"
+      ]
+    }
+  },
+  "raccompagner": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review; verify object and destination nuance.",
+    "gender": null,
+    "meanings": [
+      "to take (someone) home",
+      "to see (someone) off"
+    ],
+    "meaningsByPos": {
+      "verb": [
+        "to take (someone) home",
+        "to see (someone) off"
       ]
     }
   }

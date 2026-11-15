@@ -20,6 +20,7 @@ const errors=[];
 const LIGATURES=new Map([["oeil","œil"],["coeur","cœur"],["soeur","sœur"],["oeuf","œuf"],["noeud","nœud"],["voeu","vœu"],["boeuf","bœuf"],["oeuvre","œuvre"],["moeurs","mœurs"],["manoeuvre","manœuvre"],["choeur","chœur"]]);
 const normalize=s=>{const key=String(s).normalize("NFC").toLocaleLowerCase("fr");return LIGATURES.get(key)||key;};
 const keys=Object.keys(data),builtins=new Set(Object.keys(builtin).map(normalize)),seen=new Set();
+const DISPLAY_ORDER_EXCEPTIONS=Object.freeze({nouveau:"adjective",souvenir:"noun"});
 const FORM_ONLY=/\b(?:inflection of|plural of|feminine of|masculine of|form of|participle of|alternative form of|nonstandard spelling of|obsolete spelling of|misspelling of|superseded spelling of|etymology(?:\s+\d+)?|see also|derived terms?|related terms?|translations?|pronunciation|synonyms?|antonyms?)\b/i;
 if(rawKeys.length!==keys.length)errors.push({error:"duplicate top-level JSON headword keys",rawKeyCount:rawKeys.length,parsedKeyCount:keys.length});
 const posCounts={},meaningCounts={"1":0,"2":0,"3":0,other:0};let genderCount=0,registerTagged=0,curatedDraftCount=0;
@@ -56,7 +57,8 @@ for(const key of keys){
    }
    const highest=[...rankingRows].filter(row=>row&&typeof row.pos==="string"&&Number.isFinite(row.frequency)&&row.frequency>0)
     .sort((a,b)=>b.frequency-a.frequency||a.pos.localeCompare(b.pos,"en"))[0];
-   if(highest&&highest.pos!==primaryPos)errors.push({headword:key,error:"primary POS "+primaryPos+" differs from highest Lexique frequency POS "+highest.pos});
+   if(!Object.hasOwn(DISPLAY_ORDER_EXCEPTIONS,key)&&highest&&highest.pos!==primaryPos)errors.push({headword:key,error:"primary POS "+primaryPos+" differs from highest Lexique frequency POS "+highest.pos});
+   if(Object.hasOwn(DISPLAY_ORDER_EXCEPTIONS,key)&&primaryPos!==DISPLAY_ORDER_EXCEPTIONS[key])errors.push({headword:key,error:"explicit display-order exception requires primary POS "+DISPLAY_ORDER_EXCEPTIONS[key]});
   }
  }
  if(primaryPos==="verb"&&(m?.forms?.feminine?.length||m?.forms?.plural?.length))errors.push({headword:key,error:"verbs must not expose feminine/plural forms"});
@@ -78,7 +80,7 @@ for(const key of keys){
   if(group.pos==="verb"&&(group.forms?.feminine?.length||group.forms?.plural?.length))errors.push({headword:key,error:"verb POS group must not expose feminine/plural forms"});
  }
  if(totalPosGroupMeanings>5)errors.push({headword:key,error:"entry exceeds five meanings across POS groups"});
- if(m?.posGroups?.[0]?.pos!==primaryPos)errors.push({headword:key,error:"primary POS group must match Lexique-ranked entry POS"});
+ if(m?.posGroups?.[0]?.pos!==primaryPos)errors.push({headword:key,error:"first POS group must match displayed primary POS"});
  if(!Array.isArray(m?.senses)||m.senses.length<1||m.senses.length>3)errors.push({headword:key,error:"must contain one to three senses"});
  const senseCount=m?.senses?.length||0;meaningCounts[String(senseCount)]??(meaningCounts.other++);if(senseCount>=1&&senseCount<=3)meaningCounts[String(senseCount)]++;
  for(const sense of m?.senses||[]){
@@ -111,6 +113,7 @@ const sample=[...keys].sort((a,b)=>a.localeCompare(b,"fr"));for(let i=sample.len
 const sizes={rawBytes:Buffer.byteLength(raw),gzipBytes:gzipSync(Buffer.from(raw),{level:9}).byteLength};
 console.log("VALIDATION: PASS");
 console.log("ENTRY COUNT: "+keys.length);
+console.log("TOTAL POS GROUPS: "+keys.reduce((count,word)=>count+(data[word]?.[4]?.posGroups?.length||0),0));
 console.log("POS DISTRIBUTION: "+JSON.stringify(posCounts));
 console.log("GENDER COUNT: "+genderCount);
 console.log("MEANINGS PER ENTRY: "+JSON.stringify(meaningCounts));

@@ -11,6 +11,7 @@ Parts of the French vocabulary data in this project are adapted from **Lexique**
 
 - `data/dictionary/common-3000.json` — selected headwords and parts of speech.
 - `tools/dictionary/build-only/lexique-frequency.json` — build-only, per-headword and per-part-of-speech frequency rows used to independently validate primary-POS selection. This audit file is derived from Lexique 3.83 and is distributed under CC BY-SA 4.0. It is excluded from deployed learner assets by `.vercelignore`.
+- `tools/dictionary/build-only/rejections.json` — build-only per-headword rejection reasons for candidate lemmas and senses filtered from the generated dictionary. It is derived from the Lexique 3.83 candidate set and corresponding Kaikki/Wiktionary records, and is excluded from deployed learner assets by `.vercelignore`.
 
 Other Lexique-derived fields in this project include gender and verb forms used to cross-check conjugation. The frequency audit is a build/validation artifact, not learner-facing content.
 

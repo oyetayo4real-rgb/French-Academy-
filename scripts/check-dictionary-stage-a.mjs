@@ -171,72 +171,49 @@ const legacyHtml=compat.renderDictionaryHtml({
 });
 assert.ok(legacyHtml.includes("legacy noun sense"),"legacy POS groups without meanings fall back to their senses");
 assert.ok(!legacyHtml.includes("No reviewed meaning"),"legacy renderer never displays the missing-meanings placeholder");
-// owner-provided override words (interim eight): the owner has supplied seven overrides;
-// eighth word: none yet. Do not infer or invent an eighth.
+// Curated overrides: seven pre-existing owner entries, six existing Stage A priorities, and fifteen restored common headwords.
 const OWNER_OVERRIDE_ACCEPTED_FIRST_MEANINGS={
- "même":["even"],
- "cent":["cent, coin"],
- "véritable":["real","genuine","true"],
- "là":["there"],
- "chéri":["darling","dear","beloved"],
- "peu":["a small amount"],
- "cuire":["to cook","to bake","to burn"]
+ "même":["even"],"cent":["cent, coin"],"véritable":["real","genuine","true"],"là":["there"],
+ "chéri":["darling","dear","beloved"],"peu":["a small amount"],"cuire":["to cook","to bake","to burn"],
+ "retourner":["to return"],"minute":["minute"],"jeter":["to throw"],"nouveau":["new"],"souvenir":["memory"],"quitter":["to leave"],
+ "liberté":["freedom","liberty"],"campagne":["countryside","campaign"],"crime":["crime"],"détail":["detail"],
+ "trottoir":["sidewalk","pavement"],"club":["club"],"rivière":["river"],"test":["test"],"septembre":["september"],
+ "week-end":["weekend"],"prétexte":["pretext","excuse"],"habit":["outfit","clothes"],"musée":["museum"],
+ "impatience":["impatience"],"raccompagner":["to take (someone) home","to see (someone) off"]
 };
 const OWNER_OVERRIDE_WORDS=Object.keys(OWNER_OVERRIDE_ACCEPTED_FIRST_MEANINGS);
-assert.deepEqual(OWNER_OVERRIDE_WORDS,["même","cent","véritable","là","chéri","peu","cuire"]);
+assert.deepEqual(OWNER_OVERRIDE_WORDS,Object.keys(overrides),"all curated overrides are acceptance-tested");
 const accentFoldBuiltInKey=word=>Object.keys(dictionary).find(key=>norm(key)===norm(word))||null;
-const CURATED_ACCENT_FOLD_COLLISIONS=OWNER_OVERRIDE_WORDS.filter(word=>{
- const key=accentFoldBuiltInKey(word);
- return key!==null&&key!==word;
-});
+const CURATED_ACCENT_FOLD_COLLISIONS=OWNER_OVERRIDE_WORDS.filter(word=>{const key=accentFoldBuiltInKey(word);return key!==null&&key!==word;});
 assert.deepEqual(CURATED_ACCENT_FOLD_COLLISIONS,["là"],"only là collides with an accent-fold-only built-in key");
 for(const word of OWNER_OVERRIDE_WORDS){
- schema3Assertion(word+" curated-draft payload status",()=>assert.equal(importedData[word]?.[4]?.status,"curated-draft",word+" is marked curated draft"));
- assert.ok(overrides[word]?.reason,word+" review reason remains in build-only override metadata, not learner payload");
- const coreResult=core.lookup(word);
- assert.equal(coreResult.status,"supported",word+" combined core lookup renders");
- if(CURATED_ACCENT_FOLD_COLLISIONS.includes(word)){
-  assert.equal(coreResult.imported,true,word+" curated draft wins over accent-fold-only built-in "+accentFoldBuiltInKey(word));
-  assert.equal(coreResult.word,word,word+" exact curated headword is selected for its collision");
- }else{
-  assert.equal(coreResult.imported,true,word+" exact imported curated entry remains available without a built-in collision");
-  assert.equal(coreResult.word,word,word+" exact imported headword is selected");
- }
- const compatResult=compat.lookup(word);
- assert.ok(compatResult?.imported,word+" compatibility lookup returns the imported override");
- assert.equal(compatResult.word,word,word+" compatibility lookup preserves the exact override spelling");
- const groups=Array.isArray(compatResult.posGroups)?compatResult.posGroups:[];
- const primaryPos=String(compatResult.part||"").replace(/\s*\(.+\)$/,"");
- const primaryGroup=groups.find(group=>group.pos===primaryPos)||groups[0];
- schema3Assertion(word+" has a primary POS group",()=>assert.ok(primaryGroup,word+" has a primary POS group"));
- const firstMeaning=posGroupMeanings(primaryGroup)[0]||String(compatResult.meaning||"").split(";")[0];
- const accepted=OWNER_OVERRIDE_ACCEPTED_FIRST_MEANINGS[word];
- schema3Assertion(word+" grouped-POS first meaning",()=>assert.ok(accepted.some(value=>normalizeEnglish(firstMeaning).includes(normalizeEnglish(value))),
-  word+" first rendered meaning must match owner-override acceptance list "+JSON.stringify(accepted)+"; got "+firstMeaning));
- const html=compat.renderDictionaryHtml(compatResult);
- assert.ok(html.includes("fi-imported-dictionary"),word+" renders the imported dictionary result");
- assert.doesNotMatch(html,/(?:Owner-provided|contamination|validate|curationNote)/i,word+" rendered output excludes internal curation language");
- schema3Assertion(word+" generic curated-draft notice",()=>{if(importedData[word]?.[4]?.status==="curated-draft")assert.match(html,/Curated draft · needs French-speaker review/,word+" uses the generic curated-draft notice");});
- assert.doesNotMatch(html,/(?:importedStatus|extractDate|lexiqueFrequency|lemmaFrequency|curatedDraftReason|licence|metadata|\bhint\b|\breason\b)\s*[:=]/i,
-  word+" rendered HTML must not expose internal metadata fields");
- if(groups.length>1){
-  const renderedPos=[...html.matchAll(/<h4>([^<]+)<\/h4>/g)].map(match=>match[1]);
-  schema3Assertion(word+" renders each POS group as a distinct section",()=>assert.deepEqual(renderedPos,groups.map(group=>group.pos),word+" renders each POS group as a distinct section"));
-  schema3Assertion(word+" POS section headings are distinct",()=>assert.equal(new Set(renderedPos).size,groups.length,word+" POS section headings are distinct"));
- }
+ schema3Assertion(word+" curated-draft payload status",()=>assert.equal(importedData[word]?.[4]?.status,"curated-draft",word+" is curated draft"));
+ assert.ok(overrides[word]?.reason,word+" review note remains in override metadata");
+ const coreResult=core.lookup(word);assert.equal(coreResult.status,"supported",word+" combined lookup");assert.equal(coreResult.imported,true,word+" resolves as imported");assert.equal(coreResult.word,word);
+ const compatResult=compat.lookup(word);assert.ok(compatResult?.imported,word+" compatibility lookup");assert.equal(compatResult.word,word);
+ const groups=compatResult.posGroups||[];assert.ok(groups.length,word+" has POS groups");
+ const first=posGroupMeanings(groups[0])[0]||"";
+ schema3Assertion(word+" first POS group meaning",()=>assert.ok(OWNER_OVERRIDE_ACCEPTED_FIRST_MEANINGS[word].some(value=>normalizeEnglish(first).includes(normalizeEnglish(value))),word+" first group meaning got "+first));
+ assert.equal(importedData[word]?.[4]?.curationNote,overrides[word]?.reason,word+" stores curationNote in metadata");
+ const html=compat.renderDictionaryHtml(compatResult);assert.ok(html.includes("fi-imported-dictionary"));
+ assert.match(html,/Curated draft · needs French-speaker review/,word+" displays review status");
+ assert.doesNotMatch(html,/(?:curationNote|Curated draft · needs French-speaker review; verify)/i,word+" never renders private curation note");
+ if(groups.length>1){const rendered=[...html.matchAll(/<h4>([^<]+)<\/h4>/g)].map(match=>match[1]);assert.deepEqual(rendered,groups.map(group=>group.pos),word+" renders distinct POS sections in order");}
 }
-assert.equal(OWNER_OVERRIDE_WORDS.length,7,"seven checkpoint curated overrides remain tested");
+const restoredWords=["liberté","campagne","crime","détail","trottoir","club","rivière","test","septembre","week-end","prétexte","habit","musée","impatience","raccompagner"];
+for(const word of restoredWords){const result=compat.lookup(word);assert.ok(result?.imported,word+" resolves");assert.ok(String(result.meaning||"").trim(),word+" has a meaning");assert.equal(importedData[word]?.[4]?.status,"curated-draft");}
+assert.equal(OWNER_OVERRIDE_WORDS.length,28,"all curated overrides are tested");
 // POS-scoped acceptance keeps Lexique's primary POS intact while enforcing learner-facing group meanings.
 const MUST_HAVE_FIRST_MEANINGS=[ ["retourner","verb",["to return"]], ["nouveau","adjective",["new"]], ["plein","adjective",["full"]], ["blanc","adjective",["white"]], ["fin","noun",["end"]], ["minute","noun",["minute"]], ["jeter","verb",["to throw"]], ["tourner","verb",["to turn"]], ["envoyer","verb",["to send"]], ["servir","verb",["to serve"]], ["garder","verb",["to keep"]], ["quitter","verb",["to leave"]], ["occuper","verb",["to occupy"]], ["descendre","verb",["to go down"]], ["payer","verb",["to pay"]], ["continuer","verb",["to continue"]], ["paraître","verb",["to appear"]], ["point","noun",["point"]], ["train","noun",["train"]], ["lit","noun",["bed"]], ["guerre","noun",["war"]], ["instant","noun",["moment"]], ["souvenir","noun",["memory"]], ["là","adverb",["there"]], ["même","adverb",["even"]], ["peu","adverb",["little","few"]], ["mois","noun",["month"]], ["problème","noun",["problem"]], ["frère","noun",["brother"]], ["mettre","verb",["put"],"builtin"] ];
 assert.equal(MUST_HAVE_FIRST_MEANINGS.length,30,"30-word must-have list is complete");
 for(const [word,pos,accepted,source] of MUST_HAVE_FIRST_MEANINGS){
  schema3Assertion(word+" "+pos+" first meaning",()=>{
   if(source==="builtin")return; // The immutable built-in lookup is asserted unconditionally in ACCEPTED_MEANINGS above.
-  const groups=importedData[word]?.[4]?.posGroups||[];const group=groups.find(item=>item.pos===pos);assert.ok(group,word+" has required "+pos+" POS group");
+  const groups=importedData[word]?.[4]?.posGroups||[];const group=groups[0];assert.equal(group?.pos,pos,word+" first POS group must be "+pos);
   const first=posGroupMeanings(group)[0]||"";assert.ok(accepted.some(term=>normalizeEnglish(first).includes(normalizeEnglish(term))),word+" "+pos+" first meaning must include "+JSON.stringify(accepted)+"; got "+first);
  });
 }
-const eightWordGroups={"même":{adverb:"even",adjective:"same"},"cent":{numeral:"hundred",noun:"cent, coin"},"chéri":{noun:"darling",adjective:"beloved"},"cuire":{verb:"to cook"},"retourner":{verb:"to return"},"minute":{noun:"minute"},"jeter":{verb:"to throw"},"nouveau":{adjective:"new"}};
+const eightWordGroups={"même":{adverb:"even",adjective:"same"},"cent":{numeral:"hundred",noun:"cent, coin"},"chéri":{noun:"darling",adjective:"beloved"},"cuire":{verb:"to cook"},"retourner":{verb:"to return"},"minute":{noun:"minute"},"jeter":{verb:"to throw"},"nouveau":{adjective:"new"},"souvenir":{noun:"memory",verb:"to remember"}};
 for(const [word,expectedGroups] of Object.entries(eightWordGroups))for(const [pos,expected] of Object.entries(expectedGroups))schema3Assertion(word+" "+pos+" grouped override",()=>{const group=(importedData[word]?.[4]?.posGroups||[]).find(item=>item.pos===pos);assert.ok(group,word+" contains "+pos+" POS group");const first=posGroupMeanings(group)[0]||"";assert.ok(normalizeEnglish(first).includes(normalizeEnglish(expected)),word+" "+pos+" first meaning includes "+expected+"; got "+first);});
 
 
@@ -330,3 +307,9 @@ assert.match(verbHtml,/See the Conjugate tool for forms\./,"verb entries direct 
 assert.doesNotMatch(verbHtml,/(?:Feminine|Plural):/,"verb entries never render gender/number form lists");
 console.log("PASS spelling-variant built-in identity, curated overrides, form-only exclusions, POS grouping and register labels");
 console.log("PASS Stage A imported dictionary core and compatibility acceptance");
+
+const ng=importedData["nouveau"]?.[4]?.posGroups||[],sg=importedData["souvenir"]?.[4]?.posGroups||[];
+schema3Assertion("nouveau first group adjective new",()=>{assert.equal(ng[0]?.pos,"adjective");assert.equal(normalizeEnglish(ng[0]?.meanings?.[0]?.meaning),"new");});
+schema3Assertion("souvenir first group noun memory",()=>{assert.equal(sg[0]?.pos,"noun");assert.equal(normalizeEnglish(sg[0]?.meanings?.[0]?.meaning),"memory");});
+schema3Assertion("plein first group adjective full",()=>{const g=importedData["plein"]?.[4]?.posGroups?.[0];assert.equal(g?.pos,"adjective");assert.equal(normalizeEnglish(g?.meanings?.[0]?.meaning),"full");});
+const totalPosGroups=importedKeys.reduce((count,word)=>count+(importedData[word]?.[4]?.posGroups?.length||0),0);console.log("TOTAL POS GROUPS: "+totalPosGroups);

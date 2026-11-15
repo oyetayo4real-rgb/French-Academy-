@@ -8,8 +8,8 @@ const expectedIds = Array.from({ length: 46 }, (_, index) => "TR-" + String(inde
 const ids = ledger.rows.map(row => row.id);
 assert.deepEqual(ids, expectedIds, "ledger IDs must run TR-001 through TR-046 with no gaps or reordering");
 assert.equal(new Set(ids).size, 46, "source-verified ledger IDs must be unique");
-assert.deepEqual(ledger.status_values, ["source-verified", "lexique-confirmed", "reference-pending"], "ledger status values must match the canonical workflow");
-const counts = { "source-verified": 0, "lexique-confirmed": 0, "reference-pending": 0 };
+assert.deepEqual(ledger.status_values, ["source-verified", "lexique-confirmed", "reference-pending", "lexique-partial"], "ledger status values must match the canonical workflow");
+const counts = { "source-verified": 0, "lexique-confirmed": 0, "reference-pending": 0, "lexique-partial": 0 };
 for (const row of ledger.rows) {
   assert.ok(typeof row.input === "string" && row.input.trim(), row.id + ": input must be non-empty");
   assert.ok(Object.hasOwn(counts, row.status), row.id + ": invalid status " + row.status);
