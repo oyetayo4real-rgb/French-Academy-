@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "entryCount": 3000,
   "requestedCount": 3000,
   "minimumAccepted": 2800,
@@ -20,15 +20,18 @@
   },
   "ranking": "freqlemfilms2 + freqlemlivres; highest-frequency POS per lemma",
   "posDistribution": {
-    "noun": 1678,
-    "verb": 824,
+    "noun": 1677,
+    "verb": 826,
     "adjective": 393,
-    "adverb": 105
+    "adverb": 104
   },
   "qualityRules": {
     "firstKaikkiEntryPerPos": true,
     "formOnlyGlossesRemoved": true,
-    "spellingVariantsRemoved": true,
+    "overlongGlossesRejected": true,
+    "explicitLigatureWhitelist": 11,
+    "neutralSensesFirst": true,
+    "formsOnlyForNounsAndAdjectives": true,
     "registerLabels": [
       "archaic",
       "dated",
@@ -46,22 +49,24 @@
     "commonAlternatePosRatio": 0.01
   },
   "qualityStats": {
-    "homographRecordsIgnored": 1047,
-    "formOnlySensesDropped": 412,
-    "entriesSkippedNoUsableSenses": 395,
-    "variantOnlyEntriesSkipped": 8,
-    "registerTaggedSenses": 3708,
-    "entriesWithRegisterLabels": 279,
-    "parentGlossesReplacedBySubglosses": 7,
-    "secondaryPosGroups": 326,
-    "alternatePosRowsGrouped": 351,
-    "descriptiveGlossesDropped": 22,
+    "homographRecordsIgnored": 1026,
+    "formOnlySensesDropped": 415,
+    "entriesSkippedNoUsableSenses": 719,
+    "variantOnlyEntriesSkipped": 17,
+    "registerTaggedSenses": 3652,
+    "entriesWithRegisterLabels": 236,
+    "parentGlossesReplacedBySubglosses": 6,
+    "secondaryPosGroups": 321,
+    "alternatePosRowsGrouped": 346,
+    "descriptiveGlossesDropped": 20,
+    "overlongGlossesRejected": 801,
+    "entriesDroppedBecauseOfOverlongGlosses": 320,
     "overridesApplied": 7,
     "selectedEntries": 3000
   },
   "overridesApplied": 7,
   "sizes": {
-    "rawBytes": 4698196,
-    "gzipBytes": 315072
+    "rawBytes": 3944851,
+    "gzipBytes": 234984
   }
 }
