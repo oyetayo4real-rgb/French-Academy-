@@ -132,21 +132,21 @@ function posGroupMeanings(group){
  const raw=Array.isArray(group.meanings)&&group.meanings.length?group.meanings:(Array.isArray(group.senses)?group.senses:[]);
  return raw.map(item=>typeof item==="string"?item:item?.meaning||item?.gloss||"").filter(Boolean);
 }
-for(const [word,accepted] of Object.entries(ACCEPTED_MEANINGS)){
+for(const [word,accepted] of Object.entries(ACCEPTED_MEANINGS))schema3Assertion(word+" must-have learner meaning",()=>{
  const result=core.lookup(word);
  assert.equal(result.status,"supported",word+" combined lookup is supported");
  if(word==="mettre"){
   assert.equal(result.builtIn,true,"mettre must resolve through the built-in dictionary");
   assert.equal(result.imported,false,"mettre must not be replaced by an imported duplicate");
   assert.ok(accepted.some(term=>normalizeEnglish(result.meaning).includes(normalizeEnglish(term))),"mettre built-in meaning must satisfy the accept-list");
-  continue;
+  return;
  }
  assert.equal(result.imported,true,word+" must resolve through the imported Stage A dictionary");
  const meta=importedData[word]?.[4]||{};
  const meanings=[importedData[word]?.[0],...(meta.senses||[]).map(s=>s.meaning),...(meta.posGroups||[]).flatMap(posGroupMeanings)].filter(Boolean).join(" ");
  assert.ok(accepted.some(term=>normalizeEnglish(meanings).includes(normalizeEnglish(term))),
   word+" must contain an independently accepted learner meaning; expected "+JSON.stringify(accepted)+", actual "+meanings);
-}
+});
 const memeMeta=importedData["même"]?.[4]||{};
 const memeGroups=memeMeta.posGroups||[];
 const memeAdverb=memeGroups.find(group=>group.pos==="adverb");
@@ -224,7 +224,7 @@ for(const word of OWNER_OVERRIDE_WORDS){
 }
 assert.equal(OWNER_OVERRIDE_WORDS.length,7,"seven checkpoint curated overrides remain tested");
 // POS-scoped acceptance keeps Lexique's primary POS intact while enforcing learner-facing group meanings.
-const MUST_HAVE_FIRST_MEANINGS=[["retourner","verb",["to return"]],["nouveau","adjective",["new"]],["plein","adjective",["full"]],["blanc","adjective",["white"]],["fin","noun",["end"]],["minute","noun",["minute"]],["jeter","verb",["to throw"]],["tourner","verb",["to turn"]],["envoyer","verb",["to send"]],["servir","verb",["to serve"]],["garder","verb",["to keep"]],["quitter","verb",["to leave"]],["occuper","verb",["to occupy"]],["descendre","verb",["to go down"]],["payer","verb",["to pay"]],["continuer","verb",["to continue"]],["paraître","verb",["to appear"]],["point","noun",["point"]],["train","noun",["train"]],["lit","noun",["bed"]],["guerre","noun",["war"]],["instant","noun",["moment"]],["souvenir","noun",["memory"]],["là","adverb",["there"]],["même","adverb",["even"]],["peu","adverb",["little","few"]],["mois","noun",["month"]],["problème","noun",["problem"]],["frère","noun",["brother"]],["mettre","verb",["put"],"builtin"]];
+const MUST_HAVE_FIRST_MEANINGS=[ ["retourner","verb",["to return"]], ["nouveau","adjective",["new"]], ["plein","adjective",["full"]], ["blanc","adjective",["white"]], ["fin","noun",["end"]], ["minute","noun",["minute"]], ["jeter","verb",["to throw"]], ["tourner","verb",["to turn"]], ["envoyer","verb",["to send"]], ["servir","verb",["to serve"]], ["garder","verb",["to keep"]], ["quitter","verb",["to leave"]], ["occuper","verb",["to occupy"]], ["descendre","verb",["to go down"]], ["payer","verb",["to pay"]], ["continuer","verb",["to continue"]], ["paraître","verb",["to appear"]], ["point","noun",["point"]], ["train","noun",["train"]], ["lit","noun",["bed"]], ["guerre","noun",["war"]], ["instant","noun",["moment"]], ["souvenir","noun",["memory"]], ["là","adverb",["there"]], ["même","adverb",["even"]], ["peu","adverb",["little","few"]], ["mois","noun",["month"]], ["problème","noun",["problem"]], ["frère","noun",["brother"]], ["mettre","verb",["put"],"builtin"] ];
 assert.equal(MUST_HAVE_FIRST_MEANINGS.length,30,"30-word must-have list is complete");
 for(const [word,pos,accepted,source] of MUST_HAVE_FIRST_MEANINGS){
  schema3Assertion(word+" "+pos+" first meaning",()=>{
@@ -259,13 +259,13 @@ assert.equal(core.lookup("là")?.importedStatus, "curated-draft", "là exception
 assert.ok(!importedData["oeil"]&&!importedData["coeur"],"nonstandard spelling entries are not imported");
 assert.ok(!JSON.stringify(importedData["chéri"]||{}).includes("Shar (shari'a)"),"chéri homograph contamination is removed");
 schema3Assertion("cuire form-only sense removed",()=>assert.ok(!(importedData["cuire"]?.[4]?.senses||[]).some(s=>/inflection of/i.test(s.meaning)),"cuire form-only sense removed"));
-assert.ok(!(importedData["là"]?.[4]?.senses||[]).some(s=>/^referring to/i.test(s.meaning)),"là uses child glosses rather than descriptive parent glosses");
-assert.ok((importedData["final"]?.[4]?.senses||[]).every(s=>!/^expressing purpose/i.test(s.meaning)),"descriptive parent glosses are dropped in favour of child glosses");
-assert.ok((JSON.parse((await import("node:fs")).readFileSync(new URL("../data/dictionary/common-3000.meta.json",import.meta.url),"utf8")).qualityStats?.parentGlossesReplacedBySubglosses||0)>0,"hierarchical parent glosses were resolved to child glosses");
-for(const [word,entry] of Object.entries(importedData))assert.ok(!(entry[4].senses||[]).some(s=>/^(?:referring to|used to|indicating|expressing|denoting|relating to|pertaining to|describing|said of)\b/i.test(s.meaning)),word+" has no descriptive-only gloss");
-assert.ok((importedData["peu"]?.[4]?.posGroups||[]).some(group=>group.pos==="adverb"),"peu adverb meanings remain in a distinct POS group");
-assert.ok((importedData["peu"]?.[4]?.posGroups||[]).some(group=>group.pos==="noun"),"peu noun senses remain in a separate POS group");
-assert.ok(!(importedData["peu"]?.[3]||"").includes("noun:"),"peu POS groups are not hidden in notes");
+schema3Assertion("là descriptive parent gloss removed",()=>assert.ok(!(importedData["là"]?.[4]?.senses||[]).some(s=>/^referring to/i.test(s.meaning)),"là uses child glosses rather than descriptive parent glosses"));
+schema3Assertion("descriptive parent glosses removed",()=>assert.ok((importedData["final"]?.[4]?.senses||[]).every(s=>!/^expressing purpose/i.test(s.meaning)),"descriptive parent glosses are dropped in favour of child glosses"));
+schema3Assertion("parent gloss replacement statistic",()=>assert.ok(generatedMeta.qualityStats?.parentGlossesReplacedBySubglosses>0,"hierarchical parent glosses were resolved to child glosses"));
+schema3Assertion("dataset contains no descriptive-only glosses",()=>{for(const [word,entry] of Object.entries(importedData))assert.ok(!(entry[4].senses||[]).some(s=>/^(?:referring to|used to|indicating|expressing|denoting|relating to|pertaining to|describing|said of)\b/i.test(s.meaning)),word+" has no descriptive-only gloss");});
+schema3Assertion("peu adverb POS group",()=>assert.ok((importedData["peu"]?.[4]?.posGroups||[]).some(group=>group.pos==="adverb"),"peu adverb meanings remain in a distinct POS group"));
+schema3Assertion("peu noun POS group",()=>assert.ok((importedData["peu"]?.[4]?.posGroups||[]).some(group=>group.pos==="noun"),"peu noun senses remain in a separate POS group"));
+schema3Assertion("peu groups are not hidden in notes",()=>assert.ok(!(importedData["peu"]?.[3]||"").includes("noun:"),"peu POS groups are not hidden in notes"));
 
 schema3Assertion("plein adjective and adverb POS groups",()=>{const groups=importedData["plein"]?.[4]?.posGroups||[];assert.ok(groups.some(group=>group.pos==="adjective"&&normalizeEnglish(posGroupMeanings(group)[0]).includes("full")),"plein adjective group retains full");assert.ok(groups.some(group=>group.pos==="adverb"),"plein adverb group remains distinct");});
 assert.ok((importedData["plein"]?.[4]?.posGroups||[]).some(group=>group.pos==="adverb"),"plein adverb POS group is retained");
@@ -311,7 +311,7 @@ schema3Assertion("curated curationNote is stored but never rendered",()=>{
   assert.match(html,/Curated draft · needs French-speaker review/,word+" renders only the generic curated-draft notice");
  }
 });
-for(const [word,entry] of Object.entries(importedData))for(const sense of entry[4].senses||[]){
+schema3Assertion("register labels are visible and complete",()=>{for(const [word,entry] of Object.entries(importedData))for(const sense of entry[4].senses||[]){
  const tags=(sense.tags||[]).map(x=>String(x).toLowerCase());
  const register=(sense.registerTags||[]).map(x=>String(x).toLowerCase());
  if(tags.some(t=>t.includes("vulgar")||t.includes("offensive")))assert.ok(sense.label,word+" vulgar/offensive sense must be labelled");
@@ -320,7 +320,7 @@ for(const [word,entry] of Object.entries(importedData))for(const sense of entry[
   const visible=sense.label.toLocaleLowerCase("fr").split(/,\s*/);
   for(const tag of register)assert.ok(visible.includes(tag),word+" visible label must include register tag "+tag);
  }
-}
+}});
 const verbHtml=compat.renderDictionaryHtml(compat.lookup("cuire"));
 assert.match(verbHtml,/See the Conjugate tool for forms\./,"verb entries direct learners to the Conjugate tool");
 assert.doesNotMatch(verbHtml,/(?:Feminine|Plural):/,"verb entries never render gender/number form lists");

@@ -334,7 +334,7 @@ const MUST_HAVE_FIRST_MEANINGS=[
  ["frère","noun",["brother"]],
  ["mettre","verb",["put"],"builtin"]
 ];
-const normalizeMeaning=value=>String(value||"").normalize("NFD").replace(/\\p{M}/gu,"").toLocaleLowerCase("en");
+const normalizeMeaning=value=>String(value||"").normalize("NFD").replace(/\p{M}/gu,"").toLocaleLowerCase("en");
 if(MUST_HAVE_FIRST_MEANINGS.length!==30)throw new Error("Stage A must-have list must contain exactly 30 words");
 const mustHaveAudit=[];
 for(const [word,pos,accepted,source] of MUST_HAVE_FIRST_MEANINGS){
@@ -369,7 +369,7 @@ if(mustHaveFailures.length){
     const tags=[...(record.tags||[]),...(sense.tags||[]),...(sense.raw_tags||[])].map(String);
     const glosses=sense.glosses||sense.raw_glosses||[];
     for(const raw of glosses){
-     const gloss=String(raw),key=normalizeMeaning(gloss).split(/\\s+/).filter(Boolean).sort().join(" ");
+     const gloss=String(raw),key=normalizeMeaning(gloss).split(/\s+/).filter(Boolean).sort().join(" ");
      let droppedBy="retained";
      if(Array.from(gloss).length>MAX_GLOSS_LENGTH)droppedBy="over-length";
      else if(FORM_ONLY.test(gloss))droppedBy="form-only";
