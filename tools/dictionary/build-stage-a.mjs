@@ -91,7 +91,12 @@ function entrySenses(record){
    const label=labels.join(", ");
    const sense={meaning:gloss,tags,registerTags:labels,label:label||null};
    if(labels.length)stats.registerTaggedSenses++;
-   if(!senses.some(x=>x.meaning===sense.meaning&&x.label===sense.label))senses.push(sense);
+   const duplicate=senses.find(x=>x.meaning.trim().toLocaleLowerCase("fr")===sense.meaning.trim().toLocaleLowerCase("fr"));
+   if(duplicate){
+    duplicate.tags=[...new Set([...duplicate.tags,...sense.tags])];
+    duplicate.registerTags=[...new Set([...duplicate.registerTags,...sense.registerTags])];
+    duplicate.label=duplicate.registerTags.join(", ")||null;
+   }else senses.push(sense);
   }
  }
  senses.sort((a,b)=>Number(a.registerTags.length>0)-Number(b.registerTags.length));
