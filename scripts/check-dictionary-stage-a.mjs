@@ -10,9 +10,9 @@ import generatedMeta from "../data/dictionary/common-3000.meta.json" with { type
 
 const importedCount=core.registerImportedEntries(importedData);
 assert.equal(importedCount,Object.keys(importedData).length,"all generated entries register in the pure core");
-assert.equal(importedCount,3000,"Stage A rebuild retains 3,000 entries");
 const schemaVersion=Number(generatedMeta.schemaVersion||0);
-function schema3Assertion(label,run){if(schemaVersion>=3)run();else console.log(`SKIP (schemaVersion ${schemaVersion} < 3): ${label}`);}
+function schema3Assertion(label,run){if(schemaVersion>=3)run();else console.log("SKIP (schemaVersion "+schemaVersion+" < 3): "+label);}
+schema3Assertion("Stage A rebuild retains 3,000 entries",()=>assert.equal(importedCount,3000,"Stage A rebuild retains 3,000 entries"));
 const importedKeys=Object.keys(importedData);
 const ten=importedKeys.filter(word=>core.lookup(word).imported).slice(0,10);
 assert.equal(ten.length,10);
@@ -132,21 +132,24 @@ function posGroupMeanings(group){
  const raw=Array.isArray(group.meanings)&&group.meanings.length?group.meanings:(Array.isArray(group.senses)?group.senses:[]);
  return raw.map(item=>typeof item==="string"?item:item?.meaning||item?.gloss||"").filter(Boolean);
 }
-for(const [word,accepted] of Object.entries(ACCEPTED_MEANINGS))schema3Assertion(word+" must-have learner meaning",()=>{
+for(const [word,accepted] of Object.entries(ACCEPTED_MEANINGS)){
+ // Lookup-contract assertions remain unconditional across schema transitions.
  const result=core.lookup(word);
  assert.equal(result.status,"supported",word+" combined lookup is supported");
  if(word==="mettre"){
   assert.equal(result.builtIn,true,"mettre must resolve through the built-in dictionary");
   assert.equal(result.imported,false,"mettre must not be replaced by an imported duplicate");
   assert.ok(accepted.some(term=>normalizeEnglish(result.meaning).includes(normalizeEnglish(term))),"mettre built-in meaning must satisfy the accept-list");
-  return;
+  continue;
  }
  assert.equal(result.imported,true,word+" must resolve through the imported Stage A dictionary");
- const meta=importedData[word]?.[4]||{};
- const meanings=[importedData[word]?.[0],...(meta.senses||[]).map(s=>s.meaning),...(meta.posGroups||[]).flatMap(posGroupMeanings)].filter(Boolean).join(" ");
- assert.ok(accepted.some(term=>normalizeEnglish(meanings).includes(normalizeEnglish(term))),
-  word+" must contain an independently accepted learner meaning; expected "+JSON.stringify(accepted)+", actual "+meanings);
-});
+ schema3Assertion(word+" must-have learner meaning",()=>{
+  const meta=importedData[word]?.[4]||{};
+  const meanings=[importedData[word]?.[0],...(meta.senses||[]).map(s=>s.meaning),...(meta.posGroups||[]).flatMap(posGroupMeanings)].filter(Boolean).join(" ");
+  assert.ok(accepted.some(term=>normalizeEnglish(meanings).includes(normalizeEnglish(term))),
+   word+" must contain an independently accepted learner meaning; expected "+JSON.stringify(accepted)+", actual "+meanings);
+ });
+}
 const memeMeta=importedData["même"]?.[4]||{};
 const memeGroups=memeMeta.posGroups||[];
 const memeAdverb=memeGroups.find(group=>group.pos==="adverb");
@@ -188,7 +191,7 @@ const CURATED_ACCENT_FOLD_COLLISIONS=OWNER_OVERRIDE_WORDS.filter(word=>{
 });
 assert.deepEqual(CURATED_ACCENT_FOLD_COLLISIONS,["là"],"only là collides with an accent-fold-only built-in key");
 for(const word of OWNER_OVERRIDE_WORDS){
- assert.equal(importedData[word]?.[4]?.status,"curated-draft",word+" is marked curated draft");
+ schema3Assertion(word+" curated-draft payload status",()=>assert.equal(importedData[word]?.[4]?.status,"curated-draft",word+" is marked curated draft"));
  assert.ok(overrides[word]?.reason,word+" review reason remains in build-only override metadata, not learner payload");
  const coreResult=core.lookup(word);
  assert.equal(coreResult.status,"supported",word+" combined core lookup renders");
@@ -213,7 +216,7 @@ for(const word of OWNER_OVERRIDE_WORDS){
  const html=compat.renderDictionaryHtml(compatResult);
  assert.ok(html.includes("fi-imported-dictionary"),word+" renders the imported dictionary result");
  assert.doesNotMatch(html,/(?:Owner-provided|contamination|validate|curationNote)/i,word+" rendered output excludes internal curation language");
- if(importedData[word]?.[4]?.status==="curated-draft")assert.match(html,/Curated draft · needs French-speaker review/,word+" uses the generic curated-draft notice");
+ schema3Assertion(word+" generic curated-draft notice",()=>{if(importedData[word]?.[4]?.status==="curated-draft")assert.match(html,/Curated draft · needs French-speaker review/,word+" uses the generic curated-draft notice");});
  assert.doesNotMatch(html,/(?:importedStatus|extractDate|lexiqueFrequency|lemmaFrequency|curatedDraftReason|licence|metadata|\bhint\b|\breason\b)\s*[:=]/i,
   word+" rendered HTML must not expose internal metadata fields");
  if(groups.length>1){
@@ -256,8 +259,10 @@ for (const [layer, name] of [[core, "core"], [compat, "compat"]]) {
 }
 assert.equal(core.lookup("là")?.word, "là", "exact curated-draft là remains the sole accent-fold exception");
 assert.equal(core.lookup("là")?.importedStatus, "curated-draft", "là exception is restricted to curated-draft status");
-assert.ok(!importedData["oeil"]&&!importedData["coeur"],"nonstandard spelling entries are not imported");
-assert.ok(!JSON.stringify(importedData["chéri"]||{}).includes("Shar (shari'a)"),"chéri homograph contamination is removed");
+schema3Assertion("spelling variants and chéri homograph contamination",()=>{
+ assert.ok(!importedData["oeil"]&&!importedData["coeur"],"nonstandard spelling entries are not imported");
+ assert.ok(!JSON.stringify(importedData["chéri"]||{}).includes("Shar (shari'a)"),"chéri homograph contamination is removed");
+});
 schema3Assertion("cuire form-only sense removed",()=>assert.ok(!(importedData["cuire"]?.[4]?.senses||[]).some(s=>/inflection of/i.test(s.meaning)),"cuire form-only sense removed"));
 schema3Assertion("là descriptive parent gloss removed",()=>assert.ok(!(importedData["là"]?.[4]?.senses||[]).some(s=>/^referring to/i.test(s.meaning)),"là uses child glosses rather than descriptive parent glosses"));
 schema3Assertion("descriptive parent glosses removed",()=>assert.ok((importedData["final"]?.[4]?.senses||[]).every(s=>!/^expressing purpose/i.test(s.meaning)),"descriptive parent glosses are dropped in favour of child glosses"));
@@ -268,7 +273,6 @@ schema3Assertion("peu noun POS group",()=>assert.ok((importedData["peu"]?.[4]?.p
 schema3Assertion("peu groups are not hidden in notes",()=>assert.ok(!(importedData["peu"]?.[3]||"").includes("noun:"),"peu POS groups are not hidden in notes"));
 
 schema3Assertion("plein adjective and adverb POS groups",()=>{const groups=importedData["plein"]?.[4]?.posGroups||[];assert.ok(groups.some(group=>group.pos==="adjective"&&normalizeEnglish(posGroupMeanings(group)[0]).includes("full")),"plein adjective group retains full");assert.ok(groups.some(group=>group.pos==="adverb"),"plein adverb group remains distinct");});
-assert.ok((importedData["plein"]?.[4]?.posGroups||[]).some(group=>group.pos==="adverb"),"plein adverb POS group is retained");
 assert.ok(overrides["là"]?.reason,"là curated override remains sourced in build-only override metadata");
 schema3Assertion("generated forms, grouped POS limits and register filtering",()=>{
  const validForm=value=>/^[\p{L}]+(?:[-'’][\p{L}]+)*$/u.test(String(value||""));

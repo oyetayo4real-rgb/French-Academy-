@@ -359,31 +359,76 @@ console.log("MUST-HAVE FIRST-MEANING AUDIT (30)");
 console.log("word | first meaning | status");
 for(const row of mustHaveAudit)console.log(row.word+" | "+row.firstMeaning+" | "+row.status);
 const mustHaveFailures=mustHaveAudit.filter(row=>row.status==="FAIL");
-if(mustHaveFailures.length){
- console.log("MUST-HAVE SOURCE DIAGNOSTICS");
- for(const row of mustHaveFailures){
-  const records=matches.mustHaveSourceRecords?.get(row.word)||[];
-  console.log("DIAGNOSTIC "+row.word+": "+row.detail+"; source records="+records.length);
-  const seenGlosses=new Set();
-  for(const [recordIndex,record] of records.entries()){
-   console.log("SOURCE RECORD "+(recordIndex+1)+" POS="+record.pos+" recordTags="+JSON.stringify(record.tags||[]));
-   for(const [senseIndex,sense] of (record.senses||[]).entries()){
-    const tags=[...(record.tags||[]),...(sense.tags||[]),...(sense.raw_tags||[])].map(String);
-    const glosses=sense.glosses||sense.raw_glosses||[];
-    for(const raw of glosses){
-     const gloss=String(raw),key=normalizeMeaning(gloss).split(/\s+/).filter(Boolean).sort().join(" ");
-     let droppedBy="retained";
-     if(Array.from(gloss).length>MAX_GLOSS_LENGTH)droppedBy="over-length";
-     else if(FORM_ONLY.test(gloss))droppedBy="form-only";
-     else if(tags.some(tag=>/slang|colloquial|figurative/i.test(tag)))droppedBy="slang/colloquial/figurative register";
-     else if(seenGlosses.has(key))droppedBy="duplicate";
-     else seenGlosses.add(key);
-     console.log("SENSE "+(senseIndex+1)+" tags="+JSON.stringify(tags)+" gloss="+JSON.stringify(gloss)+" droppedBy="+droppedBy);
+function diagnoseSourceRecord(record){
+ const rows=[],deduped=[];
+ const savedStats={...stats},savedRejected=[...rejectedOverlongGlosses],savedOverlong=currentRecordOverlongRejected;
+ try{
+  for(const parent of record.senses||[]){
+   const children=Array.isArray(parent.subsenses)&&parent.subsenses.length?parent.subsenses:[parent];
+   for(const child of children){
+    const tags=[...new Set([...(record.tags||[]),...senseTags(parent),...senseTags(child)].map(value=>String(value).toLocaleLowerCase("fr")))];
+    const raw=child.glosses||child.raw_glosses||parent.glosses||parent.raw_glosses||[];
+    const rawGlosses=(Array.isArray(raw)?raw:[raw]).map(value=>String(value??""));
+    currentRecordOverlongRejected=false;
+    const glosses=senseGlosses(parent,child,children.length>1||child!==parent);
+    const hadOverlong=currentRecordOverlongRejected;
+    const formOnly=glosses.filter(gloss=>FORM_ONLY.test(gloss));
+    const valid=glosses.filter(gloss=>!FORM_ONLY.test(gloss)&&Array.from(gloss).length<=MAX_GLOSS_LENGTH);
+    const gloss=valid[0]||"";
+    const row={tags,rawGlosses,droppedBy:"",candidate:null};
+    if(!gloss){
+     if(formOnly.length)row.droppedBy="form-only";
+     else if(hadOverlong||rawGlosses.some(value=>Array.from(value).length>MAX_GLOSS_LENGTH))row.droppedBy="over-length";
+     else row.droppedBy="no-usable-gloss";
+     rows.push(row);continue;
     }
+    if(isDescriptiveParent(gloss)){row.droppedBy="descriptive-parent";rows.push(row);continue;}
+    const labels=registerTags(tags);
+    const candidate={meaning:gloss,tags,registerTags:labels};
+    const duplicate=deduped.find(item=>normalizedGloss(item.meaning)===normalizedGloss(gloss)||nearDuplicateGloss(item.meaning,gloss));
+    if(duplicate){row.droppedBy="duplicate";rows.push(row);continue;}
+    deduped.push(candidate);row.candidate=candidate;rows.push(row);
    }
   }
+  const neutral=deduped.filter(item=>!(item.registerTags||[]).some(label=>LOW_VALUE_REGISTERS.has(label)));
+  const fallback=deduped.filter(item=>(item.registerTags||[]).some(label=>LOW_VALUE_REGISTERS.has(label)));
+  const eligible=neutral.length>=2?neutral:[...neutral,...fallback];
+  const selected=eligible.slice().sort((a,b)=>Number((a.registerTags||[]).length>0)-Number((b.registerTags||[]).length>0)).slice(0,MAX_MEANINGS_PER_POS);
+  for(const row of rows){
+   if(!row.candidate)continue;
+   if(selected.includes(row.candidate)){row.droppedBy="retained";continue;}
+   const low=(row.candidate.registerTags||[]).find(label=>LOW_VALUE_REGISTERS.has(label));
+   row.droppedBy=neutral.length>=2&&low?low:"per-POS-limit";
+  }
+  return rows;
+ } finally {
+  Object.assign(stats,savedStats);
+  rejectedOverlongGlosses.clear();for(const value of savedRejected)rejectedOverlongGlosses.add(value);
+  currentRecordOverlongRejected=savedOverlong;
  }
+}
+function printSourceDiagnostic(word,records,reason){
+ console.log("DIAGNOSTIC "+word+": "+reason+"; Kaikki records="+records.length);
+ if(!records.length){console.log("  No matching French Kaikki records were encountered.");return;}
+ let index=0;
+ for(const [recordIndex,record] of records.entries()){
+  console.log("SOURCE RECORD "+(recordIndex+1)+" POS="+record.pos+" recordTags="+JSON.stringify(record.tags||[]));
+  for(const row of diagnoseSourceRecord(record)){
+   index++;
+   console.log("SENSE "+index+" tags="+JSON.stringify(row.tags)+" glosses="+JSON.stringify(row.rawGlosses)+" droppedBy="+row.droppedBy);
+  }
+ }
+}
+const mustHaveFailures=mustHaveAudit.filter(row=>row.status==="FAIL");
+if(mustHaveFailures.length){
+ console.log("MUST-HAVE SOURCE DIAGNOSTICS");
+ for(const row of mustHaveFailures)printSourceDiagnostic(row.word,matches.mustHaveSourceRecords?.get(row.word)||[],row.detail);
  throw new Error("Stage A must-have audit failed for: "+mustHaveFailures.map(row=>row.word).join(", "));
+}
+if(!mustHaveFailures.some(row=>row.word==="retourner")){
+ const retourner=mustHaveAudit.find(row=>row.word==="retourner");
+ printSourceDiagnostic("retourner",matches.mustHaveSourceRecords?.get("retourner")||[],
+  "root-cause audit; generated first meaning="+(retourner?.firstMeaning||"missing"));
 }
 
 if(selected.length<MINIMUM)throw new Error("Only "+selected.length+" qualifying entries found; minimum is "+MINIMUM+
