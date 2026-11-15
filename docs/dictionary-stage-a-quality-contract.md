@@ -45,3 +45,16 @@ This contract records the Stage A learner-facing quality rules and the 30-word m
 - Verbs show “See the Conjugate tool for forms.” Only nouns and adjectives may display tagged feminine/plural forms, restricted to letters, hyphens and apostrophes.
 - `retourner` root cause: the first selected Wiktionary verb record is transitive and omits the common return/go-back sense. The POS-specific curated override restores that learner meaning without changing Lexique's primary-POS ranking.
 - The build workflow regenerates a phone-friendly top-300 review pack in 25-entry batches and stages both `docs/dictionary-review-top300.md` and `docs/dictionary-review-top300.csv` in the bot-generated commit.
+
+
+## Verified build execution
+
+- Build trigger commit: \`9938aef3202ec72a97b778e674bcabd7f7089456\`.
+- GitHub Actions Dictionary build: run \`43685977540\` — success.
+- Generated-data bot commit: \`def6eca7097a9e2ac3f95d29359a65508364c956\`.
+- Generated data: schemaVersion 3, 3,000 entries, 13 curated overrides with stored curation notes.
+- The builder's 30-word POS-group first-meaning gate passed; 29 imported entries passed and \`mettre\` passed as the immutable built-in.
+- Validator passed. Independent post-build inspection found zero entries violating the 3-per-POS, 5-per-entry, or 70-character limits.
+- Quality counters: 702 near-duplicate senses removed; 1,076 low-register senses skipped; 1,671 overlong glosses rejected; 404 form-only senses removed; 320 entries with secondary POS groups.
+- Review pack generated: 300 Markdown entries in 12 batches, plus a 300-row CSV and header. Both files are present in the bot commit.
+- No golden or checksum files were changed. The final pull-request golden and characterization workflows remain the authority for final parity.

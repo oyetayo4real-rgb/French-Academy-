@@ -224,6 +224,7 @@ for(const word of OWNER_OVERRIDE_WORDS){
  }
 }
 assert.equal(OWNER_OVERRIDE_WORDS.length,7,"seven checkpoint curated overrides remain tested");
+// POS-scoped acceptance keeps Lexique's primary POS intact while enforcing learner-facing group meanings.
 const MUST_HAVE_FIRST_MEANINGS=[["retourner","verb","to return"],["nouveau","adjective","new"],["jeter","verb","to throw"],["minute","noun","minute"],["plein","adjective","full"],["souvenir","noun","memory"],["même","adverb","even"],["cent","numeral","hundred"],["chéri","noun","darling"],["cuire","verb","to cook"],["là","adverb","there"],["peu","adverb","little"],["part","noun","share"],["poser","verb","put down"],["longtemps","adverb","for a long time"],["gros","adjective","big"],["mois","noun","month"],["problème","noun","problem"],["long","adjective","long"],["frère","noun","brother"],["lever","verb","raise"],["montrer","verb","show"],["peine","noun","punishment"],["servir","verb","serve"],["garder","verb","keep"],["quitter","verb","leave"],["occuper","verb","occupy"],["tourner","verb","turn"],["mettre","verb","put"],["payer","verb","pay"]];
 assert.equal(MUST_HAVE_FIRST_MEANINGS.length,30,"30-word must-have list is complete");
 for(const [word,pos,expected] of MUST_HAVE_FIRST_MEANINGS){
