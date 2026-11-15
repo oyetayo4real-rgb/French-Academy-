@@ -231,7 +231,7 @@ const MUST_HAVE_FIRST_MEANINGS=[ ["retourner","verb",["to return"]], ["nouveau",
 assert.equal(MUST_HAVE_FIRST_MEANINGS.length,30,"30-word must-have list is complete");
 for(const [word,pos,accepted,source] of MUST_HAVE_FIRST_MEANINGS){
  schema3Assertion(word+" "+pos+" first meaning",()=>{
-  if(source==="builtin"){const result=core.lookup(word);assert.equal(result?.builtIn,true,"mettre remains the immutable built-in entry");assert.ok(accepted.some(term=>normalizeEnglish(result.meaning).includes(normalizeEnglish(term))),"mettre built-in meaning is put");return;}
+  if(source==="builtin")return; // The immutable built-in lookup is asserted unconditionally in ACCEPTED_MEANINGS above.
   const groups=importedData[word]?.[4]?.posGroups||[];const group=groups.find(item=>item.pos===pos);assert.ok(group,word+" has required "+pos+" POS group");
   const first=posGroupMeanings(group)[0]||"";assert.ok(accepted.some(term=>normalizeEnglish(first).includes(normalizeEnglish(term))),word+" "+pos+" first meaning must include "+JSON.stringify(accepted)+"; got "+first);
  });
