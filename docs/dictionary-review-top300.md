@@ -28,11 +28,11 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ---
 
 ### 003. peu
-- **Part of speech:** noun (m)
-- **Gender:** m
-- **Primary meaning:** a small amount
-- **POS group:** noun: a small amount
-- **POS group:** adverb: little; few; not very much
+- **Part of speech:** adverb
+- **Gender:** —
+- **Primary meaning:** little; not much; few (peu de gens); not very (peu probable)
+- **POS group:** adverb: little; not much; few (peu de gens); not very (peu probable)
+- **POS group:** noun: the little; a little (le peu que je sais)
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -348,11 +348,11 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ---
 
 ### 034. souvenir
-- **Part of speech:** verb
-- **Gender:** —
-- **Primary meaning:** to remember
-- **POS group:** verb: to remember [See the Conjugate tool for forms]
+- **Part of speech:** noun (m)
+- **Gender:** m
+- **Primary meaning:** memory; souvenir
 - **POS group:** noun: memory; souvenir [plural: souvenirs]
+- **POS group:** verb: to remember [See the Conjugate tool for forms]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -411,11 +411,11 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ---
 
 ### 040. nouveau
-- **Part of speech:** noun (m)
-- **Gender:** m
-- **Primary meaning:** new person; new thing
-- **POS group:** noun: new person; new thing [feminine: nouvelle, nouvelles; plural: nouveaux, nouvelles]
+- **Part of speech:** adjective
+- **Gender:** —
+- **Primary meaning:** new; novel
 - **POS group:** adjective: new; novel [feminine: nouvelle, nouvelles; plural: nouveaux, nouvelles]
+- **POS group:** noun: new person; new thing [feminine: nouvelle, nouvelles; plural: nouveaux, nouvelles]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 

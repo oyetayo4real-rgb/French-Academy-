@@ -116,8 +116,8 @@
     }
   ],
   "peu": [
-    "a small amount",
-    "noun (m)",
+    "little; not much; few (peu de gens); not very (peu probable)",
+    "adverb",
     "",
     "",
     {
@@ -126,10 +126,24 @@
       "extractDate": "2026-10-30",
       "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
-      "gender": "m",
+      "gender": null,
       "senses": [
         {
-          "meaning": "a small amount",
+          "meaning": "little; not much",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
+        },
+        {
+          "meaning": "few (peu de gens)",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
+        },
+        {
+          "meaning": "not very (peu probable)",
           "tags": [],
           "registerTags": [],
           "label": null,
@@ -138,10 +152,18 @@
       ],
       "posGroups": [
         {
-          "pos": "noun",
+          "pos": "adverb",
           "meanings": [
             {
-              "meaning": "a small amount",
+              "meaning": "little; not much",
+              "register": "neutral"
+            },
+            {
+              "meaning": "few (peu de gens)",
+              "register": "neutral"
+            },
+            {
+              "meaning": "not very (peu probable)",
               "register": "neutral"
             }
           ],
@@ -151,18 +173,10 @@
           }
         },
         {
-          "pos": "adverb",
+          "pos": "noun",
           "meanings": [
             {
-              "meaning": "little",
-              "register": "neutral"
-            },
-            {
-              "meaning": "few",
-              "register": "neutral"
-            },
-            {
-              "meaning": "not very much",
+              "meaning": "the little; a little (le peu que je sais)",
               "register": "neutral"
             }
           ],
@@ -2206,8 +2220,8 @@
     }
   ],
   "souvenir": [
-    "to remember",
-    "verb",
+    "memory; souvenir",
+    "noun (m)",
     "",
     "",
     {
@@ -2216,10 +2230,17 @@
       "extractDate": "2026-10-30",
       "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
-      "gender": null,
+      "gender": "m",
       "senses": [
         {
-          "meaning": "to remember",
+          "meaning": "memory",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
+        },
+        {
+          "meaning": "souvenir",
           "tags": [],
           "registerTags": [],
           "label": null,
@@ -2227,19 +2248,6 @@
         }
       ],
       "posGroups": [
-        {
-          "pos": "verb",
-          "meanings": [
-            {
-              "meaning": "to remember",
-              "register": "neutral"
-            }
-          ],
-          "forms": {
-            "feminine": [],
-            "plural": []
-          }
-        },
         {
           "pos": "noun",
           "meanings": [
@@ -2258,13 +2266,28 @@
               "souvenirs"
             ]
           }
+        },
+        {
+          "pos": "verb",
+          "meanings": [
+            {
+              "meaning": "to remember",
+              "register": "neutral"
+            }
+          ],
+          "forms": {
+            "feminine": [],
+            "plural": []
+          }
         }
       ],
       "forms": {
         "feminine": [],
-        "plural": []
+        "plural": [
+          "souvenirs"
+        ]
       },
-      "curationNote": "Preserve the Lexique-ranked verb primary POS while retaining the common noun meaning memory in its own POS group."
+      "curationNote": "Explicit display-order exception: noun first for the learner-facing meaning memory; Lexique frequencies remain unchanged."
     }
   ],
   "instant": [
@@ -2601,8 +2624,8 @@
     }
   ],
   "nouveau": [
-    "new person; new thing",
-    "noun (m)",
+    "new; novel",
+    "adjective",
     "",
     "",
     {
@@ -2611,17 +2634,17 @@
       "extractDate": "2026-10-30",
       "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
-      "gender": "m",
+      "gender": null,
       "senses": [
         {
-          "meaning": "new person",
+          "meaning": "new",
           "tags": [],
           "registerTags": [],
           "label": null,
           "curated": true
         },
         {
-          "meaning": "new thing",
+          "meaning": "novel",
           "tags": [],
           "registerTags": [],
           "label": null,
@@ -2630,14 +2653,14 @@
       ],
       "posGroups": [
         {
-          "pos": "noun",
+          "pos": "adjective",
           "meanings": [
             {
-              "meaning": "new person",
+              "meaning": "new",
               "register": "neutral"
             },
             {
-              "meaning": "new thing",
+              "meaning": "novel",
               "register": "neutral"
             }
           ],
@@ -2653,14 +2676,14 @@
           }
         },
         {
-          "pos": "adjective",
+          "pos": "noun",
           "meanings": [
             {
-              "meaning": "new",
+              "meaning": "new person",
               "register": "neutral"
             },
             {
-              "meaning": "novel",
+              "meaning": "new thing",
               "register": "neutral"
             }
           ],
@@ -2686,7 +2709,7 @@
           "nouvelles"
         ]
       },
-      "curationNote": "Preserve the Lexique-ranked noun primary POS while retaining the common adjective meaning in its own POS group."
+      "curationNote": "Explicit display-order exception: adjective first for the learner-facing meaning new; Lexique frequencies remain unchanged."
     }
   ],
   "type": [
@@ -29879,6 +29902,68 @@
       }
     }
   ],
+  "liberté": [
+    "freedom; liberty",
+    "noun (f)",
+    "",
+    "",
+    {
+      "hint": false,
+      "source": "wiktionary-en via kaikki.org",
+      "extractDate": "2026-10-30",
+      "status": "curated-draft",
+      "licence": "CC BY-SA 4.0",
+      "gender": "f",
+      "senses": [
+        {
+          "meaning": "freedom",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
+        },
+        {
+          "meaning": "liberty",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
+        }
+      ],
+      "posGroups": [
+        {
+          "pos": "noun",
+          "meanings": [
+            {
+              "meaning": "freedom",
+              "register": "neutral"
+            },
+            {
+              "meaning": "liberty",
+              "register": "neutral"
+            }
+          ],
+          "forms": {
+            "feminine": [
+              "libertés"
+            ],
+            "plural": [
+              "libertés"
+            ]
+          }
+        }
+      ],
+      "forms": {
+        "feminine": [
+          "libertés"
+        ],
+        "plural": [
+          "libertés"
+        ]
+      },
+      "curationNote": "Curated draft · needs French-speaker review; verify nuance and usage."
+    }
+  ],
   "camarade": [
     "buddy, mate; comrade (companion or fellow socialist or communist)",
     "noun (m/f)",
@@ -35443,6 +35528,68 @@
       }
     }
   ],
+  "campagne": [
+    "countryside; campaign",
+    "noun (f)",
+    "",
+    "",
+    {
+      "hint": false,
+      "source": "wiktionary-en via kaikki.org",
+      "extractDate": "2026-10-30",
+      "status": "curated-draft",
+      "licence": "CC BY-SA 4.0",
+      "gender": "f",
+      "senses": [
+        {
+          "meaning": "countryside",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
+        },
+        {
+          "meaning": "campaign",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
+        }
+      ],
+      "posGroups": [
+        {
+          "pos": "noun",
+          "meanings": [
+            {
+              "meaning": "countryside",
+              "register": "neutral"
+            },
+            {
+              "meaning": "campaign",
+              "register": "neutral"
+            }
+          ],
+          "forms": {
+            "feminine": [
+              "campagnes"
+            ],
+            "plural": [
+              "campagnes"
+            ]
+          }
+        }
+      ],
+      "forms": {
+        "feminine": [
+          "campagnes"
+        ],
+        "plural": [
+          "campagnes"
+        ]
+      },
+      "curationNote": "Curated draft · needs French-speaker review; verify both common senses."
+    }
+  ],
   "chaise": [
     "chair, seat",
     "noun (f)",
@@ -38593,6 +38740,53 @@
       }
     }
   ],
+  "crime": [
+    "crime",
+    "noun (m)",
+    "",
+    "",
+    {
+      "hint": false,
+      "source": "wiktionary-en via kaikki.org",
+      "extractDate": "2026-10-30",
+      "status": "curated-draft",
+      "licence": "CC BY-SA 4.0",
+      "gender": "m",
+      "senses": [
+        {
+          "meaning": "crime",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
+        }
+      ],
+      "posGroups": [
+        {
+          "pos": "noun",
+          "meanings": [
+            {
+              "meaning": "crime",
+              "register": "neutral"
+            }
+          ],
+          "forms": {
+            "feminine": [],
+            "plural": [
+              "crimes"
+            ]
+          }
+        }
+      ],
+      "forms": {
+        "feminine": [],
+        "plural": [
+          "crimes"
+        ]
+      },
+      "curationNote": "Curated draft · needs French-speaker review."
+    }
+  ],
   "prêter": [
     "to lend; to attribute; to go along with",
     "verb",
@@ -39312,6 +39506,53 @@
         "feminine": [],
         "plural": []
       }
+    }
+  ],
+  "détail": [
+    "detail",
+    "noun (m)",
+    "",
+    "",
+    {
+      "hint": false,
+      "source": "wiktionary-en via kaikki.org",
+      "extractDate": "2026-10-30",
+      "status": "curated-draft",
+      "licence": "CC BY-SA 4.0",
+      "gender": "m",
+      "senses": [
+        {
+          "meaning": "detail",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
+        }
+      ],
+      "posGroups": [
+        {
+          "pos": "noun",
+          "meanings": [
+            {
+              "meaning": "detail",
+              "register": "neutral"
+            }
+          ],
+          "forms": {
+            "feminine": [],
+            "plural": [
+              "détails"
+            ]
+          }
+        }
+      ],
+      "forms": {
+        "feminine": [],
+        "plural": [
+          "détails"
+        ]
+      },
+      "curationNote": "Curated draft · needs French-speaker review."
     }
   ],
   "crever": [
@@ -62152,6 +62393,64 @@
       }
     }
   ],
+  "trottoir": [
+    "sidewalk; pavement",
+    "noun (m)",
+    "",
+    "",
+    {
+      "hint": false,
+      "source": "wiktionary-en via kaikki.org",
+      "extractDate": "2026-10-30",
+      "status": "curated-draft",
+      "licence": "CC BY-SA 4.0",
+      "gender": "m",
+      "senses": [
+        {
+          "meaning": "sidewalk",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
+        },
+        {
+          "meaning": "pavement",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
+        }
+      ],
+      "posGroups": [
+        {
+          "pos": "noun",
+          "meanings": [
+            {
+              "meaning": "sidewalk",
+              "register": "neutral"
+            },
+            {
+              "meaning": "pavement",
+              "register": "neutral"
+            }
+          ],
+          "forms": {
+            "feminine": [],
+            "plural": [
+              "trottoirs"
+            ]
+          }
+        }
+      ],
+      "forms": {
+        "feminine": [],
+        "plural": [
+          "trottoirs"
+        ]
+      },
+      "curationNote": "Curated draft · needs French-speaker review; verify regional equivalents."
+    }
+  ],
   "blond": [
     "blond (of a pale golden colour); blond (having blond hair)",
     "adjective",
@@ -69310,6 +69609,53 @@
         "feminine": [],
         "plural": []
       }
+    }
+  ],
+  "club": [
+    "club",
+    "noun (m)",
+    "",
+    "",
+    {
+      "hint": false,
+      "source": "wiktionary-en via kaikki.org",
+      "extractDate": "2026-10-30",
+      "status": "curated-draft",
+      "licence": "CC BY-SA 4.0",
+      "gender": "m",
+      "senses": [
+        {
+          "meaning": "club",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
+        }
+      ],
+      "posGroups": [
+        {
+          "pos": "noun",
+          "meanings": [
+            {
+              "meaning": "club",
+              "register": "neutral"
+            }
+          ],
+          "forms": {
+            "feminine": [],
+            "plural": [
+              "clubs"
+            ]
+          }
+        }
+      ],
+      "forms": {
+        "feminine": [],
+        "plural": [
+          "clubs"
+        ]
+      },
+      "curationNote": "Curated draft · needs French-speaker review; verify contextual senses."
     }
   ],
   "attente": [
@@ -80912,6 +81258,57 @@
           "allures"
         ]
       }
+    }
+  ],
+  "rivière": [
+    "river",
+    "noun (f)",
+    "",
+    "",
+    {
+      "hint": false,
+      "source": "wiktionary-en via kaikki.org",
+      "extractDate": "2026-10-30",
+      "status": "curated-draft",
+      "licence": "CC BY-SA 4.0",
+      "gender": "f",
+      "senses": [
+        {
+          "meaning": "river",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
+        }
+      ],
+      "posGroups": [
+        {
+          "pos": "noun",
+          "meanings": [
+            {
+              "meaning": "river",
+              "register": "neutral"
+            }
+          ],
+          "forms": {
+            "feminine": [
+              "rivières"
+            ],
+            "plural": [
+              "rivières"
+            ]
+          }
+        }
+      ],
+      "forms": {
+        "feminine": [
+          "rivières"
+        ],
+        "plural": [
+          "rivières"
+        ]
+      },
+      "curationNote": "Curated draft · needs French-speaker review."
     }
   ],
   "éternel": [
@@ -98835,6 +99232,53 @@
       }
     }
   ],
+  "test": [
+    "test",
+    "noun (m)",
+    "",
+    "",
+    {
+      "hint": false,
+      "source": "wiktionary-en via kaikki.org",
+      "extractDate": "2026-10-30",
+      "status": "curated-draft",
+      "licence": "CC BY-SA 4.0",
+      "gender": "m",
+      "senses": [
+        {
+          "meaning": "test",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
+        }
+      ],
+      "posGroups": [
+        {
+          "pos": "noun",
+          "meanings": [
+            {
+              "meaning": "test",
+              "register": "neutral"
+            }
+          ],
+          "forms": {
+            "feminine": [],
+            "plural": [
+              "tests"
+            ]
+          }
+        }
+      ],
+      "forms": {
+        "feminine": [],
+        "plural": [
+          "tests"
+        ]
+      },
+      "curationNote": "Curated draft · needs French-speaker review; verify context-specific uses."
+    }
+  ],
   "talon": [
     "heel (part of the foot); backheel; heel (of footwear) (especially high heel)",
     "noun (m)",
@@ -101107,6 +101551,49 @@
       }
     }
   ],
+  "septembre": [
+    "September",
+    "noun (m)",
+    "",
+    "",
+    {
+      "hint": false,
+      "source": "wiktionary-en via kaikki.org",
+      "extractDate": "2026-10-30",
+      "status": "curated-draft",
+      "licence": "CC BY-SA 4.0",
+      "gender": "m",
+      "senses": [
+        {
+          "meaning": "September",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
+        }
+      ],
+      "posGroups": [
+        {
+          "pos": "noun",
+          "meanings": [
+            {
+              "meaning": "September",
+              "register": "neutral"
+            }
+          ],
+          "forms": {
+            "feminine": [],
+            "plural": []
+          }
+        }
+      ],
+      "forms": {
+        "feminine": [],
+        "plural": []
+      },
+      "curationNote": "Curated draft · needs French-speaker review."
+    }
+  ],
   "délicat": [
     "delicate; refined, elegant, proper; difficult, tricky",
     "adjective",
@@ -102149,6 +102636,53 @@
         "feminine": [],
         "plural": []
       }
+    }
+  ],
+  "week-end": [
+    "weekend",
+    "noun (m)",
+    "",
+    "",
+    {
+      "hint": false,
+      "source": "wiktionary-en via kaikki.org",
+      "extractDate": "2026-10-30",
+      "status": "curated-draft",
+      "licence": "CC BY-SA 4.0",
+      "gender": "m",
+      "senses": [
+        {
+          "meaning": "weekend",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
+        }
+      ],
+      "posGroups": [
+        {
+          "pos": "noun",
+          "meanings": [
+            {
+              "meaning": "weekend",
+              "register": "neutral"
+            }
+          ],
+          "forms": {
+            "feminine": [],
+            "plural": [
+              "week-ends"
+            ]
+          }
+        }
+      ],
+      "forms": {
+        "feminine": [],
+        "plural": [
+          "week-ends"
+        ]
+      },
+      "curationNote": "Curated draft · needs French-speaker review; retain French headword spelling."
     }
   ],
   "exercer": [
@@ -104984,6 +105518,64 @@
           "flingues"
         ]
       }
+    }
+  ],
+  "prétexte": [
+    "pretext; excuse",
+    "noun (m)",
+    "",
+    "",
+    {
+      "hint": false,
+      "source": "wiktionary-en via kaikki.org",
+      "extractDate": "2026-10-30",
+      "status": "curated-draft",
+      "licence": "CC BY-SA 4.0",
+      "gender": "m",
+      "senses": [
+        {
+          "meaning": "pretext",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
+        },
+        {
+          "meaning": "excuse",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
+        }
+      ],
+      "posGroups": [
+        {
+          "pos": "noun",
+          "meanings": [
+            {
+              "meaning": "pretext",
+              "register": "neutral"
+            },
+            {
+              "meaning": "excuse",
+              "register": "neutral"
+            }
+          ],
+          "forms": {
+            "feminine": [],
+            "plural": [
+              "prétextes"
+            ]
+          }
+        }
+      ],
+      "forms": {
+        "feminine": [],
+        "plural": [
+          "prétextes"
+        ]
+      },
+      "curationNote": "Curated draft · needs French-speaker review; verify distinction between pretext and excuse."
     }
   ],
   "volant": [
@@ -108740,6 +109332,64 @@
           "veines"
         ]
       }
+    }
+  ],
+  "habit": [
+    "outfit; clothes",
+    "noun (m)",
+    "",
+    "",
+    {
+      "hint": false,
+      "source": "wiktionary-en via kaikki.org",
+      "extractDate": "2026-10-30",
+      "status": "curated-draft",
+      "licence": "CC BY-SA 4.0",
+      "gender": "m",
+      "senses": [
+        {
+          "meaning": "outfit",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
+        },
+        {
+          "meaning": "clothes",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
+        }
+      ],
+      "posGroups": [
+        {
+          "pos": "noun",
+          "meanings": [
+            {
+              "meaning": "outfit",
+              "register": "neutral"
+            },
+            {
+              "meaning": "clothes",
+              "register": "neutral"
+            }
+          ],
+          "forms": {
+            "feminine": [],
+            "plural": [
+              "habits"
+            ]
+          }
+        }
+      ],
+      "forms": {
+        "feminine": [],
+        "plural": [
+          "habits"
+        ]
+      },
+      "curationNote": "Curated draft · needs French-speaker review; clothing sense, not the English homograph."
     }
   ],
   "comporter": [
@@ -121381,6 +122031,53 @@
         "feminine": [],
         "plural": []
       }
+    }
+  ],
+  "musée": [
+    "museum",
+    "noun (m)",
+    "",
+    "",
+    {
+      "hint": false,
+      "source": "wiktionary-en via kaikki.org",
+      "extractDate": "2026-10-30",
+      "status": "curated-draft",
+      "licence": "CC BY-SA 4.0",
+      "gender": "m",
+      "senses": [
+        {
+          "meaning": "museum",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
+        }
+      ],
+      "posGroups": [
+        {
+          "pos": "noun",
+          "meanings": [
+            {
+              "meaning": "museum",
+              "register": "neutral"
+            }
+          ],
+          "forms": {
+            "feminine": [],
+            "plural": [
+              "musées"
+            ]
+          }
+        }
+      ],
+      "forms": {
+        "feminine": [],
+        "plural": [
+          "musées"
+        ]
+      },
+      "curationNote": "Curated draft · needs French-speaker review."
     }
   ],
   "soucier": [
@@ -139672,6 +140369,57 @@
       }
     }
   ],
+  "impatience": [
+    "impatience",
+    "noun (f)",
+    "",
+    "",
+    {
+      "hint": false,
+      "source": "wiktionary-en via kaikki.org",
+      "extractDate": "2026-10-30",
+      "status": "curated-draft",
+      "licence": "CC BY-SA 4.0",
+      "gender": "f",
+      "senses": [
+        {
+          "meaning": "impatience",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
+        }
+      ],
+      "posGroups": [
+        {
+          "pos": "noun",
+          "meanings": [
+            {
+              "meaning": "impatience",
+              "register": "neutral"
+            }
+          ],
+          "forms": {
+            "feminine": [
+              "impatiences"
+            ],
+            "plural": [
+              "impatiences"
+            ]
+          }
+        }
+      ],
+      "forms": {
+        "feminine": [
+          "impatiences"
+        ],
+        "plural": [
+          "impatiences"
+        ]
+      },
+      "curationNote": "Curated draft · needs French-speaker review."
+    }
+  ],
   "carrefour": [
     "crossroads; intersection",
     "noun (m)",
@@ -142575,6 +143323,60 @@
           "catholiques"
         ]
       }
+    }
+  ],
+  "raccompagner": [
+    "to take (someone) home; to see (someone) off",
+    "verb",
+    "",
+    "",
+    {
+      "hint": false,
+      "source": "wiktionary-en via kaikki.org",
+      "extractDate": "2026-10-30",
+      "status": "curated-draft",
+      "licence": "CC BY-SA 4.0",
+      "gender": null,
+      "senses": [
+        {
+          "meaning": "to take (someone) home",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
+        },
+        {
+          "meaning": "to see (someone) off",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
+        }
+      ],
+      "posGroups": [
+        {
+          "pos": "verb",
+          "meanings": [
+            {
+              "meaning": "to take (someone) home",
+              "register": "neutral"
+            },
+            {
+              "meaning": "to see (someone) off",
+              "register": "neutral"
+            }
+          ],
+          "forms": {
+            "feminine": [],
+            "plural": []
+          }
+        }
+      ],
+      "forms": {
+        "feminine": [],
+        "plural": []
+      },
+      "curationNote": "Curated draft · needs French-speaker review; verify object and destination nuance."
     }
   ],
   "prolonger": [
@@ -179702,879 +180504,6 @@
         ],
         "plural": [
           "voûtes"
-        ]
-      }
-    }
-  ],
-  "quantité": [
-    "quantity",
-    "noun (f)",
-    "",
-    "",
-    {
-      "hint": false,
-      "source": "wiktionary-en via kaikki.org",
-      "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
-      "licence": "CC BY-SA 4.0",
-      "gender": "f",
-      "senses": [
-        {
-          "meaning": "quantity",
-          "tags": [
-            "feminine"
-          ],
-          "registerTags": [],
-          "label": null
-        }
-      ],
-      "posGroups": [
-        {
-          "pos": "noun",
-          "meanings": [
-            {
-              "meaning": "quantity",
-              "register": "neutral"
-            }
-          ],
-          "forms": {
-            "feminine": [
-              "quantités"
-            ],
-            "plural": [
-              "quantités"
-            ]
-          }
-        }
-      ],
-      "forms": {
-        "feminine": [
-          "quantités"
-        ],
-        "plural": [
-          "quantités"
-        ]
-      }
-    }
-  ],
-  "négliger": [
-    "to neglect; to ignore (a detail)",
-    "verb",
-    "",
-    "",
-    {
-      "hint": false,
-      "source": "wiktionary-en via kaikki.org",
-      "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
-      "licence": "CC BY-SA 4.0",
-      "gender": null,
-      "senses": [
-        {
-          "meaning": "to neglect",
-          "tags": [],
-          "registerTags": [],
-          "label": null
-        },
-        {
-          "meaning": "to ignore (a detail)",
-          "tags": [],
-          "registerTags": [],
-          "label": null
-        }
-      ],
-      "posGroups": [
-        {
-          "pos": "verb",
-          "meanings": [
-            {
-              "meaning": "to neglect",
-              "register": "neutral"
-            },
-            {
-              "meaning": "to ignore (a detail)",
-              "register": "neutral"
-            }
-          ],
-          "forms": {
-            "feminine": [],
-            "plural": []
-          }
-        }
-      ],
-      "forms": {
-        "feminine": [],
-        "plural": []
-      }
-    }
-  ],
-  "vibrer": [
-    "to vibrate",
-    "verb",
-    "",
-    "",
-    {
-      "hint": false,
-      "source": "wiktionary-en via kaikki.org",
-      "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
-      "licence": "CC BY-SA 4.0",
-      "gender": null,
-      "senses": [
-        {
-          "meaning": "to vibrate",
-          "tags": [
-            "intransitive",
-            "transitive"
-          ],
-          "registerTags": [],
-          "label": null
-        }
-      ],
-      "posGroups": [
-        {
-          "pos": "verb",
-          "meanings": [
-            {
-              "meaning": "to vibrate",
-              "register": "neutral"
-            }
-          ],
-          "forms": {
-            "feminine": [],
-            "plural": []
-          }
-        }
-      ],
-      "forms": {
-        "feminine": [],
-        "plural": []
-      }
-    }
-  ],
-  "marge": [
-    "margin (of paper, etc); markup (percentage or amount added to buy-in price)",
-    "noun (f)",
-    "",
-    "",
-    {
-      "hint": false,
-      "source": "wiktionary-en via kaikki.org",
-      "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
-      "licence": "CC BY-SA 4.0",
-      "gender": "f",
-      "senses": [
-        {
-          "meaning": "margin (of paper, etc)",
-          "tags": [
-            "feminine"
-          ],
-          "registerTags": [],
-          "label": null
-        },
-        {
-          "meaning": "markup (percentage or amount added to buy-in price)",
-          "tags": [
-            "feminine"
-          ],
-          "registerTags": [],
-          "label": null
-        }
-      ],
-      "posGroups": [
-        {
-          "pos": "noun",
-          "meanings": [
-            {
-              "meaning": "margin (of paper, etc)",
-              "register": "neutral"
-            },
-            {
-              "meaning": "markup (percentage or amount added to buy-in price)",
-              "register": "neutral"
-            }
-          ],
-          "forms": {
-            "feminine": [
-              "marges"
-            ],
-            "plural": [
-              "marges"
-            ]
-          }
-        }
-      ],
-      "forms": {
-        "feminine": [
-          "marges"
-        ],
-        "plural": [
-          "marges"
-        ]
-      }
-    }
-  ],
-  "pétrole": [
-    "petroleum; oil; hydrocarbon",
-    "noun (m)",
-    "",
-    "",
-    {
-      "hint": false,
-      "source": "wiktionary-en via kaikki.org",
-      "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
-      "licence": "CC BY-SA 4.0",
-      "gender": "m",
-      "senses": [
-        {
-          "meaning": "petroleum",
-          "tags": [
-            "masculine"
-          ],
-          "registerTags": [],
-          "label": null
-        },
-        {
-          "meaning": "oil",
-          "tags": [
-            "masculine"
-          ],
-          "registerTags": [],
-          "label": null
-        },
-        {
-          "meaning": "hydrocarbon",
-          "tags": [
-            "masculine"
-          ],
-          "registerTags": [],
-          "label": null
-        }
-      ],
-      "posGroups": [
-        {
-          "pos": "noun",
-          "meanings": [
-            {
-              "meaning": "petroleum",
-              "register": "neutral"
-            },
-            {
-              "meaning": "oil",
-              "register": "neutral"
-            },
-            {
-              "meaning": "hydrocarbon",
-              "register": "neutral"
-            }
-          ],
-          "forms": {
-            "feminine": [],
-            "plural": [
-              "pétroles"
-            ]
-          }
-        }
-      ],
-      "forms": {
-        "feminine": [],
-        "plural": [
-          "pétroles"
-        ]
-      }
-    }
-  ],
-  "bouffée": [
-    "puff (of wind, smoke, etc.); (figurative) surge, rush",
-    "noun (f)",
-    "",
-    "",
-    {
-      "hint": false,
-      "source": "wiktionary-en via kaikki.org",
-      "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
-      "licence": "CC BY-SA 4.0",
-      "gender": "f",
-      "senses": [
-        {
-          "meaning": "puff (of wind, smoke, etc.)",
-          "tags": [
-            "feminine"
-          ],
-          "registerTags": [],
-          "label": null
-        },
-        {
-          "meaning": "surge, rush",
-          "tags": [
-            "feminine",
-            "figuratively"
-          ],
-          "registerTags": [
-            "figurative"
-          ],
-          "label": "figurative"
-        }
-      ],
-      "posGroups": [
-        {
-          "pos": "noun",
-          "meanings": [
-            {
-              "meaning": "puff (of wind, smoke, etc.)",
-              "register": "neutral"
-            },
-            {
-              "meaning": "surge, rush",
-              "register": "figurative"
-            }
-          ],
-          "forms": {
-            "feminine": [
-              "bouffées"
-            ],
-            "plural": [
-              "bouffées"
-            ]
-          }
-        }
-      ],
-      "forms": {
-        "feminine": [
-          "bouffées"
-        ],
-        "plural": [
-          "bouffées"
-        ]
-      }
-    }
-  ],
-  "narine": [
-    "nostril",
-    "noun (f)",
-    "",
-    "",
-    {
-      "hint": false,
-      "source": "wiktionary-en via kaikki.org",
-      "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
-      "licence": "CC BY-SA 4.0",
-      "gender": "f",
-      "senses": [
-        {
-          "meaning": "nostril",
-          "tags": [
-            "feminine"
-          ],
-          "registerTags": [],
-          "label": null
-        }
-      ],
-      "posGroups": [
-        {
-          "pos": "noun",
-          "meanings": [
-            {
-              "meaning": "nostril",
-              "register": "neutral"
-            }
-          ],
-          "forms": {
-            "feminine": [
-              "narines"
-            ],
-            "plural": [
-              "narines"
-            ]
-          }
-        }
-      ],
-      "forms": {
-        "feminine": [
-          "narines"
-        ],
-        "plural": [
-          "narines"
-        ]
-      }
-    }
-  ],
-  "caporal": [
-    "corporal; caporal (tobacco)",
-    "noun (m)",
-    "",
-    "",
-    {
-      "hint": false,
-      "source": "wiktionary-en via kaikki.org",
-      "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
-      "licence": "CC BY-SA 4.0",
-      "gender": "m",
-      "senses": [
-        {
-          "meaning": "corporal",
-          "tags": [
-            "masculine"
-          ],
-          "registerTags": [],
-          "label": null
-        },
-        {
-          "meaning": "caporal (tobacco)",
-          "tags": [
-            "masculine"
-          ],
-          "registerTags": [],
-          "label": null
-        }
-      ],
-      "posGroups": [
-        {
-          "pos": "noun",
-          "meanings": [
-            {
-              "meaning": "corporal",
-              "register": "neutral"
-            },
-            {
-              "meaning": "caporal (tobacco)",
-              "register": "neutral"
-            }
-          ],
-          "forms": {
-            "feminine": [
-              "caporale"
-            ],
-            "plural": [
-              "caporaux"
-            ]
-          }
-        }
-      ],
-      "forms": {
-        "feminine": [
-          "caporale"
-        ],
-        "plural": [
-          "caporaux"
-        ]
-      }
-    }
-  ],
-  "roche": [
-    "rock (large mass of stone)",
-    "noun (f)",
-    "",
-    "",
-    {
-      "hint": false,
-      "source": "wiktionary-en via kaikki.org",
-      "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
-      "licence": "CC BY-SA 4.0",
-      "gender": "f",
-      "senses": [
-        {
-          "meaning": "rock (large mass of stone)",
-          "tags": [
-            "feminine"
-          ],
-          "registerTags": [],
-          "label": null
-        }
-      ],
-      "posGroups": [
-        {
-          "pos": "noun",
-          "meanings": [
-            {
-              "meaning": "rock (large mass of stone)",
-              "register": "neutral"
-            }
-          ],
-          "forms": {
-            "feminine": [
-              "roches"
-            ],
-            "plural": [
-              "roches"
-            ]
-          }
-        }
-      ],
-      "forms": {
-        "feminine": [
-          "roches"
-        ],
-        "plural": [
-          "roches"
-        ]
-      }
-    }
-  ],
-  "probable": [
-    "likely, probable",
-    "adjective",
-    "",
-    "",
-    {
-      "hint": false,
-      "source": "wiktionary-en via kaikki.org",
-      "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
-      "licence": "CC BY-SA 4.0",
-      "gender": null,
-      "senses": [
-        {
-          "meaning": "likely, probable",
-          "tags": [],
-          "registerTags": [],
-          "label": null
-        }
-      ],
-      "posGroups": [
-        {
-          "pos": "adjective",
-          "meanings": [
-            {
-              "meaning": "likely, probable",
-              "register": "neutral"
-            }
-          ],
-          "forms": {
-            "feminine": [],
-            "plural": [
-              "probables"
-            ]
-          }
-        }
-      ],
-      "forms": {
-        "feminine": [],
-        "plural": [
-          "probables"
-        ]
-      }
-    }
-  ],
-  "complice": [
-    "accomplice",
-    "noun (m/f)",
-    "",
-    "",
-    {
-      "hint": false,
-      "source": "wiktionary-en via kaikki.org",
-      "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
-      "licence": "CC BY-SA 4.0",
-      "gender": "m/f",
-      "senses": [
-        {
-          "meaning": "accomplice",
-          "tags": [
-            "by-personal-gender",
-            "feminine",
-            "masculine"
-          ],
-          "registerTags": [],
-          "label": null
-        }
-      ],
-      "posGroups": [
-        {
-          "pos": "noun",
-          "meanings": [
-            {
-              "meaning": "accomplice",
-              "register": "neutral"
-            }
-          ],
-          "forms": {
-            "feminine": [],
-            "plural": [
-              "complices"
-            ]
-          }
-        },
-        {
-          "pos": "adjective",
-          "meanings": [
-            {
-              "meaning": "kindred, close",
-              "register": "neutral"
-            },
-            {
-              "meaning": "complicit",
-              "register": "neutral"
-            }
-          ],
-          "forms": {
-            "feminine": [],
-            "plural": [
-              "complices"
-            ]
-          }
-        }
-      ],
-      "forms": {
-        "feminine": [],
-        "plural": [
-          "complices"
-        ]
-      }
-    }
-  ],
-  "confusion": [
-    "confusion",
-    "noun (f)",
-    "",
-    "",
-    {
-      "hint": false,
-      "source": "wiktionary-en via kaikki.org",
-      "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
-      "licence": "CC BY-SA 4.0",
-      "gender": "f",
-      "senses": [
-        {
-          "meaning": "confusion",
-          "tags": [
-            "feminine"
-          ],
-          "registerTags": [],
-          "label": null
-        }
-      ],
-      "posGroups": [
-        {
-          "pos": "noun",
-          "meanings": [
-            {
-              "meaning": "confusion",
-              "register": "neutral"
-            }
-          ],
-          "forms": {
-            "feminine": [
-              "confusions"
-            ],
-            "plural": [
-              "confusions"
-            ]
-          }
-        }
-      ],
-      "forms": {
-        "feminine": [
-          "confusions"
-        ],
-        "plural": [
-          "confusions"
-        ]
-      }
-    }
-  ],
-  "teint": [
-    "tint",
-    "noun (m)",
-    "",
-    "",
-    {
-      "hint": false,
-      "source": "wiktionary-en via kaikki.org",
-      "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
-      "licence": "CC BY-SA 4.0",
-      "gender": "m",
-      "senses": [
-        {
-          "meaning": "tint",
-          "tags": [
-            "masculine"
-          ],
-          "registerTags": [],
-          "label": null
-        }
-      ],
-      "posGroups": [
-        {
-          "pos": "noun",
-          "meanings": [
-            {
-              "meaning": "tint",
-              "register": "neutral"
-            }
-          ],
-          "forms": {
-            "feminine": [],
-            "plural": [
-              "teints"
-            ]
-          }
-        },
-        {
-          "pos": "adjective",
-          "meanings": [
-            {
-              "meaning": "dyed; tinted",
-              "register": "neutral"
-            }
-          ],
-          "forms": {
-            "feminine": [
-              "teinte",
-              "teintes"
-            ],
-            "plural": [
-              "teintes",
-              "teints"
-            ]
-          }
-        }
-      ],
-      "forms": {
-        "feminine": [],
-        "plural": [
-          "teints"
-        ]
-      }
-    }
-  ],
-  "pasteur": [
-    "shepherd; (figurative) one who looks after the flock of the faithful",
-    "noun (m)",
-    "",
-    "",
-    {
-      "hint": false,
-      "source": "wiktionary-en via kaikki.org",
-      "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
-      "licence": "CC BY-SA 4.0",
-      "gender": "m",
-      "senses": [
-        {
-          "meaning": "shepherd",
-          "tags": [
-            "masculine"
-          ],
-          "registerTags": [],
-          "label": null
-        },
-        {
-          "meaning": "one who looks after the flock of the faithful",
-          "tags": [
-            "figuratively",
-            "masculine"
-          ],
-          "registerTags": [
-            "figurative"
-          ],
-          "label": "figurative"
-        }
-      ],
-      "posGroups": [
-        {
-          "pos": "noun",
-          "meanings": [
-            {
-              "meaning": "shepherd",
-              "register": "neutral"
-            },
-            {
-              "meaning": "one who looks after the flock of the faithful",
-              "register": "figurative"
-            }
-          ],
-          "forms": {
-            "feminine": [
-              "pasteure",
-              "pastoresse"
-            ],
-            "plural": [
-              "pasteurs"
-            ]
-          }
-        }
-      ],
-      "forms": {
-        "feminine": [
-          "pasteure",
-          "pastoresse"
-        ],
-        "plural": [
-          "pasteurs"
-        ]
-      }
-    }
-  ],
-  "brigade": [
-    "brigade; brigade, team of workers",
-    "noun (f)",
-    "",
-    "",
-    {
-      "hint": false,
-      "source": "wiktionary-en via kaikki.org",
-      "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
-      "licence": "CC BY-SA 4.0",
-      "gender": "f",
-      "senses": [
-        {
-          "meaning": "brigade",
-          "tags": [
-            "feminine"
-          ],
-          "registerTags": [],
-          "label": null
-        },
-        {
-          "meaning": "brigade, team of workers",
-          "tags": [
-            "broadly",
-            "feminine"
-          ],
-          "registerTags": [],
-          "label": null
-        }
-      ],
-      "posGroups": [
-        {
-          "pos": "noun",
-          "meanings": [
-            {
-              "meaning": "brigade",
-              "register": "neutral"
-            },
-            {
-              "meaning": "brigade, team of workers",
-              "register": "neutral"
-            }
-          ],
-          "forms": {
-            "feminine": [
-              "brigades"
-            ],
-            "plural": [
-              "brigades"
-            ]
-          }
-        }
-      ],
-      "forms": {
-        "feminine": [
-          "brigades"
-        ],
-        "plural": [
-          "brigades"
         ]
       }
     }

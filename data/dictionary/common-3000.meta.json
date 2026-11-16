@@ -18,12 +18,17 @@
       "url": "https://kaikki.org/dictionary/French/kaikki.org-dictionary-French.jsonl"
     }
   },
-  "ranking": "freqlemfilms2 + freqlemlivres; highest-frequency POS per lemma",
+  "ranking": "freqlemfilms2 + freqlemlivres; highest-frequency POS per lemma except explicit learner display-order exceptions",
+  "displayOrderExceptions": {
+    "nouveau": "adjective",
+    "souvenir": "noun",
+    "peu": "adverb"
+  },
   "posDistribution": {
-    "noun": 1678,
-    "verb": 825,
+    "noun": 1679,
+    "verb": 823,
     "adjective": 393,
-    "adverb": 104
+    "adverb": 105
   },
   "qualityRules": {
     "firstKaikkiEntryPerPos": true,
@@ -64,21 +69,21 @@
     "entriesSkippedNoUsableSenses": 1110,
     "variantOnlyEntriesSkipped": 17,
     "registerTaggedSenses": 4588,
-    "entriesWithRegisterLabels": 217,
+    "entriesWithRegisterLabels": 215,
     "parentGlossesReplacedBySubglosses": 6,
-    "secondaryPosGroups": 320,
-    "alternatePosRowsGrouped": 339,
+    "secondaryPosGroups": 318,
+    "alternatePosRowsGrouped": 337,
     "descriptiveGlossesDropped": 20,
-    "overlongGlossesRejected": 1671,
+    "overlongGlossesRejected": 1833,
     "entriesDroppedBecauseOfOverlongGlosses": 655,
     "nearDuplicateSensesRemoved": 702,
     "lowRegisterSensesSkipped": 1076,
-    "overridesApplied": 13,
+    "overridesApplied": 28,
     "selectedEntries": 3000
   },
-  "overridesApplied": 13,
+  "overridesApplied": 28,
   "sizes": {
-    "rawBytes": 3849430,
-    "gzipBytes": 225422
+    "rawBytes": 3848713,
+    "gzipBytes": 226266
   }
 }
