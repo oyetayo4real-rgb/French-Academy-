@@ -29,7 +29,7 @@ jobs:
           curl -sSL --retry 4 --retry-all-errors --retry-delay 3 --connect-timeout 30 -o data/raw/kaikki.jsonl 'https://kaikki.org/dictionary/French/kaikki.org-dictionary-French.jsonl'
           ls -l data/raw/kaikki.jsonl
           sha256sum data/raw/kaikki.jsonl
-          grep -o '"sha256":"[0-9a-f]*"' tools/dictionary/sources.lock.json | tail -1
+          grep -o '"sha256": *"[0-9a-f]*"' tools/dictionary/sources.lock.json | tail -1 || true
 
       - name: Extract records for the 3,000 headwords
         run: |
