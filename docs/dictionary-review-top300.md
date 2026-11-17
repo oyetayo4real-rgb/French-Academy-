@@ -225,9 +225,9 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 022. foutre
 - **Part of speech:** verb
 - **Gender:** —
-- **Primary meaning:** (slang, vulgar) to do, to fuck around with, to dick around, to fritter, to tinker; (slang) to give; (slang) to put on/in (quickly), to shove, to stick, to stash
-- **POS group:** verb: to do, to fuck around with, to dick around, to fritter, to tinker; to give; to put on/in (quickly), to shove, to stick, to stash [See the Conjugate tool for forms]
-- **POS group:** noun: spunk, sperm, cum [plural: foutres]
+- **Primary meaning:** to do (vulgar slang); to put; to throw (vulgar slang); to give (vulgar slang)
+- **POS group:** verb: to do (vulgar slang); to put; to throw (vulgar slang); to give (vulgar slang) [See the Conjugate tool for forms]
+- **POS group:** noun: semen (vulgar) [plural: foutres]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -320,8 +320,8 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 031. envoyer
 - **Part of speech:** verb
 - **Gender:** —
-- **Primary meaning:** to send; to gulp down with relish
-- **POS group:** verb: to send; to gulp down with relish [See the Conjugate tool for forms]
+- **Primary meaning:** to send; to throw
+- **POS group:** verb: to send; to throw [See the Conjugate tool for forms]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -393,8 +393,8 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 038. bout
 - **Part of speech:** noun (m)
 - **Gender:** m
-- **Primary meaning:** end, extremity, tip (of a physical object); bit, piece, scrap; rope
-- **POS group:** noun: end, extremity, tip (of a physical object); bit, piece, scrap; rope [plural: bouts]
+- **Primary meaning:** end; tip; bit; piece
+- **POS group:** noun: end; tip; bit; piece [plural: bouts]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -454,8 +454,8 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 044. madame
 - **Part of speech:** noun (f)
 - **Gender:** f
-- **Primary meaning:** lady, woman; the female employer of a domestic servant
-- **POS group:** noun: lady, woman; the female employer of a domestic servant [feminine: mesdames; plural: mesdames]
+- **Primary meaning:** Mrs; madam; lady
+- **POS group:** noun: Mrs; madam; lady [feminine: mesdames; plural: mesdames]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -514,8 +514,8 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 050. chance
 - **Part of speech:** noun (f)
 - **Gender:** f
-- **Primary meaning:** chance; luck; Immigrant of non-European heritage, short for "chance pour la France".
-- **POS group:** noun: chance; luck; Immigrant of non-European heritage, short for "chance pour la France". [feminine: chances; plural: chances]
+- **Primary meaning:** luck; chance; opportunity
+- **POS group:** noun: luck; chance; opportunity [feminine: chances; plural: chances]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -671,7 +671,7 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 - **Gender:** —
 - **Primary meaning:** to touch (physically); to affect; to receive, to get; to earn (money)
 - **POS group:** verb: to touch (physically); to affect; to receive, to get; to earn (money) [See the Conjugate tool for forms]
-- **POS group:** noun: the act of touching (see below); a way of touching [plural: touchers]
+- **POS group:** noun: sense of touch; feel [plural: touchers]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -740,8 +740,8 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 072. lieu
 - **Part of speech:** noun (m)
 - **Gender:** m
-- **Primary meaning:** place; outhouse, toilet
-- **POS group:** noun: place; outhouse, toilet [plural: lieus, lieux]
+- **Primary meaning:** place; spot; location
+- **POS group:** noun: place; spot; location [plural: lieus, lieux]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -1006,8 +1006,8 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 098. chef
 - **Part of speech:** noun (m)
 - **Gender:** m
-- **Primary meaning:** article, principal point; principal motive, charge, count of indictment; chief; top third of a coat of arms
-- **POS group:** noun: article, principal point; principal motive, charge, count of indictment; chief; top third of a coat of arms [plural: chefs]
+- **Primary meaning:** chief; boss; leader; chef (head cook)
+- **POS group:** noun: chief; boss; leader; chef (head cook) [plural: chefs]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -1016,8 +1016,8 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 099. lumière
 - **Part of speech:** noun (f)
 - **Gender:** f
-- **Primary meaning:** lumen; (informal) light; (informal) headlight; headlamp
-- **POS group:** noun: lumen; light; headlight; headlamp [feminine: lumières; plural: lumières]
+- **Primary meaning:** light; lamp; headlight
+- **POS group:** noun: light; lamp; headlight [feminine: lumières; plural: lumières]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -1048,8 +1048,8 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 102. verre
 - **Part of speech:** noun (m)
 - **Gender:** m
-- **Primary meaning:** glass (substance); Object of this substance
-- **POS group:** noun: glass (substance); Object of this substance [plural: verres]
+- **Primary meaning:** glass (material); glass (for drinking)
+- **POS group:** noun: glass (material); glass (for drinking) [plural: verres]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -1108,8 +1108,8 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 108. cheveu
 - **Part of speech:** noun (m)
 - **Gender:** m
-- **Primary meaning:** a headhair
-- **POS group:** noun: a headhair [plural: cheveux]
+- **Primary meaning:** hair (a single hair on the head)
+- **POS group:** noun: hair (a single hair on the head) [plural: cheveux]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -1231,8 +1231,8 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 120. rouge
 - **Part of speech:** adjective
 - **Gender:** —
-- **Primary meaning:** red (of a red color); red (left-wing, socialist); a supporter of the Republican Party
-- **POS group:** adjective: red (of a red color); red (left-wing, socialist); a supporter of the Republican Party [plural: rouges]
+- **Primary meaning:** red; left-wing (politics)
+- **POS group:** adjective: red; left-wing (politics) [plural: rouges]
 - **POS group:** noun: red [plural: rouges]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
@@ -1386,8 +1386,9 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 135. nouvelle
 - **Part of speech:** adjective
 - **Gender:** —
-- **Primary meaning:** feminine singular of nouveau (“new”)
-- **POS group:** adjective: feminine singular of nouveau (“new”) [feminine: nouvelles; plural: nouvelles]
+- **Primary meaning:** new
+- **POS group:** adjective: new [feminine: nouvelles; plural: nouvelles]
+- **POS group:** noun: news; piece of news; short story
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -1517,8 +1518,8 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 148. putain
 - **Part of speech:** noun (f)
 - **Gender:** f
-- **Primary meaning:** (dated, vulgar) whore, hooker; (dated, slang, vulgar, derogatory) bitch, cow (an unpleasant woman)
-- **POS group:** noun: whore, hooker; bitch, cow (an unpleasant woman) [feminine: putains; plural: putains]
+- **Primary meaning:** whore (vulgar); damn! (vulgar exclamation)
+- **POS group:** noun: whore (vulgar); damn! (vulgar exclamation) [feminine: putains; plural: putains]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -1604,8 +1605,8 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 156. papa
 - **Part of speech:** noun (m)
 - **Gender:** m
-- **Primary meaning:** pops, any man of roughly fatherly age and appearance
-- **POS group:** noun: pops, any man of roughly fatherly age and appearance [plural: papas]
+- **Primary meaning:** dad; daddy
+- **POS group:** noun: dad; daddy [plural: papas]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -1687,8 +1688,8 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 164. après
 - **Part of speech:** adverb
 - **Gender:** —
-- **Primary meaning:** afterwards; Indicates the continuous aspect
-- **POS group:** adverb: afterwards; Indicates the continuous aspect
+- **Primary meaning:** afterwards; after that
+- **POS group:** adverb: afterwards; after that
 - **POS group:** preposition: after, later than in time.; after, coming for, trying to get (someone).
 - **Review:** OK: __________
 - **Correction:** Fix: __________
@@ -1728,8 +1729,8 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 168. voler
 - **Part of speech:** verb
 - **Gender:** —
-- **Primary meaning:** to fly through the air; to pursue flying; to scarper, flee
-- **POS group:** verb: to fly through the air; to pursue flying; to scarper, flee [See the Conjugate tool for forms]
+- **Primary meaning:** to fly; to steal; to rob
+- **POS group:** verb: to fly; to steal; to rob [See the Conjugate tool for forms]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -1810,8 +1811,8 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 176. cours
 - **Part of speech:** noun (m)
 - **Gender:** m
-- **Primary meaning:** stream of water, river; course (of events); teaching, lesson, lecture, class
-- **POS group:** noun: stream of water, river; course (of events); teaching, lesson, lecture, class
+- **Primary meaning:** class; lesson; course (of events); flow (of water)
+- **POS group:** noun: class; lesson; course (of events); flow (of water)
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -1941,8 +1942,8 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 189. cheval
 - **Part of speech:** noun (m)
 - **Gender:** m
-- **Primary meaning:** horse; ellipsis of cheval-vapeur (“horsepower”); ellipsis of cheval fiscal (“tax horsepower”)
-- **POS group:** noun: horse; ellipsis of cheval-vapeur (“horsepower”); ellipsis of cheval fiscal (“tax horsepower”) [feminine: jument; plural: chevaux]
+- **Primary meaning:** horse; horsepower
+- **POS group:** noun: horse; horsepower [feminine: jument; plural: chevaux]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -1961,8 +1962,8 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 191. meilleur
 - **Part of speech:** adjective
 - **Gender:** —
-- **Primary meaning:** comparative degree of bon ("better"); comparative degree of bien; superlative degree of bon ("best")
-- **POS group:** adjective: comparative degree of bon ("better"); comparative degree of bien; superlative degree of bon ("best") [feminine: meilleure, meilleures; plural: meilleures, meilleurs]
+- **Primary meaning:** better; best (le meilleur)
+- **POS group:** adjective: better; best (le meilleur) [feminine: meilleure, meilleures; plural: meilleures, meilleurs]
 - **POS group:** noun: best [feminine: meilleure, meilleures; plural: meilleures, meilleurs]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
@@ -2042,8 +2043,8 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 199. sac
 - **Part of speech:** noun (m)
 - **Gender:** m
-- **Primary meaning:** bag, sack; (dated, slang) ten French francs
-- **POS group:** noun: bag, sack; ten French francs [plural: sacs]
+- **Primary meaning:** bag; sack
+- **POS group:** noun: bag; sack [plural: sacs]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -2074,8 +2075,8 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 202. vent
 - **Part of speech:** noun (m)
 - **Gender:** m
-- **Primary meaning:** flatulence; empty words, hot air
-- **POS group:** noun: flatulence; empty words, hot air [plural: vents]
+- **Primary meaning:** wind; flatulence; empty talk; hot air
+- **POS group:** noun: wind; flatulence; empty talk; hot air [plural: vents]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -2174,8 +2175,8 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 212. arbre
 - **Part of speech:** noun (m)
 - **Gender:** m
-- **Primary meaning:** axle; drive shaft
-- **POS group:** noun: axle; drive shaft [plural: arbres]
+- **Primary meaning:** tree; shaft (of a machine)
+- **POS group:** noun: tree; shaft (of a machine) [plural: arbres]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -2424,8 +2425,8 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 236. merde
 - **Part of speech:** noun (f)
 - **Gender:** f
-- **Primary meaning:** shit (something undesirable or unwanted); shit (something of poor quality)
-- **POS group:** noun: shit (something undesirable or unwanted); shit (something of poor quality) [feminine: merdes; plural: merdes]
+- **Primary meaning:** shit (vulgar); crap; mess (informal)
+- **POS group:** noun: shit (vulgar); crap; mess (informal) [feminine: merdes; plural: merdes]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -2444,8 +2445,8 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 238. patron
 - **Part of speech:** noun (m)
 - **Gender:** m
-- **Primary meaning:** a boss, employer,; a head of a group of people, a department, a location, etc.; a pimp or brothel-keeper
-- **POS group:** noun: a boss, employer,; a head of a group of people, a department, a location, etc.; a pimp or brothel-keeper [feminine: patronne, patronnes; plural: patronnes, patrons]
+- **Primary meaning:** boss; employer; owner (of a bar, restaurant); pattern (for sewing)
+- **POS group:** noun: boss; employer; owner (of a bar, restaurant); pattern (for sewing) [feminine: patronne, patronnes; plural: patronnes, patrons]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -2486,8 +2487,8 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 242. image
 - **Part of speech:** noun (f)
 - **Gender:** f
-- **Primary meaning:** picture, image; frame; A mental representation.
-- **POS group:** noun: picture, image; frame; A mental representation. [feminine: images; plural: images]
+- **Primary meaning:** picture; image; mental image
+- **POS group:** noun: picture; image; mental image [feminine: images; plural: images]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -2580,8 +2581,8 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 251. fleur
 - **Part of speech:** noun (f)
 - **Gender:** f
-- **Primary meaning:** flowering plant; angiosperm; the plant with flowers itself; (figurative) a kind favor given by one person to another; (figurative) the best of something
-- **POS group:** noun: flowering plant; angiosperm; the plant with flowers itself; a kind favor given by one person to another; the best of something [feminine: fleurs; plural: fleurs]
+- **Primary meaning:** flower; bloom; blossom
+- **POS group:** noun: flower; bloom; blossom [feminine: fleurs; plural: fleurs]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -2972,8 +2973,8 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 290. capitaine
 - **Part of speech:** noun (m/f)
 - **Gender:** m/f
-- **Primary meaning:** captain, leader; giant African threadfin (Polydactylus quadrifilis)
-- **POS group:** noun: captain, leader; giant African threadfin (Polydactylus quadrifilis) [plural: capitaines]
+- **Primary meaning:** captain; leader; skipper
+- **POS group:** noun: captain; leader; skipper [plural: capitaines]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 
@@ -3033,8 +3034,8 @@ Index: batches contain 25 entries each. Use the matching rank in the CSV when re
 ### 296. bonheur
 - **Part of speech:** noun (m)
 - **Gender:** m
-- **Primary meaning:** goodhap, good fortune; happiness
-- **POS group:** noun: goodhap, good fortune; happiness [plural: bonheurs]
+- **Primary meaning:** happiness; good luck
+- **POS group:** noun: happiness; good luck [plural: bonheurs]
 - **Review:** OK: __________
 - **Correction:** Fix: __________
 

@@ -1404,7 +1404,7 @@
     }
   ],
   "foutre": [
-    "(slang, vulgar) to do, to fuck around with, to dick around, to fritter, to tinker; (slang) to give; (slang) to put on/in (quickly), to shove, to stick, to stash",
+    "to do (vulgar slang); to put; to throw (vulgar slang); to give (vulgar slang)",
     "verb",
     "",
     "",
@@ -1412,44 +1412,30 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": null,
       "senses": [
         {
-          "meaning": "to do, to fuck around with, to dick around, to fritter, to tinker",
-          "tags": [
-            "slang",
-            "transitive",
-            "vulgar"
-          ],
-          "registerTags": [
-            "slang",
-            "vulgar"
-          ],
-          "label": "slang, vulgar"
+          "meaning": "to do (vulgar slang)",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "to give",
-          "tags": [
-            "slang",
-            "transitive"
-          ],
-          "registerTags": [
-            "slang"
-          ],
-          "label": "slang"
+          "meaning": "to put; to throw (vulgar slang)",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "to put on/in (quickly), to shove, to stick, to stash",
-          "tags": [
-            "slang",
-            "transitive"
-          ],
-          "registerTags": [
-            "slang"
-          ],
-          "label": "slang"
+          "meaning": "to give (vulgar slang)",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -1457,16 +1443,16 @@
           "pos": "verb",
           "meanings": [
             {
-              "meaning": "to do, to fuck around with, to dick around, to fritter, to tinker",
-              "register": "slang, vulgar"
+              "meaning": "to do (vulgar slang)",
+              "register": "neutral"
             },
             {
-              "meaning": "to give",
-              "register": "slang"
+              "meaning": "to put; to throw (vulgar slang)",
+              "register": "neutral"
             },
             {
-              "meaning": "to put on/in (quickly), to shove, to stick, to stash",
-              "register": "slang"
+              "meaning": "to give (vulgar slang)",
+              "register": "neutral"
             }
           ],
           "forms": {
@@ -1478,8 +1464,8 @@
           "pos": "noun",
           "meanings": [
             {
-              "meaning": "spunk, sperm, cum",
-              "register": "slang, vulgar"
+              "meaning": "semen (vulgar)",
+              "register": "neutral"
             }
           ],
           "forms": {
@@ -1493,7 +1479,8 @@
       "forms": {
         "feminine": [],
         "plural": []
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "paraître": [
@@ -2034,7 +2021,7 @@
     }
   ],
   "envoyer": [
-    "to send; to gulp down with relish",
+    "to send; to throw",
     "verb",
     "",
     "",
@@ -2042,7 +2029,7 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": null,
       "senses": [
@@ -2050,15 +2037,15 @@
           "meaning": "to send",
           "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "to gulp down with relish",
-          "tags": [
-            "reflexive"
-          ],
+          "meaning": "to throw",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -2070,7 +2057,7 @@
               "register": "neutral"
             },
             {
-              "meaning": "to gulp down with relish",
+              "meaning": "to throw",
               "register": "neutral"
             }
           ],
@@ -2083,7 +2070,8 @@
       "forms": {
         "feminine": [],
         "plural": []
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "descendre": [
@@ -2493,7 +2481,7 @@
     }
   ],
   "bout": [
-    "end, extremity, tip (of a physical object); bit, piece, scrap; rope",
+    "end; tip; bit; piece",
     "noun (m)",
     "",
     "",
@@ -2501,33 +2489,23 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": "m",
       "senses": [
         {
-          "meaning": "end, extremity, tip (of a physical object)",
-          "tags": [
-            "masculine"
-          ],
+          "meaning": "end; tip",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "bit, piece, scrap",
-          "tags": [
-            "masculine"
-          ],
+          "meaning": "bit; piece",
+          "tags": [],
           "registerTags": [],
-          "label": null
-        },
-        {
-          "meaning": "rope",
-          "tags": [
-            "masculine"
-          ],
-          "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -2535,15 +2513,11 @@
           "pos": "noun",
           "meanings": [
             {
-              "meaning": "end, extremity, tip (of a physical object)",
+              "meaning": "end; tip",
               "register": "neutral"
             },
             {
-              "meaning": "bit, piece, scrap",
-              "register": "neutral"
-            },
-            {
-              "meaning": "rope",
+              "meaning": "bit; piece",
               "register": "neutral"
             }
           ],
@@ -2560,7 +2534,8 @@
         "plural": [
           "bouts"
         ]
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "lit": [
@@ -2860,7 +2835,7 @@
     }
   ],
   "madame": [
-    "lady, woman; the female employer of a domestic servant",
+    "Mrs; madam; lady",
     "noun (f)",
     "",
     "",
@@ -2868,27 +2843,23 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": "f",
       "senses": [
         {
-          "meaning": "lady, woman",
-          "tags": [
-            "childish",
-            "feminine",
-            "in children's language"
-          ],
+          "meaning": "Mrs; madam",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "the female employer of a domestic servant",
-          "tags": [
-            "feminine"
-          ],
+          "meaning": "lady",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -2896,11 +2867,11 @@
           "pos": "noun",
           "meanings": [
             {
-              "meaning": "lady, woman",
+              "meaning": "Mrs; madam",
               "register": "neutral"
             },
             {
-              "meaning": "the female employer of a domestic servant",
+              "meaning": "lady",
               "register": "neutral"
             }
           ],
@@ -2921,7 +2892,8 @@
         "plural": [
           "mesdames"
         ]
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "façon": [
@@ -3218,7 +3190,7 @@
     }
   ],
   "chance": [
-    "chance; luck; Immigrant of non-European heritage, short for \"chance pour la France\".",
+    "luck; chance; opportunity",
     "noun (f)",
     "",
     "",
@@ -3226,34 +3198,23 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": "f",
       "senses": [
         {
-          "meaning": "chance",
-          "tags": [
-            "feminine"
-          ],
-          "registerTags": [],
-          "label": null
-        },
-        {
           "meaning": "luck",
-          "tags": [
-            "feminine"
-          ],
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "Immigrant of non-European heritage, short for \"chance pour la France\".",
-          "tags": [
-            "euphemistic",
-            "feminine"
-          ],
+          "meaning": "chance; opportunity",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -3261,15 +3222,11 @@
           "pos": "noun",
           "meanings": [
             {
-              "meaning": "chance",
-              "register": "neutral"
-            },
-            {
               "meaning": "luck",
               "register": "neutral"
             },
             {
-              "meaning": "Immigrant of non-European heritage, short for \"chance pour la France\".",
+              "meaning": "chance; opportunity",
               "register": "neutral"
             }
           ],
@@ -3290,7 +3247,8 @@
         "plural": [
           "chances"
         ]
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "force": [
@@ -4192,33 +4150,30 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": null,
       "senses": [
         {
           "meaning": "to touch (physically)",
-          "tags": [
-            "transitive"
-          ],
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
           "meaning": "to affect",
-          "tags": [
-            "transitive"
-          ],
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
           "meaning": "to receive, to get; to earn (money)",
-          "tags": [
-            "transitive"
-          ],
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -4247,11 +4202,7 @@
           "pos": "noun",
           "meanings": [
             {
-              "meaning": "the act of touching (see below)",
-              "register": "neutral"
-            },
-            {
-              "meaning": "a way of touching",
+              "meaning": "sense of touch; feel",
               "register": "neutral"
             }
           ],
@@ -4266,7 +4217,8 @@
       "forms": {
         "feminine": [],
         "plural": []
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "doute": [
@@ -4638,7 +4590,7 @@
     }
   ],
   "lieu": [
-    "place; outhouse, toilet",
+    "place; spot; location",
     "noun (m)",
     "",
     "",
@@ -4646,26 +4598,23 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": "m",
       "senses": [
         {
           "meaning": "place",
-          "tags": [
-            "masculine"
-          ],
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "outhouse, toilet",
-          "tags": [
-            "louisiana",
-            "masculine"
-          ],
+          "meaning": "spot; location",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -4677,7 +4626,7 @@
               "register": "neutral"
             },
             {
-              "meaning": "outhouse, toilet",
+              "meaning": "spot; location",
               "register": "neutral"
             }
           ],
@@ -4696,7 +4645,8 @@
           "lieus",
           "lieux"
         ]
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "autour": [
@@ -6196,7 +6146,7 @@
     }
   ],
   "chef": [
-    "article, principal point; principal motive, charge, count of indictment; chief; top third of a coat of arms",
+    "chief; boss; leader; chef (head cook)",
     "noun (m)",
     "",
     "",
@@ -6204,33 +6154,23 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": "m",
       "senses": [
         {
-          "meaning": "article, principal point",
-          "tags": [
-            "masculine"
-          ],
+          "meaning": "chief; boss; leader",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "principal motive, charge, count of indictment",
-          "tags": [
-            "masculine"
-          ],
+          "meaning": "chef (head cook)",
+          "tags": [],
           "registerTags": [],
-          "label": null
-        },
-        {
-          "meaning": "chief; top third of a coat of arms",
-          "tags": [
-            "masculine"
-          ],
-          "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -6238,15 +6178,11 @@
           "pos": "noun",
           "meanings": [
             {
-              "meaning": "article, principal point",
+              "meaning": "chief; boss; leader",
               "register": "neutral"
             },
             {
-              "meaning": "principal motive, charge, count of indictment",
-              "register": "neutral"
-            },
-            {
-              "meaning": "chief; top third of a coat of arms",
+              "meaning": "chef (head cook)",
               "register": "neutral"
             }
           ],
@@ -6263,11 +6199,12 @@
         "plural": [
           "chefs"
         ]
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "lumière": [
-    "lumen; (informal) light; (informal) headlight; headlamp",
+    "light; lamp; headlight",
     "noun (f)",
     "",
     "",
@@ -6275,43 +6212,23 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": "f",
       "senses": [
         {
-          "meaning": "lumen",
-          "tags": [
-            "feminine"
-          ],
-          "registerTags": [],
-          "label": null
-        },
-        {
           "meaning": "light",
-          "tags": [
-            "feminine",
-            "quebec",
-            "informal",
-            "plural-normally"
-          ],
-          "registerTags": [
-            "informal"
-          ],
-          "label": "informal"
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "headlight; headlamp",
-          "tags": [
-            "quebec",
-            "feminine",
-            "informal",
-            "plural-normally"
-          ],
-          "registerTags": [
-            "informal"
-          ],
-          "label": "informal"
+          "meaning": "lamp; headlight",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -6319,16 +6236,12 @@
           "pos": "noun",
           "meanings": [
             {
-              "meaning": "lumen",
+              "meaning": "light",
               "register": "neutral"
             },
             {
-              "meaning": "light",
-              "register": "informal"
-            },
-            {
-              "meaning": "headlight; headlamp",
-              "register": "informal"
+              "meaning": "lamp; headlight",
+              "register": "neutral"
             }
           ],
           "forms": {
@@ -6348,7 +6261,8 @@
         "plural": [
           "lumières"
         ]
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "chien": [
@@ -6466,7 +6380,7 @@
     }
   ],
   "verre": [
-    "glass (substance); Object of this substance",
+    "glass (material); glass (for drinking)",
     "noun (m)",
     "",
     "",
@@ -6474,28 +6388,23 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": "m",
       "senses": [
         {
-          "meaning": "glass (substance)",
-          "tags": [
-            "masculine",
-            "uncountable",
-            "usually"
-          ],
+          "meaning": "glass (material)",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "Object of this substance",
-          "tags": [
-            "countable",
-            "masculine"
-          ],
+          "meaning": "glass (for drinking)",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -6503,11 +6412,11 @@
           "pos": "noun",
           "meanings": [
             {
-              "meaning": "glass (substance)",
+              "meaning": "glass (material)",
               "register": "neutral"
             },
             {
-              "meaning": "Object of this substance",
+              "meaning": "glass (for drinking)",
               "register": "neutral"
             }
           ],
@@ -6524,7 +6433,8 @@
         "plural": [
           "verres"
         ]
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "partie": [
@@ -6864,7 +6774,7 @@
     }
   ],
   "cheveu": [
-    "a headhair",
+    "hair (a single hair on the head)",
     "noun (m)",
     "",
     "",
@@ -6872,17 +6782,16 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": "m",
       "senses": [
         {
-          "meaning": "a headhair",
-          "tags": [
-            "masculine"
-          ],
+          "meaning": "hair (a single hair on the head)",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -6890,7 +6799,7 @@
           "pos": "noun",
           "meanings": [
             {
-              "meaning": "a headhair",
+              "meaning": "hair (a single hair on the head)",
               "register": "neutral"
             }
           ],
@@ -6907,7 +6816,8 @@
         "plural": [
           "cheveux"
         ]
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "offrir": [
@@ -7605,7 +7515,7 @@
     }
   ],
   "rouge": [
-    "red (of a red color); red (left-wing, socialist); a supporter of the Republican Party",
+    "red; left-wing (politics)",
     "adjective",
     "",
     "",
@@ -7613,29 +7523,23 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": null,
       "senses": [
         {
-          "meaning": "red (of a red color)",
+          "meaning": "red",
           "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "red (left-wing, socialist)",
+          "meaning": "left-wing (politics)",
           "tags": [],
           "registerTags": [],
-          "label": null
-        },
-        {
-          "meaning": "a supporter of the Republican Party",
-          "tags": [
-            "us"
-          ],
-          "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -7643,15 +7547,11 @@
           "pos": "adjective",
           "meanings": [
             {
-              "meaning": "red (of a red color)",
+              "meaning": "red",
               "register": "neutral"
             },
             {
-              "meaning": "red (left-wing, socialist)",
-              "register": "neutral"
-            },
-            {
-              "meaning": "a supporter of the Republican Party",
+              "meaning": "left-wing (politics)",
               "register": "neutral"
             }
           ],
@@ -7683,7 +7583,8 @@
         "plural": [
           "rouges"
         ]
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "bruit": [
@@ -8584,7 +8485,7 @@
     }
   ],
   "nouvelle": [
-    "feminine singular of nouveau (“new”)",
+    "new",
     "adjective",
     "",
     "",
@@ -8592,19 +8493,16 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": null,
       "senses": [
         {
-          "meaning": "feminine singular of nouveau (“new”)",
-          "tags": [
-            "feminine",
-            "form-of",
-            "singular"
-          ],
+          "meaning": "new",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -8612,7 +8510,7 @@
           "pos": "adjective",
           "meanings": [
             {
-              "meaning": "feminine singular of nouveau (“new”)",
+              "meaning": "new",
               "register": "neutral"
             }
           ],
@@ -8624,6 +8522,23 @@
               "nouvelles"
             ]
           }
+        },
+        {
+          "pos": "noun",
+          "meanings": [
+            {
+              "meaning": "news; piece of news",
+              "register": "neutral"
+            },
+            {
+              "meaning": "short story",
+              "register": "neutral"
+            }
+          ],
+          "forms": {
+            "feminine": [],
+            "plural": []
+          }
         }
       ],
       "forms": {
@@ -8633,7 +8548,8 @@
         "plural": [
           "nouvelles"
         ]
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "général": [
@@ -9362,7 +9278,7 @@
     }
   ],
   "putain": [
-    "(dated, vulgar) whore, hooker; (dated, slang, vulgar, derogatory) bitch, cow (an unpleasant woman)",
+    "whore (vulgar); damn! (vulgar exclamation)",
     "noun (f)",
     "",
     "",
@@ -9370,39 +9286,23 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": "f",
       "senses": [
         {
-          "meaning": "whore, hooker",
-          "tags": [
-            "dated",
-            "feminine",
-            "vulgar"
-          ],
-          "registerTags": [
-            "dated",
-            "vulgar"
-          ],
-          "label": "dated, vulgar"
+          "meaning": "whore (vulgar)",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "bitch, cow (an unpleasant woman)",
-          "tags": [
-            "dated",
-            "derogatory",
-            "feminine",
-            "slang",
-            "vulgar"
-          ],
-          "registerTags": [
-            "dated",
-            "slang",
-            "vulgar",
-            "derogatory"
-          ],
-          "label": "dated, slang, vulgar, derogatory"
+          "meaning": "damn! (vulgar exclamation)",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -9410,12 +9310,12 @@
           "pos": "noun",
           "meanings": [
             {
-              "meaning": "whore, hooker",
-              "register": "dated, vulgar"
+              "meaning": "whore (vulgar)",
+              "register": "neutral"
             },
             {
-              "meaning": "bitch, cow (an unpleasant woman)",
-              "register": "dated, slang, vulgar, derogatory"
+              "meaning": "damn! (vulgar exclamation)",
+              "register": "neutral"
             }
           ],
           "forms": {
@@ -9435,7 +9335,8 @@
         "plural": [
           "putains"
         ]
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "joli": [
@@ -9971,7 +9872,7 @@
     }
   ],
   "papa": [
-    "pops, any man of roughly fatherly age and appearance",
+    "dad; daddy",
     "noun (m)",
     "",
     "",
@@ -9979,17 +9880,16 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": "m",
       "senses": [
         {
-          "meaning": "pops, any man of roughly fatherly age and appearance",
-          "tags": [
-            "masculine"
-          ],
+          "meaning": "dad; daddy",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -9997,7 +9897,7 @@
           "pos": "noun",
           "meanings": [
             {
-              "meaning": "pops, any man of roughly fatherly age and appearance",
+              "meaning": "dad; daddy",
               "register": "neutral"
             }
           ],
@@ -10014,7 +9914,8 @@
         "plural": [
           "papas"
         ]
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "sens": [
@@ -10522,7 +10423,7 @@
     }
   ],
   "après": [
-    "afterwards; Indicates the continuous aspect",
+    "afterwards; after that",
     "adverb",
     "",
     "",
@@ -10530,7 +10431,7 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": null,
       "senses": [
@@ -10538,15 +10439,15 @@
           "meaning": "afterwards",
           "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "Indicates the continuous aspect",
-          "tags": [
-            "north-america"
-          ],
+          "meaning": "after that",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -10558,7 +10459,7 @@
               "register": "neutral"
             },
             {
-              "meaning": "Indicates the continuous aspect",
+              "meaning": "after that",
               "register": "neutral"
             }
           ],
@@ -10588,7 +10489,8 @@
       "forms": {
         "feminine": [],
         "plural": []
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "service": [
@@ -10769,7 +10671,7 @@
     }
   ],
   "voler": [
-    "to fly through the air; to pursue flying; to scarper, flee",
+    "to fly; to steal; to rob",
     "verb",
     "",
     "",
@@ -10777,33 +10679,30 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": null,
       "senses": [
         {
-          "meaning": "to fly through the air",
-          "tags": [
-            "intransitive"
-          ],
+          "meaning": "to fly",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "to pursue flying",
-          "tags": [
-            "transitive"
-          ],
+          "meaning": "to steal",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "to scarper, flee",
-          "tags": [
-            "intransitive"
-          ],
+          "meaning": "to rob",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -10811,15 +10710,15 @@
           "pos": "verb",
           "meanings": [
             {
-              "meaning": "to fly through the air",
+              "meaning": "to fly",
               "register": "neutral"
             },
             {
-              "meaning": "to pursue flying",
+              "meaning": "to steal",
               "register": "neutral"
             },
             {
-              "meaning": "to scarper, flee",
+              "meaning": "to rob",
               "register": "neutral"
             }
           ],
@@ -10832,7 +10731,8 @@
       "forms": {
         "feminine": [],
         "plural": []
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "film": [
@@ -11236,7 +11136,7 @@
     }
   ],
   "cours": [
-    "stream of water, river; course (of events); teaching, lesson, lecture, class",
+    "class; lesson; course (of events); flow (of water)",
     "noun (m)",
     "",
     "",
@@ -11244,36 +11144,30 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": "m",
       "senses": [
         {
-          "meaning": "stream of water, river",
-          "tags": [
-            "invariable",
-            "masculine"
-          ],
+          "meaning": "class; lesson",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
           "meaning": "course (of events)",
-          "tags": [
-            "invariable",
-            "masculine"
-          ],
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "teaching, lesson, lecture, class",
-          "tags": [
-            "invariable",
-            "masculine"
-          ],
+          "meaning": "flow (of water)",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -11281,7 +11175,7 @@
           "pos": "noun",
           "meanings": [
             {
-              "meaning": "stream of water, river",
+              "meaning": "class; lesson",
               "register": "neutral"
             },
             {
@@ -11289,7 +11183,7 @@
               "register": "neutral"
             },
             {
-              "meaning": "teaching, lesson, lecture, class",
+              "meaning": "flow (of water)",
               "register": "neutral"
             }
           ],
@@ -11302,7 +11196,8 @@
       "forms": {
         "feminine": [],
         "plural": []
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "bureau": [
@@ -12008,7 +11903,7 @@
     }
   ],
   "cheval": [
-    "horse; ellipsis of cheval-vapeur (“horsepower”); ellipsis of cheval fiscal (“tax horsepower”)",
+    "horse; horsepower",
     "noun (m)",
     "",
     "",
@@ -12016,39 +11911,23 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": "m",
       "senses": [
         {
           "meaning": "horse",
-          "tags": [
-            "masculine"
-          ],
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "ellipsis of cheval-vapeur (“horsepower”)",
-          "tags": [
-            "abbreviation",
-            "alt-of",
-            "ellipsis",
-            "masculine"
-          ],
+          "meaning": "horsepower",
+          "tags": [],
           "registerTags": [],
-          "label": null
-        },
-        {
-          "meaning": "ellipsis of cheval fiscal (“tax horsepower”)",
-          "tags": [
-            "abbreviation",
-            "alt-of",
-            "ellipsis",
-            "masculine"
-          ],
-          "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -12060,11 +11939,7 @@
               "register": "neutral"
             },
             {
-              "meaning": "ellipsis of cheval-vapeur (“horsepower”)",
-              "register": "neutral"
-            },
-            {
-              "meaning": "ellipsis of cheval fiscal (“tax horsepower”)",
+              "meaning": "horsepower",
               "register": "neutral"
             }
           ],
@@ -12085,7 +11960,8 @@
         "plural": [
           "chevaux"
         ]
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "bord": [
@@ -12160,7 +12036,7 @@
     }
   ],
   "meilleur": [
-    "comparative degree of bon (\"better\"); comparative degree of bien; superlative degree of bon (\"best\")",
+    "better; best (le meilleur)",
     "adjective",
     "",
     "",
@@ -12168,36 +12044,23 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": null,
       "senses": [
         {
-          "meaning": "comparative degree of bon (\"better\")",
-          "tags": [
-            "comparative",
-            "form-of"
-          ],
+          "meaning": "better",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "comparative degree of bien",
-          "tags": [
-            "comparative",
-            "form-of"
-          ],
+          "meaning": "best (le meilleur)",
+          "tags": [],
           "registerTags": [],
-          "label": null
-        },
-        {
-          "meaning": "superlative degree of bon (\"best\")",
-          "tags": [
-            "form-of",
-            "superlative"
-          ],
-          "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -12205,15 +12068,11 @@
           "pos": "adjective",
           "meanings": [
             {
-              "meaning": "comparative degree of bon (\"better\")",
+              "meaning": "better",
               "register": "neutral"
             },
             {
-              "meaning": "comparative degree of bien",
-              "register": "neutral"
-            },
-            {
-              "meaning": "superlative degree of bon (\"best\")",
+              "meaning": "best (le meilleur)",
               "register": "neutral"
             }
           ],
@@ -12257,7 +12116,8 @@
           "meilleures",
           "meilleurs"
         ]
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "ressembler": [
@@ -12668,7 +12528,7 @@
     }
   ],
   "sac": [
-    "bag, sack; (dated, slang) ten French francs",
+    "bag; sack",
     "noun (m)",
     "",
     "",
@@ -12676,30 +12536,23 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": "m",
       "senses": [
         {
-          "meaning": "bag, sack",
-          "tags": [
-            "masculine"
-          ],
+          "meaning": "bag",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "ten French francs",
-          "tags": [
-            "dated",
-            "masculine",
-            "slang"
-          ],
-          "registerTags": [
-            "dated",
-            "slang"
-          ],
-          "label": "dated, slang"
+          "meaning": "sack",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -12707,12 +12560,12 @@
           "pos": "noun",
           "meanings": [
             {
-              "meaning": "bag, sack",
+              "meaning": "bag",
               "register": "neutral"
             },
             {
-              "meaning": "ten French francs",
-              "register": "dated, slang"
+              "meaning": "sack",
+              "register": "neutral"
             }
           ],
           "forms": {
@@ -12728,7 +12581,8 @@
         "plural": [
           "sacs"
         ]
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "coin": [
@@ -12856,7 +12710,7 @@
     }
   ],
   "vent": [
-    "flatulence; empty words, hot air",
+    "wind; flatulence; empty talk; hot air",
     "noun (m)",
     "",
     "",
@@ -12864,27 +12718,30 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": "m",
       "senses": [
         {
-          "meaning": "flatulence",
-          "tags": [
-            "euphemistic",
-            "masculine"
-          ],
+          "meaning": "wind",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "empty words, hot air",
-          "tags": [
-            "masculine",
-            "uncountable"
-          ],
+          "meaning": "flatulence",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
+        },
+        {
+          "meaning": "empty talk; hot air",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -12892,11 +12749,15 @@
           "pos": "noun",
           "meanings": [
             {
+              "meaning": "wind",
+              "register": "neutral"
+            },
+            {
               "meaning": "flatulence",
               "register": "neutral"
             },
             {
-              "meaning": "empty words, hot air",
+              "meaning": "empty talk; hot air",
               "register": "neutral"
             }
           ],
@@ -12913,7 +12774,8 @@
         "plural": [
           "vents"
         ]
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "retour": [
@@ -13446,7 +13308,7 @@
     }
   ],
   "arbre": [
-    "axle; drive shaft",
+    "tree; shaft (of a machine)",
     "noun (m)",
     "",
     "",
@@ -13454,25 +13316,23 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": "m",
       "senses": [
         {
-          "meaning": "axle",
-          "tags": [
-            "masculine"
-          ],
+          "meaning": "tree",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "drive shaft",
-          "tags": [
-            "masculine"
-          ],
+          "meaning": "shaft (of a machine)",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -13480,11 +13340,11 @@
           "pos": "noun",
           "meanings": [
             {
-              "meaning": "axle",
+              "meaning": "tree",
               "register": "neutral"
             },
             {
-              "meaning": "drive shaft",
+              "meaning": "shaft (of a machine)",
               "register": "neutral"
             }
           ],
@@ -13501,7 +13361,8 @@
         "plural": [
           "arbres"
         ]
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "dehors": [
@@ -15060,7 +14921,7 @@
     }
   ],
   "merde": [
-    "shit (something undesirable or unwanted); shit (something of poor quality)",
+    "shit (vulgar); crap; mess (informal)",
     "noun (f)",
     "",
     "",
@@ -15068,25 +14929,23 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": "f",
       "senses": [
         {
-          "meaning": "shit (something undesirable or unwanted)",
-          "tags": [
-            "feminine"
-          ],
+          "meaning": "shit (vulgar)",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "shit (something of poor quality)",
-          "tags": [
-            "feminine"
-          ],
+          "meaning": "crap; mess (informal)",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -15094,11 +14953,11 @@
           "pos": "noun",
           "meanings": [
             {
-              "meaning": "shit (something undesirable or unwanted)",
+              "meaning": "shit (vulgar)",
               "register": "neutral"
             },
             {
-              "meaning": "shit (something of poor quality)",
+              "meaning": "crap; mess (informal)",
               "register": "neutral"
             }
           ],
@@ -15119,7 +14978,8 @@
         "plural": [
           "merdes"
         ]
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "peau": [
@@ -15198,7 +15058,7 @@
     }
   ],
   "patron": [
-    "a boss, employer,; a head of a group of people, a department, a location, etc.; a pimp or brothel-keeper",
+    "boss; employer; owner (of a bar, restaurant); pattern (for sewing)",
     "noun (m)",
     "",
     "",
@@ -15206,33 +15066,30 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": "m",
       "senses": [
         {
-          "meaning": "a boss, employer,",
-          "tags": [
-            "masculine"
-          ],
+          "meaning": "boss; employer",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "a head of a group of people, a department, a location, etc.",
-          "tags": [
-            "masculine"
-          ],
+          "meaning": "owner (of a bar, restaurant)",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "a pimp or brothel-keeper",
-          "tags": [
-            "masculine"
-          ],
+          "meaning": "pattern (for sewing)",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -15240,15 +15097,15 @@
           "pos": "noun",
           "meanings": [
             {
-              "meaning": "a boss, employer,",
+              "meaning": "boss; employer",
               "register": "neutral"
             },
             {
-              "meaning": "a head of a group of people, a department, a location, etc.",
+              "meaning": "owner (of a bar, restaurant)",
               "register": "neutral"
             },
             {
-              "meaning": "a pimp or brothel-keeper",
+              "meaning": "pattern (for sewing)",
               "register": "neutral"
             }
           ],
@@ -15273,7 +15130,8 @@
           "patronnes",
           "patrons"
         ]
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "hôtel": [
@@ -15468,7 +15326,7 @@
     }
   ],
   "image": [
-    "picture, image; frame; A mental representation.",
+    "picture; image; mental image",
     "noun (f)",
     "",
     "",
@@ -15476,33 +15334,23 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": "f",
       "senses": [
         {
-          "meaning": "picture, image",
-          "tags": [
-            "feminine"
-          ],
+          "meaning": "picture; image",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "frame",
-          "tags": [
-            "feminine"
-          ],
+          "meaning": "mental image",
+          "tags": [],
           "registerTags": [],
-          "label": null
-        },
-        {
-          "meaning": "A mental representation.",
-          "tags": [
-            "feminine"
-          ],
-          "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -15510,15 +15358,11 @@
           "pos": "noun",
           "meanings": [
             {
-              "meaning": "picture, image",
+              "meaning": "picture; image",
               "register": "neutral"
             },
             {
-              "meaning": "frame",
-              "register": "neutral"
-            },
-            {
-              "meaning": "A mental representation.",
+              "meaning": "mental image",
               "register": "neutral"
             }
           ],
@@ -15539,7 +15383,8 @@
         "plural": [
           "images"
         ]
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "rapport": [
@@ -16075,7 +15920,7 @@
     }
   ],
   "fleur": [
-    "flowering plant; angiosperm; the plant with flowers itself; (figurative) a kind favor given by one person to another; (figurative) the best of something",
+    "flower; bloom; blossom",
     "noun (f)",
     "",
     "",
@@ -16083,40 +15928,23 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": "f",
       "senses": [
         {
-          "meaning": "flowering plant; angiosperm; the plant with flowers itself",
-          "tags": [
-            "feminine",
-            "metonymically"
-          ],
+          "meaning": "flower",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "a kind favor given by one person to another",
-          "tags": [
-            "feminine",
-            "figuratively"
-          ],
-          "registerTags": [
-            "figurative"
-          ],
-          "label": "figurative"
-        },
-        {
-          "meaning": "the best of something",
-          "tags": [
-            "feminine",
-            "figuratively"
-          ],
-          "registerTags": [
-            "figurative"
-          ],
-          "label": "figurative"
+          "meaning": "bloom; blossom",
+          "tags": [],
+          "registerTags": [],
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -16124,16 +15952,12 @@
           "pos": "noun",
           "meanings": [
             {
-              "meaning": "flowering plant; angiosperm; the plant with flowers itself",
+              "meaning": "flower",
               "register": "neutral"
             },
             {
-              "meaning": "a kind favor given by one person to another",
-              "register": "figurative"
-            },
-            {
-              "meaning": "the best of something",
-              "register": "figurative"
+              "meaning": "bloom; blossom",
+              "register": "neutral"
             }
           ],
           "forms": {
@@ -16153,7 +15977,8 @@
         "plural": [
           "fleurs"
         ]
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "glisser": [
@@ -18395,7 +18220,7 @@
     }
   ],
   "capitaine": [
-    "captain, leader; giant African threadfin (Polydactylus quadrifilis)",
+    "captain; leader; skipper",
     "noun (m/f)",
     "",
     "",
@@ -18403,28 +18228,23 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": "m/f",
       "senses": [
         {
-          "meaning": "captain, leader",
-          "tags": [
-            "feminine",
-            "masculine"
-          ],
+          "meaning": "captain",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "giant African threadfin (Polydactylus quadrifilis)",
-          "tags": [
-            "southern-africa",
-            "feminine",
-            "masculine"
-          ],
+          "meaning": "leader; skipper",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -18432,11 +18252,11 @@
           "pos": "noun",
           "meanings": [
             {
-              "meaning": "captain, leader",
+              "meaning": "captain",
               "register": "neutral"
             },
             {
-              "meaning": "giant African threadfin (Polydactylus quadrifilis)",
+              "meaning": "leader; skipper",
               "register": "neutral"
             }
           ],
@@ -18453,7 +18273,8 @@
         "plural": [
           "capitaines"
         ]
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "odeur": [
@@ -18775,7 +18596,7 @@
     }
   ],
   "bonheur": [
-    "goodhap, good fortune; happiness",
+    "happiness; good luck",
     "noun (m)",
     "",
     "",
@@ -18783,25 +18604,23 @@
       "hint": false,
       "source": "wiktionary-en via kaikki.org",
       "extractDate": "2026-10-30",
-      "status": "imported-unreviewed",
+      "status": "curated-draft",
       "licence": "CC BY-SA 4.0",
       "gender": "m",
       "senses": [
         {
-          "meaning": "goodhap, good fortune",
-          "tags": [
-            "masculine"
-          ],
+          "meaning": "happiness",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         },
         {
-          "meaning": "happiness",
-          "tags": [
-            "masculine"
-          ],
+          "meaning": "good luck",
+          "tags": [],
           "registerTags": [],
-          "label": null
+          "label": null,
+          "curated": true
         }
       ],
       "posGroups": [
@@ -18809,11 +18628,11 @@
           "pos": "noun",
           "meanings": [
             {
-              "meaning": "goodhap, good fortune",
+              "meaning": "happiness",
               "register": "neutral"
             },
             {
-              "meaning": "happiness",
+              "meaning": "good luck",
               "register": "neutral"
             }
           ],
@@ -18830,7 +18649,8 @@
         "plural": [
           "bonheurs"
         ]
-      }
+      },
+      "curationNote": "Quality pass: unclear, form-only, outdated or offensive source glosses replaced with plain learner meanings; needs French-speaker review."
     }
   ],
   "habiter": [

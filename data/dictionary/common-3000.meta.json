@@ -69,21 +69,21 @@
     "entriesSkippedNoUsableSenses": 1110,
     "variantOnlyEntriesSkipped": 17,
     "registerTaggedSenses": 4588,
-    "entriesWithRegisterLabels": 215,
+    "entriesWithRegisterLabels": 210,
     "parentGlossesReplacedBySubglosses": 6,
-    "secondaryPosGroups": 318,
-    "alternatePosRowsGrouped": 337,
+    "secondaryPosGroups": 319,
+    "alternatePosRowsGrouped": 338,
     "descriptiveGlossesDropped": 20,
     "overlongGlossesRejected": 1833,
     "entriesDroppedBecauseOfOverlongGlosses": 655,
     "nearDuplicateSensesRemoved": 702,
     "lowRegisterSensesSkipped": 1076,
-    "overridesApplied": 28,
+    "overridesApplied": 57,
     "selectedEntries": 3000
   },
-  "overridesApplied": 28,
+  "overridesApplied": 57,
   "sizes": {
-    "rawBytes": 3848713,
-    "gzipBytes": 226266
+    "rawBytes": 3846514,
+    "gzipBytes": 225724
   }
 }
