@@ -1,0 +1,45 @@
+name: Dictionary sample export
+
+on:
+  push:
+    branches:
+      - 'feat/dictionary-*'
+
+permissions:
+  contents: read
+
+jobs:
+  sample:
+    if: contains(github.event.head_commit.message, '[dictionary-sample]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Download Wiktionary extract
+        run: |
+          set -euo pipefail
+          mkdir -p data/raw
+          curl -sSL --retry 4 --retry-all-errors --retry-delay 3 --connect-timeout 30 -o data/raw/kaikki.jsonl 'https://kaikki.org/dictionary/French/kaikki.org-dictionary-French.jsonl'
+          ls -l data/raw/kaikki.jsonl
+          sha256sum data/raw/kaikki.jsonl
+          grep -o '"sha256":"[0-9a-f]*"' tools/dictionary/sources.lock.json | tail -1
+
+      - name: Extract records for the 3,000 headwords
+        run: |
+          set -euo pipefail
+          KAIKKI_FILE=data/raw/kaikki.jsonl HEADWORDS_FILE=data/dictionary/common-3000.json OUT_FILE=kaikki-top3000.jsonl.gz node tools/dictionary/extract-kaikki-sample.mjs
+          ls -l kaikki-top3000.jsonl.gz
+
+      - name: Upload sample
+        uses: actions/upload-artifact@v4
+        with:
+          name: kaikki-top3000-sample
+          path: kaikki-top3000.jsonl.gz
+          retention-days: 7
