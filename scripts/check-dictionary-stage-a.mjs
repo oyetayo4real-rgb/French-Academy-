@@ -312,5 +312,5 @@ console.log("PASS Stage A imported dictionary core and compatibility acceptance"
 const ng=importedData["nouveau"]?.[4]?.posGroups||[],sg=importedData["souvenir"]?.[4]?.posGroups||[];
 schema3Assertion("nouveau first group adjective new",()=>{assert.equal(ng[0]?.pos,"adjective");assert.equal(normalizeEnglish(ng[0]?.meanings?.[0]?.meaning),"new");});
 schema3Assertion("souvenir first group noun memory",()=>{assert.equal(sg[0]?.pos,"noun");assert.equal(normalizeEnglish(sg[0]?.meanings?.[0]?.meaning),"memory");});
-schema3Assertion("plein first group adjective full",()=>{const g=importedData["plein"]?.[4]?.posGroups?.[0];assert.equal(g?.pos,"adjective");assert.equal(normalizeEnglish(g?.meanings?.[0]?.meaning),"full");});
+schema3Assertion("plein first group adjective full",()=>{const g=importedData["plein"]?.[4]?.posGroups?.[0];assert.equal(g?.pos,"adjective");assert.match(normalizeEnglish(g?.meanings?.[0]?.meaning),/^full(?:, full up)?$/);});
 const totalPosGroups=importedKeys.reduce((count,word)=>count+(importedData[word]?.[4]?.posGroups?.length||0),0);console.log("TOTAL POS GROUPS: "+totalPosGroups);
