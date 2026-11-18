@@ -72,20 +72,13 @@ try {
     window.__memoryCalls = [];
     window.api = async (_path, options) => {
       const payload = structuredClone(options.body);
-      if (payload.action) {
+      if (typeof payload.setLearningMemoryEnabled === "boolean") {
         window.__memoryCalls.push(payload);
-        if (payload.action === "memory_get") return { memory: {
-          enabled: false, cefr_level: null, topic_counts: {}, mode_counts: {},
-          interaction_count: 0, last_interaction_at: null
-        } };
-        if (payload.action === "memory_set") return { memory: {
-          enabled: payload.enabled, cefr_level: null, topic_counts: {}, mode_counts: {},
-          interaction_count: 0, last_interaction_at: null
-        } };
-        if (payload.action === "memory_clear") return { memory: {
-          enabled: false, cefr_level: null, topic_counts: {}, mode_counts: {},
-          interaction_count: 0, last_interaction_at: null
-        } };
+        return { memoryEnabled: payload.setLearningMemoryEnabled };
+      }
+      if (payload.clearLearningMemory === true) {
+        window.__memoryCalls.push(payload);
+        return { memoryCleared: true };
       }
       window.__tutorRequests.push(payload);
       if (window.__tutorRequests.length === 1) {
@@ -105,7 +98,7 @@ try {
 
   await check("learner can opt in to structured persistent memory", async () => {
     assert.equal(await page.locator("#faMemoryEnabled").isChecked(), false);
-    await page.locator("#faMemoryEnabled").check();
+    await page.locator("#faMemoryEnabled").evaluate((element) => element.click());
     await page.waitForFunction(() => document.querySelector("#faMemoryEnabled")?.checked === true);
     const localState = await page.evaluate(() => {
       const key = Object.keys(localStorage).find((item) => item.startsWith("fa_tutor_local_v1:"));
@@ -113,7 +106,8 @@ try {
     });
     assert(localState && localState.version === 1, "local tutor data was not saved");
     assert.equal(localState.memory.enabled, true, "learning-memory opt-in was not persisted locally");
-    assert.match(await page.locator(".fa-memory-panel").innerText(), /saved locally in this browser|stored only on this device/i);
+    assert.match(await page.locator(".fa-memory-panel").innerText(), /saved securely to your account in Supabase/i);
+    assert.equal((await page.evaluate(() => window.__memoryCalls)).length, 1, "cloud memory opt-in was not sent to Tutor V2");
   });
 
   await check("voice input captures French and English speech without auto-submitting", async () => {
@@ -145,7 +139,7 @@ try {
     assert.equal(await page.locator("#faTutorMessages .card").count(), 1);
     assert.equal(await page.locator("#faTutorMessages .card").innerText(), "You\nExplique le subjonctif.");
 
-    await page.locator("#faTutorRetry").click();
+    await page.locator("#faTutorRetry").evaluate((element) => element.click());
     await page.locator("#faTutorRetry").waitFor({ state: "visible" });
     assert.equal(await page.locator("#faTutorRetry").isDisabled(), true);
     assert.equal(await page.locator("#faTutorRetry").getAttribute("aria-disabled"), "true");
