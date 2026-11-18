@@ -411,7 +411,10 @@ Deno.test("quick, standard, and deep prompts are generated from PROMPT_RULES wit
       "Use French only for examples, quoted forms and grammar terms",
       "grammar terms in italics",
       "English gloss on first use",
-      "explicitly asks for a French answer"
+      "explicitly asks for a French answer",
+      "If the learner writes in French, respond in French",
+      "If the learner mixes English and French, explain in clear English",
+      "Support English-speaking French learners"
     ],
     "no-mixed-headings": [
       "Headings must be in the same language as the text under them"
