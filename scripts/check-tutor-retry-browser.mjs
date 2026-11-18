@@ -20,14 +20,21 @@ async function check(name, fn) {
 
 try {
   page = await browser.newPage();
+  const testOrigin = new URL(baseUrl).origin;
+  const testDocument = '<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main id="app"></main></body></html>';
   await page.route("**/*", (route) => {
-    const url = new URL(route.request().url());
-    if (url.origin === new URL(baseUrl).origin) return route.continue();
-    return route.abort();
+    const request = route.request();
+    const url = new URL(request.url());
+    if (url.origin !== testOrigin) return route.abort();
+    // Serve a minimal document on the HTTP origin without loading the real app's
+    // inline AUTH bindings; the test installs its own isolated auth fixture.
+    if (request.isNavigationRequest() && url.pathname === "/") {
+      return route.fulfill({ status: 200, contentType: "text/html", body: testDocument });
+    }
+    return route.continue();
   });
-  // Establish a real HTTP origin before setContent; about:blank blocks localStorage.
+  // A real HTTP origin enables localStorage while keeping the test page isolated.
   await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
-  await page.setContent('<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main id="app"></main></body></html>');
   await page.evaluate(() => {
     window.AUTH = { user: { id: "mock-user" } };
     // The production feature bridge is loaded after these globals in index.html.
