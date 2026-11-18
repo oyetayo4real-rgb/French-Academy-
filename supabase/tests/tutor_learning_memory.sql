@@ -58,17 +58,26 @@ $$;
 
 select public.tutor_set_learning_memory_enabled(:'test_uid'::pg_catalog.uuid, false);
 
-do $$
+do $
+declare
+  v_uid pg_catalog.uuid := pg_catalog.current_setting('tutor.test_uid')::pg_catalog.uuid;
+  v_memory pg_catalog.jsonb;
 begin
   if exists (
     select 1 from public.tutor_learning_memory
-    where user_id = pg_catalog.current_setting('tutor.test_uid')::pg_catalog.uuid
-      and enabled = true
+    where user_id = v_uid and enabled = true
   ) then
     raise exception 'disabling learning memory did not pause the profile';
   end if;
+
+  v_memory := public.tutor_record_learning_interaction(
+    v_uid, 'B1', array['vocabulary'], 'chat'
+  );
+  if v_memory is not null then
+    raise exception 'an in-flight interaction re-enabled or wrote disabled memory';
+  end if;
 end;
-$$;
+$;
 
 select public.tutor_clear_learning_memory(:'test_uid'::pg_catalog.uuid);
 
