@@ -5,6 +5,7 @@
   const FA_TUTOR_FUNCTION_SLUG = "tutor-v2";
   const FA_SCRIPT_URL = document.currentScript && document.currentScript.src;
   const FA_AI = { level: "A1", mode: "chat", depth: "quick", messages: [], pending: false, error: "", lastRequest: null };
+  const FA_VOICE = { language: "fr-FR", recognition: null, listening: false, speaking: false };
   function faEnsureTutorStyles() {
     if (document.getElementById("faTutorStyles")) return;
     const link = document.createElement("link");
@@ -301,15 +302,66 @@
   }
   startCall = faStartCall; callView = faCallView; endCall = () => faExitCall(false);
 
+  function faVoiceLanguage() { return FA_VOICE.language === "en-US" ? "en-US" : "fr-FR"; }
+  function faVoiceStatus(message) { const status = faEl("faVoiceStatus"); if (status) status.textContent = message; }
+  function faStopSpeaking() { if ("speechSynthesis" in window) window.speechSynthesis.cancel(); FA_VOICE.speaking = false; }
+  function faSpeakTutorAnswer(index) {
+    const message = FA_AI.messages[index];
+    if (!message || message.role !== "assistant") return;
+    if (!("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined") { faVoiceStatus("Spoken answers are not supported by this browser."); return; }
+    faStopSpeaking();
+    const utterance = new SpeechSynthesisUtterance(message.content);
+    utterance.lang = faVoiceLanguage(); utterance.rate = 0.92;
+    utterance.onstart = () => { FA_VOICE.speaking = true; faVoiceStatus("Speaking the answer…"); };
+    utterance.onend = () => { FA_VOICE.speaking = false; faVoiceStatus("Finished speaking."); };
+    utterance.onerror = () => { FA_VOICE.speaking = false; faVoiceStatus("Could not play the spoken answer."); };
+    window.speechSynthesis.speak(utterance);
+  }
+  function faStartVoiceInput() {
+    const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Recognition) { faVoiceStatus("Voice input is not supported here. Try Chrome on Android or type your message."); return; }
+    if (FA_VOICE.listening && FA_VOICE.recognition) { FA_VOICE.recognition.stop(); return; }
+    const input = faEl("faTutorInput"); if (!input) return;
+    const recognition = new Recognition(); recognition.lang = faVoiceLanguage();
+    recognition.interimResults = true; recognition.continuous = false;
+    FA_VOICE.recognition = recognition; FA_VOICE.listening = true;
+    const button = faEl("faTutorMic"); if (button) button.textContent = "Stop listening";
+    faVoiceStatus("Listening in " + (FA_VOICE.language === "fr-FR" ? "French" : "English") + "…");
+    recognition.onresult = (event) => {
+      let finalText = "", interimText = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0] && event.results[i][0].transcript || "";
+        if (event.results[i].isFinal) finalText += transcript; else interimText += transcript;
+      }
+      if (finalText) input.value = (input.value ? input.value.trimEnd() + " " : "") + finalText.trim();
+      faVoiceStatus(finalText ? "Voice captured. Review the text, then press Ask Académie." : (interimText || "Listening…"));
+    };
+    recognition.onerror = (event) => {
+      FA_VOICE.listening = false; if (button) button.textContent = "Speak";
+      faVoiceStatus(event.error === "not-allowed" ? "Microphone permission was denied. Allow microphone access in browser settings." : "Voice input stopped: " + event.error + ".");
+    };
+    recognition.onend = () => {
+      FA_VOICE.listening = false; FA_VOICE.recognition = null;
+      const currentButton = faEl("faTutorMic"); if (currentButton) currentButton.textContent = "Speak";
+      const status = faEl("faVoiceStatus");
+      if (status && status.textContent === "Listening…") faVoiceStatus("No speech detected. Try again or type your message.");
+    };
+    try { recognition.start(); } catch (_) {
+      FA_VOICE.listening = false; FA_VOICE.recognition = null;
+      if (button) button.textContent = "Speak";
+      faVoiceStatus("Could not start the microphone. Check browser permissions and try again.");
+    }
+  }
+
   function faTutorView() {
     if (!AUTH || !AUTH.user) { $.innerHTML = '<button class="g" id="faHome">← Home</button><h1>🤖 AI French tutor</h1><div class="card"><p>Sign in to use the tutor and keep your learning progress.</p><button id="faSignIn" style="width:100%">Sign in / Create account</button></div>'; return; }
-    const messageHtml = FA_AI.messages.map((m) => '<div class="card" style="margin:8px 0"><b>' + (m.role === "user" ? "You" : "Académie AI") + '</b><div class="fa-answer" style="margin-top:8px;line-height:1.75">' + (m.role === "assistant" ? faMarkdown(m.content) : '<div style="white-space:pre-wrap">' + faSafe(m.content) + "</div>") + "</div>" + (m.role === "assistant" ? '<p class="fa-tutor-answer-note" role="note">AI answers can contain mistakes. Check important points in a dictionary or grammar reference.</p>' : "") + "</div>").join("");
+    const messageHtml = FA_AI.messages.map((m, index) => '<div class="card" style="margin:8px 0"><b>' + (m.role === "user" ? "You" : "Académie AI") + '</b><div class="fa-answer" style="margin-top:8px;line-height:1.75">' + (m.role === "assistant" ? faMarkdown(m.content) : '<div style="white-space:pre-wrap">' + faSafe(m.content) + "</div>") + "</div>" + (m.role === "assistant" ? '<button class="g" type="button" data-fa-speak="' + index + '">🔊 Listen</button><p class="fa-tutor-answer-note" role="note">AI answers can contain mistakes. Check important points in a dictionary or grammar reference.</p>' : "") + "</div>").join("");
     $.innerHTML = (typeof topbar === "function" ? topbar() : "") + '<button class="g" id="faHome">← Home</button><h1>🤖 Académie French Intelligence</h1><p class="mu">A French-language tutor for grammar, syntax, semantics, literature, history, translation, writing and contemporary usage. CEFR level is optional guidance.</p>' +
       '<div class="card"><label for="faTutorDepth"><b>Answer depth</b></label><select class="inp" id="faTutorDepth">' +
       '<option value="quick"' + (FA_AI.depth === "quick" ? " selected" : "") + '>Quick answer</option><option value="deep"' + (FA_AI.depth === "deep" ? " selected" : "") + '>Deep answer</option></select>' +
       '<label for="faTutorLevel"><b>Optional explanation style</b></label><select class="inp" id="faTutorLevel"><option value="none"' + (FA_AI.level === "none" ? " selected" : "") + '>No level restriction</option>' + ["A1","A2","B1","B2","C1","C2"].map((l) => '<option value="' + l + '"' + (l === FA_AI.level ? " selected" : "") + '>' + l + ' · optional learner scaffolding</option>').join("") + '</select><label for="faTutorMode"><b>Tool</b></label><select class="inp" id="faTutorMode">' + [["chat","Tutor answer"],["practice","Conversation practice"],["correct","Correct and analyse my French"],["translate","Translate French ↔ English"]].map((o) => '<option value="' + o[0] + '"' + (o[0] === FA_AI.mode ? " selected" : "") + '>' + o[1] + '</option>').join("") + "</select></div><div id=\"faTutorMessages\">" + (messageHtml || '<div class="card mu">Ask a question. Choose Quick answer for a focused explanation or Deep answer for a fuller treatment.</div>') + "</div>" +
       (FA_AI.pending ? '<div class="card mu">Preparing your answer…</div>' : "") + (FA_AI.error ? '<div class="err" role="alert">' + faSafe(FA_AI.error) + '</div>' : "") + (FA_AI.lastRequest ? '<button id="faTutorRetry" class="g" type="button"' + (FA_AI.pending ? ' disabled aria-disabled="true">Trying again...</button>' : ' aria-disabled="false">Try again</button>') : "") +
-      '<div class="card fa-tutor-panel"><textarea class="inp" id="faTutorInput" rows="5" placeholder="Ask anything about French: grammar, literature, idioms, translation, writing or language usage…"></textarea><button id="faTutorSend" style="width:100%"' + (FA_AI.pending ? " disabled" : "") + ">" + (FA_AI.pending ? "Please wait…" : "Ask Académie") + '</button><p class="mu">Answers come from an AI service and can contain mistakes. You need to be signed in to use the Tutor.</p></div>';
+      '<div class="card fa-tutor-panel"><label for="faVoiceLanguage"><b>Voice language</b></label><select class="inp" id="faVoiceLanguage"><option value="fr-FR"' + (FA_VOICE.language === "fr-FR" ? " selected" : "") + '>French</option><option value="en-US"' + (FA_VOICE.language === "en-US" ? " selected" : "") + '>English</option></select><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="g" id="faTutorMic" type="button">Speak</button><button class="g" id="faTutorStopAudio" type="button">Stop audio</button></div><p class="mu" id="faVoiceStatus" role="status" aria-live="polite">Choose French or English, then use Speak to dictate your question.</p><textarea class="inp" id="faTutorInput" rows="5" placeholder="Ask anything about French: grammar, literature, idioms, translation, writing or language usage…"></textarea><button id="faTutorSend" style="width:100%"' + (FA_AI.pending ? " disabled" : "") + ">" + (FA_AI.pending ? "Please wait…" : "Ask Académie") + '</button><p class="mu">Answers come from an AI service and can contain mistakes. You need to be signed in to use the Tutor.</p></div>';
     if (typeof bindTop === "function") bindTop();
   }
   async function faTutorSend(isRetry) {
@@ -514,6 +566,9 @@
     else if (button.id === "faHome") { view = "home"; render(); }
     else if (button.id === "faCallBack") await faExitCall(false);
     else if (button.id === "faSignIn") { view = "auth"; render(); }
+    else if (button.id === "faTutorMic") faStartVoiceInput();
+    else if (button.id === "faTutorStopAudio") { faStopSpeaking(); faVoiceStatus("Audio stopped."); }
+    else if (button.hasAttribute("data-fa-speak")) faSpeakTutorAnswer(Number(button.getAttribute("data-fa-speak")));
     else if (button.id === "faTutorSend") await faTutorSend();
     else if (button.id === "faTutorRetry") await faTutorSend(true);
     else if (button.id === "faDictLookup") await faDictionaryLookup();
@@ -531,6 +586,13 @@
       if (!confirm("Remove this student from the live call? Their class enrolment will remain unchanged.")) return;
       try { FA_DAILY_CALL.updateParticipant(session, { eject: true }); faSetStatus("Removal requested."); }
       catch (error) { alert((error && error.message) || "Could not remove this participant."); }
+    }
+  });
+  document.addEventListener("change", (event) => {
+    if (event.target && event.target.id === "faVoiceLanguage") {
+      FA_VOICE.language = event.target.value === "en-US" ? "en-US" : "fr-FR";
+      if (FA_VOICE.listening && FA_VOICE.recognition) FA_VOICE.recognition.stop();
+      faVoiceStatus("Voice language set to " + (FA_VOICE.language === "fr-FR" ? "French" : "English") + ".");
     }
   });
   document.addEventListener("input", (event) => { if (event.target && event.target.id === "faRosterSearch") faRefreshRoster(); });
