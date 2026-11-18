@@ -44,11 +44,16 @@ declare
   v_topic pg_catalog.text;
   v_row public.tutor_learning_memory;
 begin
-  insert into public.tutor_learning_memory (user_id, enabled)
-  values (p_uid, true)
-  on conflict (user_id) do update
-    set enabled = true,
-        updated_at = pg_catalog.now();
+  -- The explicit opt-in action creates/enables the row. Never re-enable it
+  -- during a response: this prevents an in-flight request undoing an opt-out.
+  select * into v_row
+  from public.tutor_learning_memory
+  where user_id = p_uid and enabled = true
+  for update;
+
+  if not found then
+    return null;
+  end if;
 
   update public.tutor_learning_memory
   set cefr_level = case
@@ -58,7 +63,7 @@ begin
       interaction_count = interaction_count + 1,
       last_interaction_at = pg_catalog.now(),
       updated_at = pg_catalog.now()
-  where user_id = p_uid;
+  where user_id = p_uid and enabled = true;
 
   foreach v_topic in array coalesce(p_topics, array[]::text[]) loop
     if v_topic = any(array[
@@ -75,7 +80,7 @@ begin
         true
       ),
       updated_at = pg_catalog.now()
-      where user_id = p_uid;
+      where user_id = p_uid and enabled = true;
     end if;
   end loop;
 
@@ -88,12 +93,12 @@ begin
       true
     ),
     updated_at = pg_catalog.now()
-    where user_id = p_uid;
+    where user_id = p_uid and enabled = true;
   end if;
 
   select * into v_row
   from public.tutor_learning_memory
-  where user_id = p_uid;
+  where user_id = p_uid and enabled = true;
 
   return pg_catalog.to_jsonb(v_row);
 end;
