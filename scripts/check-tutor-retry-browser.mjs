@@ -49,14 +49,17 @@ try {
     window.SpeechSynthesisUtterance = class {
       constructor(text) { this.text = text; }
     };
-    window.speechSynthesis = {
-      cancel() {},
-      speak(utterance) {
-        window.__spoken.push({ text: utterance.text, lang: utterance.lang });
-        if (utterance.onstart) utterance.onstart();
-        if (utterance.onend) utterance.onend();
+    Object.defineProperty(window, "speechSynthesis", {
+      configurable: true,
+      value: {
+        cancel() {},
+        speak(utterance) {
+          window.__spoken.push({ text: utterance.text, lang: utterance.lang });
+          if (utterance.onstart) utterance.onstart();
+          if (utterance.onend) utterance.onend();
+        }
       }
-    };
+    });
     window.api = async (_path, options) => {
       const payload = structuredClone(options.body);
       window.__tutorRequests.push(payload);
