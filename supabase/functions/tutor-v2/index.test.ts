@@ -533,7 +533,7 @@ Deno.test("client-side learning memory is allow-listed and does not require a me
     mode_counts: { chat: 6, unknown_mode: 4 },
     interaction_count: 6
   });
-  assert(memory !== null, "enabled local memory was rejected");
+  if (!memory) throw new Error("enabled local memory was rejected");
   assert(memory.cefr_level === "A2", "valid CEFR level was not retained");
   assert(memory.topic_counts.subjunctive === 4 && memory.topic_counts.past_tenses === 2, "valid topic counts were not retained");
   assert(!("private_question_text" in memory.topic_counts), "unapproved topic label was retained");
