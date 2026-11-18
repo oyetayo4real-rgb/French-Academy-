@@ -8,7 +8,7 @@ create or replace function public.tutor_set_learning_memory_enabled(
 )
 returns pg_catalog.void
 language sql
-security definer
+security invoker
 set search_path = pg_catalog, public
 as $$
   insert into public.tutor_learning_memory (user_id, enabled, updated_at)
@@ -23,7 +23,7 @@ create or replace function public.tutor_clear_learning_memory(
 )
 returns pg_catalog.void
 language sql
-security definer
+security invoker
 set search_path = pg_catalog, public
 as $$
   delete from public.tutor_learning_memory where user_id = p_uid;
@@ -37,7 +37,7 @@ create or replace function public.tutor_record_learning_interaction(
 )
 returns pg_catalog.jsonb
 language plpgsql
-security definer
+security invoker
 set search_path = pg_catalog, public
 as $$
 declare
