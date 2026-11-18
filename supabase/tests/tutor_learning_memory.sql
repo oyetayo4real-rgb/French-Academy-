@@ -58,7 +58,7 @@ $$;
 
 select public.tutor_set_learning_memory_enabled(:'test_uid'::pg_catalog.uuid, false);
 
-do $
+do $$
 declare
   v_uid pg_catalog.uuid := pg_catalog.current_setting('tutor.test_uid')::pg_catalog.uuid;
   v_memory pg_catalog.jsonb;
@@ -77,7 +77,7 @@ begin
     raise exception 'an in-flight interaction re-enabled or wrote disabled memory';
   end if;
 end;
-$;
+$$;
 
 select public.tutor_clear_learning_memory(:'test_uid'::pg_catalog.uuid);
 
