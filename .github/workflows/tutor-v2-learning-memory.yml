@@ -1,0 +1,41 @@
+name: Tutor V2 learning memory tests
+
+on:
+  push:
+    branches:
+      - feat/bilingual-voice-tutor
+    paths:
+      - "supabase/functions/tutor-v2/**"
+      - "supabase/migrations/**"
+      - ".github/workflows/tutor-v2-learning-memory.yml"
+  pull_request:
+    branches:
+      - feat/bilingual-voice-tutor
+    paths:
+      - "supabase/functions/tutor-v2/**"
+      - "supabase/migrations/**"
+      - ".github/workflows/tutor-v2-learning-memory.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tutor-v2-learning-memory-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tutor-v2-tests:
+    name: Tutor V2 mocked integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Run Tutor V2 tests
+        run: deno test --no-check supabase/functions/tutor-v2/index.test.ts
