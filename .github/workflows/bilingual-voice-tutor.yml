@@ -100,6 +100,7 @@ jobs:
             ARRAY['subjunctive', 'subjunctive', 'unapproved_raw_text']
           );
           RESET ROLE;
+          SQL
           memory_ok="$(psql -v ON_ERROR_STOP=1 -tA -c "SELECT
             interaction_count = 1
             AND cefr_level = 'A2'
@@ -112,7 +113,6 @@ jobs:
             echo "Learning memory aggregation or allow-list check failed."
             exit 1
           fi
-          SQL
           if psql -v ON_ERROR_STOP=1 -c "SET ROLE authenticated; SELECT * FROM public.tutor_learning_memory;" >/dev/null 2>&1; then
             echo "Authenticated users must not access the server-only memory table."
             exit 1
