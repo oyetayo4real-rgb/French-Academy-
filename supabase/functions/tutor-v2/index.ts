@@ -560,7 +560,7 @@ type LearningMemory = {
 
 const LEARNING_TOPIC_PATTERNS: Array<[string, RegExp]> = [
   ["subjunctive", /\b(subjonctif|subjunctive)\b/i],
-  ["past_tenses", /\b(pass[eé] compos[eé]|imparfait|plus-que-parfait|pass[eé] simple|past tense)\b/i],
+  ["past_tenses", /(pass[eé] compos[eé]|imparfait|plus-que-parfait|pass[eé] simple|past tense)/i],
   ["articles", /\b(articles?|article défini|article indéfini)\b/i],
   ["pronouns", /\b(pronoms?|pronouns?|y and en)\b/i],
   ["agreement", /\b(accord|agreement|genre|gender|plural)\b/i],
