@@ -613,7 +613,7 @@ async function learningMemoryRequest(
   const baseUrl = deps.env.get("SUPABASE_URL");
   const serviceKey = deps.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (!baseUrl || !serviceKey) throw new Error("Learning memory storage is not configured.");
-  return deps.fetchImpl(baseUrl.replace(/\\/$/, "") + "/rest/v1/" + path, {
+  return deps.fetchImpl(baseUrl.replace(/\/$/, "") + "/rest/v1/" + path, {
     ...init,
     headers: {
       apikey: serviceKey,
