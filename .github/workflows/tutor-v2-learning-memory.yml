@@ -7,6 +7,7 @@ on:
     paths:
       - "supabase/functions/tutor-v2/**"
       - "supabase/migrations/**"
+      - "supabase/tests/tutor_learning_memory.sql"
       - ".github/workflows/tutor-v2-learning-memory.yml"
   pull_request:
     branches:
@@ -14,6 +15,7 @@ on:
     paths:
       - "supabase/functions/tutor-v2/**"
       - "supabase/migrations/**"
+      - "supabase/tests/tutor_learning_memory.sql"
       - ".github/workflows/tutor-v2-learning-memory.yml"
 
 permissions:
@@ -24,18 +26,55 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  tutor-v2-tests:
-    name: Tutor V2 mocked integration tests
-    runs-on: ubuntu-latest
+  learning-memory:
+    name: Learning memory SQL and Edge Function tests
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: tutor_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d tutor_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
     steps:
       - name: Check out source
         uses: actions/checkout@v4
 
+      - name: Prepare isolated auth schema and roles
+        env:
+          PGPASSWORD: postgres
+        run: |
+          TEST_UID="$(cat /proc/sys/kernel/random/uuid)"
+          echo "TUTOR_TEST_UID=$TEST_UID" >> "$GITHUB_ENV"
+          psql -h 127.0.0.1 -U postgres -d tutor_test -v test_uid="$TEST_UID" -v ON_ERROR_STOP=1 <<'SQL'
+          create role anon;
+          create role authenticated;
+          create role service_role;
+          create schema auth;
+          create table auth.users (id uuid primary key);
+          insert into auth.users (id) values (:'test_uid');
+          SQL
+
+      - name: Apply canonical learning memory migrations and test
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h 127.0.0.1 -U postgres -d tutor_test -v test_uid="$TUTOR_TEST_UID" -v ON_ERROR_STOP=1 -f supabase/migrations/20261118190000_tutor_learning_memory.sql
+          psql -h 127.0.0.1 -U postgres -d tutor_test -v test_uid="$TUTOR_TEST_UID" -v ON_ERROR_STOP=1 -f supabase/migrations/20261118202000_tutor_learning_memory_rpc.sql
+          psql -h 127.0.0.1 -U postgres -d tutor_test -v test_uid="$TUTOR_TEST_UID" -v ON_ERROR_STOP=1 -f supabase/tests/tutor_learning_memory.sql
+
       - name: Set up Deno
         uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.x
+          deno-version: "2.5.6"
 
-      - name: Run Tutor V2 tests
+      - name: Run Tutor V2 mocked integration tests
         run: deno test supabase/functions/tutor-v2/index.test.ts
