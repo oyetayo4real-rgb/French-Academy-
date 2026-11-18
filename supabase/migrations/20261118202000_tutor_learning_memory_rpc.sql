@@ -102,9 +102,9 @@ begin
   v_mode_counts := coalesce(v_mode_counts, '{}'::jsonb);
 
   for v_topic in
-    select distinct candidate
-    from pg_catalog.unnest(coalesce(p_topics, array[]::text[])) as candidate
-    where candidate = any (v_allowed_topics)
+    select distinct topic
+    from pg_catalog.unnest(coalesce(p_topics, array[]::text[])) as topics(topic)
+    where topic = any (v_allowed_topics)
   loop
     v_topic_counts := pg_catalog.jsonb_set(
       v_topic_counts,
