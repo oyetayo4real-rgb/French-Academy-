@@ -4,7 +4,76 @@
   let FA_DAILY_CALL = null, FA_DAILY_META = null, FA_DAILY_SDK_PROMISE = null;
   const FA_TUTOR_FUNCTION_SLUG = "tutor-v2";
   const FA_SCRIPT_URL = document.currentScript && document.currentScript.src;
-  const FA_AI = { level: "A1", mode: "chat", depth: "quick", messages: [], pending: false, error: "", lastRequest: null, memoryUserId: null, memoryLoaded: false, memoryLoading: false, memoryBusy: false, memoryEnabled: false, memoryProfile: null, memoryStatus: "" };
+  const FA_AI = { level: "A1", mode: "chat", depth: "quick", messages: [], pending: false, error: "", lastRequest: null, memoryUserId: null, memoryLoaded: false, memoryLoading: false, memoryBusy: false, memoryEnabled: false, memoryProfile: null, memoryStatus: "", conversations: [], activeConversationId: null, localStorageError: "" };
+  const FA_TUTOR_LOCAL_VERSION = 1;
+  const FA_TUTOR_LOCAL_PREFIX = "fa_tutor_local_v1:";
+  const FA_TUTOR_TOPICS = [
+    ["subjunctive", /\\b(subjonctif|subjunctive)\\b/i], ["past_tenses", /(pass[eé] compos[eé]|imparfait|plus-que-parfait|pass[eé] simple|past tense)/i],
+    ["articles", /\\b(articles?|article défini|article indéfini)\\b/i], ["pronouns", /\\b(pronoms?|pronouns?|y and en)\\b/i],
+    ["agreement", /\\b(accord|agreement|genre|gender|plural)\\b/i], ["prepositions", /\\b(pr[eé]position|preposition|à|de|chez|dans)\\b/i],
+    ["negation", /\\b(n[eé]gation|ne \\w+ pas|negation)\\b/i], ["vocabulary", /\\b(vocabulaire|vocabulary|synonyme|antonyme|meaning)\\b/i],
+    ["pronunciation", /\\b(prononciation|pronunciation|phon[eè]me|liaison)\\b/i], ["writing", /\\b(r[eé]daction|writing|essay|composition)\\b/i],
+    ["literature", /\\b(litt[eé]rature|literature|po[eè]me|roman|auteur)\\b/i], ["idioms", /\\b(expression idiomatique|idiom|locution|expression)\\b/i],
+    ["questions", /\\b(question|interrogation|interrogative)\\b/i], ["verb_conjugation", /\\b(conjugaison|conjugation|conjugate|verbe|verb)\\b/i],
+    ["listening", /\\b(compr[eé]hension orale|listening|[eé]coute)\\b/i]
+  ];
+  function faTutorStorageKey() { return FA_TUTOR_LOCAL_PREFIX + encodeURIComponent(String(AUTH && AUTH.user && AUTH.user.id || "guest")); }
+  function faEmptyLearningMemory() { return { enabled: false, cefr_level: null, topic_counts: {}, mode_counts: {}, interaction_count: 0, last_interaction_at: null }; }
+  function faLoadTutorLocalData() {
+    const empty = { conversations: [], activeConversationId: null, memory: faEmptyLearningMemory() };
+    try {
+      const raw = localStorage.getItem(faTutorStorageKey());
+      if (!raw) return empty;
+      const data = JSON.parse(raw);
+      if (!data || data.version !== FA_TUTOR_LOCAL_VERSION) return empty;
+      const conversations = Array.isArray(data.conversations) ? data.conversations.filter(x => x && typeof x.id === "string" && Array.isArray(x.messages)).slice(-25).map(x => ({
+        id: x.id, title: String(x.title || "New conversation").slice(0,80), createdAt: Number(x.createdAt)||Date.now(), updatedAt: Number(x.updatedAt)||Date.now(),
+        level: ["none","A1","A2","B1","B2","C1","C2"].includes(x.level) ? x.level : "A1",
+        mode: ["chat","practice","correct","translate"].includes(x.mode) ? x.mode : "chat", depth: x.depth === "deep" ? "deep" : "quick",
+        messages: x.messages.filter(m => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string").slice(-100).map(m => ({role:m.role,content:m.content.slice(0,12000)}))
+      })) : [];
+      const src = data.memory && typeof data.memory === "object" ? data.memory : {};
+      const memory = faEmptyLearningMemory(); memory.enabled = src.enabled === true;
+      memory.cefr_level = ["A1","A2","B1","B2","C1","C2"].includes(src.cefr_level) ? src.cefr_level : null;
+      for (const [k,v] of Object.entries(src.topic_counts || {})) if (/^[a-z_]{2,32}$/.test(k) && Number.isInteger(v) && v >= 0) memory.topic_counts[k] = Math.min(v,100000);
+      for (const [k,v] of Object.entries(src.mode_counts || {})) if (["chat","practice","correct","translate","examples"].includes(k) && Number.isInteger(v) && v >= 0) memory.mode_counts[k] = Math.min(v,100000);
+      memory.interaction_count = Number.isInteger(src.interaction_count) && src.interaction_count >= 0 ? Math.min(src.interaction_count,1000000) : 0;
+      memory.last_interaction_at = typeof src.last_interaction_at === "string" ? src.last_interaction_at : null;
+      return {conversations,activeConversationId:typeof data.activeConversationId==="string"?data.activeConversationId:null,memory};
+    } catch (_) { FA_AI.localStorageError = "This browser could not read saved tutor data. The tutor session can still work."; return empty; }
+  }
+  function faSaveTutorLocalData() {
+    try {
+      const active = FA_AI.conversations.find(x => x.id === FA_AI.activeConversationId);
+      if (active) { active.messages = FA_AI.messages.slice(-100).map(m=>({role:m.role,content:String(m.content||"").slice(0,12000)})); active.updatedAt=Date.now(); active.level=FA_AI.level; active.mode=FA_AI.mode; active.depth=FA_AI.depth; }
+      FA_AI.conversations = FA_AI.conversations.slice(-25);
+      localStorage.setItem(faTutorStorageKey(),JSON.stringify({version:FA_TUTOR_LOCAL_VERSION,activeConversationId:FA_AI.activeConversationId,conversations:FA_AI.conversations,memory:FA_AI.memoryProfile||faEmptyLearningMemory()}));
+      FA_AI.localStorageError=""; return true;
+    } catch (_) { FA_AI.localStorageError="Browser storage is full or unavailable. Export or remove older chats before continuing."; return false; }
+  }
+  function faStartTutorConversation() {
+    const now=Date.now(),id="chat_"+now.toString(36)+"_"+Math.random().toString(36).slice(2,8);
+    FA_AI.conversations.push({id,title:"New conversation",createdAt:now,updatedAt:now,level:FA_AI.level,mode:FA_AI.mode,depth:FA_AI.depth,messages:[]});
+    FA_AI.activeConversationId=id; FA_AI.messages=[]; FA_AI.lastRequest=null; FA_AI.error=""; faSaveTutorLocalData();
+  }
+  function faActivateTutorConversation(id) {
+    const item=FA_AI.conversations.find(x=>x.id===id); if(!item)return;
+    FA_AI.activeConversationId=item.id; FA_AI.messages=item.messages.map(m=>({role:m.role,content:m.content}));
+    FA_AI.level=item.level; FA_AI.mode=item.mode; FA_AI.depth=item.depth; FA_AI.lastRequest=null; FA_AI.error="";
+    faSaveTutorLocalData(); render(true);
+  }
+  function faUpdateLocalLearningMemory(request) {
+    if(!FA_AI.memoryEnabled)return;
+    const memory=FA_AI.memoryProfile||faEmptyLearningMemory(),topics=new Set(),value=String(request.text||"");
+    for(const [topic,pattern] of FA_TUTOR_TOPICS)if(pattern.test(value))topics.add(topic);
+    if(request.mode==="translate")topics.add("translation"); if(request.mode==="correct")topics.add("correction");
+    if(request.mode==="practice")topics.add("conversation"); if(request.mode==="examples")topics.add("examples");
+    for(const topic of [...topics].slice(0,8))memory.topic_counts[topic]=Math.min(100000,(memory.topic_counts[topic]||0)+1);
+    memory.mode_counts[request.mode]=Math.min(100000,(memory.mode_counts[request.mode]||0)+1);
+    memory.interaction_count=Math.min(1000000,memory.interaction_count+1);
+    memory.cefr_level=["A1","A2","B1","B2","C1","C2"].includes(request.level)?request.level:memory.cefr_level;
+    memory.last_interaction_at=new Date().toISOString(); FA_AI.memoryProfile=memory; faSaveTutorLocalData();
+  }
   const FA_VOICE = { language: "fr-FR", recognition: null, listening: false, speaking: false };
   function faEnsureTutorStyles() {
     if (document.getElementById("faTutorStyles")) return;
@@ -356,78 +425,48 @@
   function faTutorView() {
     if (!AUTH || !AUTH.user) { $.innerHTML = '<button class="g" id="faHome">← Home</button><h1>🤖 AI French tutor</h1><div class="card"><p>Sign in to use the tutor and keep your learning progress.</p><button id="faSignIn" style="width:100%">Sign in / Create account</button></div>'; return; }
     if (FA_AI.memoryUserId !== AUTH.user.id) {
-      FA_AI.memoryUserId = AUTH.user.id;
-      FA_AI.memoryLoaded = false;
-      FA_AI.memoryLoading = false;
-      FA_AI.memoryEnabled = false;
-      FA_AI.memoryProfile = null;
-      FA_AI.memoryStatus = "";
+      FA_AI.memoryUserId=AUTH.user.id;
+      const saved=faLoadTutorLocalData(); FA_AI.conversations=saved.conversations; FA_AI.activeConversationId=saved.activeConversationId;
+      FA_AI.memoryProfile=saved.memory; FA_AI.memoryEnabled=saved.memory.enabled===true; FA_AI.memoryLoaded=true; FA_AI.memoryLoading=false; FA_AI.memoryBusy=false;
+      FA_AI.memoryStatus=FA_AI.memoryEnabled?"Learning memory is on. Saved only in this browser.":"Learning memory is off. Turn it on to save progress on this device.";
+      const active=FA_AI.conversations.find(x=>x.id===FA_AI.activeConversationId);
+      if(active){FA_AI.messages=active.messages.map(m=>({role:m.role,content:m.content}));FA_AI.level=active.level;FA_AI.mode=active.mode;FA_AI.depth=active.depth;}
+      else{FA_AI.messages=[];FA_AI.activeConversationId=null;}
     }
+    if(!FA_AI.activeConversationId)faStartTutorConversation();
     const messageHtml = FA_AI.messages.map((m, index) => '<div class="card" style="margin:8px 0"><b>' + (m.role === "user" ? "You" : "Académie AI") + '</b><div class="fa-answer" style="margin-top:8px;line-height:1.75">' + (m.role === "assistant" ? faMarkdown(m.content) : '<div style="white-space:pre-wrap">' + faSafe(m.content) + "</div>") + "</div>" + (m.role === "assistant" ? '<button class="g" type="button" data-fa-speak="' + index + '">🔊 Listen</button><p class="fa-tutor-answer-note" role="note">AI answers can contain mistakes. Check important points in a dictionary or grammar reference.</p>' : "") + "</div>").join("");
+    const conversationOptions=FA_AI.conversations.slice().sort((a,b)=>b.updatedAt-a.updatedAt).map(item=>'<option value="'+faSafe(item.id)+'"'+(item.id===FA_AI.activeConversationId?" selected":"")+'>'+faSafe(item.title||"New conversation")+'</option>').join("");
     $.innerHTML = (typeof topbar === "function" ? topbar() : "") + '<button class="g" id="faHome">← Home</button><h1>🤖 Académie French Intelligence</h1><p class="mu">A French-language tutor for grammar, syntax, semantics, literature, history, translation, writing and contemporary usage. CEFR level is optional guidance.</p>' +
+      '<div class="card fa-conversation-manager"><b>Your conversations</b><select class="inp" id="faConversationSelect" aria-label="Choose a saved conversation">'+conversationOptions+'</select><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="g" id="faNewConversation" type="button">＋ New chat</button><button class="g" id="faRenameConversation" type="button">Rename</button><button class="g" id="faDeleteConversation" type="button">Delete chat</button></div><p class="mu">Saved on this device and browser only.</p></div>' +
       '<div class="card"><label for="faTutorDepth"><b>Answer depth</b></label><select class="inp" id="faTutorDepth">' +
       '<option value="quick"' + (FA_AI.depth === "quick" ? " selected" : "") + '>Quick answer</option><option value="deep"' + (FA_AI.depth === "deep" ? " selected" : "") + '>Deep answer</option></select>' +
       '<label for="faTutorLevel"><b>Optional explanation style</b></label><select class="inp" id="faTutorLevel"><option value="none"' + (FA_AI.level === "none" ? " selected" : "") + '>No level restriction</option>' + ["A1","A2","B1","B2","C1","C2"].map((l) => '<option value="' + l + '"' + (l === FA_AI.level ? " selected" : "") + '>' + l + ' · optional learner scaffolding</option>').join("") + '</select><label for="faTutorMode"><b>Tool</b></label><select class="inp" id="faTutorMode">' + [["chat","Tutor answer"],["practice","Conversation practice"],["correct","Correct and analyse my French"],["translate","Translate French ↔ English"]].map((o) => '<option value="' + o[0] + '"' + (o[0] === FA_AI.mode ? " selected" : "") + '>' + o[1] + '</option>').join("") + "</select></div><div id=\"faTutorMessages\">" + (messageHtml || '<div class="card mu">Ask a question. Choose Quick answer for a focused explanation or Deep answer for a fuller treatment.</div>') + "</div>" +
       (FA_AI.pending ? '<div class="card mu">Preparing your answer…</div>' : "") + (FA_AI.error ? '<div class="err" role="alert">' + faSafe(FA_AI.error) + '</div>' : "") + (FA_AI.lastRequest ? '<button id="faTutorRetry" class="g" type="button"' + (FA_AI.pending ? ' disabled aria-disabled="true">Trying again...</button>' : ' aria-disabled="false">Try again</button>') : "") +
-      '<div class="card fa-memory-panel"><label style="display:flex;align-items:center;gap:10px;font-weight:700"><input id="faMemoryEnabled" type="checkbox"' + (FA_AI.memoryEnabled ? " checked" : "") + (FA_AI.memoryBusy || !FA_AI.memoryLoaded ? " disabled" : "") + '> Remember my learning progress</label><p class="mu">Optional, private learning memory. When enabled, French Academy saves your selected CEFR level, topic counts and practice modes—not your questions, chat history or answers. Turning it off pauses memory; use Clear saved memory to erase it.</p><p class="mu" id="faMemoryStatus" role="status" aria-live="polite">' + faSafe(FA_AI.memoryStatus || (FA_AI.memoryLoading ? "Loading your memory settings…" : (FA_AI.memoryLoaded ? (FA_AI.memoryEnabled ? "Learning memory is on." : "Learning memory is off.") : "Loading memory settings…"))) + '</p>' + (FA_AI.memoryProfile && FA_AI.memoryProfile.interaction_count > 0 ? '<p class="mu">Saved tutor sessions: <b>' + Number(FA_AI.memoryProfile.interaction_count) + '</b>' + (Object.keys(FA_AI.memoryProfile.topic_counts || {}).length ? ' · Topics: ' + faSafe(Object.entries(FA_AI.memoryProfile.topic_counts).sort((a,b) => Number(b[1])-Number(a[1])).slice(0,5).map(([topic,count]) => topic.replace(/_/g," ") + " (" + Number(count) + ")").join(", ")) : "") + '</p>' : '<p class="mu">No learning activity has been saved yet.</p>') + '<button class="g" id="faMemoryClear" type="button"' + (FA_AI.memoryBusy || !FA_AI.memoryLoaded || !(FA_AI.memoryProfile && (FA_AI.memoryProfile.interaction_count > 0 || FA_AI.memoryProfile.enabled)) ? " disabled" : "") + '>Clear saved learning memory</button></div>' +
+      '<div class="card fa-memory-panel"><label style="display:flex;align-items:center;gap:10px;font-weight:700"><input id="faMemoryEnabled" type="checkbox"' + (FA_AI.memoryEnabled ? " checked" : "") + (FA_AI.memoryBusy || !FA_AI.memoryLoaded ? " disabled" : "") + '> Remember my learning progress</label><p class="mu">When enabled, your selected level, frequently practised topics and practice modes are saved locally in this browser. Actual questions and answers are saved separately in conversation history. This memory feature does not upload them.</p><p class="mu" id="faMemoryStatus" role="status" aria-live="polite">' + faSafe(FA_AI.memoryStatus || (FA_AI.memoryEnabled ? "Learning memory is on." : "Learning memory is off.")) + '</p>' + (FA_AI.memoryProfile && FA_AI.memoryProfile.interaction_count > 0 ? '<p class="mu">Saved tutor sessions: <b>' + Number(FA_AI.memoryProfile.interaction_count) + '</b>' + (Object.keys(FA_AI.memoryProfile.topic_counts || {}).length ? ' · Topics: ' + faSafe(Object.entries(FA_AI.memoryProfile.topic_counts).sort((a,b) => Number(b[1])-Number(a[1])).slice(0,5).map(([topic,count]) => topic.replace(/_/g," ") + " (" + Number(count) + ")").join(", ")) : "") + '</p>' : '<p class="mu">No learning activity has been saved yet.</p>') + '<button class="g" id="faMemoryClear" type="button"' + (FA_AI.memoryBusy || !FA_AI.memoryLoaded || !(FA_AI.memoryProfile && (FA_AI.memoryProfile.interaction_count > 0 || FA_AI.memoryProfile.enabled)) ? " disabled" : "") + '>Clear saved learning memory</button></div>' +
       '<div class="card fa-tutor-panel"><label for="faVoiceLanguage"><b>Voice language</b></label><select class="inp" id="faVoiceLanguage"><option value="fr-FR"' + (FA_VOICE.language === "fr-FR" ? " selected" : "") + '>French</option><option value="en-US"' + (FA_VOICE.language === "en-US" ? " selected" : "") + '>English</option></select><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="g" id="faTutorMic" type="button">Speak</button><button class="g" id="faTutorStopAudio" type="button">Stop audio</button></div><p class="mu" id="faVoiceStatus" role="status" aria-live="polite">Choose French or English, then use Speak to dictate your question.</p><p class="mu">Microphone access is requested only when you tap Speak. Voice recognition may be processed by your browser speech service; check its privacy settings.</p><textarea class="inp" id="faTutorInput" rows="5" placeholder="Ask anything about French: grammar, literature, idioms, translation, writing or language usage…"></textarea><button id="faTutorSend" style="width:100%"' + (FA_AI.pending ? " disabled" : "") + ">" + (FA_AI.pending ? "Please wait…" : "Ask Académie") + '</button><p class="mu">Answers come from an AI service and can contain mistakes. You need to be signed in to use the Tutor.</p></div>';
     if (typeof bindTop === "function") bindTop();
-    if (!FA_AI.memoryLoaded && !FA_AI.memoryLoading) void faLoadTutorMemory();
   }
-  async function faLoadTutorMemory() {
-    if (!AUTH || !AUTH.user || FA_AI.memoryLoading || FA_AI.memoryLoaded) return;
-    FA_AI.memoryLoading = true;
-    try {
-      const response = await faTutorRequest({ action: "memory_get" });
-      if (!response || response.error || !response.memory) throw new Error("Learning memory settings are unavailable.");
-      FA_AI.memoryProfile = response.memory;
-      FA_AI.memoryEnabled = response.memory.enabled === true;
-      FA_AI.memoryStatus = FA_AI.memoryEnabled ? "Learning memory is on. Your next tutor sessions can use these learning signals." : "Learning memory is off. Nothing new will be saved.";
-    } catch (_) {
-      FA_AI.memoryStatus = "Could not load memory settings. The tutor still works without persistent memory.";
-    } finally {
-      FA_AI.memoryLoaded = true;
-      FA_AI.memoryLoading = false;
-      if (view === "tutor") render(true);
-    }
+  function faSetTutorMemory(enabled) {
+    FA_AI.memoryEnabled=enabled===true; FA_AI.memoryProfile=FA_AI.memoryProfile||faEmptyLearningMemory();
+    FA_AI.memoryProfile.enabled=FA_AI.memoryEnabled;
+    FA_AI.memoryStatus=FA_AI.memoryEnabled?"Learning memory enabled. Structured progress is stored only on this device.":"Learning memory paused. Existing local progress remains until you clear it.";
+    faSaveTutorLocalData(); if(view==="tutor")render(true);
   }
-  async function faSetTutorMemory(enabled) {
-    if (FA_AI.memoryBusy || !FA_AI.memoryLoaded) return;
-    FA_AI.memoryBusy = true;
-    FA_AI.memoryStatus = enabled ? "Enabling learning memory…" : "Pausing learning memory…";
-    render(true);
-    try {
-      const response = await faTutorRequest({ action: "memory_set", enabled: enabled === true });
-      if (!response || response.error || !response.memory) throw new Error("Learning memory settings could not be saved.");
-      FA_AI.memoryProfile = response.memory;
-      FA_AI.memoryEnabled = response.memory.enabled === true;
-      FA_AI.memoryStatus = FA_AI.memoryEnabled ? "Learning memory enabled. Only structured learning progress will be stored." : "Learning memory paused. Previously saved progress remains until you clear it.";
-    } catch (_) {
-      FA_AI.memoryStatus = "Could not update memory settings. Please try again.";
-    } finally {
-      FA_AI.memoryBusy = false;
-      if (view === "tutor") render(true);
-    }
+  function faClearTutorMemory() {
+    if(!confirm("Permanently clear saved learning memory on this device? Your saved conversations will remain."))return;
+    FA_AI.memoryProfile=faEmptyLearningMemory(); FA_AI.memoryEnabled=false; FA_AI.memoryStatus="Local learning memory cleared.";
+    faSaveTutorLocalData(); if(view==="tutor")render(true);
   }
-  async function faClearTutorMemory() {
-    if (FA_AI.memoryBusy || !FA_AI.memoryLoaded) return;
-    if (!(FA_AI.memoryProfile && (FA_AI.memoryProfile.interaction_count > 0 || FA_AI.memoryProfile.enabled))) return;
-    if (!confirm("Permanently clear your saved French Academy learning memory? This will not delete lessons, scores or course progress.")) return;
-    FA_AI.memoryBusy = true;
-    FA_AI.memoryStatus = "Clearing saved learning memory…";
-    render(true);
-    try {
-      const response = await faTutorRequest({ action: "memory_clear" });
-      if (!response || response.error) throw new Error("Learning memory could not be cleared.");
-      FA_AI.memoryProfile = response.memory || { enabled: false, topic_counts: {}, mode_counts: {}, interaction_count: 0 };
-      FA_AI.memoryEnabled = false;
-      FA_AI.memoryStatus = "Saved learning memory cleared.";
-    } catch (_) {
-      FA_AI.memoryStatus = "Could not clear learning memory. Please try again.";
-    } finally {
-      FA_AI.memoryBusy = false;
-      if (view === "tutor") render(true);
-    }
+  function faRenameTutorConversation() {
+    const item=FA_AI.conversations.find(x=>x.id===FA_AI.activeConversationId); if(!item)return;
+    const next=window.prompt("Conversation name",item.title||"New conversation"); if(next===null)return;
+    const title=next.trim().slice(0,80); if(!title)return; item.title=title; faSaveTutorLocalData(); render(true);
+  }
+  function faDeleteTutorConversation() {
+    const item=FA_AI.conversations.find(x=>x.id===FA_AI.activeConversationId); if(!item||!confirm("Delete this saved conversation from this device? This cannot be undone."))return;
+    FA_AI.conversations=FA_AI.conversations.filter(x=>x.id!==item.id); FA_AI.activeConversationId=null; FA_AI.messages=[]; FA_AI.lastRequest=null;
+    if(!FA_AI.conversations.length)faStartTutorConversation(); else faActivateTutorConversation(FA_AI.conversations.slice().sort((a,b)=>b.updatedAt-a.updatedAt)[0].id);
+    faSaveTutorLocalData(); if(view==="tutor")render(true);
   }
   async function faTutorSend(isRetry) {
     if (!faNeedSignIn() || FA_AI.pending) return;
@@ -439,7 +478,7 @@
       FA_AI.mode = faEl("faTutorMode")?.value || "chat";
       FA_AI.depth = faEl("faTutorDepth")?.value === "deep" ? "deep" : "quick";
       const history = FA_AI.messages.slice(-12).map((m) => ({ role: m.role, content: m.content }));
-      request = { mode: FA_AI.mode, level: FA_AI.level, depth: FA_AI.depth, text, history, useLearningMemory: FA_AI.memoryEnabled === true };
+      request = { mode: FA_AI.mode, level: FA_AI.level, depth: FA_AI.depth, text, history, useLearningMemory: FA_AI.memoryEnabled === true, learningMemory: FA_AI.memoryEnabled ? FA_AI.memoryProfile : null };
       FA_AI.lastRequest = request;
       FA_AI.messages.push({ role: "user", content: text });
       FA_AI.messages = FA_AI.messages.slice(-24);
@@ -451,7 +490,8 @@
     try {
       const response = await faTutorRequest({
         mode: request.mode, level: request.level, depth: request.depth,
-        text: request.text, history: request.history, useLearningMemory: request.useLearningMemory === true
+        text: request.text, history: request.history, useLearningMemory: request.useLearningMemory === true,
+        learningMemory: request.useLearningMemory === true ? request.learningMemory : null
       });
       const answer = response && typeof response.text === "string" ? response.text.trim() : "";
       if (!answer) {
@@ -463,10 +503,14 @@
         throw new Error((response && response.message) || "The Tutor could not prepare an answer.");
       }
       FA_AI.messages.push({ role: "assistant", content: answer });
-      FA_AI.messages = FA_AI.messages.slice(-24);
+      FA_AI.messages = FA_AI.messages.slice(-100);
       FA_AI.lastRequest = null;
+      const activeConversation=FA_AI.conversations.find(x=>x.id===FA_AI.activeConversationId);
+      if(activeConversation&&activeConversation.title==="New conversation")activeConversation.title=String(request.text||"French tutor session").replace(/\\s+/g," ").slice(0,48);
+      faUpdateLocalLearningMemory(request); faSaveTutorLocalData();
     } catch (error) {
       FA_AI.error = (error && error.message) || "The Tutor could not answer just now.";
+      faSaveTutorLocalData();
     } finally {
       FA_AI.pending = false;
       render(true);
@@ -633,7 +677,10 @@
     else if (button.id === "faSignIn") { view = "auth"; render(); }
     else if (button.id === "faTutorMic") faStartVoiceInput();
     else if (button.id === "faTutorStopAudio") { faStopSpeaking(); faVoiceStatus("Audio stopped."); }
-    else if (button.id === "faMemoryClear") await faClearTutorMemory();
+    else if (button.id === "faMemoryClear") faClearTutorMemory();
+    else if (button.id === "faNewConversation") { faSaveTutorLocalData(); faStartTutorConversation(); render(true); }
+    else if (button.id === "faRenameConversation") faRenameTutorConversation();
+    else if (button.id === "faDeleteConversation") faDeleteTutorConversation();
     else if (button.hasAttribute("data-fa-speak")) faSpeakTutorAnswer(Number(button.getAttribute("data-fa-speak")));
     else if (button.id === "faTutorSend") await faTutorSend();
     else if (button.id === "faTutorRetry") await faTutorSend(true);
@@ -655,8 +702,9 @@
     }
   });
   document.addEventListener("change", (event) => {
+    if (event.target && event.target.id === "faConversationSelect") { faSaveTutorLocalData(); faActivateTutorConversation(event.target.value); return; }
     if (event.target && event.target.id === "faMemoryEnabled") {
-      void faSetTutorMemory(event.target.checked);
+      faSetTutorMemory(event.target.checked);
       return;
     }
     if (event.target && event.target.id === "faVoiceLanguage") {
