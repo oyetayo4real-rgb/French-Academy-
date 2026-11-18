@@ -60,8 +60,24 @@ try {
         }
       }
     });
+    window.__memoryCalls = [];
     window.api = async (_path, options) => {
       const payload = structuredClone(options.body);
+      if (payload.action) {
+        window.__memoryCalls.push(payload);
+        if (payload.action === "memory_get") return { memory: {
+          enabled: false, cefr_level: null, topic_counts: {}, mode_counts: {},
+          interaction_count: 0, last_interaction_at: null
+        } };
+        if (payload.action === "memory_set") return { memory: {
+          enabled: payload.enabled, cefr_level: null, topic_counts: {}, mode_counts: {},
+          interaction_count: 0, last_interaction_at: null
+        } };
+        if (payload.action === "memory_clear") return { memory: {
+          enabled: false, cefr_level: null, topic_counts: {}, mode_counts: {},
+          interaction_count: 0, last_interaction_at: null
+        } };
+      }
       window.__tutorRequests.push(payload);
       if (window.__tutorRequests.length === 1) {
         return { error: "provider_unavailable", retryable: true };
@@ -72,6 +88,21 @@ try {
   });
   await page.addScriptTag({ url: baseUrl + "/features/ai-classroom.js" });
   await page.evaluate(() => window.FATutorView());
+  await page.locator("#faMemoryEnabled").waitFor({ state: "visible" });
+  await page.waitForFunction(() => {
+    const control = document.querySelector("#faMemoryEnabled");
+    return control && !control.disabled;
+  });
+
+  await check("learner can opt in to structured persistent memory", async () => {
+    assert.equal(await page.locator("#faMemoryEnabled").isChecked(), false);
+    await page.locator("#faMemoryEnabled").check();
+    await page.waitForFunction(() => document.querySelector("#faMemoryEnabled")?.checked === true);
+    const memoryCalls = await page.evaluate(() => window.__memoryCalls);
+    assert(memoryCalls.some((call) => call.action === "memory_get"), "memory settings were not loaded");
+    assert(memoryCalls.some((call) => call.action === "memory_set" && call.enabled === true), "memory opt-in was not saved");
+    assert.match(await page.locator(".fa-memory-panel").innerText(), /only your selected CEFR level, topic counts and practice modes|selected CEFR level, topic counts and practice modes/i);
+  });
 
   await check("voice input captures French and English speech without auto-submitting", async () => {
     await page.locator("#faTutorMic").click();
