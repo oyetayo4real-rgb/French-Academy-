@@ -152,6 +152,19 @@ try {
     await page.locator("#faTutorMessages .card").nth(1).waitFor({ state: "visible" });
     assert.equal(await page.locator("#faTutorMessages .card").count(), 2);
     assert.equal(await page.locator("#faTutorRetry").count(), 0);
+    const savedChat = await page.evaluate(() => {
+      const key = Object.keys(localStorage).find((item) => item.startsWith("fa_tutor_local_v1:"));
+      if (!key) return null;
+      const data = JSON.parse(localStorage.getItem(key));
+      const active = data.conversations.find((item) => item.id === data.activeConversationId);
+      return active ? { id: active.id, title: active.title, messages: active.messages } : null;
+    });
+    assert(savedChat && savedChat.messages.length === 2, "user and assistant messages were not saved locally");
+    assert.match(savedChat.title, /Explique le subjonctif/i);
+    await page.locator("#faNewConversation").click();
+    assert.equal(await page.locator("#faTutorMessages .card").count(), 0, "new conversation did not start empty");
+    await page.locator("#faConversationSelect").selectOption(savedChat.id);
+    assert.equal(await page.locator("#faTutorMessages .card").count(), 2, "saved conversation did not reopen with its messages");
     await page.locator('[data-fa-speak="1"]').click();
     const spoken = await page.evaluate(() => window.__spoken);
     assert.equal(spoken.length, 1);
