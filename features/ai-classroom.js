@@ -4,7 +4,7 @@
   let FA_DAILY_CALL = null, FA_DAILY_META = null, FA_DAILY_SDK_PROMISE = null;
   const FA_TUTOR_FUNCTION_SLUG = "tutor-v2";
   const FA_SCRIPT_URL = document.currentScript && document.currentScript.src;
-  const FA_AI = { level: "A1", mode: "chat", depth: "quick", messages: [], pending: false, error: "", lastRequest: null };
+  const FA_AI = { level: "A1", mode: "chat", depth: "quick", messages: [], pending: false, error: "", lastRequest: null, memoryUserId: null, memoryLoaded: false, memoryLoading: false, memoryBusy: false, memoryEnabled: false, memoryProfile: null, memoryStatus: "" };
   const FA_VOICE = { language: "fr-FR", recognition: null, listening: false, speaking: false };
   function faEnsureTutorStyles() {
     if (document.getElementById("faTutorStyles")) return;
@@ -355,14 +355,79 @@
 
   function faTutorView() {
     if (!AUTH || !AUTH.user) { $.innerHTML = '<button class="g" id="faHome">← Home</button><h1>🤖 AI French tutor</h1><div class="card"><p>Sign in to use the tutor and keep your learning progress.</p><button id="faSignIn" style="width:100%">Sign in / Create account</button></div>'; return; }
+    if (FA_AI.memoryUserId !== AUTH.user.id) {
+      FA_AI.memoryUserId = AUTH.user.id;
+      FA_AI.memoryLoaded = false;
+      FA_AI.memoryLoading = false;
+      FA_AI.memoryEnabled = false;
+      FA_AI.memoryProfile = null;
+      FA_AI.memoryStatus = "";
+    }
     const messageHtml = FA_AI.messages.map((m, index) => '<div class="card" style="margin:8px 0"><b>' + (m.role === "user" ? "You" : "Académie AI") + '</b><div class="fa-answer" style="margin-top:8px;line-height:1.75">' + (m.role === "assistant" ? faMarkdown(m.content) : '<div style="white-space:pre-wrap">' + faSafe(m.content) + "</div>") + "</div>" + (m.role === "assistant" ? '<button class="g" type="button" data-fa-speak="' + index + '">🔊 Listen</button><p class="fa-tutor-answer-note" role="note">AI answers can contain mistakes. Check important points in a dictionary or grammar reference.</p>' : "") + "</div>").join("");
     $.innerHTML = (typeof topbar === "function" ? topbar() : "") + '<button class="g" id="faHome">← Home</button><h1>🤖 Académie French Intelligence</h1><p class="mu">A French-language tutor for grammar, syntax, semantics, literature, history, translation, writing and contemporary usage. CEFR level is optional guidance.</p>' +
       '<div class="card"><label for="faTutorDepth"><b>Answer depth</b></label><select class="inp" id="faTutorDepth">' +
       '<option value="quick"' + (FA_AI.depth === "quick" ? " selected" : "") + '>Quick answer</option><option value="deep"' + (FA_AI.depth === "deep" ? " selected" : "") + '>Deep answer</option></select>' +
       '<label for="faTutorLevel"><b>Optional explanation style</b></label><select class="inp" id="faTutorLevel"><option value="none"' + (FA_AI.level === "none" ? " selected" : "") + '>No level restriction</option>' + ["A1","A2","B1","B2","C1","C2"].map((l) => '<option value="' + l + '"' + (l === FA_AI.level ? " selected" : "") + '>' + l + ' · optional learner scaffolding</option>').join("") + '</select><label for="faTutorMode"><b>Tool</b></label><select class="inp" id="faTutorMode">' + [["chat","Tutor answer"],["practice","Conversation practice"],["correct","Correct and analyse my French"],["translate","Translate French ↔ English"]].map((o) => '<option value="' + o[0] + '"' + (o[0] === FA_AI.mode ? " selected" : "") + '>' + o[1] + '</option>').join("") + "</select></div><div id=\"faTutorMessages\">" + (messageHtml || '<div class="card mu">Ask a question. Choose Quick answer for a focused explanation or Deep answer for a fuller treatment.</div>') + "</div>" +
       (FA_AI.pending ? '<div class="card mu">Preparing your answer…</div>' : "") + (FA_AI.error ? '<div class="err" role="alert">' + faSafe(FA_AI.error) + '</div>' : "") + (FA_AI.lastRequest ? '<button id="faTutorRetry" class="g" type="button"' + (FA_AI.pending ? ' disabled aria-disabled="true">Trying again...</button>' : ' aria-disabled="false">Try again</button>') : "") +
+      '<div class="card fa-memory-panel"><label style="display:flex;align-items:center;gap:10px;font-weight:700"><input id="faMemoryEnabled" type="checkbox"' + (FA_AI.memoryEnabled ? " checked" : "") + (FA_AI.memoryBusy || !FA_AI.memoryLoaded ? " disabled" : "") + '> Remember my learning progress</label><p class="mu">Optional, private learning memory. When enabled, French Academy saves your selected CEFR level, topic counts and practice modes—not your questions, chat history or answers. Turning it off pauses memory; use Clear saved memory to erase it.</p><p class="mu" id="faMemoryStatus" role="status" aria-live="polite">' + faSafe(FA_AI.memoryStatus || (FA_AI.memoryLoading ? "Loading your memory settings…" : (FA_AI.memoryLoaded ? (FA_AI.memoryEnabled ? "Learning memory is on." : "Learning memory is off.") : "Loading memory settings…"))) + '</p>' + (FA_AI.memoryProfile && FA_AI.memoryProfile.interaction_count > 0 ? '<p class="mu">Saved tutor sessions: <b>' + Number(FA_AI.memoryProfile.interaction_count) + '</b>' + (Object.keys(FA_AI.memoryProfile.topic_counts || {}).length ? ' · Topics: ' + faSafe(Object.entries(FA_AI.memoryProfile.topic_counts).sort((a,b) => Number(b[1])-Number(a[1])).slice(0,5).map(([topic,count]) => topic.replace(/_/g," ") + " (" + Number(count) + ")").join(", ")) : "") + '</p>' : '<p class="mu">No learning activity has been saved yet.</p>') + '<button class="g" id="faMemoryClear" type="button"' + (FA_AI.memoryBusy || !FA_AI.memoryLoaded || !(FA_AI.memoryProfile && FA_AI.memoryProfile.interaction_count > 0) ? " disabled" : "") + '>Clear saved learning memory</button></div>' +
       '<div class="card fa-tutor-panel"><label for="faVoiceLanguage"><b>Voice language</b></label><select class="inp" id="faVoiceLanguage"><option value="fr-FR"' + (FA_VOICE.language === "fr-FR" ? " selected" : "") + '>French</option><option value="en-US"' + (FA_VOICE.language === "en-US" ? " selected" : "") + '>English</option></select><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="g" id="faTutorMic" type="button">Speak</button><button class="g" id="faTutorStopAudio" type="button">Stop audio</button></div><p class="mu" id="faVoiceStatus" role="status" aria-live="polite">Choose French or English, then use Speak to dictate your question.</p><p class="mu">Microphone access is requested only when you tap Speak. Voice recognition may be processed by your browser speech service; check its privacy settings.</p><textarea class="inp" id="faTutorInput" rows="5" placeholder="Ask anything about French: grammar, literature, idioms, translation, writing or language usage…"></textarea><button id="faTutorSend" style="width:100%"' + (FA_AI.pending ? " disabled" : "") + ">" + (FA_AI.pending ? "Please wait…" : "Ask Académie") + '</button><p class="mu">Answers come from an AI service and can contain mistakes. You need to be signed in to use the Tutor.</p></div>';
     if (typeof bindTop === "function") bindTop();
+    if (!FA_AI.memoryLoaded && !FA_AI.memoryLoading) void faLoadTutorMemory();
+  }
+  async function faLoadTutorMemory() {
+    if (!AUTH || !AUTH.user || FA_AI.memoryLoading || FA_AI.memoryLoaded) return;
+    FA_AI.memoryLoading = true;
+    try {
+      const response = await faTutorRequest({ action: "memory_get" });
+      if (!response || response.error || !response.memory) throw new Error("Learning memory settings are unavailable.");
+      FA_AI.memoryProfile = response.memory;
+      FA_AI.memoryEnabled = response.memory.enabled === true;
+      FA_AI.memoryStatus = FA_AI.memoryEnabled ? "Learning memory is on. Your next tutor sessions can use these learning signals." : "Learning memory is off. Nothing new will be saved.";
+    } catch (_) {
+      FA_AI.memoryStatus = "Could not load memory settings. The tutor still works without persistent memory.";
+    } finally {
+      FA_AI.memoryLoaded = true;
+      FA_AI.memoryLoading = false;
+      if (view === "tutor") render(true);
+    }
+  }
+  async function faSetTutorMemory(enabled) {
+    if (FA_AI.memoryBusy || !FA_AI.memoryLoaded) return;
+    FA_AI.memoryBusy = true;
+    FA_AI.memoryStatus = enabled ? "Enabling learning memory…" : "Pausing learning memory…";
+    render(true);
+    try {
+      const response = await faTutorRequest({ action: "memory_set", enabled: enabled === true });
+      if (!response || response.error || !response.memory) throw new Error("Learning memory settings could not be saved.");
+      FA_AI.memoryProfile = response.memory;
+      FA_AI.memoryEnabled = response.memory.enabled === true;
+      FA_AI.memoryStatus = FA_AI.memoryEnabled ? "Learning memory enabled. Only structured learning progress will be stored." : "Learning memory paused. Previously saved progress remains until you clear it.";
+    } catch (_) {
+      FA_AI.memoryStatus = "Could not update memory settings. Please try again.";
+    } finally {
+      FA_AI.memoryBusy = false;
+      if (view === "tutor") render(true);
+    }
+  }
+  async function faClearTutorMemory() {
+    if (FA_AI.memoryBusy || !FA_AI.memoryLoaded) return;
+    if (!(FA_AI.memoryProfile && FA_AI.memoryProfile.interaction_count > 0)) return;
+    if (!confirm("Permanently clear your saved French Academy learning memory? This will not delete lessons, scores or course progress.")) return;
+    FA_AI.memoryBusy = true;
+    FA_AI.memoryStatus = "Clearing saved learning memory…";
+    render(true);
+    try {
+      const response = await faTutorRequest({ action: "memory_clear" });
+      if (!response || response.error) throw new Error("Learning memory could not be cleared.");
+      FA_AI.memoryProfile = response.memory || { enabled: false, topic_counts: {}, mode_counts: {}, interaction_count: 0 };
+      FA_AI.memoryEnabled = false;
+      FA_AI.memoryStatus = "Saved learning memory cleared.";
+    } catch (_) {
+      FA_AI.memoryStatus = "Could not clear learning memory. Please try again.";
+    } finally {
+      FA_AI.memoryBusy = false;
+      if (view === "tutor") render(true);
+    }
   }
   async function faTutorSend(isRetry) {
     if (!faNeedSignIn() || FA_AI.pending) return;
@@ -374,7 +439,7 @@
       FA_AI.mode = faEl("faTutorMode")?.value || "chat";
       FA_AI.depth = faEl("faTutorDepth")?.value === "deep" ? "deep" : "quick";
       const history = FA_AI.messages.slice(-12).map((m) => ({ role: m.role, content: m.content }));
-      request = { mode: FA_AI.mode, level: FA_AI.level, depth: FA_AI.depth, text, history };
+      request = { mode: FA_AI.mode, level: FA_AI.level, depth: FA_AI.depth, text, history, useLearningMemory: FA_AI.memoryEnabled === true };
       FA_AI.lastRequest = request;
       FA_AI.messages.push({ role: "user", content: text });
       FA_AI.messages = FA_AI.messages.slice(-24);
@@ -386,7 +451,7 @@
     try {
       const response = await faTutorRequest({
         mode: request.mode, level: request.level, depth: request.depth,
-        text: request.text, history: request.history
+        text: request.text, history: request.history, useLearningMemory: request.useLearningMemory === true
       });
       const answer = response && typeof response.text === "string" ? response.text.trim() : "";
       if (!answer) {
@@ -568,6 +633,7 @@
     else if (button.id === "faSignIn") { view = "auth"; render(); }
     else if (button.id === "faTutorMic") faStartVoiceInput();
     else if (button.id === "faTutorStopAudio") { faStopSpeaking(); faVoiceStatus("Audio stopped."); }
+    else if (button.id === "faMemoryClear") await faClearTutorMemory();
     else if (button.hasAttribute("data-fa-speak")) faSpeakTutorAnswer(Number(button.getAttribute("data-fa-speak")));
     else if (button.id === "faTutorSend") await faTutorSend();
     else if (button.id === "faTutorRetry") await faTutorSend(true);
@@ -589,6 +655,10 @@
     }
   });
   document.addEventListener("change", (event) => {
+    if (event.target && event.target.id === "faMemoryEnabled") {
+      void faSetTutorMemory(event.target.checked);
+      return;
+    }
     if (event.target && event.target.id === "faVoiceLanguage") {
       FA_VOICE.language = event.target.value === "en-US" ? "en-US" : "fr-FR";
       if (FA_VOICE.listening && FA_VOICE.recognition) FA_VOICE.recognition.stop();
