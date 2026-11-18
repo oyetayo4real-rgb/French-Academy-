@@ -541,8 +541,38 @@ Deno.test("client-side learning memory is allow-listed and does not require a me
   assert(normalizeClientLearningMemory({ enabled: false, topic_counts: { subjunctive: 10 } }) === null, "disabled local memory was used");
 });
 
-Deno.test("opted-in local memory is injected into tutor context without a memory database request", async () => {
+Deno.test("opted-in cloud memory is loaded from Supabase and updated after a successful answer", async () => {
   let prompt = "";
+  let readCount = 0;
+  let recordBody: any = null;
+  const stored = { enabled: true, cefr_level: "A2", topic_counts: { subjunctive: 4, past_tenses: 2 }, mode_counts: { chat: 6 }, interaction_count: 6, last_interaction_at: null };
+  const fetchImpl = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    const body = init?.body ? JSON.parse(String(init.body)) : null;
+    if (url.includes("/rpc/ai_use_reserve")) return reservationOk();
+    if (url.includes("/rpc/ai_use_settle")) return settlementOk();
+    if (url.includes("/rest/v1/tutor_learning_memory?")) { readCount++; return ok([stored]); }
+    if (url.includes("/rpc/tutor_record_learning_interaction")) { recordBody = body; return ok({ ...stored, interaction_count: 7 }); }
+    if (url.includes("generativelanguage.googleapis.com/v1beta/models?pageSize=1000")) return geminiCatalog();
+    if (url.includes(":generateContent")) { prompt = body.systemInstruction.parts[0].text; return completion("Here is your answer."); }
+    throw new Error("Unexpected mocked URL: " + url);
+  };
+  const response = await run(fetchImpl, [], [], env, request("quick", {
+    useLearningMemory: true, level: "A2", text: "Explain the subjonctif.",
+    learningMemory: { enabled: true, cefr_level: "C1", topic_counts: { vocabulary: 99 }, mode_counts: {}, interaction_count: 99 }
+  }));
+  const body = await response.json();
+  assert(response.status === 200, "memory-enabled tutor request failed");
+  assert(readCount === 1, "cloud memory was not read exactly once");
+  assert(prompt.includes("Last selected CEFR scaffold: A2."), "database CEFR context was not added");
+  assert(prompt.includes("Frequently practised topics: subjunctive (4), past tenses (2)."), "database topic context was not added");
+  assert(!prompt.includes("C1") && !prompt.includes("vocabulary (99)"), "untrusted client memory overrode server memory");
+  assert(recordBody && recordBody.p_uid === uid, "learning activity was not attributed to the authenticated user");
+  assert(recordBody.p_cefr_level === "A2" && recordBody.p_topics.includes("subjunctive") && recordBody.p_mode === "chat", "only structured learning signals were not sent to the memory RPC");
+  assert(body.learningMemory && body.learningMemory.interaction_count === 7, "updated cloud memory was not returned to the client");
+});
+
+Deno.test("disabled learning memory performs no cloud read or write", async () => {
   const urls: string[] = [];
   const fetchImpl = async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = String(input); urls.push(url);
@@ -550,23 +580,26 @@ Deno.test("opted-in local memory is injected into tutor context without a memory
     if (url.includes("/rpc/ai_use_reserve")) return reservationOk();
     if (url.includes("/rpc/ai_use_settle")) return settlementOk();
     if (url.includes("generativelanguage.googleapis.com/v1beta/models?pageSize=1000")) return geminiCatalog();
-    if (url.includes(":generateContent")) {
-      prompt = body.systemInstruction.parts[0].text;
-      return completion("Here is your answer.");
-    }
+    if (url.includes(":generateContent")) return completion("No memory used.");
     throw new Error("Unexpected mocked URL: " + url);
   };
-  const response = await run(fetchImpl, [], [], env, request("quick", {
-    useLearningMemory: true,
-    learningMemory: {
-      enabled: true, cefr_level: "A2", topic_counts: { subjunctive: 4, past_tenses: 2, raw_private_text: 77 },
-      mode_counts: { chat: 6 }, interaction_count: 6
-    },
-    text: "Explain the subjonctif."
-  }));
-  assert(response.status === 200, "memory-enabled tutor request failed");
-  assert(prompt.includes("Last selected CEFR scaffold: A2."), "local CEFR context was not added");
-  assert(prompt.includes("Frequently practised topics: subjunctive (4), past tenses (2)."), "local topic context was not added");
-  assert(!prompt.includes("raw private text"), "unapproved topic data reached the tutor prompt");
-  assert(!urls.some(url => url.includes("tutor_learning_memory") || url.includes("tutor_memory_record_interaction")), "local memory unexpectedly called a database endpoint");
+  const response = await run(fetchImpl, [], [], env, request("quick", { useLearningMemory: false }));
+  assert(response.status === 200, "tutor request with memory disabled failed");
+  assert(!urls.some(url => url.includes("tutor_learning_memory") || url.includes("tutor_record_learning_interaction")), "disabled memory accessed cloud storage");
+});
+
+Deno.test("memory management actions are authenticated and delegated to server-only RPCs", async () => {
+  const calls: Array<{ url: string; body: any }> = [];
+  const fetchImpl = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input); const body = init?.body ? JSON.parse(String(init.body)) : null;
+    calls.push({ url, body });
+    if (url.includes("/rpc/tutor_set_learning_memory_enabled") || url.includes("/rpc/tutor_clear_learning_memory")) return ok({});
+    throw new Error("Unexpected mocked URL: " + url);
+  };
+  const disabled = await run(fetchImpl, [], [], env, request("quick", { setLearningMemoryEnabled: false }));
+  const cleared = await run(fetchImpl, [], [], env, request("quick", { clearLearningMemory: true }));
+  assert(disabled.status === 200 && (await disabled.json()).memoryEnabled === false, "disable action failed");
+  assert(cleared.status === 200 && (await cleared.json()).memoryCleared === true, "clear action failed");
+  assert(calls[0].body.p_uid === uid && calls[0].body.p_enabled === false, "disable action did not use authenticated UID");
+  assert(calls[1].body.p_uid === uid, "clear action did not use authenticated UID");
 });
