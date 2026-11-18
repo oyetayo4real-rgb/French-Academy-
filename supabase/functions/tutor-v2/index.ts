@@ -198,7 +198,7 @@ export const PROMPT_RULES: ReadonlyArray<{ id: string; text: string }> = [
   }
 ];
 
-export function makeSystemPrompt(mode: string, level: string, depth: Depth): string {
+export function makeSystemPrompt(mode: string, level: string, depth: Depth, memoryContext = ""): string {
   const learner = level && level !== "none" ? "Optional learner level: " + level + "." : "";
   const sharedRules = PROMPT_RULES.map((rule) => rule.text).join(" ");
   const depthGuidance = depth === "quick"
@@ -211,6 +211,7 @@ export function makeSystemPrompt(mode: string, level: string, depth: Depth): str
     depthGuidance,
     sharedRules,
     learner,
+    memoryContext,
     "Requested task: " + mode + "."
   ].filter(Boolean).join(" ");
 }
@@ -548,6 +549,166 @@ async function rpc(
   return response.json();
 }
 
+type LearningMemory = {
+  enabled: boolean;
+  cefr_level: string | null;
+  topic_counts: Record<string, number>;
+  mode_counts: Record<string, number>;
+  interaction_count: number;
+  last_interaction_at: string | null;
+};
+
+const LEARNING_TOPIC_PATTERNS: Array<[string, RegExp]> = [
+  ["subjunctive", /\\b(subjonctif|subjunctive)\\b/i],
+  ["past_tenses", /\\b(pass[eé] compos[eé]|imparfait|plus-que-parfait|pass[eé] simple|past tense)\\b/i],
+  ["articles", /\\b(articles?|article défini|article indéfini)\\b/i],
+  ["pronouns", /\\b(pronoms?|pronouns?|y and en)\\b/i],
+  ["agreement", /\\b(accord|agreement|genre|gender|plural)\\b/i],
+  ["prepositions", /\\b(pr[eé]position|preposition|à|de|chez|dans)\\b/i],
+  ["negation", /\\b(n[eé]gation|ne \\w+ pas|negation)\\b/i],
+  ["vocabulary", /\\b(vocabulaire|vocabulary|synonyme|antonyme|meaning|meaning of)\\b/i],
+  ["pronunciation", /\\b(prononciation|pronunciation|phon[eè]me|liaison)\\b/i],
+  ["writing", /\\b(r[eé]daction|writing|essay|composition)\\b/i],
+  ["literature", /\\b(litt[eé]rature|literature|po[eè]me|roman|auteur)\\b/i],
+  ["idioms", /\\b(expression idiomatique|idiom|locution|expression)\\b/i],
+  ["questions", /\\b(question|interrogation|interrogative)\\b/i],
+  ["verb_conjugation", /\\b(conjugaison|conjugation|conjugate|verbe|verb)\\b/i],
+  ["listening", /\\b(compr[eé]hension orale|listening|[eé]coute)\\b/i]
+];
+
+export function classifyLearningTopics(text: string, mode: string): string[] {
+  const topics = new Set<string>();
+  const value = String(text || "");
+  for (const [topic, pattern] of LEARNING_TOPIC_PATTERNS) {
+    if (pattern.test(value)) topics.add(topic);
+  }
+  if (mode === "translate") topics.add("translation");
+  if (mode === "correct") topics.add("correction");
+  if (mode === "practice") topics.add("conversation");
+  if (mode === "examples") topics.add("examples");
+  return [...topics].slice(0, 8);
+}
+
+function learningMemoryContext(memory: LearningMemory | null): string {
+  if (!memory?.enabled) return "";
+  const topics = Object.entries(memory.topic_counts || {})
+    .filter(([topic, count]) => /^[a-z_]{2,32}$/.test(topic) && Number.isFinite(Number(count)) && Number(count) > 0)
+    .sort((a, b) => Number(b[1]) - Number(a[1]))
+    .slice(0, 6)
+    .map(([topic, count]) => topic.replace(/_/g, " ") + " (" + Number(count) + ")");
+  const level = memory.cefr_level ? "Last selected CEFR scaffold: " + memory.cefr_level + "." : "";
+  const topicsLine = topics.length ? "Frequently practised topics: " + topics.join(", ") + "." : "";
+  return [
+    "Opt-in learner memory: use these structured learning signals to adapt examples and revision. Do not assume mastery from activity counts, and do not mention this internal profile unless the learner asks.",
+    level,
+    topicsLine
+  ].filter(Boolean).join(" ");
+}
+
+async function learningMemoryRequest(
+  path: string,
+  init: RequestInit,
+  deps: Required<Pick<Dependencies, "env" | "fetchImpl">>
+): Promise<Response> {
+  const baseUrl = deps.env.get("SUPABASE_URL");
+  const serviceKey = deps.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!baseUrl || !serviceKey) throw new Error("Learning memory storage is not configured.");
+  return deps.fetchImpl(baseUrl.replace(/\\/$/, "") + "/rest/v1/" + path, {
+    ...init,
+    headers: {
+      apikey: serviceKey,
+      Authorization: "Bearer " + serviceKey,
+      "Content-Type": "application/json",
+      ...(init.headers || {})
+    }
+  });
+}
+
+async function getLearningMemory(
+  uid: string,
+  deps: Required<Pick<Dependencies, "env" | "fetchImpl">>
+): Promise<LearningMemory | null> {
+  const response = await learningMemoryRequest(
+    "tutor_learning_memory?user_id=eq." + encodeURIComponent(uid) +
+      "&select=enabled,cefr_level,topic_counts,mode_counts,interaction_count,last_interaction_at",
+    { method: "GET" },
+    deps
+  );
+  if (!response.ok) throw new Error("Learning memory could not be loaded.");
+  const rows = await response.json();
+  if (!Array.isArray(rows) || !rows[0]) return null;
+  const row = rows[0];
+  return {
+    enabled: row.enabled === true,
+    cefr_level: typeof row.cefr_level === "string" ? row.cefr_level : null,
+    topic_counts: row.topic_counts && typeof row.topic_counts === "object" && !Array.isArray(row.topic_counts) ? row.topic_counts : {},
+    mode_counts: row.mode_counts && typeof row.mode_counts === "object" && !Array.isArray(row.mode_counts) ? row.mode_counts : {},
+    interaction_count: Number.isInteger(row.interaction_count) && row.interaction_count >= 0 ? row.interaction_count : 0,
+    last_interaction_at: typeof row.last_interaction_at === "string" ? row.last_interaction_at : null
+  };
+}
+
+async function setLearningMemory(
+  uid: string,
+  enabled: boolean,
+  deps: Required<Pick<Dependencies, "env" | "fetchImpl">>,
+  now: () => number
+): Promise<LearningMemory> {
+  const response = await learningMemoryRequest(
+    "tutor_learning_memory?on_conflict=user_id",
+    {
+      method: "POST",
+      headers: { Prefer: "resolution=merge-duplicates,return=representation" },
+      body: JSON.stringify({ user_id: uid, enabled, updated_at: new Date(now()).toISOString() })
+    },
+    deps
+  );
+  if (!response.ok) throw new Error("Learning memory settings could not be saved.");
+  const rows = await response.json();
+  const row = Array.isArray(rows) ? rows[0] : null;
+  return {
+    enabled,
+    cefr_level: row?.cefr_level || null,
+    topic_counts: row?.topic_counts || {},
+    mode_counts: row?.mode_counts || {},
+    interaction_count: Number.isInteger(row?.interaction_count) ? row.interaction_count : 0,
+    last_interaction_at: row?.last_interaction_at || null
+  };
+}
+
+async function clearLearningMemory(
+  uid: string,
+  deps: Required<Pick<Dependencies, "env" | "fetchImpl">>
+): Promise<void> {
+  const response = await learningMemoryRequest(
+    "tutor_learning_memory?user_id=eq." + encodeURIComponent(uid),
+    { method: "DELETE" },
+    deps
+  );
+  if (!response.ok) throw new Error("Learning memory could not be cleared.");
+}
+
+async function recordLearningMemory(
+  uid: string,
+  level: string,
+  mode: string,
+  question: string,
+  deps: Required<Pick<Dependencies, "env" | "fetchImpl">>
+): Promise<void> {
+  const validLevel = ["A1", "A2", "B1", "B2", "C1", "C2"].includes(level) ? level : null;
+  const topics = classifyLearningTopics(question, mode);
+  const response = await learningMemoryRequest("rpc/tutor_memory_record_interaction", {
+    method: "POST",
+    body: JSON.stringify({
+      p_user_id: uid,
+      p_cefr_level: validLevel,
+      p_mode: mode,
+      p_topics: topics
+    })
+  }, deps);
+  if (!response.ok) throw new Error("Learning memory could not be updated.");
+}
+
 export function createTutorHandler(overrides: Dependencies = {}) {
   const deps = {
     env: overrides.env || defaultEnv,
@@ -570,6 +731,42 @@ export function createTutorHandler(overrides: Dependencies = {}) {
       return json({ error: "invalid_request", retryable: false }, 400);
     }
 
+    const dbDeps = { env: deps.env, fetchImpl: deps.fetchImpl };
+    if (body?.action === "memory_get") {
+      try {
+        const memory = await getLearningMemory(uid, dbDeps);
+        return json({ memory: memory || {
+          enabled: false, cefr_level: null, topic_counts: {}, mode_counts: {},
+          interaction_count: 0, last_interaction_at: null
+        } });
+      } catch {
+        deps.log("learning_memory_read_failed", {});
+        return json({ error: "memory_unavailable", retryable: true }, 503);
+      }
+    }
+    if (body?.action === "memory_set") {
+      if (typeof body.enabled !== "boolean") return json({ error: "invalid_request", retryable: false }, 400);
+      try {
+        const memory = await setLearningMemory(uid, body.enabled, dbDeps, deps.now);
+        return json({ memory });
+      } catch {
+        deps.log("learning_memory_write_failed", {});
+        return json({ error: "memory_unavailable", retryable: true }, 503);
+      }
+    }
+    if (body?.action === "memory_clear") {
+      try {
+        await clearLearningMemory(uid, dbDeps);
+        return json({ memory: {
+          enabled: false, cefr_level: null, topic_counts: {}, mode_counts: {},
+          interaction_count: 0, last_interaction_at: null
+        } });
+      } catch {
+        deps.log("learning_memory_clear_failed", {});
+        return json({ error: "memory_unavailable", retryable: true }, 503);
+      }
+    }
+
     if (body?.health === true) {
       const providerKeys = Object.fromEntries(PROVIDERS.map((provider) => [
         provider.name,
@@ -590,6 +787,15 @@ export function createTutorHandler(overrides: Dependencies = {}) {
     const depth = parseDepth(body?.depth);
     const history = normalizeHistory(body?.history);
     const messages: ChatMessage[] = [...history, { role: "user", content: question }];
+    let learnerMemory: LearningMemory | null = null;
+    if (body?.useLearningMemory === true) {
+      try {
+        learnerMemory = await getLearningMemory(uid, dbDeps);
+        if (!learnerMemory?.enabled) learnerMemory = null;
+      } catch {
+        deps.log("learning_memory_read_failed", {});
+      }
+    }
     const quotaMode = getQuotaMode(deps.env);
     const requestId = quotaMode === "reservation" ? crypto.randomUUID() : "";
     let reserved = false;
@@ -613,7 +819,7 @@ export function createTutorHandler(overrides: Dependencies = {}) {
       let answer = "";
       try {
         answer = await generateAnswer(
-          makeSystemPrompt(mode, clip(body?.level, 8), depth),
+          makeSystemPrompt(mode, clip(body?.level, 8), depth, learningMemoryContext(learnerMemory)),
           messages,
           depth,
           deps
@@ -640,6 +846,13 @@ export function createTutorHandler(overrides: Dependencies = {}) {
         reserved = false;
         if (settled?.settled !== true || settled?.status !== "succeeded") {
           throw new TutorFault("quota_unavailable", true, 503);
+        }
+      }
+      if (learnerMemory?.enabled) {
+        try {
+          await recordLearningMemory(uid, clip(body?.level, 8), mode, question, dbDeps);
+        } catch {
+          deps.log("learning_memory_update_failed", {});
         }
       }
       return json({ text: answer, depth });
