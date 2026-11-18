@@ -1,4 +1,4 @@
-import { createTutorHandler, makeSystemPrompt, OVERALL_DEADLINE_MS, PROMPT_RULES } from "./index.ts";
+import { classifyLearningTopics, createTutorHandler, makeSystemPrompt, OVERALL_DEADLINE_MS, PROMPT_RULES } from "./index.ts";
 
 const uid = "00000000-0000-4000-8000-000000000001";
 const token = "eyJhbGciOiJub25lIn0." +
@@ -513,4 +513,98 @@ Deno.test("quick, standard, and deep prompts are generated from PROMPT_RULES wit
 
   console.log("T1D_PROMPT_RULES_FAILURES_JSON " + JSON.stringify(failures));
   if (failures.length) throw new Error("Tutor prompt rule registry acceptance failed: " + failures.length);
+});
+
+
+Deno.test("learning topic classifier stores only allow-listed topic labels", () => {
+  const topics = classifyLearningTopics("Explain the French subjonctif and passé composé", "chat");
+  assert(topics.includes("subjunctive"), "subjunctive topic was not detected");
+  assert(topics.includes("past_tenses"), "past tense topic was not detected");
+  assert(!topics.some((topic) => topic.includes("PRIVATE")), "raw prompt content leaked into topic labels");
+  assert(classifyLearningTopics("Translate this sentence", "translate").includes("translation"), "translation mode was not recorded");
+  assert(classifyLearningTopics("Correct my French", "correct").includes("correction"), "correction mode was not recorded");
+});
+
+Deno.test("memory_get returns an empty disabled profile and scopes reads to the authenticated user", async () => {
+  let requestedUrl = "";
+  let serviceKey = "";
+  const fetchImpl = async (input: RequestInfo | URL, init?: RequestInit) => {
+    requestedUrl = String(input);
+    serviceKey = new Headers(init?.headers).get("Authorization") || "";
+    return ok([]);
+  };
+  const response = await run(fetchImpl, [], [], env, request("quick", { action: "memory_get" }));
+  const body = await response.json();
+  assert(response.status === 200 && body.memory.enabled === false, "empty memory was not returned disabled");
+  assert(requestedUrl.includes("/rest/v1/tutor_learning_memory?user_id=eq." + uid), "memory read was not scoped to JWT user");
+  assert(serviceKey === "Bearer test-service-role", "memory read did not use the server-only service role");
+});
+
+Deno.test("memory_set and memory_clear use the authenticated user id and never accept a client-supplied owner", async () => {
+  const calls: Array<{ url: string; method: string; body: string }> = [];
+  const fetchImpl = async (input: RequestInfo | URL, init?: RequestInit) => {
+    calls.push({
+      url: String(input),
+      method: init?.method || "GET",
+      body: String(init?.body || "")
+    });
+    if (init?.method === "POST") return ok([{
+      enabled: true, cefr_level: null, topic_counts: {}, mode_counts: {},
+      interaction_count: 0, last_interaction_at: null
+    }]);
+    return ok({});
+  };
+  const enabled = await run(fetchImpl, [], [], env, request("quick", {
+    action: "memory_set", enabled: true, user_id: "00000000-0000-4000-8000-000000000099"
+  }));
+  assert(enabled.status === 200, "memory could not be enabled");
+  const cleared = await run(fetchImpl, [], [], env, request("quick", {
+    action: "memory_clear", user_id: "00000000-0000-4000-8000-000000000099"
+  }));
+  assert(cleared.status === 200, "memory could not be cleared");
+  assert(calls.length === 2, "unexpected memory request count");
+  assert(calls[0].url.includes("on_conflict=user_id") && calls[0].method === "POST", "memory enable did not upsert");
+  assert(calls[0].body.includes(uid) && !calls[0].body.includes("00000000-0000-4000-8000-000000000099"), "memory enable trusted a client-supplied user id");
+  assert(calls[1].url.endsWith("user_id=eq." + uid) && calls[1].method === "DELETE", "memory clear was not scoped to authenticated user");
+});
+
+Deno.test("opted-in memory is injected into tutor context and recorded without storing raw text", async () => {
+  const calls: Array<{ url: string; body: any }> = [];
+  let prompt = "";
+  const fetchImpl = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    const body = init?.body ? JSON.parse(String(init.body)) : null;
+    if (url.includes("/rest/v1/tutor_learning_memory?")) {
+      return ok([{
+        enabled: true,
+        cefr_level: "A2",
+        topic_counts: { subjunctive: 4, past_tenses: 2 },
+        mode_counts: { chat: 6 },
+        interaction_count: 6,
+        last_interaction_at: null
+      }]);
+    }
+    if (url.includes("/rpc/ai_use_reserve")) return reservationOk();
+    if (url.includes("/rpc/ai_use_settle")) return settlementOk();
+    if (url.includes("generativelanguage.googleapis.com/v1beta/models?pageSize=1000")) return geminiCatalog();
+    if (url.includes(":generateContent")) {
+      prompt = body.systemInstruction.parts[0].text;
+      return completion("Here is your answer.");
+    }
+    if (url.includes("/rpc/tutor_memory_record_interaction")) {
+      calls.push({ url, body });
+      return ok(null);
+    }
+    throw new Error("Unexpected mocked URL: " + url);
+  };
+  const response = await run(fetchImpl, [], [], env, request("quick", {
+    useLearningMemory: true,
+    text: "Explain the subjonctif."
+  }));
+  assert(response.status === 200, "memory-enabled tutor request failed");
+  assert(prompt.includes("Frequently practised topics: subjunctive (4), past tenses (2)."), "saved topic context was not added to the tutor prompt");
+  assert(calls.length === 1, "learning interaction was not recorded exactly once");
+  assert(calls[0].body.p_user_id === uid, "memory interaction used an untrusted user id");
+  assert(calls[0].body.p_topics.includes("subjunctive"), "topic tag was not sent to the memory recorder");
+  assert(!JSON.stringify(calls[0].body).includes("Explain the subjonctif."), "raw learner text was stored in the memory update");
 });
