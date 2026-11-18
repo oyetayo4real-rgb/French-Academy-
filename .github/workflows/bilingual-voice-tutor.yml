@@ -100,22 +100,18 @@ jobs:
             ARRAY['subjunctive', 'subjunctive', 'unapproved_raw_text']
           );
           RESET ROLE;
-          DO $
-          DECLARE
-            saved public.tutor_learning_memory%ROWTYPE;
-          BEGIN
-            SELECT * INTO saved
+          memory_ok="$(psql -v ON_ERROR_STOP=1 -tA -c "SELECT
+            interaction_count = 1
+            AND cefr_level = 'A2'
+            AND topic_counts ->> 'subjunctive' = '2'
+            AND NOT (topic_counts ? 'unapproved_raw_text')
+            AND mode_counts ->> 'practice' = '1'
             FROM public.tutor_learning_memory
-            WHERE user_id = '00000000-0000-4000-8000-000000000001';
-            IF saved.interaction_count <> 1
-              OR saved.cefr_level <> 'A2'
-              OR saved.topic_counts ->> 'subjunctive' <> '2'
-              OR saved.topic_counts ? 'unapproved_raw_text'
-              OR saved.mode_counts ->> 'practice' <> '1' THEN
-              RAISE EXCEPTION 'learning memory aggregation or allow-list check failed';
-            END IF;
-          END;
-          $;
+            WHERE user_id = '00000000-0000-4000-8000-000000000001';")"
+          if [ "$memory_ok" != "t" ]; then
+            echo "Learning memory aggregation or allow-list check failed."
+            exit 1
+          fi
           SQL
           if psql -v ON_ERROR_STOP=1 -c "SET ROLE authenticated; SELECT * FROM public.tutor_learning_memory;" >/dev/null 2>&1; then
             echo "Authenticated users must not access the server-only memory table."
