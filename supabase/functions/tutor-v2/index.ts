@@ -528,7 +528,7 @@ async function generateAnswer(
 }
 
 async function rpc(
-  name: "ai_use" | "ai_use_reserve" | "ai_use_settle",
+  name: "ai_use" | "ai_use_reserve" | "ai_use_settle" | "tutor_set_learning_memory_enabled" | "tutor_clear_learning_memory" | "tutor_record_learning_interaction",
   body: Record<string, unknown>,
   deps: Required<Pick<Dependencies, "env" | "fetchImpl">>
 ): Promise<any> {
@@ -549,6 +549,18 @@ async function rpc(
   return response.json();
 }
 
+async function loadLearningMemory(uid: string, deps: Required<Pick<Dependencies, "env" | "fetchImpl">>): Promise<LearningMemory | null> {
+  const url = deps.env.get("SUPABASE_URL");
+  const serviceKey = deps.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !serviceKey) return null;
+  try {
+    const endpoint = url.replace(/\/$/, "") + "/rest/v1/tutor_learning_memory?user_id=eq." + encodeURIComponent(uid) + "&enabled=eq.true&select=enabled,cefr_level,topic_counts,mode_counts,interaction_count,last_interaction_at&limit=1";
+    const response = await deps.fetchImpl(endpoint, { headers: { apikey: serviceKey, Authorization: "Bearer " + serviceKey } });
+    if (!response.ok) return null;
+    const rows = await response.json();
+    return Array.isArray(rows) && rows.length ? normalizeClientLearningMemory(rows[0]) : null;
+  } catch { return null; }
+}
 type LearningMemory = {
   enabled: boolean;
   cefr_level: string | null;
@@ -656,27 +668,30 @@ export function createTutorHandler(overrides: Dependencies = {}) {
 
     if (body?.health === true) {
       const providerKeys = Object.fromEntries(PROVIDERS.map((provider) => [
-        provider.name,
-        Boolean(getConfiguredProvider(provider.name, deps.env))
+        provider.name, Boolean(getConfiguredProvider(provider.name, deps.env))
       ]));
-      return json({
-        providerKeys,
-        groqModels: getGroqModels(deps.env),
-        quotaMode: getQuotaMode(deps.env)
-      });
+      return json({ providerKeys, groqModels: getGroqModels(deps.env), quotaMode: getQuotaMode(deps.env) });
     }
 
-    const mode = ["chat", "translate", "correct", "practice", "examples"].includes(body?.mode)
-      ? body.mode : "chat";
+    if (body?.clearLearningMemory === true) {
+      try { await rpc("tutor_clear_learning_memory", { p_uid: uid }, deps); return json({ memoryCleared: true }); }
+      catch { return json({ error: "memory_unavailable", retryable: true }, 503); }
+    }
+    if (typeof body?.setLearningMemoryEnabled === "boolean") {
+      try {
+        await rpc("tutor_set_learning_memory_enabled", { p_uid: uid, p_enabled: body.setLearningMemoryEnabled }, deps);
+        return json({ memoryEnabled: body.setLearningMemoryEnabled });
+      } catch { return json({ error: "memory_unavailable", retryable: true }, 503); }
+    }
+
+    const mode = ["chat", "translate", "correct", "practice", "examples"].includes(body?.mode) ? body.mode : "chat";
     const question = clip(body?.text, 1_800).trim();
     if (!question) return json({ error: "invalid_request", retryable: false }, 400);
-
     const depth = parseDepth(body?.depth);
     const history = normalizeHistory(body?.history);
     const messages: ChatMessage[] = [...history, { role: "user", content: question }];
-    const learnerMemory = body?.useLearningMemory === true
-      ? normalizeClientLearningMemory(body?.learningMemory)
-      : null;
+    const useLearningMemory = body?.useLearningMemory === true;
+    const learnerMemory = useLearningMemory ? await loadLearningMemory(uid, deps) : null;
     const quotaMode = getQuotaMode(deps.env);
     const requestId = quotaMode === "reservation" ? crypto.randomUUID() : "";
     let reserved = false;
@@ -729,7 +744,19 @@ export function createTutorHandler(overrides: Dependencies = {}) {
           throw new TutorFault("quota_unavailable", true, 503);
         }
       }
-      return json({ text: answer, depth });
+      let savedLearningMemory: LearningMemory | null = null;
+      if (useLearningMemory) {
+        try {
+          const saved = await rpc("tutor_record_learning_interaction", {
+            p_uid: uid,
+            p_cefr_level: ["A1", "A2", "B1", "B2", "C1", "C2"].includes(body?.level) ? body.level : null,
+            p_topics: classifyLearningTopics(question, mode),
+            p_mode: mode
+          }, deps);
+          savedLearningMemory = normalizeClientLearningMemory(saved);
+        } catch { deps.log("learning_memory_save_failed", { enabled: true }); }
+      }
+      return json({ text: answer, depth, learningMemory: savedLearningMemory });
     } catch (error) {
       if (reserved) {
         await rpc("ai_use_settle", {
