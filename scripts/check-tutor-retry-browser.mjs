@@ -171,7 +171,10 @@ try {
     assert(savedChat && savedChat.messages.length === 2, "user and assistant messages were not saved locally");
     assert.match(savedChat.title, /Explique le subjonctif/i);
     await page.locator("#faNewConversation").click();
-    assert.equal(await page.locator("#faTutorMessages .card").count(), 0, "new conversation did not start empty");
+    // The new chat has no message records; the UI intentionally renders one
+    // instructional empty-state card inside the messages container.
+    assert.equal(await page.locator("#faTutorMessages .card").count(), 1, "new conversation should show only its empty-state card");
+    assert.match(await page.locator("#faTutorMessages .card").innerText(), /Ask a question/i, "new conversation contains prior chat content");
     await page.locator("#faConversationSelect").selectOption(savedChat.id);
     assert.equal(await page.locator("#faTutorMessages .card").count(), 2, "saved conversation did not reopen with its messages");
     await page.locator('[data-fa-speak="1"]').click();
