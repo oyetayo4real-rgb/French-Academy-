@@ -428,7 +428,7 @@
       FA_AI.memoryUserId=AUTH.user.id;
       const saved=faLoadTutorLocalData(); FA_AI.conversations=saved.conversations; FA_AI.activeConversationId=saved.activeConversationId;
       FA_AI.memoryProfile=saved.memory; FA_AI.memoryEnabled=saved.memory.enabled===true; FA_AI.memoryLoaded=true; FA_AI.memoryLoading=false; FA_AI.memoryBusy=false;
-      FA_AI.memoryStatus=FA_AI.memoryEnabled?"Learning memory is on. Saved only in this browser.":"Learning memory is off. Turn it on to save progress on this device.";
+      FA_AI.memoryStatus=FA_AI.memoryEnabled?"Learning memory is on for your account.":"Learning memory is off. Turn it on to save progress to your account.";
       const active=FA_AI.conversations.find(x=>x.id===FA_AI.activeConversationId);
       if(active){FA_AI.messages=active.messages.map(m=>({role:m.role,content:m.content}));FA_AI.level=active.level;FA_AI.mode=active.mode;FA_AI.depth=active.depth;}
       else{FA_AI.messages=[];FA_AI.activeConversationId=null;}
@@ -442,20 +442,38 @@
       '<option value="quick"' + (FA_AI.depth === "quick" ? " selected" : "") + '>Quick answer</option><option value="deep"' + (FA_AI.depth === "deep" ? " selected" : "") + '>Deep answer</option></select>' +
       '<label for="faTutorLevel"><b>Optional explanation style</b></label><select class="inp" id="faTutorLevel"><option value="none"' + (FA_AI.level === "none" ? " selected" : "") + '>No level restriction</option>' + ["A1","A2","B1","B2","C1","C2"].map((l) => '<option value="' + l + '"' + (l === FA_AI.level ? " selected" : "") + '>' + l + ' · optional learner scaffolding</option>').join("") + '</select><label for="faTutorMode"><b>Tool</b></label><select class="inp" id="faTutorMode">' + [["chat","Tutor answer"],["practice","Conversation practice"],["correct","Correct and analyse my French"],["translate","Translate French ↔ English"]].map((o) => '<option value="' + o[0] + '"' + (o[0] === FA_AI.mode ? " selected" : "") + '>' + o[1] + '</option>').join("") + "</select></div><div id=\"faTutorMessages\">" + (messageHtml || '<div class="card mu">Ask a question. Choose Quick answer for a focused explanation or Deep answer for a fuller treatment.</div>') + "</div>" +
       (FA_AI.pending ? '<div class="card mu">Preparing your answer…</div>' : "") + (FA_AI.error ? '<div class="err" role="alert">' + faSafe(FA_AI.error) + '</div>' : "") + (FA_AI.lastRequest ? '<button id="faTutorRetry" class="g" type="button"' + (FA_AI.pending ? ' disabled aria-disabled="true">Trying again...</button>' : ' aria-disabled="false">Try again</button>') : "") +
-      '<div class="card fa-memory-panel"><label style="display:flex;align-items:center;gap:10px;font-weight:700"><input id="faMemoryEnabled" type="checkbox"' + (FA_AI.memoryEnabled ? " checked" : "") + (FA_AI.memoryBusy || !FA_AI.memoryLoaded ? " disabled" : "") + '> Remember my learning progress</label><p class="mu">Your learning profile is saved locally in this browser. When memory is enabled, its small structured profile is included with tutor requests for personalization; no separate cloud memory database is used.</p><p class="mu" id="faMemoryStatus" role="status" aria-live="polite">' + faSafe(FA_AI.memoryStatus || (FA_AI.memoryEnabled ? "Learning memory is on." : "Learning memory is off.")) + '</p>' + (FA_AI.memoryProfile && FA_AI.memoryProfile.interaction_count > 0 ? '<p class="mu">Saved tutor sessions: <b>' + Number(FA_AI.memoryProfile.interaction_count) + '</b>' + (Object.keys(FA_AI.memoryProfile.topic_counts || {}).length ? ' · Topics: ' + faSafe(Object.entries(FA_AI.memoryProfile.topic_counts).sort((a,b) => Number(b[1])-Number(a[1])).slice(0,5).map(([topic,count]) => topic.replace(/_/g," ") + " (" + Number(count) + ")").join(", ")) : "") + '</p>' : '<p class="mu">No learning activity has been saved yet.</p>') + '<button class="g" id="faMemoryClear" type="button"' + (FA_AI.memoryBusy || !FA_AI.memoryLoaded || !(FA_AI.memoryProfile && (FA_AI.memoryProfile.interaction_count > 0 || FA_AI.memoryProfile.enabled)) ? " disabled" : "") + '>Clear saved learning memory</button></div>' +
+      '<div class="card fa-memory-panel"><label style="display:flex;align-items:center;gap:10px;font-weight:700"><input id="faMemoryEnabled" type="checkbox"' + (FA_AI.memoryEnabled ? " checked" : "") + (FA_AI.memoryBusy || !FA_AI.memoryLoaded ? " disabled" : "") + '> Remember my learning progress</label><p class="mu">When enabled, a small structured learning profile is saved securely to your account in Supabase. Prompts and chat transcripts are not stored in this profile.</p><p class="mu" id="faMemoryStatus" role="status" aria-live="polite">' + faSafe(FA_AI.memoryStatus || (FA_AI.memoryEnabled ? "Learning memory is on." : "Learning memory is off.")) + '</p>' + (FA_AI.memoryProfile && FA_AI.memoryProfile.interaction_count > 0 ? '<p class="mu">Saved tutor sessions: <b>' + Number(FA_AI.memoryProfile.interaction_count) + '</b>' + (Object.keys(FA_AI.memoryProfile.topic_counts || {}).length ? ' · Topics: ' + faSafe(Object.entries(FA_AI.memoryProfile.topic_counts).sort((a,b) => Number(b[1])-Number(a[1])).slice(0,5).map(([topic,count]) => topic.replace(/_/g," ") + " (" + Number(count) + ")").join(", ")) : "") + '</p>' : '<p class="mu">No learning activity has been saved yet.</p>') + '<button class="g" id="faMemoryClear" type="button"' + (FA_AI.memoryBusy || !FA_AI.memoryLoaded || !(FA_AI.memoryProfile && (FA_AI.memoryProfile.interaction_count > 0 || FA_AI.memoryProfile.enabled)) ? " disabled" : "") + '>Clear saved learning memory</button></div>' +
       '<div class="card fa-tutor-panel"><label for="faVoiceLanguage"><b>Voice language</b></label><select class="inp" id="faVoiceLanguage"><option value="fr-FR"' + (FA_VOICE.language === "fr-FR" ? " selected" : "") + '>French</option><option value="en-US"' + (FA_VOICE.language === "en-US" ? " selected" : "") + '>English</option></select><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="g" id="faTutorMic" type="button">Speak</button><button class="g" id="faTutorStopAudio" type="button">Stop audio</button></div><p class="mu" id="faVoiceStatus" role="status" aria-live="polite">Choose French or English, then use Speak to dictate your question.</p><p class="mu">Microphone access is requested only when you tap Speak. Voice recognition may be processed by your browser speech service; check its privacy settings.</p><textarea class="inp" id="faTutorInput" rows="5" placeholder="Ask anything about French: grammar, literature, idioms, translation, writing or language usage…"></textarea><button id="faTutorSend" style="width:100%"' + (FA_AI.pending ? " disabled" : "") + ">" + (FA_AI.pending ? "Please wait…" : "Ask Académie") + '</button><p class="mu">Answers come from an AI service and can contain mistakes. You need to be signed in to use the Tutor.</p></div>';
     if (typeof bindTop === "function") bindTop();
   }
-  function faSetTutorMemory(enabled) {
-    FA_AI.memoryEnabled=enabled===true; FA_AI.memoryProfile=FA_AI.memoryProfile||faEmptyLearningMemory();
-    FA_AI.memoryProfile.enabled=FA_AI.memoryEnabled;
-    FA_AI.memoryStatus=FA_AI.memoryEnabled?"Learning memory enabled. Structured progress is stored only on this device.":"Learning memory paused. Existing local progress remains until you clear it.";
-    faSaveTutorLocalData(); if(view==="tutor")render(true);
+  async function faSetTutorMemory(enabled) {
+    const next = enabled === true;
+    FA_AI.memoryBusy = true;
+    FA_AI.memoryStatus = next ? "Enabling account learning memory…" : "Pausing account learning memory…";
+    if (view === "tutor") render(true);
+    try {
+      const result = await faTutorRequest({ setLearningMemoryEnabled: next });
+      if (!result || result.error || result.memoryEnabled !== next) throw new Error("Could not update account learning memory.");
+      FA_AI.memoryEnabled = next;
+      FA_AI.memoryProfile = FA_AI.memoryProfile || faEmptyLearningMemory();
+      FA_AI.memoryProfile.enabled = next;
+      FA_AI.memoryStatus = next ? "Learning memory is on for your account. Only structured progress is saved." : "Learning memory is paused. Existing saved progress is retained.";
+      faSaveTutorLocalData();
+    } catch (error) {
+      FA_AI.memoryStatus = (error && error.message) || "Could not update learning memory. Please try again.";
+      const checkbox = faEl("faMemoryEnabled"); if (checkbox) checkbox.checked = FA_AI.memoryEnabled;
+    } finally { FA_AI.memoryBusy = false; if (view === "tutor") render(true); }
   }
-  function faClearTutorMemory() {
-    if(!confirm("Permanently clear saved learning memory on this device? Your saved conversations will remain."))return;
-    FA_AI.memoryProfile=faEmptyLearningMemory(); FA_AI.memoryEnabled=false; FA_AI.memoryStatus="Local learning memory cleared.";
-    faSaveTutorLocalData(); if(view==="tutor")render(true);
+  async function faClearTutorMemory() {
+    if (!confirm("Permanently clear your saved learning memory from your account? Your saved conversations will remain.")) return;
+    FA_AI.memoryBusy = true; FA_AI.memoryStatus = "Clearing account learning memory…"; if (view === "tutor") render(true);
+    try {
+      const result = await faTutorRequest({ clearLearningMemory: true });
+      if (!result || result.error || result.memoryCleared !== true) throw new Error("Could not clear account learning memory.");
+      FA_AI.memoryProfile = faEmptyLearningMemory(); FA_AI.memoryEnabled = false; FA_AI.memoryStatus = "Account learning memory cleared.";
+      faSaveTutorLocalData();
+    } catch (error) { FA_AI.memoryStatus = (error && error.message) || "Could not clear learning memory. Please try again."; }
+    finally { FA_AI.memoryBusy = false; if (view === "tutor") render(true); }
   }
   function faRenameTutorConversation() {
     const item=FA_AI.conversations.find(x=>x.id===FA_AI.activeConversationId); if(!item)return;
@@ -483,7 +501,7 @@
       FA_AI.mode = faEl("faTutorMode")?.value || "chat";
       FA_AI.depth = faEl("faTutorDepth")?.value === "deep" ? "deep" : "quick";
       const history = FA_AI.messages.slice(-12).map((m) => ({ role: m.role, content: m.content }));
-      request = { mode: FA_AI.mode, level: FA_AI.level, depth: FA_AI.depth, text, history, useLearningMemory: FA_AI.memoryEnabled === true, learningMemory: FA_AI.memoryEnabled ? FA_AI.memoryProfile : null };
+      request = { mode: FA_AI.mode, level: FA_AI.level, depth: FA_AI.depth, text, history, useLearningMemory: FA_AI.memoryEnabled === true };
       FA_AI.lastRequest = request;
       FA_AI.messages.push({ role: "user", content: text });
       FA_AI.messages = FA_AI.messages.slice(-100);
@@ -498,10 +516,14 @@
     try {
       const response = await faTutorRequest({
         mode: request.mode, level: request.level, depth: request.depth,
-        text: request.text, history: request.history, useLearningMemory: request.useLearningMemory === true,
-        learningMemory: request.useLearningMemory === true ? request.learningMemory : null
+        text: request.text, history: request.history, useLearningMemory: request.useLearningMemory === true
       });
       const answer = response && typeof response.text === "string" ? response.text.trim() : "";
+      if (response && response.learningMemory && request.useLearningMemory === true) {
+        FA_AI.memoryProfile = response.learningMemory;
+        FA_AI.memoryProfile.enabled = true;
+        faSaveTutorLocalData();
+      }
       if (!answer) {
         const code = response && response.error;
         if (code === "quota_exceeded") throw new Error("You have reached today's Tutor usage limit. Please try again tomorrow.");
