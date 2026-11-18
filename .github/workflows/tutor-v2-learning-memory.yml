@@ -38,4 +38,4 @@ jobs:
           deno-version: v2.x
 
       - name: Run Tutor V2 tests
-        run: deno test --no-check supabase/functions/tutor-v2/index.test.ts
+        run: deno test supabase/functions/tutor-v2/index.test.ts
