@@ -20,6 +20,7 @@ on:
       - "scripts/check-tutor-retry-browser.mjs"
       - "supabase/functions/tutor-v2/index.ts"
       - "supabase/functions/tutor-v2/index.test.ts"
+      - "supabase/migrations/20261118181000_tutor_learning_memory.sql"
       - "index.html"
       - ".github/workflows/bilingual-voice-tutor.yml"
 
