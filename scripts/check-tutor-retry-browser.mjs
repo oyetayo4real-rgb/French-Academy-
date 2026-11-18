@@ -25,6 +25,8 @@ try {
     if (url.origin === new URL(baseUrl).origin) return route.continue();
     return route.abort();
   });
+  // Establish a real HTTP origin before setContent; about:blank blocks localStorage.
+  await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
   await page.setContent('<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main id="app"></main></body></html>');
   await page.evaluate(() => {
     window.AUTH = { user: { id: "mock-user" } };
