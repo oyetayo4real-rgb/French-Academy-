@@ -98,10 +98,13 @@ try {
     assert.equal(await page.locator("#faMemoryEnabled").isChecked(), false);
     await page.locator("#faMemoryEnabled").check();
     await page.waitForFunction(() => document.querySelector("#faMemoryEnabled")?.checked === true);
-    const memoryCalls = await page.evaluate(() => window.__memoryCalls);
-    assert(memoryCalls.some((call) => call.action === "memory_get"), "memory settings were not loaded");
-    assert(memoryCalls.some((call) => call.action === "memory_set" && call.enabled === true), "memory opt-in was not saved");
-    assert.match(await page.locator(".fa-memory-panel").innerText(), /only your selected CEFR level, topic counts and practice modes|selected CEFR level, topic counts and practice modes/i);
+    const localState = await page.evaluate(() => {
+      const key = Object.keys(localStorage).find((item) => item.startsWith("fa_tutor_local_v1:"));
+      return key ? JSON.parse(localStorage.getItem(key)) : null;
+    });
+    assert(localState && localState.version === 1, "local tutor data was not saved");
+    assert.equal(localState.memory.enabled, true, "learning-memory opt-in was not persisted locally");
+    assert.match(await page.locator(".fa-memory-panel").innerText(), /saved locally in this browser|stored only on this device/i);
   });
 
   await check("voice input captures French and English speech without auto-submitting", async () => {
