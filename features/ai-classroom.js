@@ -8,14 +8,14 @@
   const FA_TUTOR_LOCAL_VERSION = 1;
   const FA_TUTOR_LOCAL_PREFIX = "fa_tutor_local_v1:";
   const FA_TUTOR_TOPICS = [
-    ["subjunctive", /\\b(subjonctif|subjunctive)\\b/i], ["past_tenses", /(pass[eé] compos[eé]|imparfait|plus-que-parfait|pass[eé] simple|past tense)/i],
-    ["articles", /\\b(articles?|article défini|article indéfini)\\b/i], ["pronouns", /\\b(pronoms?|pronouns?|y and en)\\b/i],
-    ["agreement", /\\b(accord|agreement|genre|gender|plural)\\b/i], ["prepositions", /\\b(pr[eé]position|preposition|à|de|chez|dans)\\b/i],
-    ["negation", /\\b(n[eé]gation|ne \\w+ pas|negation)\\b/i], ["vocabulary", /\\b(vocabulaire|vocabulary|synonyme|antonyme|meaning)\\b/i],
-    ["pronunciation", /\\b(prononciation|pronunciation|phon[eè]me|liaison)\\b/i], ["writing", /\\b(r[eé]daction|writing|essay|composition)\\b/i],
-    ["literature", /\\b(litt[eé]rature|literature|po[eè]me|roman|auteur)\\b/i], ["idioms", /\\b(expression idiomatique|idiom|locution|expression)\\b/i],
-    ["questions", /\\b(question|interrogation|interrogative)\\b/i], ["verb_conjugation", /\\b(conjugaison|conjugation|conjugate|verbe|verb)\\b/i],
-    ["listening", /\\b(compr[eé]hension orale|listening|[eé]coute)\\b/i]
+    ["subjunctive", /\b(subjonctif|subjunctive)\b/i], ["past_tenses", /(pass[eé] compos[eé]|imparfait|plus-que-parfait|pass[eé] simple|past tense)/i],
+    ["articles", /\b(articles?|article défini|article indéfini)\b/i], ["pronouns", /\b(pronoms?|pronouns?|y and en)\b/i],
+    ["agreement", /\b(accord|agreement|genre|gender|plural)\b/i], ["prepositions", /\b(pr[eé]position|preposition|à|de|chez|dans)\b/i],
+    ["negation", /\b(n[eé]gation|ne \w+ pas|negation)\b/i], ["vocabulary", /\b(vocabulaire|vocabulary|synonyme|antonyme|meaning)\b/i],
+    ["pronunciation", /\b(prononciation|pronunciation|phon[eè]me|liaison)\b/i], ["writing", /\b(r[eé]daction|writing|essay|composition)\b/i],
+    ["literature", /\b(litt[eé]rature|literature|po[eè]me|roman|auteur)\b/i], ["idioms", /\b(expression idiomatique|idiom|locution|expression)\b/i],
+    ["questions", /\b(question|interrogation|interrogative)\b/i], ["verb_conjugation", /\b(conjugaison|conjugation|conjugate|verbe|verb)\b/i],
+    ["listening", /\b(compr[eé]hension orale|listening|[eé]coute)\b/i]
   ];
   function faTutorStorageKey() { return FA_TUTOR_LOCAL_PREFIX + encodeURIComponent(String(AUTH && AUTH.user && AUTH.user.id || "guest")); }
   function faEmptyLearningMemory() { return { enabled: false, cefr_level: null, topic_counts: {}, mode_counts: {}, interaction_count: 0, last_interaction_at: null }; }
@@ -488,7 +488,7 @@
       FA_AI.messages.push({ role: "user", content: text });
       FA_AI.messages = FA_AI.messages.slice(-100);
       const activeConversation=FA_AI.conversations.find(x=>x.id===FA_AI.activeConversationId);
-      if(activeConversation&&activeConversation.title==="New conversation")activeConversation.title=String(text).replace(/\\s+/g," ").slice(0,48);
+      if(activeConversation&&activeConversation.title==="New conversation")activeConversation.title=String(text).replace(/\s+/g," ").slice(0,48);
       faSaveTutorLocalData();
     }
     if (!request) return;
@@ -514,7 +514,7 @@
       FA_AI.messages = FA_AI.messages.slice(-100);
       FA_AI.lastRequest = null;
       const activeConversation=FA_AI.conversations.find(x=>x.id===FA_AI.activeConversationId);
-      if(activeConversation&&activeConversation.title==="New conversation")activeConversation.title=String(request.text||"French tutor session").replace(/\\s+/g," ").slice(0,48);
+      if(activeConversation&&activeConversation.title==="New conversation")activeConversation.title=String(request.text||"French tutor session").replace(/\s+/g," ").slice(0,48);
       faUpdateLocalLearningMemory(request); faSaveTutorLocalData();
     } catch (error) {
       FA_AI.error = (error && error.message) || "The Tutor could not answer just now.";
