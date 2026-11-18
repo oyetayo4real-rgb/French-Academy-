@@ -1,0 +1,80 @@
+name: Bilingual voice tutor validation
+
+on:
+  push:
+    branches:
+      - feat/bilingual-voice-tutor
+    paths:
+      - "features/ai-classroom.js"
+      - "features/ai-classroom.css"
+      - "scripts/check-tutor-retry-browser.mjs"
+      - "supabase/functions/tutor-v2/index.ts"
+      - "supabase/functions/tutor-v2/index.test.ts"
+      - "index.html"
+      - ".github/workflows/bilingual-voice-tutor.yml"
+  pull_request:
+    paths:
+      - "features/ai-classroom.js"
+      - "features/ai-classroom.css"
+      - "scripts/check-tutor-retry-browser.mjs"
+      - "supabase/functions/tutor-v2/index.ts"
+      - "supabase/functions/tutor-v2/index.test.ts"
+      - "index.html"
+      - ".github/workflows/bilingual-voice-tutor.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bilingual-voice-tutor-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check features/ai-classroom.js
+          node --check scripts/check-tutor-retry-browser.mjs
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Run tutor backend tests
+        run: deno test supabase/functions/tutor-v2/index.test.ts
+
+      - name: Install Playwright
+        run: npm install --no-save --no-package-lock playwright@1.56.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Start local static server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/french-academy-server.log 2>&1 &
+          echo $! >/tmp/french-academy-server.pid
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:4173/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/french-academy-server.log
+          exit 1
+
+      - name: Run tutor voice and retry browser tests
+        env:
+          BASE_URL: http://127.0.0.1:4173
+        run: node scripts/check-tutor-retry-browser.mjs
