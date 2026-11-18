@@ -44,6 +44,15 @@ begin
   if not pg_catalog.has_function_privilege('service_role', 'public.tutor_record_learning_interaction(uuid,text,text[],text)', 'EXECUTE') then
     raise exception 'service_role cannot execute learning memory RPC';
   end if;
+  if exists (
+    select 1 from pg_catalog.pg_proc p
+    join pg_catalog.pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'public'
+      and p.proname in ('tutor_set_learning_memory_enabled','tutor_clear_learning_memory','tutor_record_learning_interaction')
+      and p.prosecdef = true
+  ) then
+    raise exception 'learning memory RPCs must remain SECURITY INVOKER';
+  end if;
 end;
 $$;
 
