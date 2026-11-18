@@ -546,7 +546,8 @@ async function rpc(
     body: JSON.stringify(body)
   });
   if (!response.ok) throw new TutorFault("quota_unavailable", true, 503);
-  return response.json();
+  const payload = await response.text();
+  return payload ? JSON.parse(payload) : null;
 }
 
 async function loadLearningMemory(uid: string, deps: Required<Pick<Dependencies, "env" | "fetchImpl">>): Promise<LearningMemory | null> {
