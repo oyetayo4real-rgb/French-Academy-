@@ -13,9 +13,9 @@ if (parsed.protocol !== "https:" || parsed.pathname !== "/" || parsed.search || 
 if (process.env.VERCEL_ENV === "preview" && parsed.hostname !== "pagytaefoumwdvwaohft.supabase.co") {
   throw new Error("Preview builds are restricted to the French Academy staging Supabase project.");
 }
-if (!anonKey.startsWith("sb_publishable_") && !/^eyJ[A-Za-z0-9_-]+\\./.test(anonKey)) {
+if (!anonKey.startsWith("sb_publishable_") && !/^eyJ[A-Za-z0-9_-]+\./.test(anonKey)) {
   throw new Error("FA_SUPABASE_ANON_KEY is not a recognized Supabase public key.");
 }
 const config = { supabaseUrl: parsed.origin, supabaseAnonKey: anonKey };
-fs.writeFileSync("runtime-config.js", "window.FA_CONFIG = " + JSON.stringify(config) + ";\\n", { mode: 0o644 });
+fs.writeFileSync("runtime-config.js", "window.FA_CONFIG = " + JSON.stringify(config) + ";\n", { mode: 0o644 });
 console.log("Generated runtime backend config for " + parsed.hostname);
