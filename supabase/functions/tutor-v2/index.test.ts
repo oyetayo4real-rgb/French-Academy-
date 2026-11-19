@@ -1,4 +1,48 @@
-import { createTutorHandler, makeSystemPrompt, OVERALL_DEADLINE_MS, PROMPT_RULES } from "./index.ts";
+Deno.test("conversational tutor prompt includes continuity, patient teaching, guided practice, and contextual correction", () => {
+  const prompt = makeSystemPrompt("chat", "A1", "quick");
+  for (const phrase of [
+    "Conversation continuity:",
+    "Resolve short follow-ups",
+    "patient, interactive French tutor",
+    "When the learner is confused, slow down",
+    "Wait for the learner's answer",
+    "distinguish grammatical errors from optional stylistic improvements"
+  ]) {
+    assert(prompt.includes(phrase), "missing conversational tutor instruction: " + phrase);
+  }
+});
+
+Deno.test("conversation history is forwarded to the model before the current follow-up", async () => {
+  const calls: any[] = [];
+  let capturedMessages: any[] = [];
+  const req = request("quick", {
+    text: "Why is it 'nous sommes'?",
+    history: [
+      { role: "user", content: "Teach me the verb être." },
+      { role: "assistant", content: "Être means 'to be'. The form for nous is sommes." }
+    ]
+  });
+  const fetchImpl = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    if (url.includes("/rpc/")) return rpcCalls(calls)(url, init);
+    if (url === "https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000") return geminiCatalog();
+    if (url.includes(":generateContent")) {
+      const payload = JSON.parse(String(init?.body || "{}"));
+      capturedMessages = payload.contents || [];
+      return completion("Because être is irregular; nous takes sommes.");
+    }
+    throw new Error("Unexpected fetch: " + url);
+  };
+  const response = await run(fetchImpl, calls, [], env, req);
+  const body = await response.json();
+  assert(response.status === 200 && body.text.includes("sommes"), "follow-up request did not receive a tutor answer");
+  assert(capturedMessages.length === 3, "expected two history turns plus the current question");
+  assert(capturedMessages[0].role === "user" && capturedMessages[0].parts[0].text === "Teach me the verb être.", "first learner turn was not preserved");
+  assert(capturedMessages[1].role === "model" && capturedMessages[1].parts[0].text.includes("form for nous"), "previous tutor answer was not preserved");
+  assert(capturedMessages[2].role === "user" && capturedMessages[2].parts[0].text === "Why is it 'nous sommes'?", "current follow-up was not last");
+});
+
+import { classifyLearningTopics, createTutorHandler, makeSystemPrompt, normalizeClientLearningMemory, OVERALL_DEADLINE_MS, PROMPT_RULES } from "./index.ts";
 
 const uid = "00000000-0000-4000-8000-000000000001";
 const token = "eyJhbGciOiJub25lIn0." +
@@ -411,7 +455,10 @@ Deno.test("quick, standard, and deep prompts are generated from PROMPT_RULES wit
       "Use French only for examples, quoted forms and grammar terms",
       "grammar terms in italics",
       "English gloss on first use",
-      "explicitly asks for a French answer"
+      "explicitly asks for a French answer",
+      "If the learner writes in French, respond in French",
+      "If the learner mixes English and French, explain in clear English",
+      "Support English-speaking French learners"
     ],
     "no-mixed-headings": [
       "Headings must be in the same language as the text under them"
@@ -510,4 +557,93 @@ Deno.test("quick, standard, and deep prompts are generated from PROMPT_RULES wit
 
   console.log("T1D_PROMPT_RULES_FAILURES_JSON " + JSON.stringify(failures));
   if (failures.length) throw new Error("Tutor prompt rule registry acceptance failed: " + failures.length);
+});
+
+
+Deno.test("learning topic classifier stores only allow-listed topic labels", () => {
+  const topics = classifyLearningTopics("Explain the French subjonctif and passé composé", "chat");
+  assert(topics.includes("subjunctive"), "subjunctive topic was not detected");
+  assert(topics.includes("past_tenses"), "past tense topic was not detected");
+  assert(!topics.some((topic) => topic.includes("PRIVATE")), "raw prompt content leaked into topic labels");
+  assert(classifyLearningTopics("Translate this sentence", "translate").includes("translation"), "translation mode was not recorded");
+  assert(classifyLearningTopics("Correct my French", "correct").includes("correction"), "correction mode was not recorded");
+});
+
+Deno.test("client-side learning memory is allow-listed and does not require a memory database", () => {
+  const memory = normalizeClientLearningMemory({
+    enabled: true,
+    cefr_level: "A2",
+    topic_counts: { subjunctive: 4, past_tenses: 2, private_question_text: 99 },
+    mode_counts: { chat: 6, unknown_mode: 4 },
+    interaction_count: 6
+  });
+  if (!memory) throw new Error("enabled local memory was rejected");
+  assert(memory.cefr_level === "A2", "valid CEFR level was not retained");
+  assert(memory.topic_counts.subjunctive === 4 && memory.topic_counts.past_tenses === 2, "valid topic counts were not retained");
+  assert(!("private_question_text" in memory.topic_counts), "unapproved topic label was retained");
+  assert(!("unknown_mode" in memory.mode_counts), "unapproved mode was retained");
+  assert(normalizeClientLearningMemory({ enabled: false, topic_counts: { subjunctive: 10 } }) === null, "disabled local memory was used");
+});
+
+Deno.test("opted-in cloud memory is loaded from Supabase and updated after a successful answer", async () => {
+  let prompt = "";
+  let readCount = 0;
+  let recordBody: any = null;
+  const stored = { enabled: true, cefr_level: "A2", topic_counts: { subjunctive: 4, past_tenses: 2 }, mode_counts: { chat: 6 }, interaction_count: 6, last_interaction_at: null };
+  const fetchImpl = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    const body = init?.body ? JSON.parse(String(init.body)) : null;
+    if (url.includes("/rpc/ai_use_reserve")) return reservationOk();
+    if (url.includes("/rpc/ai_use_settle")) return settlementOk();
+    if (url.includes("/rest/v1/tutor_learning_memory?")) { readCount++; return ok([stored]); }
+    if (url.includes("/rpc/tutor_record_learning_interaction")) { recordBody = body; return ok({ ...stored, interaction_count: 7 }); }
+    if (url.includes("generativelanguage.googleapis.com/v1beta/models?pageSize=1000")) return geminiCatalog();
+    if (url.includes(":generateContent")) { prompt = body.systemInstruction.parts[0].text; return completion("Here is your answer."); }
+    throw new Error("Unexpected mocked URL: " + url);
+  };
+  const response = await run(fetchImpl, [], [], env, request("quick", {
+    useLearningMemory: true, level: "A2", text: "Explain the subjonctif.",
+    learningMemory: { enabled: true, cefr_level: "C1", topic_counts: { vocabulary: 99 }, mode_counts: {}, interaction_count: 99 }
+  }));
+  const body = await response.json();
+  assert(response.status === 200, "memory-enabled tutor request failed");
+  assert(readCount === 1, "cloud memory was not read exactly once");
+  assert(prompt.includes("Last selected CEFR scaffold: A2."), "database CEFR context was not added");
+  assert(prompt.includes("Frequently practised topics: subjunctive (4), past tenses (2)."), "database topic context was not added");
+  assert(!prompt.includes("C1") && !prompt.includes("vocabulary (99)"), "untrusted client memory overrode server memory");
+  assert(recordBody && recordBody.p_uid === uid, "learning activity was not attributed to the authenticated user");
+  assert(recordBody.p_cefr_level === "A2" && recordBody.p_topics.includes("subjunctive") && recordBody.p_mode === "chat", "only structured learning signals were not sent to the memory RPC");
+  assert(body.learningMemory && body.learningMemory.interaction_count === 7, "updated cloud memory was not returned to the client");
+});
+
+Deno.test("disabled learning memory performs no cloud read or write", async () => {
+  const urls: string[] = [];
+  const fetchImpl = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input); urls.push(url);
+    const body = init?.body ? JSON.parse(String(init.body)) : null;
+    if (url.includes("/rpc/ai_use_reserve")) return reservationOk();
+    if (url.includes("/rpc/ai_use_settle")) return settlementOk();
+    if (url.includes("generativelanguage.googleapis.com/v1beta/models?pageSize=1000")) return geminiCatalog();
+    if (url.includes(":generateContent")) return completion("No memory used.");
+    throw new Error("Unexpected mocked URL: " + url);
+  };
+  const response = await run(fetchImpl, [], [], env, request("quick", { useLearningMemory: false }));
+  assert(response.status === 200, "tutor request with memory disabled failed");
+  assert(!urls.some(url => url.includes("tutor_learning_memory") || url.includes("tutor_record_learning_interaction")), "disabled memory accessed cloud storage");
+});
+
+Deno.test("memory management actions are authenticated and delegated to server-only RPCs", async () => {
+  const calls: Array<{ url: string; body: any }> = [];
+  const fetchImpl = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input); const body = init?.body ? JSON.parse(String(init.body)) : null;
+    calls.push({ url, body });
+    if (url.includes("/rpc/tutor_set_learning_memory_enabled") || url.includes("/rpc/tutor_clear_learning_memory")) return ok({});
+    throw new Error("Unexpected mocked URL: " + url);
+  };
+  const disabled = await run(fetchImpl, [], [], env, request("quick", { setLearningMemoryEnabled: false }));
+  const cleared = await run(fetchImpl, [], [], env, request("quick", { clearLearningMemory: true }));
+  assert(disabled.status === 200 && (await disabled.json()).memoryEnabled === false, "disable action failed");
+  assert(cleared.status === 200 && (await cleared.json()).memoryCleared === true, "clear action failed");
+  assert(calls[0].body.p_uid === uid && calls[0].body.p_enabled === false, "disable action did not use authenticated UID");
+  assert(calls[1].body.p_uid === uid, "clear action did not use authenticated UID");
 });

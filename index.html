@@ -51,6 +51,7 @@ input.inp,select.inp{width:100%;font:inherit;padding:11px;margin:6px 0;border-ra
 
 </style></head><body><header></header>
 <div class="w" id="app"></div>
+<script src="/runtime-config.js"></script>
 <script>
 const PASS=70;
 const L=[
@@ -473,9 +474,13 @@ function grammarView(){
   draw("");el("gq").oninput=e=>draw(e.target.value.toLowerCase().trim());el("bk").onclick=()=>{view="home";render()};
 }
 /* ===================== BACKEND (Supabase REST, no library) ===================== */
-const SBURL="https://zzphvgkooaylxurwrlqx.supabase.co",SBKEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6cGh2Z2tvb2F5bHh1cndybHF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE1NzMyODMsImV4cCI6MjEwNzE0OTI4M30.cV0X9duSpLx7rf3LenBvaMEX6I4Lua-xumqPKDhqx-k",PUB=SBURL+"/storage/v1/object/public/lesson-audio/";
+const FA_CONFIG=window.FA_CONFIG;if(!FA_CONFIG||!FA_CONFIG.supabaseUrl||!FA_CONFIG.supabaseAnonKey)throw new Error("Backend configuration missing; refusing to connect.");const SBURL=FA_CONFIG.supabaseUrl,SBKEY=FA_CONFIG.supabaseAnonKey,PUB=SBURL+"/storage/v1/object/public/lesson-audio/";
 let AUTH=null,PROF=null,MY={classes:[],assign:[],live:[],clips:{}},clipAu=null,syncMsg="",stm=null,dirty=false,deferred=null,warm=new Set();
 try{AUTH=JSON.parse(localStorage.getItem("fa_auth")||"null");PROF=JSON.parse(localStorage.getItem("fa_prof")||"null");const m=JSON.parse(localStorage.getItem("fa_my")||"null");if(m)MY={...MY,...m}}catch(e){}
+function faJwtClaims(token){try{const part=String(token||"").split(".")[1];if(!part)return null;const raw=part.replace(/-/g,"+").replace(/_/g,"/");return JSON.parse(atob(raw+"=".repeat((4-raw.length%4)%4)))}catch(e){return null}}
+function faTokenBelongsToBackend(token){const claims=faJwtClaims(token);if(!claims)return false;const expected=new URL(SBURL).hostname;let issuerHost="";try{issuerHost=new URL(claims.iss||"").hostname}catch(e){}const tokenProject=String(claims.ref||issuerHost.split(".")[0]||"");return tokenProject===expected.split(".")[0]&&(!issuerHost||issuerHost===expected)}
+if(AUTH&&AUTH.access_token&&!faTokenBelongsToBackend(AUTH.access_token)){AUTH=null;PROF=null;["fa_auth","fa_prof","fa_my"].forEach(k=>localStorage.removeItem(k));}
+
 const escA=s=>esc(String(s==null?"":s)).replace(/"/g,"&quot;"),online=()=>navigator.onLine!==false,isLect=()=>!!(PROF&&PROF.role==="lecturer"),store=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 function setAuth(j){AUTH={access_token:j.access_token,refresh_token:j.refresh_token,expires_at:j.expires_at||Math.floor(Date.now()/1000)+(j.expires_in||3600),user:j.user||(AUTH&&AUTH.user)};store("fa_auth",AUTH)}
 async function refreshTok(){if(!AUTH||!AUTH.refresh_token||!online())return;if(AUTH.expires_at*1000-Date.now()>60000)return;

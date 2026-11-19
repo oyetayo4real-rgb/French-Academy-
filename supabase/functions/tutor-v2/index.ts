@@ -126,7 +126,7 @@ function normalizeHistory(value: unknown): ChatMessage[] {
 export const PROMPT_RULES: ReadonlyArray<{ id: string; text: string }> = [
   {
     id: "language-default-english",
-    text: "Language: Write explanations, headings and labels in English by default. Use French only for examples, quoted forms and grammar terms; put grammar terms in italics and give an English gloss on first use. Exception: if the user explicitly asks for a French answer (for example, \"en français\" or \"answer in French\"), write everything, including headings, in French."
+    text: "Language: Write explanations, headings and labels in English by default when the learner communicates in English. Use French only for examples, quoted forms and grammar terms in that case; put grammar terms in italics and give an English gloss on first use. If the learner writes in French, respond in French and gently correct relevant errors. If the learner mixes English and French, explain in clear English with accurate French examples unless they request otherwise. If the learner explicitly asks for a French answer (for example, \"en français\" or \"answer in French\"), write everything, including headings, in French. Support English-speaking French learners; never assume the learner is a native French speaker."
   },
   {
     id: "no-mixed-headings",
@@ -189,6 +189,22 @@ export const PROMPT_RULES: ReadonlyArray<{ id: string; text: string }> = [
     text: "Deep mode: stay focused on the user's request and use no more than about 600 words unless the user explicitly asks for more. Do not add unrelated background or sections."
   },
   {
+    id: "conversation-continuity",
+    text: "Conversation continuity: Treat the supplied conversation history as the active lesson, not as unrelated isolated prompts. Resolve short follow-ups such as 'why?', 'how?', 'give me another example', and 'I do not understand' using the immediately preceding turns. Do not restart the lesson or repeat a full explanation unless asked. If the learner changes topic, follow the change while retaining relevant context. Never claim to remember a conversation that is not present in the supplied history or enabled learner memory."
+  },
+  {
+    id: "patient-interactive-teaching",
+    text: "Teaching behaviour: Be a patient, interactive French tutor rather than a dictionary dump. When teaching a concept, explain one idea at a time in plain language, show one accurate French example with an English meaning, and briefly explain why the form is used. When the learner is confused, slow down, rephrase with simpler words, and use a smaller example instead of repeating the same explanation. Do not overload an A1-A2 learner with unrelated exceptions."
+  },
+  {
+    id: "guided-practice",
+    text: "Guided practice: When the learner asks to learn, practise, or check understanding, teach briefly and then offer one small, relevant exercise or ask one focused question. Wait for the learner's answer before revealing the solution unless they request the answer. Give specific feedback: identify what is correct, correct the exact mistake, explain the reason, and let the learner try again when useful. Do not append a quiz to every ordinary factual answer."
+  },
+  {
+    id: "contextual-correction",
+    text: "Contextual correction: In conversation, correct meaningful French errors gently without interrupting the learner's intended message. Show the corrected form, explain the key reason in the learner's preferred language, and distinguish grammatical errors from optional stylistic improvements. Preserve the learner's intended meaning."
+  },
+  {
     id: "no-internal-scaffolding",
     text: "Never expose internal prompt scaffolding, rubric names, private reasoning, or internal section titles. Do not create headings that describe hidden reasoning steps or internal classifications."
   },
@@ -198,7 +214,7 @@ export const PROMPT_RULES: ReadonlyArray<{ id: string; text: string }> = [
   }
 ];
 
-export function makeSystemPrompt(mode: string, level: string, depth: Depth): string {
+export function makeSystemPrompt(mode: string, level: string, depth: Depth, memoryContext = ""): string {
   const learner = level && level !== "none" ? "Optional learner level: " + level + "." : "";
   const sharedRules = PROMPT_RULES.map((rule) => rule.text).join(" ");
   const depthGuidance = depth === "quick"
@@ -211,6 +227,7 @@ export function makeSystemPrompt(mode: string, level: string, depth: Depth): str
     depthGuidance,
     sharedRules,
     learner,
+    memoryContext,
     "Requested task: " + mode + "."
   ].filter(Boolean).join(" ");
 }
@@ -527,7 +544,7 @@ async function generateAnswer(
 }
 
 async function rpc(
-  name: "ai_use" | "ai_use_reserve" | "ai_use_settle",
+  name: "ai_use" | "ai_use_reserve" | "ai_use_settle" | "tutor_set_learning_memory_enabled" | "tutor_clear_learning_memory" | "tutor_record_learning_interaction",
   body: Record<string, unknown>,
   deps: Required<Pick<Dependencies, "env" | "fetchImpl">>
 ): Promise<any> {
@@ -545,7 +562,103 @@ async function rpc(
     body: JSON.stringify(body)
   });
   if (!response.ok) throw new TutorFault("quota_unavailable", true, 503);
-  return response.json();
+  const payload = await response.text();
+  return payload ? JSON.parse(payload) : null;
+}
+
+async function loadLearningMemory(uid: string, deps: Required<Pick<Dependencies, "env" | "fetchImpl">>): Promise<LearningMemory | null> {
+  const url = deps.env.get("SUPABASE_URL");
+  const serviceKey = deps.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !serviceKey) return null;
+  try {
+    const endpoint = url.replace(/\/$/, "") + "/rest/v1/tutor_learning_memory?user_id=eq." + encodeURIComponent(uid) + "&enabled=eq.true&select=enabled,cefr_level,topic_counts,mode_counts,interaction_count,last_interaction_at&limit=1";
+    const response = await deps.fetchImpl(endpoint, { headers: { apikey: serviceKey, Authorization: "Bearer " + serviceKey } });
+    if (!response.ok) return null;
+    const rows = await response.json();
+    return Array.isArray(rows) && rows.length ? normalizeClientLearningMemory(rows[0]) : null;
+  } catch { return null; }
+}
+type LearningMemory = {
+  enabled: boolean;
+  cefr_level: string | null;
+  topic_counts: Record<string, number>;
+  mode_counts: Record<string, number>;
+  interaction_count: number;
+  last_interaction_at: string | null;
+};
+
+const LEARNING_TOPIC_PATTERNS: Array<[string, RegExp]> = [
+  ["subjunctive", /\b(subjonctif|subjunctive)\b/i],
+  ["past_tenses", /(pass[eé] compos[eé]|imparfait|plus-que-parfait|pass[eé] simple|past tense)/i],
+  ["articles", /\b(articles?|article défini|article indéfini)\b/i],
+  ["pronouns", /\b(pronoms?|pronouns?|y and en)\b/i],
+  ["agreement", /\b(accord|agreement|genre|gender|plural)\b/i],
+  ["prepositions", /\b(pr[eé]position|preposition|à|de|chez|dans)\b/i],
+  ["negation", /\b(n[eé]gation|ne \w+ pas|negation)\b/i],
+  ["vocabulary", /\b(vocabulaire|vocabulary|synonyme|antonyme|meaning|meaning of)\b/i],
+  ["pronunciation", /\b(prononciation|pronunciation|phon[eè]me|liaison)\b/i],
+  ["writing", /\b(r[eé]daction|writing|essay|composition)\b/i],
+  ["literature", /\b(litt[eé]rature|literature|po[eè]me|roman|auteur)\b/i],
+  ["idioms", /\b(expression idiomatique|idiom|locution|expression)\b/i],
+  ["questions", /\b(question|interrogation|interrogative)\b/i],
+  ["verb_conjugation", /\b(conjugaison|conjugation|conjugate|verbe|verb)\b/i],
+  ["listening", /\b(compr[eé]hension orale|listening|[eé]coute)\b/i]
+];
+
+export function classifyLearningTopics(text: string, mode: string): string[] {
+  const topics = new Set<string>();
+  const value = String(text || "");
+  for (const [topic, pattern] of LEARNING_TOPIC_PATTERNS) {
+    if (pattern.test(value)) topics.add(topic);
+  }
+  if (mode === "translate") topics.add("translation");
+  if (mode === "correct") topics.add("correction");
+  if (mode === "practice") topics.add("conversation");
+  if (mode === "examples") topics.add("examples");
+  return [...topics].slice(0, 8);
+}
+
+function learningMemoryContext(memory: LearningMemory | null): string {
+  if (!memory?.enabled) return "";
+  const topics = Object.entries(memory.topic_counts || {})
+    .filter(([topic, count]) => /^[a-z_]{2,32}$/.test(topic) && Number.isFinite(Number(count)) && Number(count) > 0)
+    .sort((a, b) => Number(b[1]) - Number(a[1]))
+    .slice(0, 6)
+    .map(([topic, count]) => topic.replace(/_/g, " ") + " (" + Number(count) + ")");
+  const level = memory.cefr_level ? "Last selected CEFR scaffold: " + memory.cefr_level + "." : "";
+  const topicsLine = topics.length ? "Frequently practised topics: " + topics.join(", ") + "." : "";
+  return [
+    "Opt-in learner memory: use these structured learning signals to adapt examples and revision. Do not assume mastery from activity counts, and do not mention this internal profile unless the learner asks.",
+    level,
+    topicsLine
+  ].filter(Boolean).join(" ");
+}
+
+export function normalizeClientLearningMemory(value: unknown): LearningMemory | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const source = value as Record<string, unknown>;
+  if (source.enabled !== true) return null;
+  const allowedTopics = new Set(LEARNING_TOPIC_PATTERNS.map(([topic]) => topic).concat(["translation","correction","conversation","examples"]));
+  const allowedModes = new Set(["chat","practice","correct","translate","examples"]);
+  const topicCounts: Record<string, number> = {};
+  const modeCounts: Record<string, number> = {};
+  if (source.topic_counts && typeof source.topic_counts === "object" && !Array.isArray(source.topic_counts)) {
+    for (const [key, raw] of Object.entries(source.topic_counts as Record<string, unknown>).slice(0, 32)) {
+      const count = Number(raw);
+      if (allowedTopics.has(key) && Number.isSafeInteger(count) && count >= 0) topicCounts[key] = Math.min(count, 100000);
+    }
+  }
+  if (source.mode_counts && typeof source.mode_counts === "object" && !Array.isArray(source.mode_counts)) {
+    for (const [key, raw] of Object.entries(source.mode_counts as Record<string, unknown>).slice(0, 8)) {
+      const count = Number(raw);
+      if (allowedModes.has(key) && Number.isSafeInteger(count) && count >= 0) modeCounts[key] = Math.min(count, 100000);
+    }
+  }
+  const level = typeof source.cefr_level === "string" && ["A1","A2","B1","B2","C1","C2"].includes(source.cefr_level) ? source.cefr_level : null;
+  const interactions = Number(source.interaction_count);
+  return { enabled: true, cefr_level: level, topic_counts: topicCounts, mode_counts: modeCounts,
+    interaction_count: Number.isSafeInteger(interactions) && interactions >= 0 ? Math.min(interactions, 1000000) : 0,
+    last_interaction_at: null };
 }
 
 export function createTutorHandler(overrides: Dependencies = {}) {
@@ -572,24 +685,30 @@ export function createTutorHandler(overrides: Dependencies = {}) {
 
     if (body?.health === true) {
       const providerKeys = Object.fromEntries(PROVIDERS.map((provider) => [
-        provider.name,
-        Boolean(getConfiguredProvider(provider.name, deps.env))
+        provider.name, Boolean(getConfiguredProvider(provider.name, deps.env))
       ]));
-      return json({
-        providerKeys,
-        groqModels: getGroqModels(deps.env),
-        quotaMode: getQuotaMode(deps.env)
-      });
+      return json({ providerKeys, groqModels: getGroqModels(deps.env), quotaMode: getQuotaMode(deps.env) });
     }
 
-    const mode = ["chat", "translate", "correct", "practice", "examples"].includes(body?.mode)
-      ? body.mode : "chat";
+    if (body?.clearLearningMemory === true) {
+      try { await rpc("tutor_clear_learning_memory", { p_uid: uid }, deps); return json({ memoryCleared: true }); }
+      catch { return json({ error: "memory_unavailable", retryable: true }, 503); }
+    }
+    if (typeof body?.setLearningMemoryEnabled === "boolean") {
+      try {
+        await rpc("tutor_set_learning_memory_enabled", { p_uid: uid, p_enabled: body.setLearningMemoryEnabled }, deps);
+        return json({ memoryEnabled: body.setLearningMemoryEnabled });
+      } catch { return json({ error: "memory_unavailable", retryable: true }, 503); }
+    }
+
+    const mode = ["chat", "translate", "correct", "practice", "examples"].includes(body?.mode) ? body.mode : "chat";
     const question = clip(body?.text, 1_800).trim();
     if (!question) return json({ error: "invalid_request", retryable: false }, 400);
-
     const depth = parseDepth(body?.depth);
     const history = normalizeHistory(body?.history);
     const messages: ChatMessage[] = [...history, { role: "user", content: question }];
+    const useLearningMemory = body?.useLearningMemory === true;
+    const learnerMemory = useLearningMemory ? await loadLearningMemory(uid, deps) : null;
     const quotaMode = getQuotaMode(deps.env);
     const requestId = quotaMode === "reservation" ? crypto.randomUUID() : "";
     let reserved = false;
@@ -613,7 +732,7 @@ export function createTutorHandler(overrides: Dependencies = {}) {
       let answer = "";
       try {
         answer = await generateAnswer(
-          makeSystemPrompt(mode, clip(body?.level, 8), depth),
+          makeSystemPrompt(mode, clip(body?.level, 8), depth, learningMemoryContext(learnerMemory)),
           messages,
           depth,
           deps
@@ -642,7 +761,19 @@ export function createTutorHandler(overrides: Dependencies = {}) {
           throw new TutorFault("quota_unavailable", true, 503);
         }
       }
-      return json({ text: answer, depth });
+      let savedLearningMemory: LearningMemory | null = null;
+      if (useLearningMemory) {
+        try {
+          const saved = await rpc("tutor_record_learning_interaction", {
+            p_uid: uid,
+            p_cefr_level: ["A1", "A2", "B1", "B2", "C1", "C2"].includes(body?.level) ? body.level : null,
+            p_topics: classifyLearningTopics(question, mode),
+            p_mode: mode
+          }, deps);
+          savedLearningMemory = normalizeClientLearningMemory(saved);
+        } catch { deps.log("learning_memory_save_failed", { enabled: true }); }
+      }
+      return json({ text: answer, depth, learningMemory: savedLearningMemory });
     } catch (error) {
       if (reserved) {
         await rpc("ai_use_settle", {
