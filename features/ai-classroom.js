@@ -527,6 +527,7 @@
       if (!answer) {
         const code = response && response.error;
         if (code === "quota_exceeded") throw new Error("You have reached today's Tutor usage limit. Please try again tomorrow.");
+        if (code === "quota_unavailable") throw new Error("Académie AI cannot reach the account usage service right now. Your question was not answered. Please try again later; if this continues, the app administrator must check the Supabase Tutor quota function and service-role configuration.");
         if (code === "provider_rate_limit") throw new Error("The AI provider is temporarily rate-limiting requests. Please try again shortly.");
         if (code === "provider_timeout") throw new Error("The Tutor took too long to respond. Please try again.");
         if (code === "provider_unavailable") throw new Error("The Tutor service is temporarily unavailable. Please try again.");
