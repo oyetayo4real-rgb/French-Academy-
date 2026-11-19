@@ -1,3 +1,47 @@
+Deno.test("conversational tutor prompt includes continuity, patient teaching, guided practice, and contextual correction", () => {
+  const prompt = makeSystemPrompt("chat", "A1", "quick");
+  for (const phrase of [
+    "Conversation continuity:",
+    "Resolve short follow-ups",
+    "patient, interactive French tutor",
+    "When the learner is confused, slow down",
+    "Wait for the learner's answer",
+    "distinguish grammatical errors from optional stylistic improvements"
+  ]) {
+    assert(prompt.includes(phrase), "missing conversational tutor instruction: " + phrase);
+  }
+});
+
+Deno.test("conversation history is forwarded to the model before the current follow-up", async () => {
+  const calls: any[] = [];
+  let capturedMessages: any[] = [];
+  const req = request("quick", {
+    text: "Why is it 'nous sommes'?",
+    history: [
+      { role: "user", content: "Teach me the verb être." },
+      { role: "assistant", content: "Être means 'to be'. The form for nous is sommes." }
+    ]
+  });
+  const fetchImpl = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    if (url.includes("/rpc/")) return rpcCalls(calls)(url, init);
+    if (url === "https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000") return geminiCatalog();
+    if (url.includes(":generateContent")) {
+      const payload = JSON.parse(String(init?.body || "{}"));
+      capturedMessages = payload.contents || [];
+      return completion("Because être is irregular; nous takes sommes.");
+    }
+    throw new Error("Unexpected fetch: " + url);
+  };
+  const response = await run(fetchImpl, calls, [], env, req);
+  const body = await response.json();
+  assert(response.status === 200 && body.text.includes("sommes"), "follow-up request did not receive a tutor answer");
+  assert(capturedMessages.length === 3, "expected two history turns plus the current question");
+  assert(capturedMessages[0].role === "user" && capturedMessages[0].parts[0].text === "Teach me the verb être.", "first learner turn was not preserved");
+  assert(capturedMessages[1].role === "model" && capturedMessages[1].parts[0].text.includes("form for nous"), "previous tutor answer was not preserved");
+  assert(capturedMessages[2].role === "user" && capturedMessages[2].parts[0].text === "Why is it 'nous sommes'?", "current follow-up was not last");
+});
+
 import { classifyLearningTopics, createTutorHandler, makeSystemPrompt, normalizeClientLearningMemory, OVERALL_DEADLINE_MS, PROMPT_RULES } from "./index.ts";
 
 const uid = "00000000-0000-4000-8000-000000000001";
