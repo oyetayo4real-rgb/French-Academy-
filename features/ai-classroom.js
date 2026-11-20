@@ -203,7 +203,8 @@
     if (!FA_AI.cloudSyncEnabled || !FA_TUTOR_UUID_RE.test(String(id))) return;
     await api("/rest/v1/tutor_conversations?id=eq." + encodeURIComponent(id), {m:"DELETE"});
   }
-\n  function faStartTutorConversation() {
+
+  function faStartTutorConversation() {
     const now=Date.now(),id=faTutorNewUuid();
     FA_AI.conversations.push({id,title:"New conversation",createdAt:now,updatedAt:now,level:FA_AI.level,mode:FA_AI.mode,depth:FA_AI.depth,messages:[]});
     FA_AI.activeConversationId=id; FA_AI.messages=[]; FA_AI.lastRequest=null; FA_AI.error=""; faSaveTutorLocalData();
