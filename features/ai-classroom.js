@@ -605,7 +605,8 @@
       FA_AI.memoryProfile=saved.memory; FA_AI.memoryEnabled=saved.memory.enabled===true; FA_AI.memoryLoaded=true; FA_AI.memoryLoading=false; FA_AI.memoryBusy=false;
       FA_AI.memoryStatus=FA_AI.memoryEnabled?"Learning memory is on for your account.":"Learning memory is off. Turn it on to save progress to your account.";
       FA_AI.cloudLoadedUserId=null; FA_AI.cloudSyncEnabled=false; FA_AI.cloudSyncStatus="";
-      void faLoadTutorCloudState();\n      void faLoadTutorMemoryState();
+      void faLoadTutorCloudState();
+      void faLoadTutorMemoryState();
       const active=FA_AI.conversations.find(x=>x.id===FA_AI.activeConversationId);
       if(active){FA_AI.messages=active.messages.map(m=>({role:m.role,content:m.content}));FA_AI.level=active.level;FA_AI.mode=active.mode;FA_AI.depth=active.depth;}
       else{FA_AI.messages=[];FA_AI.activeConversationId=null;}
