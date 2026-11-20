@@ -121,7 +121,8 @@
     }
     if (view === "tutor") render(true);
   }
-\n  async function faLoadTutorCloudState() {
+
+  async function faLoadTutorCloudState() {
     if (!AUTH || !AUTH.user || FA_AI.cloudLoadedUserId === AUTH.user.id) return;
     const uid = AUTH.user.id;
     FA_AI.cloudLoadedUserId = uid;
