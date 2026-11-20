@@ -72,6 +72,9 @@ try {
     window.__memoryCalls = [];
     window.api = async (_path, options) => {
       const payload = structuredClone(options.body);
+      if (payload.getLearningMemory === true) {
+        return { memoryEnabled: false, learningMemory: null };
+      }
       if (typeof payload.setLearningMemoryEnabled === "boolean") {
         window.__memoryCalls.push(payload);
         return { memoryEnabled: payload.setLearningMemoryEnabled };

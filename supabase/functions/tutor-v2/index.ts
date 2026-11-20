@@ -60,7 +60,8 @@ type FaultCode =
   | "provider_timeout"
   | "provider_rate_limit"
   | "provider_unavailable"
-  | "quota_unavailable";
+  | "quota_unavailable"
+  | "memory_unavailable";
 
 class TutorFault extends Error {
   constructor(
@@ -578,6 +579,21 @@ async function loadLearningMemory(uid: string, deps: Required<Pick<Dependencies,
     return Array.isArray(rows) && rows.length ? normalizeClientLearningMemory(rows[0]) : null;
   } catch { return null; }
 }
+async function loadLearningMemoryState(uid: string, deps: Required<Pick<Dependencies, "env" | "fetchImpl">>): Promise<{ enabled: boolean; memory: LearningMemory | null } | null> {
+  const url = deps.env.get("SUPABASE_URL");
+  const serviceKey = deps.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !serviceKey) return null;
+  const endpoint = url.replace(/\/$/, "") + "/rest/v1/tutor_learning_memory?user_id=eq." + encodeURIComponent(uid) + "&select=enabled,cefr_level,topic_counts,mode_counts,interaction_count,last_interaction_at&limit=1";
+  const response = await deps.fetchImpl(endpoint, { headers: { apikey: serviceKey, Authorization: "Bearer " + serviceKey } });
+  if (!response.ok) throw new TutorFault("memory_unavailable", true, 503);
+  const rows = await response.json();
+  if (!Array.isArray(rows) || !rows.length) return { enabled: false, memory: null };
+  const row = rows[0];
+  const normalized = normalizeClientLearningMemory({ ...row, enabled: true });
+  if (normalized) normalized.enabled = row.enabled === true;
+  return { enabled: row.enabled === true, memory: normalized };
+}
+
 type LearningMemory = {
   enabled: boolean;
   cefr_level: string | null;
@@ -628,7 +644,10 @@ function learningMemoryContext(memory: LearningMemory | null): string {
   const level = memory.cefr_level ? "Last selected CEFR scaffold: " + memory.cefr_level + "." : "";
   const topicsLine = topics.length ? "Frequently practised topics: " + topics.join(", ") + "." : "";
   return [
-    "Opt-in learner memory: use these structured learning signals to adapt examples and revision. Do not assume mastery from activity counts, and do not mention this internal profile unless the learner asks.",
+    "The learner has explicitly enabled structured account learning memory. This is a limited learning profile, not a transcript or complete record of past conversations.",
+    "Use the supplied CEFR scaffold and practiced-topic signals to personalize the lesson. Activity counts indicate exposure only; never describe a topic as mastered based on counts.",
+    "If the learner asks about their level, previous learning, practiced topics, progress, or next steps, answer directly from the supplied profile. Identify the CEFR scaffold as the saved learning level, list only the supplied practiced topics, and explain that these are recorded learning signals rather than a full conversation history.",
+    "When this profile is supplied, do not claim that you have no long-term memory or cannot access prior learning context. Do not invent lesson details, dates, scores, proficiency gains, or topics absent from the profile.",
     level,
     topicsLine
   ].filter(Boolean).join(" ");
@@ -690,6 +709,15 @@ export function createTutorHandler(overrides: Dependencies = {}) {
       return json({ providerKeys, groqModels: getGroqModels(deps.env), quotaMode: getQuotaMode(deps.env) });
     }
 
+    if (body?.getLearningMemory === true) {
+      try {
+        const state = await loadLearningMemoryState(uid, deps);
+        if (!state) throw new TutorFault("memory_unavailable", true, 503);
+        return json({ memoryEnabled: state.enabled, learningMemory: state.memory });
+      } catch {
+        return json({ error: "memory_unavailable", retryable: true }, 503);
+      }
+    }
     if (body?.clearLearningMemory === true) {
       try { await rpc("tutor_clear_learning_memory", { p_uid: uid }, deps); return json({ memoryCleared: true }); }
       catch { return json({ error: "memory_unavailable", retryable: true }, 503); }

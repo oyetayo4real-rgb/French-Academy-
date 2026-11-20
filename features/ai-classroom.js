@@ -4,7 +4,7 @@
   let FA_DAILY_CALL = null, FA_DAILY_META = null, FA_DAILY_SDK_PROMISE = null;
   const FA_TUTOR_FUNCTION_SLUG = "tutor-v2";
   const FA_SCRIPT_URL = document.currentScript && document.currentScript.src;
-  const FA_AI = { level: "A1", mode: "chat", depth: "quick", messages: [], pending: false, error: "", lastRequest: null, memoryUserId: null, memoryLoaded: false, memoryLoading: false, memoryBusy: false, memoryEnabled: false, memoryProfile: null, memoryStatus: "", conversations: [], activeConversationId: null, localStorageError: "" };
+  const FA_AI = { level: "A1", mode: "chat", depth: "quick", messages: [], pending: false, error: "", lastRequest: null, memoryUserId: null, memoryLoaded: false, memoryLoading: false, memoryBusy: false, memoryEnabled: false, memoryProfile: null, memoryStatus: "", conversations: [], activeConversationId: null, localStorageError: "", cloudSyncEnabled: false, cloudSyncLoading: false, cloudSyncBusy: false, cloudSyncStatus: "", cloudSaveTimer: null, cloudLoadedUserId: null };
   const FA_TUTOR_LOCAL_VERSION = 1;
   const FA_TUTOR_LOCAL_PREFIX = "fa_tutor_local_v1:";
   const FA_TUTOR_TOPICS = [
@@ -48,11 +48,186 @@
       if (active) { active.messages = FA_AI.messages.slice(-100).map(m=>({role:m.role,content:String(m.content||"").slice(0,12000)})); active.updatedAt=Date.now(); active.level=FA_AI.level; active.mode=FA_AI.mode; active.depth=FA_AI.depth; }
       FA_AI.conversations = FA_AI.conversations.slice(-25);
       localStorage.setItem(faTutorStorageKey(),JSON.stringify({version:FA_TUTOR_LOCAL_VERSION,activeConversationId:FA_AI.activeConversationId,conversations:FA_AI.conversations,memory:FA_AI.memoryProfile||faEmptyLearningMemory()}));
-      FA_AI.localStorageError=""; return true;
+      FA_AI.localStorageError=""; faScheduleTutorCloudSave(); return true;
     } catch (_) { FA_AI.localStorageError="Browser storage is full or unavailable. Export or remove older chats before continuing."; return false; }
   }
+
+  const FA_TUTOR_UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  function faTutorNewUuid() {
+    if (window.crypto && typeof window.crypto.randomUUID === "function") return window.crypto.randomUUID();
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
+      const r = Math.random() * 16 | 0;
+      return (c === "x" ? r : (r & 3 | 8)).toString(16);
+    });
+  }
+  function faTutorCloudRow(item) {
+    return {
+      id: item.id, user_id: AUTH.user.id, title: String(item.title || "New conversation").slice(0,80),
+      level: ["none","A1","A2","B1","B2","C1","C2"].includes(item.level) ? item.level : "A1",
+      mode: ["chat","practice","correct","translate"].includes(item.mode) ? item.mode : "chat",
+      depth: item.depth === "deep" ? "deep" : "quick",
+      messages: (item.messages || []).filter(m => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
+         .slice(-80).map(m => ({role:m.role,content:m.content.slice(0,5000)})),
+      created_at: new Date(Number(item.createdAt) || Date.now()).toISOString(),
+      updated_at: new Date(Number(item.updatedAt) || Date.now()).toISOString()
+    };
+  }
+  async function faPersistTutorCloudConversation(item) {
+    if (!FA_AI.cloudSyncEnabled || !AUTH || !AUTH.user || !item) return;
+    if (!FA_TUTOR_UUID_RE.test(item.id)) {
+      const oldId = item.id;
+      item.id = faTutorNewUuid();
+      if (FA_AI.activeConversationId === oldId) FA_AI.activeConversationId = item.id;
+    }
+    await api("/rest/v1/tutor_conversations?on_conflict=id", {
+      m: "POST",
+      h: { Prefer: "resolution=merge-duplicates,return=minimal" },
+      body: faTutorCloudRow(item)
+    });
+    FA_AI.cloudSyncStatus = "Conversations are saved to your account and available across previews and devices.";
+  }
+  function faScheduleTutorCloudSave() {
+    if (!FA_AI.cloudSyncEnabled || FA_AI.cloudSyncLoading || !AUTH || !AUTH.user) return;
+    clearTimeout(FA_AI.cloudSaveTimer);
+    FA_AI.cloudSaveTimer = setTimeout(async () => {
+      const item = FA_AI.conversations.find(x => x.id === FA_AI.activeConversationId);
+      if (!item) return;
+      try { await faPersistTutorCloudConversation(item); }
+      catch (_) { FA_AI.cloudSyncStatus = "Could not sync this conversation yet. It remains saved in this browser and will retry when you continue."; }
+      if (view === "tutor") {
+        const status = faEl("faConversationSyncStatus");
+        if (status) status.textContent = FA_AI.cloudSyncStatus;
+      }
+    }, 900);
+  }
+
+  async function faLoadTutorMemoryState() {
+    if (!AUTH || !AUTH.user) return;
+    try {
+      const result = await faTutorRequest({ getLearningMemory: true });
+      if (!result || result.error || typeof result.memoryEnabled !== "boolean") {
+        throw new Error("The account memory state could not be verified.");
+      }
+      FA_AI.memoryEnabled = result.memoryEnabled === true;
+      FA_AI.memoryProfile = result.learningMemory || faEmptyLearningMemory();
+      FA_AI.memoryProfile.enabled = FA_AI.memoryEnabled;
+      FA_AI.memoryLoaded = true;
+      FA_AI.memoryStatus = FA_AI.memoryEnabled
+        ? "Learning memory is on for your account. Saved learning signals have been restored."
+        : "Learning memory is off for your account. Existing paused profile data is retained.";
+      faSaveTutorLocalData();
+    } catch (_) {
+      FA_AI.memoryStatus = "Could not verify account learning memory right now. Your local tutor data has been preserved.";
+    }
+    if (view === "tutor") render(true);
+  }
+
+  async function faLoadTutorCloudState() {
+    if (!AUTH || !AUTH.user || FA_AI.cloudLoadedUserId === AUTH.user.id) return;
+    const uid = AUTH.user.id;
+    FA_AI.cloudLoadedUserId = uid;
+    FA_AI.cloudSyncLoading = true;
+    FA_AI.cloudSyncStatus = "Checking your account conversation settings…";
+    try {
+      const prefs = await api("/rest/v1/tutor_conversation_preferences?user_id=eq." + encodeURIComponent(uid) + "&select=sync_enabled");
+      FA_AI.cloudSyncEnabled = !!(prefs && prefs[0] && prefs[0].sync_enabled === true);
+      if (FA_AI.cloudSyncEnabled) {
+        const rows = await api("/rest/v1/tutor_conversations?select=id,title,level,mode,depth,messages,created_at,updated_at&order=updated_at.desc&limit=25");
+        const merged = new Map();
+        (Array.isArray(rows) ? rows : []).forEach(row => {
+          const messages = Array.isArray(row.messages) ? row.messages.filter(m => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string") .slice(-80).map(m => ({role:m.role,content:m.content.slice(0,5000)})) : [];
+          merged.set(row.id, {
+            id:row.id, title:String(row.title || "New conversation").slice(0,80),
+            createdAt:Date.parse(row.created_at) || Date.now(), updatedAt:Date.parse(row.updated_at) || Date.now(),
+            level:row.level, mode:row.mode, depth:row.depth, messages
+          });
+        });
+        const legacyUploads = [];
+        FA_AI.conversations.forEach(local => {
+          const oldId = local.id;
+          if (!FA_TUTOR_UUID_RE.test(local.id)) {
+            local.id = faTutorNewUuid();
+            if (FA_AI.activeConversationId === oldId) FA_AI.activeConversationId = local.id;
+          }
+          const cloud = merged.get(local.id);
+          if (!cloud || Number(local.updatedAt) > cloud.updatedAt) {
+            merged.set(local.id, local);
+            legacyUploads.push(faTutorCloudRow(local));
+          }
+        });
+        if (legacyUploads.length) {
+          await api("/rest/v1/tutor_conversations?on_conflict=id", {
+            m:"POST", h:{Prefer:"resolution=merge-duplicates,return=minimal"}, body:legacyUploads
+          });
+        }
+        FA_AI.conversations = [...merged.values()].sort((a,b) => b.updatedAt-a.updatedAt).slice(0,25);
+        if (!FA_AI.conversations.some(x => x.id === FA_AI.activeConversationId)) {
+          FA_AI.activeConversationId = FA_AI.conversations[0] ? FA_AI.conversations[0].id : null;
+        }
+        if (FA_AI.activeConversationId) {
+          const active = FA_AI.conversations.find(x => x.id === FA_AI.activeConversationId);
+          FA_AI.messages = active.messages.map(m => ({role:m.role,content:m.content}));
+          FA_AI.level = active.level; FA_AI.mode = active.mode; FA_AI.depth = active.depth;
+        }
+        FA_AI.cloudSyncStatus = "Your account conversations are restored and synchronized.";
+      } else {
+        FA_AI.cloudSyncStatus = "Account conversation sync is off. Your chats remain in this browser until you enable sync.";
+      }
+      faSaveTutorLocalData();
+    } catch (error) {
+      FA_AI.cloudSyncStatus = "Could not load account conversations. Your local chats have been preserved.";
+    } finally {
+      FA_AI.cloudSyncLoading = false;
+      if (view === "tutor") render(true);
+    }
+  }
+  async function faSetTutorConversationSync(enabled) {
+    const next = enabled === true;
+    if (next && !confirm("Save your tutor conversation transcripts securely to your French Academy account so they can follow you across Preview deployments and devices? You can turn this off later.")) {
+      const checkbox = faEl("faConversationSyncEnabled"); if (checkbox) checkbox.checked = false;
+      return;
+    }
+    if (!AUTH || !AUTH.user) return;
+    FA_AI.cloudSyncBusy = true;
+    FA_AI.cloudSyncStatus = next ? "Enabling account conversation sync…" : "Pausing account conversation sync…";
+    if (view === "tutor") render(true);
+    try {
+      await api("/rest/v1/tutor_conversation_preferences?on_conflict=user_id", {
+        m:"POST", h:{Prefer:"resolution=merge-duplicates,return=minimal"},
+        body:{user_id:AUTH.user.id,sync_enabled:next,updated_at:new Date().toISOString()}
+      });
+      FA_AI.cloudSyncEnabled = next;
+      if (next) {
+        const rows = FA_AI.conversations.map(item => {
+          if (!FA_TUTOR_UUID_RE.test(item.id)) {
+            const oldId=item.id; item.id=faTutorNewUuid();
+            if (FA_AI.activeConversationId===oldId) FA_AI.activeConversationId=item.id;
+          }
+          return faTutorCloudRow(item);
+        });
+        if (rows.length) await api("/rest/v1/tutor_conversations?on_conflict=id", {
+          m:"POST", h:{Prefer:"resolution=merge-duplicates,return=minimal"}, body:rows
+        });
+        FA_AI.cloudSyncStatus = "Conversation sync is on. Your saved chats are now linked to your account.";
+      } else {
+        FA_AI.cloudSyncStatus = "Conversation sync is off. Existing account conversations are retained; new changes stay in this browser.";
+      }
+      faSaveTutorLocalData();
+    } catch (error) {
+      FA_AI.cloudSyncEnabled = !next;
+      FA_AI.cloudSyncStatus = (error && error.message) || "Could not update conversation sync. Your local chats are preserved.";
+    } finally {
+      FA_AI.cloudSyncBusy = false;
+      if (view === "tutor") render(true);
+    }
+  }
+  async function faDeleteTutorCloudConversation(id) {
+    if (!FA_AI.cloudSyncEnabled || !FA_TUTOR_UUID_RE.test(String(id))) return;
+    await api("/rest/v1/tutor_conversations?id=eq." + encodeURIComponent(id), {m:"DELETE"});
+  }
+
   function faStartTutorConversation() {
-    const now=Date.now(),id="chat_"+now.toString(36)+"_"+Math.random().toString(36).slice(2,8);
+    const now=Date.now(),id=faTutorNewUuid();
     FA_AI.conversations.push({id,title:"New conversation",createdAt:now,updatedAt:now,level:FA_AI.level,mode:FA_AI.mode,depth:FA_AI.depth,messages:[]});
     FA_AI.activeConversationId=id; FA_AI.messages=[]; FA_AI.lastRequest=null; FA_AI.error=""; faSaveTutorLocalData();
   }
@@ -429,6 +604,9 @@
       const saved=faLoadTutorLocalData(); FA_AI.conversations=saved.conversations; FA_AI.activeConversationId=saved.activeConversationId;
       FA_AI.memoryProfile=saved.memory; FA_AI.memoryEnabled=saved.memory.enabled===true; FA_AI.memoryLoaded=true; FA_AI.memoryLoading=false; FA_AI.memoryBusy=false;
       FA_AI.memoryStatus=FA_AI.memoryEnabled?"Learning memory is on for your account.":"Learning memory is off. Turn it on to save progress to your account.";
+      FA_AI.cloudLoadedUserId=null; FA_AI.cloudSyncEnabled=false; FA_AI.cloudSyncStatus="";
+      void faLoadTutorCloudState();
+      void faLoadTutorMemoryState();
       const active=FA_AI.conversations.find(x=>x.id===FA_AI.activeConversationId);
       if(active){FA_AI.messages=active.messages.map(m=>({role:m.role,content:m.content}));FA_AI.level=active.level;FA_AI.mode=active.mode;FA_AI.depth=active.depth;}
       else{FA_AI.messages=[];FA_AI.activeConversationId=null;}
@@ -437,7 +615,7 @@
     const messageHtml = FA_AI.messages.map((m, index) => '<div class="card" style="margin:8px 0"><b>' + (m.role === "user" ? "You" : "Académie AI") + '</b><div class="fa-answer" style="margin-top:8px;line-height:1.75">' + (m.role === "assistant" ? faMarkdown(m.content) : '<div style="white-space:pre-wrap">' + faSafe(m.content) + "</div>") + "</div>" + (m.role === "assistant" ? '<button class="g" type="button" data-fa-speak="' + index + '">🔊 Listen</button><p class="fa-tutor-answer-note" role="note">AI answers can contain mistakes. Check important points in a dictionary or grammar reference.</p>' : "") + "</div>").join("");
     const conversationOptions=FA_AI.conversations.slice().sort((a,b)=>b.updatedAt-a.updatedAt).map(item=>'<option value="'+faSafe(item.id)+'"'+(item.id===FA_AI.activeConversationId?" selected":"")+'>'+faSafe(item.title||"New conversation")+'</option>').join("");
     $.innerHTML = (typeof topbar === "function" ? topbar() : "") + '<button class="g" id="faHome">← Home</button><h1>🤖 Académie French Intelligence</h1><p class="mu">A French-language tutor for grammar, syntax, semantics, literature, history, translation, writing and contemporary usage. CEFR level is optional guidance.</p>' +
-      '<div class="card fa-conversation-manager"><b>Your conversations</b><select class="inp" id="faConversationSelect" aria-label="Choose a saved conversation">'+conversationOptions+'</select><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="g" id="faNewConversation" type="button">＋ New chat</button><button class="g" id="faRenameConversation" type="button">Rename</button><button class="g" id="faDeleteConversation" type="button">Delete chat</button><button class="g" id="faClearAllConversations" type="button">Clear all chats</button></div><p class="mu">Conversations are stored in this browser. Your messages are still sent to the AI tutor when you ask a question.</p></div>' +
+      '<div class="card fa-conversation-manager"><b>Your conversations</b><select class="inp" id="faConversationSelect" aria-label="Choose a saved conversation">'+conversationOptions+'</select><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="g" id="faNewConversation" type="button">＋ New chat</button><button class="g" id="faRenameConversation" type="button">Rename</button><button class="g" id="faDeleteConversation" type="button">Delete chat</button><button class="g" id="faClearAllConversations" type="button">Clear all chats</button></div><p class="mu">Chats are saved in this browser by default. Turn on account sync to securely save conversation transcripts to your account and continue across Preview deployments and devices. This is separate from your learning-memory setting.</p><label style="display:flex;align-items:center;gap:10px;font-weight:700;margin-top:12px"><input id="faConversationSyncEnabled" type="checkbox"' + (FA_AI.cloudSyncEnabled ? " checked" : "") + (FA_AI.cloudSyncBusy || FA_AI.cloudSyncLoading ? " disabled" : "") + '> Save conversations to my account</label><p class="mu" id="faConversationSyncStatus" role="status" aria-live="polite">' + faSafe(FA_AI.cloudSyncStatus || (FA_AI.cloudSyncEnabled ? "Account conversation sync is on." : "Account conversation sync is off.")) + '</p></div>' +
       '<div class="card"><label for="faTutorDepth"><b>Answer depth</b></label><select class="inp" id="faTutorDepth">' +
       '<option value="quick"' + (FA_AI.depth === "quick" ? " selected" : "") + '>Quick answer</option><option value="deep"' + (FA_AI.depth === "deep" ? " selected" : "") + '>Deep answer</option></select>' +
       '<label for="faTutorLevel"><b>Optional explanation style</b></label><select class="inp" id="faTutorLevel"><option value="none"' + (FA_AI.level === "none" ? " selected" : "") + '>No level restriction</option>' + ["A1","A2","B1","B2","C1","C2"].map((l) => '<option value="' + l + '"' + (l === FA_AI.level ? " selected" : "") + '>' + l + ' · optional learner scaffolding</option>').join("") + '</select><label for="faTutorMode"><b>Tool</b></label><select class="inp" id="faTutorMode">' + [["chat","Tutor answer"],["practice","Conversation practice"],["correct","Correct and analyse my French"],["translate","Translate French ↔ English"]].map((o) => '<option value="' + o[0] + '"' + (o[0] === FA_AI.mode ? " selected" : "") + '>' + o[1] + '</option>').join("") + "</select></div><div id=\"faTutorMessages\">" + (messageHtml || '<div class="card mu">Ask a question. Choose Quick answer for a focused explanation or Deep answer for a fuller treatment.</div>') + "</div>" +
@@ -480,14 +658,16 @@
     const next=window.prompt("Conversation name",item.title||"New conversation"); if(next===null)return;
     const title=next.trim().slice(0,80); if(!title)return; item.title=title; faSaveTutorLocalData(); render(true);
   }
-  function faDeleteTutorConversation() {
+  async function faDeleteTutorConversation() {
     const item=FA_AI.conversations.find(x=>x.id===FA_AI.activeConversationId); if(!item||!confirm("Delete this saved conversation from this device? This cannot be undone."))return;
+    try { await faDeleteTutorCloudConversation(item.id); } catch (_) { FA_AI.cloudSyncStatus="Could not delete the account copy. Please retry when online."; }
     FA_AI.conversations=FA_AI.conversations.filter(x=>x.id!==item.id); FA_AI.activeConversationId=null; FA_AI.messages=[]; FA_AI.lastRequest=null;
     if(!FA_AI.conversations.length)faStartTutorConversation(); else faActivateTutorConversation(FA_AI.conversations.slice().sort((a,b)=>b.updatedAt-a.updatedAt)[0].id);
     faSaveTutorLocalData(); if(view==="tutor")render(true);
   }
-  function faClearAllTutorConversations() {
+  async function faClearAllTutorConversations() {
     if(!FA_AI.conversations.length||!confirm("Delete every saved tutor conversation from this device? Learning memory will remain."))return;
+    if (FA_AI.cloudSyncEnabled) { try { await api("/rest/v1/tutor_conversations?user_id=eq." + encodeURIComponent(AUTH.user.id), {m:"DELETE"}); } catch (_) { FA_AI.cloudSyncStatus="Could not clear account conversations. Please retry when online."; } }
     FA_AI.conversations=[]; FA_AI.activeConversationId=null; FA_AI.messages=[]; FA_AI.lastRequest=null; FA_AI.error="";
     faStartTutorConversation(); if(view==="tutor")render(true);
   }
@@ -735,6 +915,10 @@
   });
   document.addEventListener("change", (event) => {
     if (event.target && event.target.id === "faConversationSelect") { faSaveTutorLocalData(); faActivateTutorConversation(event.target.value); return; }
+    if (event.target && event.target.id === "faConversationSyncEnabled") {
+      faSetTutorConversationSync(event.target.checked);
+      return;
+    }
     if (event.target && event.target.id === "faMemoryEnabled") {
       faSetTutorMemory(event.target.checked);
       return;

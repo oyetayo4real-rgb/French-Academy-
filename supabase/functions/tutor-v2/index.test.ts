@@ -610,6 +610,9 @@ Deno.test("opted-in cloud memory is loaded from Supabase and updated after a suc
   assert(readCount === 1, "cloud memory was not read exactly once");
   assert(prompt.includes("Last selected CEFR scaffold: A2."), "database CEFR context was not added");
   assert(prompt.includes("Frequently practised topics: subjunctive (4), past tenses (2)."), "database topic context was not added");
+  assert(prompt.includes("If the learner asks about their level, previous learning, practiced topics, progress, or next steps, answer directly from the supplied profile."), "profile questions are not explicitly grounded in restored memory");
+  assert(prompt.includes("do not claim that you have no long-term memory or cannot access prior learning context"), "generic no-memory disclaimers are not prohibited when account memory is supplied");
+  assert(prompt.includes("Activity counts indicate exposure only; never describe a topic as mastered based on counts."), "memory counts are not distinguished from mastery");
   assert(!prompt.includes("C1") && !prompt.includes("vocabulary (99)"), "untrusted client memory overrode server memory");
   assert(recordBody && recordBody.p_uid === uid, "learning activity was not attributed to the authenticated user");
   assert(recordBody.p_cefr_level === "A2" && recordBody.p_topics.includes("subjunctive") && recordBody.p_mode === "chat", "only structured learning signals were not sent to the memory RPC");
@@ -646,4 +649,37 @@ Deno.test("memory management actions are authenticated and delegated to server-o
   assert(cleared.status === 200 && (await cleared.json()).memoryCleared === true, "clear action failed");
   assert(calls[0].body.p_uid === uid && calls[0].body.p_enabled === false, "disable action did not use authenticated UID");
   assert(calls[1].body.p_uid === uid, "clear action did not use authenticated UID");
+});
+
+
+Deno.test("getLearningMemory restores the authenticated learner's persisted account profile", async () => {
+  let requestedUrl = "";
+  const stored = {
+    enabled: true, cefr_level: "A2", topic_counts: { subjunctive: 4, past_tenses: 2 },
+    mode_counts: { chat: 6 }, interaction_count: 6, last_interaction_at: "2026-11-20T10:00:00Z"
+  };
+  const fetchImpl = async (input: RequestInfo | URL) => {
+    requestedUrl = String(input);
+    return ok([stored]);
+  };
+  const response = await run(fetchImpl, [], [], env, request("quick", { getLearningMemory: true }));
+  const body = await response.json();
+  assert(response.status === 200, "account learning memory could not be restored");
+  assert(requestedUrl.includes("user_id=eq." + uid), "memory lookup was not scoped to the authenticated learner");
+  assert(body.memoryEnabled === true, "persisted memory-enabled state was not restored");
+  assert(body.learningMemory?.cefr_level === "A2", "persisted CEFR level was not returned");
+  assert(body.learningMemory?.topic_counts?.subjunctive === 4, "persisted topic counts were not returned");
+  assert(body.learningMemory?.interaction_count === 6, "persisted interaction count was not returned");
+});
+
+Deno.test("getLearningMemory restores disabled state without using it as AI context", async () => {
+  const fetchImpl = async () => ok([{
+    enabled: false, cefr_level: "A1", topic_counts: { articles: 3 },
+    mode_counts: { chat: 3 }, interaction_count: 3
+  }]);
+  const response = await run(fetchImpl, [], [], env, request("quick", { getLearningMemory: true }));
+  const body = await response.json();
+  assert(response.status === 200 && body.memoryEnabled === false, "disabled account memory state was not restored");
+  assert(body.learningMemory?.enabled === false, "disabled profile state was not preserved");
+  assert(body.learningMemory?.topic_counts?.articles === 3, "paused profile data was not preserved");
 });
