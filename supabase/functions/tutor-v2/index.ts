@@ -578,6 +578,21 @@ async function loadLearningMemory(uid: string, deps: Required<Pick<Dependencies,
     return Array.isArray(rows) && rows.length ? normalizeClientLearningMemory(rows[0]) : null;
   } catch { return null; }
 }
+async function loadLearningMemoryState(uid: string, deps: Required<Pick<Dependencies, "env" | "fetchImpl">>): Promise<{ enabled: boolean; memory: LearningMemory | null } | null> {
+  const url = deps.env.get("SUPABASE_URL");
+  const serviceKey = deps.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !serviceKey) return null;
+  const endpoint = url.replace(/\/$/, "") + "/rest/v1/tutor_learning_memory?user_id=eq." + encodeURIComponent(uid) + "&select=enabled,cefr_level,topic_counts,mode_counts,interaction_count,last_interaction_at&limit=1";
+  const response = await deps.fetchImpl(endpoint, { headers: { apikey: serviceKey, Authorization: "Bearer " + serviceKey } });
+  if (!response.ok) throw new TutorFault("memory_unavailable", true, 503);
+  const rows = await response.json();
+  if (!Array.isArray(rows) || !rows.length) return { enabled: false, memory: null };
+  const row = rows[0];
+  const normalized = normalizeClientLearningMemory({ ...row, enabled: true });
+  if (normalized) normalized.enabled = row.enabled === true;
+  return { enabled: row.enabled === true, memory: normalized };
+}
+
 type LearningMemory = {
   enabled: boolean;
   cefr_level: string | null;
@@ -690,6 +705,15 @@ export function createTutorHandler(overrides: Dependencies = {}) {
       return json({ providerKeys, groqModels: getGroqModels(deps.env), quotaMode: getQuotaMode(deps.env) });
     }
 
+    if (body?.getLearningMemory === true) {
+      try {
+        const state = await loadLearningMemoryState(uid, deps);
+        if (!state) throw new TutorFault("memory_unavailable", true, 503);
+        return json({ memoryEnabled: state.enabled, learningMemory: state.memory });
+      } catch {
+        return json({ error: "memory_unavailable", retryable: true }, 503);
+      }
+    }
     if (body?.clearLearningMemory === true) {
       try { await rpc("tutor_clear_learning_memory", { p_uid: uid }, deps); return json({ memoryCleared: true }); }
       catch { return json({ error: "memory_unavailable", retryable: true }, 503); }
