@@ -120,10 +120,24 @@
             level:row.level, mode:row.mode, depth:row.depth, messages
           });
         });
+        const legacyUploads = [];
         FA_AI.conversations.forEach(local => {
+          const oldId = local.id;
+          if (!FA_TUTOR_UUID_RE.test(local.id)) {
+            local.id = faTutorNewUuid();
+            if (FA_AI.activeConversationId === oldId) FA_AI.activeConversationId = local.id;
+          }
           const cloud = merged.get(local.id);
-          if (!cloud || Number(local.updatedAt) > cloud.updatedAt) merged.set(local.id, local);
+          if (!cloud || Number(local.updatedAt) > cloud.updatedAt) {
+            merged.set(local.id, local);
+            legacyUploads.push(faTutorCloudRow(local));
+          }
         });
+        if (legacyUploads.length) {
+          await api("/rest/v1/tutor_conversations?on_conflict=id", {
+            m:"POST", h:{Prefer:"resolution=merge-duplicates,return=minimal"}, body:legacyUploads
+          });
+        }
         FA_AI.conversations = [...merged.values()].sort((a,b) => b.updatedAt-a.updatedAt).slice(0,25);
         if (!FA_AI.conversations.some(x => x.id === FA_AI.activeConversationId)) {
           FA_AI.activeConversationId = FA_AI.conversations[0] ? FA_AI.conversations[0].id : null;
