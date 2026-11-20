@@ -53,6 +53,11 @@ jobs:
           create role authenticated;
           create role service_role;
           create schema auth;
+          grant usage on schema auth to authenticated, anon;
+          create function auth.uid() returns uuid language sql stable as $
+            select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
+          $;
+          grant execute on function auth.uid() to authenticated, anon;
           create table auth.users (id uuid primary key);
           create table public.profiles (id uuid primary key references auth.users(id), role text);
           create table public.ai_usage (
