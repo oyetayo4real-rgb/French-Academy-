@@ -67,7 +67,7 @@
       mode: ["chat","practice","correct","translate"].includes(item.mode) ? item.mode : "chat",
       depth: item.depth === "deep" ? "deep" : "quick",
       messages: (item.messages || []).filter(m => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
-        .slice(-100).map(m => ({role:m.role,content:m.content.slice(0,12000)})),
+         .slice(-80).map(m => ({role:m.role,content:m.content.slice(0,5000)})),
       created_at: new Date(Number(item.createdAt) || Date.now()).toISOString(),
       updated_at: new Date(Number(item.updatedAt) || Date.now()).toISOString()
     };
@@ -100,7 +100,28 @@
       }
     }, 900);
   }
-  async function faLoadTutorCloudState() {
+
+  async function faLoadTutorMemoryState() {
+    if (!AUTH || !AUTH.user) return;
+    try {
+      const result = await faTutorRequest({ getLearningMemory: true });
+      if (!result || result.error || typeof result.memoryEnabled !== "boolean") {
+        throw new Error("The account memory state could not be verified.");
+      }
+      FA_AI.memoryEnabled = result.memoryEnabled === true;
+      FA_AI.memoryProfile = result.learningMemory || faEmptyLearningMemory();
+      FA_AI.memoryProfile.enabled = FA_AI.memoryEnabled;
+      FA_AI.memoryLoaded = true;
+      FA_AI.memoryStatus = FA_AI.memoryEnabled
+        ? "Learning memory is on for your account. Saved learning signals have been restored."
+        : "Learning memory is off for your account. Existing paused profile data is retained.";
+      faSaveTutorLocalData();
+    } catch (_) {
+      FA_AI.memoryStatus = "Could not verify account learning memory right now. Your local tutor data has been preserved.";
+    }
+    if (view === "tutor") render(true);
+  }
+\n  async function faLoadTutorCloudState() {
     if (!AUTH || !AUTH.user || FA_AI.cloudLoadedUserId === AUTH.user.id) return;
     const uid = AUTH.user.id;
     FA_AI.cloudLoadedUserId = uid;
@@ -113,7 +134,7 @@
         const rows = await api("/rest/v1/tutor_conversations?select=id,title,level,mode,depth,messages,created_at,updated_at&order=updated_at.desc&limit=25");
         const merged = new Map();
         (Array.isArray(rows) ? rows : []).forEach(row => {
-          const messages = Array.isArray(row.messages) ? row.messages.filter(m => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string").slice(-100).map(m => ({role:m.role,content:m.content.slice(0,12000)})) : [];
+          const messages = Array.isArray(row.messages) ? row.messages.filter(m => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string") .slice(-80).map(m => ({role:m.role,content:m.content.slice(0,5000)})) : [];
           merged.set(row.id, {
             id:row.id, title:String(row.title || "New conversation").slice(0,80),
             createdAt:Date.parse(row.created_at) || Date.now(), updatedAt:Date.parse(row.updated_at) || Date.now(),
@@ -583,7 +604,7 @@
       FA_AI.memoryProfile=saved.memory; FA_AI.memoryEnabled=saved.memory.enabled===true; FA_AI.memoryLoaded=true; FA_AI.memoryLoading=false; FA_AI.memoryBusy=false;
       FA_AI.memoryStatus=FA_AI.memoryEnabled?"Learning memory is on for your account.":"Learning memory is off. Turn it on to save progress to your account.";
       FA_AI.cloudLoadedUserId=null; FA_AI.cloudSyncEnabled=false; FA_AI.cloudSyncStatus="";
-      void faLoadTutorCloudState();
+      void faLoadTutorCloudState();\n      void faLoadTutorMemoryState();
       const active=FA_AI.conversations.find(x=>x.id===FA_AI.activeConversationId);
       if(active){FA_AI.messages=active.messages.map(m=>({role:m.role,content:m.content}));FA_AI.level=active.level;FA_AI.mode=active.mode;FA_AI.depth=active.depth;}
       else{FA_AI.messages=[];FA_AI.activeConversationId=null;}
