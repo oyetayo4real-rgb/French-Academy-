@@ -60,7 +60,8 @@ type FaultCode =
   | "provider_timeout"
   | "provider_rate_limit"
   | "provider_unavailable"
-  | "quota_unavailable";
+  | "quota_unavailable"
+  | "memory_unavailable";
 
 class TutorFault extends Error {
   constructor(
