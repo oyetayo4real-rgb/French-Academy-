@@ -566,6 +566,9 @@ Deno.test("opted-in cloud memory is loaded from Supabase and updated after a suc
   assert(readCount === 1, "cloud memory was not read exactly once");
   assert(prompt.includes("Last selected CEFR scaffold: A2."), "database CEFR context was not added");
   assert(prompt.includes("Frequently practised topics: subjunctive (4), past tenses (2)."), "database topic context was not added");
+  assert(prompt.includes("If the learner asks about their level, previous learning, practiced topics, progress, or next steps, answer directly from the supplied profile."), "profile questions are not explicitly grounded in restored memory");
+  assert(prompt.includes("do not claim that you have no long-term memory or cannot access prior learning context"), "generic no-memory disclaimers are not prohibited when account memory is supplied");
+  assert(prompt.includes("Activity counts indicate exposure only; never describe a topic as mastered based on counts."), "memory counts are not distinguished from mastery");
   assert(!prompt.includes("C1") && !prompt.includes("vocabulary (99)"), "untrusted client memory overrode server memory");
   assert(recordBody && recordBody.p_uid === uid, "learning activity was not attributed to the authenticated user");
   assert(recordBody.p_cefr_level === "A2" && recordBody.p_topics.includes("subjunctive") && recordBody.p_mode === "chat", "only structured learning signals were not sent to the memory RPC");
