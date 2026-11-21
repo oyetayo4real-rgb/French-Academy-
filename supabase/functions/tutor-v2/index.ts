@@ -701,6 +701,25 @@ export function createTutorHandler(overrides: Dependencies = {}) {
       } catch { return json({ error: "memory_unavailable", retryable: true }, 503); }
     }
 
+    // Voice transcripts update the same opt-in learning profile without triggering a second AI generation or quota charge.
+    if (body?.recordVoiceLearningInteraction === true) {
+      if (body?.useLearningMemory !== true) return json({ learningMemory: null, memoryDisabled: true });
+      const text = clip(body?.text, 1_800).trim();
+      if (!text) return json({ error: "invalid_request", retryable: false }, 400);
+      try {
+        const saved = await rpc("tutor_record_learning_interaction", {
+          p_uid: uid,
+          p_cefr_level: ["A1", "A2", "B1", "B2", "C1", "C2"].includes(body?.level) ? body.level : null,
+          p_topics: classifyLearningTopics(text, "practice"),
+          p_mode: "practice"
+        }, deps);
+        return json({ learningMemory: normalizeClientLearningMemory(saved) });
+      } catch {
+        deps.log("voice_learning_memory_save_failed", { enabled: true });
+        return json({ error: "memory_unavailable", retryable: true }, 503);
+      }
+    }
+
     const mode = ["chat", "translate", "correct", "practice", "examples"].includes(body?.mode) ? body.mode : "chat";
     const question = clip(body?.text, 1_800).trim();
     if (!question) return json({ error: "invalid_request", retryable: false }, 400);
