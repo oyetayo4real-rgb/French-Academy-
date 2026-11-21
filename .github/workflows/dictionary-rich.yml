@@ -1,0 +1,58 @@
+name: Dictionary rich layer build
+
+on:
+  push:
+    branches:
+      - 'feat/dictionary-*'
+
+permissions:
+  contents: write
+
+jobs:
+  rich:
+    if: contains(github.event.head_commit.message, '[build-rich]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout selected dictionary branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Download Wiktionary extract and verify pinned checksum
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p data/raw
+          curl -sSL --retry 4 --retry-all-errors --retry-delay 3 --connect-timeout 30 -o data/raw/kaikki.jsonl 'https://kaikki.org/dictionary/French/kaikki.org-dictionary-French.jsonl'
+          ACTUAL=$(sha256sum data/raw/kaikki.jsonl | cut -d' ' -f1)
+          PINNED=$(node -e "console.log(JSON.parse(require('fs').readFileSync('tools/dictionary/sources.lock.json','utf8')).sources.kaikki.sha256)")
+          echo "actual=$ACTUAL pinned=$PINNED"
+          if [ "$ACTUAL" != "$PINNED" ]; then echo 'ERROR: Wiktionary checksum differs from the pinned lock.'; exit 1; fi
+
+      - name: Build rich layer
+        run: KAIKKI_FILE=data/raw/kaikki.jsonl STAGE_A_FILE=data/dictionary/common-3000.json OUT_DIR=data/dictionary/rich node tools/dictionary/build-stage-b.mjs
+
+      - name: Validate rich layer
+        run: node tools/dictionary/validate-stage-b.mjs data/dictionary/rich data/dictionary/common-3000.json
+
+      - name: Commit only the generated rich layer
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- data/dictionary/rich
+          if git diff --cached --quiet; then
+            echo 'No rich layer changes to commit.'
+            exit 0
+          fi
+          git diff --cached --name-only
+          git commit -m 'Dictionary rich layer (generated)'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
