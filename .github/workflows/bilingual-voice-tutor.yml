@@ -4,8 +4,12 @@ on:
   push:
     branches:
       - feat/bilingual-voice-tutor
+      - feat/live-voice-conversation
     paths:
       - "features/ai-classroom.js"
+      - "features/live-voice.js"
+      - "supabase/functions/live-voice-groq/index.ts"
+      - "supabase/functions/live-voice-session/index.ts"
       - "features/ai-classroom.css"
       - "scripts/check-tutor-retry-browser.mjs"
       - "supabase/functions/tutor-v2/index.ts"
@@ -45,12 +49,19 @@ jobs:
       - name: Check JavaScript syntax
         run: |
           node --check features/ai-classroom.js
+          node --check features/live-voice.js
           node --check scripts/check-tutor-retry-browser.mjs
 
       - name: Set up Deno
         uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
+
+      - name: Type-check voice and tutor edge functions
+        run: |
+          deno check supabase/functions/live-voice-groq/index.ts
+          deno check supabase/functions/live-voice-session/index.ts
+          deno check supabase/functions/tutor-v2/index.ts
 
       - name: Run tutor backend tests
         run: deno test supabase/functions/tutor-v2/index.test.ts
