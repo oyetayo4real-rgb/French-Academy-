@@ -1,48 +1,52 @@
-// Authenticated broker for short-lived OpenAI Realtime client secrets.
+// Gemini Live ephemeral-token broker. The permanent key never reaches the browser.
 const cors = {"Access-Control-Allow-Headers":"authorization, apikey, content-type, x-client-info","Access-Control-Allow-Methods":"POST, OPTIONS","Vary":"Origin"};
 function allowed(origin:string, env:(n:string)=>string|undefined) {
-  const configured=(env("ALLOWED_APP_ORIGINS")||"").split(",").map(x=>x.trim()).filter(Boolean);
-  if(configured.includes(origin)) return true;
-  try { const u=new URL(origin); return u.protocol==="https:" && /^french-academy-[a-z0-9-]+-vogtay\.vercel\.app$/.test(u.hostname); } catch { return false; }
+ const configured=(env("ALLOWED_APP_ORIGINS")||"").split(",").map(x=>x.trim()).filter(Boolean);
+ if(configured.includes(origin)) return true;
+ try { const u=new URL(origin); return u.protocol==="https:" && /^french-academy-[a-z0-9-]+-vogtay\.vercel\.app$/.test(u.hostname); } catch { return false; }
 }
 function reply(body:unknown,status:number,origin:string|null) {
-  return new Response(JSON.stringify(body),{status,headers:{...cors,...(origin?{"Access-Control-Allow-Origin":origin}:{}),"Content-Type":"application/json","Cache-Control":"no-store"}});
+ return new Response(JSON.stringify(body),{status,headers:{...cors,...(origin?{"Access-Control-Allow-Origin":origin}:{}),"Content-Type":"application/json","Cache-Control":"no-store"}});
 }
-async function safetyId(uid:string) {
-  const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(uid));
-  return btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"");
-}
+const clean=(value:unknown,max:number)=>typeof value==="string"?value.replace(/[\u0000-\u001f\u007f]/g," ").trim().slice(0,max):"";
 Deno.serve(async(req:Request)=>{
-  const origin=req.headers.get("Origin"), allowedOrigin=origin&&allowed(origin,n=>Deno.env.get(n))?origin:null;
-  if(req.method==="OPTIONS") return allowedOrigin?new Response(null,{status:204,headers:{...cors,"Access-Control-Allow-Origin":allowedOrigin}}):new Response(null,{status:403,headers:cors});
-  if(req.method!=="POST") return reply({error:"method_not_allowed"},405,allowedOrigin);
-  if(!allowedOrigin) return reply({error:"origin_not_allowed"},403,null);
-  const authorization=req.headers.get("Authorization")||"";
-  if(!/^Bearer\s+\S+$/i.test(authorization)) return reply({error:"not_signed_in"},401,allowedOrigin);
-  const supabaseUrl=Deno.env.get("SUPABASE_URL"), anonKey=Deno.env.get("SUPABASE_ANON_KEY"), openAiKey=Deno.env.get("OPENAI_API_KEY");
-  if(!supabaseUrl||!anonKey||!openAiKey) return reply({error:"voice_service_not_configured"},503,allowedOrigin);
-  const auth=await fetch(new URL("/auth/v1/user",supabaseUrl),{headers:{apikey:anonKey,Authorization:authorization}});
-  if(!auth.ok) return reply({error:"not_signed_in"},401,allowedOrigin);
-  const user=await auth.json();
-  if(!user||typeof user.id!=="string") return reply({error:"not_signed_in"},401,allowedOrigin);
-  let input:Record<string,unknown>;
-  try { input=await req.json(); } catch { return reply({error:"invalid_request"},400,allowedOrigin); }
-  const level=["none","A1","A2","B1","B2","C1","C2"].includes(String(input.level))?String(input.level):"A1";
-  const guided=input.mode!=="conversation", english=input.language!=="fr";
-  const instructions=[
-    "You are Académie AI Live, a patient expert French language tutor in a real spoken conversation.",
-    level==="none"?"The learner is an absolute beginner and may know no French.":"The learner's CEFR guidance level is "+level+"; do not assume mastery from this label.",
-    guided?"Use guided teaching: introduce one small idea, model it, invite the learner to try, then give gentle specific feedback. Teach before testing.":"Have a natural two-way conversation and adapt to the learner.",
-    english?"Use clear English for explanations with short French examples; gradually increase French as confidence grows.":"Use French primarily, switching briefly to English when the learner is confused or asks.",
-    "Speak calmly and naturally at a beginner-friendly pace. Keep turns concise and ask one question at a time.",
-    "Correct the most useful one or two errors: acknowledge meaning, model corrected French, then briefly explain.",
-    "Never claim to remember prior lessons, scores, or profile data unless explicitly supplied in this session.",
-    "Do not claim to assess accent or phoneme accuracy beyond the audio evidence. Stay focused on French learning."
-  ].join("\n");
-  const session={type:"realtime",model:"gpt-realtime-2.1",output_modalities:["audio"],instructions,
-    audio:{input:{transcription:{model:"gpt-4o-mini-transcribe"},turn_detection:{type:"server_vad",threshold:0.5,prefix_padding_ms:300,silence_duration_ms:650,create_response:true,interrupt_response:true}},output:{voice:"marin",speed:0.95}}};
-  const upstream=await fetch("https://api.openai.com/v1/realtime/client_secrets",{method:"POST",headers:{Authorization:"Bearer "+openAiKey,"Content-Type":"application/json","OpenAI-Safety-Identifier":await safetyId(user.id)},body:JSON.stringify({expires_after:{anchor:"created_at",seconds:600},session})});
-  const data=await upstream.json().catch(()=>({}));
-  if(!upstream.ok||typeof data.value!=="string"){console.error("[live-voice] secret creation failed",{status:upstream.status});return reply({error:"voice_session_unavailable"},502,allowedOrigin);}
-  return reply({client_secret:data.value,expires_at:data.expires_at,model:data.session?.model||session.model},200,allowedOrigin);
+ const origin=req.headers.get("Origin"), okOrigin=origin&&allowed(origin,n=>Deno.env.get(n))?origin:null;
+ if(req.method==="OPTIONS") return okOrigin?new Response(null,{status:204,headers:{...cors,"Access-Control-Allow-Origin":okOrigin}}):new Response(null,{status:403,headers:cors});
+ if(req.method!=="POST") return reply({error:"method_not_allowed"},405,okOrigin);
+ if(!okOrigin) return reply({error:"origin_not_allowed"},403,null);
+ const authHeader=req.headers.get("Authorization")||"";
+ if(!/^Bearer\s+\S+$/i.test(authHeader)) return reply({error:"not_signed_in"},401,okOrigin);
+ const supabaseUrl=Deno.env.get("SUPABASE_URL"),anonKey=Deno.env.get("SUPABASE_ANON_KEY"),geminiKey=Deno.env.get("GEMINI_API_KEY");
+ if(!supabaseUrl||!anonKey||!geminiKey) return reply({error:"voice_service_not_configured"},503,okOrigin);
+ const auth=await fetch(new URL("/auth/v1/user",supabaseUrl),{headers:{apikey:anonKey,Authorization:authHeader}});
+ if(!auth.ok) return reply({error:"not_signed_in"},401,okOrigin);
+ const user=await auth.json(); if(!user||typeof user.id!=="string") return reply({error:"not_signed_in"},401,okOrigin);
+ let input:Record<string,unknown>; try{input=await req.json();}catch{return reply({error:"invalid_request"},400,okOrigin);}
+ const level=["none","A1","A2","B1","B2","C1","C2"].includes(String(input.level))?String(input.level):"A1";
+ const mode=input.mode==="conversation"?"conversation":"guided";
+ const support=input.language==="fr"?"French":"English";
+ const topics=Array.isArray(input.topics)?input.topics.slice(0,12).map(x=>clean(x,48)).filter(Boolean):[];
+ const recent=Array.isArray(input.recent)?input.recent.slice(-6).map(x=>({role:x?.role==="assistant"?"Tutor":"Learner",text:clean(x?.content,500)})).filter(x=>x.text):[];
+ const instructions=[
+  "You are Académie AI Live, the spoken French teacher inside Académie. You are one integrated part of the existing French Academy learning system, not a separate generic chatbot.",
+  level==="none"?"Learner level: absolute beginner (pre-A1). Assume no prior French knowledge.":"Learner guidance level: "+level+". Do not assume mastery from a CEFR label.",
+  "Learner explanation language: "+support+". Teach French progressively. Explain unfamiliar vocabulary in "+support+".",
+  mode==="guided"?"Teaching mode: guided lesson. Teach one small concept, model it, invite one response, then give supportive correction. Never test a concept before teaching it.":"Teaching mode: natural conversation. Keep the dialogue realistic and adapt to learner ability; briefly explain useful corrections.",
+  topics.length?"Previously recorded practice topics (activity, not proof of mastery): "+topics.join(", ")+".":"No verified topic history was supplied. Do not invent prior lessons.",
+  recent.length?"Recent Tutor context for continuity (not a mastery record): "+recent.map(x=>x.role+": "+x.text).join(" | "):"No recent text-Tutor turns were supplied.",
+  "Use concise natural speech, one question at a time, and leave space for the learner. Correct one or two high-value mistakes at a time.",
+  "Never claim to remember anything beyond the profile and recent context explicitly provided here. Do not claim phonetic or accent scoring from audio unless an explicit assessment is available.",
+  "Keep the learner's spoken practice coherent with Académie's dictionary, grammar and conjugation knowledge. If a precise rule is uncertain, say so instead of inventing it."
+ ].join("\n");
+ const now=Date.now();
+ const tokenResponse=await fetch("https://generativelanguage.googleapis.com/v1beta/auth_tokens",{
+  method:"POST",headers:{"x-goog-api-key":geminiKey,"Content-Type":"application/json"},
+  body:JSON.stringify({
+   uses:1,expireTime:new Date(now+30*60*1000).toISOString(),newSessionExpireTime:new Date(now+60*1000).toISOString(),
+   liveConnectConstraints:{model:"gemini-3.8-live",config:{responseModalities:["AUDIO"],sessionResumption:{},inputAudioTranscription:{},outputAudioTranscription:{},systemInstruction:{parts:[{text:instructions}]}}}
+  })
+ });
+ const data=await tokenResponse.json().catch(()=>({}));
+ if(!tokenResponse.ok||typeof data.name!=="string"){console.error("[live-voice] Gemini token provisioning failed",{status:tokenResponse.status});return reply({error:"voice_session_unavailable"},502,okOrigin);}
+ return reply({ephemeral_token:data.name,expires_at:data.expireTime||null,model:"gemini-3.8-live"},200,okOrigin);
 });
