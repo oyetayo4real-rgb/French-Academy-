@@ -768,6 +768,7 @@
     },
     context: () => ({
       level: (faEl("faTutorLevel") && faEl("faTutorLevel").value) || FA_AI.level || "none",
+      memoryEnabled: FA_AI.memoryEnabled === true,
       topics: FA_AI.memoryEnabled && FA_AI.memoryProfile ? Object.keys(FA_AI.memoryProfile.topic_counts || {}).filter(k => FA_AI.memoryProfile.topic_counts[k] > 0).slice(0, 12) : [],
       recent: FA_AI.messages.slice(-6).map(m => ({ role: m.role, content: String(m.content || "").slice(0, 500) }))
     }),
