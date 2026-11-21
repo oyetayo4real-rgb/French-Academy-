@@ -750,4 +750,6 @@
     if (event.target && event.target.id === "faTutorInput" && event.key === "Enter" && (event.ctrlKey || event.metaKey)) { event.preventDefault(); faTutorSend(); }
     if (event.target && event.target.id === "faDictInput" && event.key === "Enter") { event.preventDefault(); faDictionaryLookup(); }
   });
+  // Add the WebRTC voice experience without replacing the text Tutor.
+  import("./live-voice.js").catch((error) => console.error("[Académie Live Voice] load failed", error));
 })();
