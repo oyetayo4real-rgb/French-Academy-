@@ -29,12 +29,12 @@ if(data.error){status("Gemini Live returned an error. End the session and retry.
 }
 function setupConfig(){const bridge=app(),ctx=bridge?.context?bridge.context():{};const lang=$("faVoiceLanguage")?.value==="en-US"?"English":"French";const mode=$("faLiveMode")?.value||"guided";
 const level=ctx.level||bridge?.level?.()||"A1";const topics=ctx.topics||[];const recent=ctx.recent||[];
-return {level,mode,language:lang,topics,recent};}
+return {level,mode,language:lang==="French"?"fr":"en",topics,recent};}
 async function handleTools(call){const responses=[];for(const fc of call.functionCalls||[]){let result={error:"This learning tool is not available yet."};if(app()?.runTool){try{result=await app().runTool(fc.name,fc.args||{});}catch(e){result={error:e.message||"Tool failed"};}}responses.push({id:fc.id,name:fc.name,response:{result}});}
 if(ws?.readyState===WebSocket.OPEN)ws.send(JSON.stringify({toolResponse:{functionResponses:responses}}));}
 function setupSocket(token,config,myId){return new Promise((resolve,reject)=>{const endpoint="wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContentConstrained?access_token="+encodeURIComponent(token);ws=new WebSocket(endpoint);
 const timeout=setTimeout(()=>reject(Error("Gemini Live connection timed out.")),20000);
-ws.onopen=()=>{ws.send(JSON.stringify({setup:{model:"models/gemini-3.8-live",generationConfig:{responseModalities:["AUDIO"]},systemInstruction:{parts:[{text:"You are Académie AI Live, the spoken French teacher integrated with the learner's existing Académie Tutor. Learner level: "+config.level+". Teaching style: "+(config.mode==="guided"?"teach one idea before asking an exercise":"natural conversation")+". Explain in "+config.language+". Previously practiced topics (not mastery): "+(config.topics.join(", ")||"not provided")+". Recent Tutor context: "+config.recent.map(x=>x.role+": "+x.content).join(" | ")+". Speak naturally, keep turns short, ask one question at a time, gently correct one or two errors, and never invent learner history or claim mastery without evidence."}]}},inputAudioTranscription:{},outputAudioTranscription:{},realtimeInputConfig:{automaticActivityDetection:{disabled:false}},sessionResumption:{}}}));};
+ws.onopen=()=>{ws.send(JSON.stringify({setup:{model:"models/gemini-3.8-live",responseModalities:["AUDIO"],inputAudioTranscription:{},outputAudioTranscription:{},realtimeInputConfig:{automaticActivityDetection:{disabled:false}},sessionResumption:{}}}));
 ws.onmessage=e=>{if(myId!==sessionId)return;const before=!active;receive(e);if(before&&JSON.parse(e.data||"{}").setupComplete){clearTimeout(timeout);resolve();}};
 ws.onerror=()=>{clearTimeout(timeout);reject(Error("Could not connect to Gemini Live. Check the staging API key and network."));};
 ws.onclose=()=>{if(myId===sessionId&&active)status("Voice connection closed. End the session and reconnect.",true);};
