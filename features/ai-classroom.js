@@ -750,6 +750,14 @@
     if (event.target && event.target.id === "faTutorInput" && event.key === "Enter" && (event.ctrlKey || event.metaKey)) { event.preventDefault(); faTutorSend(); }
     if (event.target && event.target.id === "faDictInput" && event.key === "Enter") { event.preventDefault(); faDictionaryLookup(); }
   });
-  // Add the WebRTC voice experience without replacing the text Tutor.
-  import("./live-voice.js").catch((error) => console.error("[Académie Live Voice] load failed", error));
+  // Narrow bridge: the standalone voice module reuses existing auth and learner state.
+  window.FA_LIVE_VOICE_CONTEXT = {
+    isSignedIn: () => !!(AUTH && AUTH.user),
+    level: () => FA_AI.level || "A1",
+    request: (body) => api("/functions/v1/live-voice-session", { m: "POST", body })
+  };
+  const faLiveVoiceScript = document.createElement("script");
+  faLiveVoiceScript.src = new URL("./live-voice.js", FA_SCRIPT_URL || document.baseURI).href;
+  faLiveVoiceScript.async = true;
+  document.head.appendChild(faLiveVoiceScript);
 })();
