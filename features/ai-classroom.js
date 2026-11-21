@@ -753,8 +753,37 @@
   // Narrow bridge: the standalone voice module reuses existing auth and learner state.
   window.FA_LIVE_VOICE_CONTEXT = {
     isSignedIn: () => !!(AUTH && AUTH.user),
-    level: () => FA_AI.level || "A1",
-    request: (body) => api("/functions/v1/live-voice-session", { m: "POST", body })
+    level: () => (faEl("faTutorLevel") && faEl("faTutorLevel").value) || FA_AI.level || "none",
+    request: (body) => api("/functions/v1/live-voice-session", { m: "POST", body }),
+    context: () => ({
+      level: (faEl("faTutorLevel") && faEl("faTutorLevel").value) || FA_AI.level || "none",
+      topics: FA_AI.memoryEnabled && FA_AI.memoryProfile ? Object.keys(FA_AI.memoryProfile.topic_counts || {}).filter(k => FA_AI.memoryProfile.topic_counts[k] > 0).slice(0, 12) : [],
+      recent: FA_AI.messages.slice(-6).map(m => ({ role: m.role, content: String(m.content || "").slice(0, 500) }))
+    }),
+    appendTranscript: (role, content) => {
+      const text = String(content || "").trim().slice(0, 4000);
+      if (!text || !FA_AI.activeConversationId) return;
+      FA_AI.messages.push({ role, content: text });
+      FA_AI.messages = FA_AI.messages.slice(-100);
+      const active = FA_AI.conversations.find(x => x.id === FA_AI.activeConversationId);
+      if (active && active.title === "New conversation" && role === "user") active.title = text.replace(/\\s+/g, " ").slice(0, 48);
+      faSaveTutorLocalData();
+    },
+    recordVoiceTurn: async (text) => {
+      if (!FA_AI.memoryEnabled || !text) return;
+      const result = await faTutorRequest({
+        recordVoiceLearningInteraction: true,
+        useLearningMemory: true,
+        level: (faEl("faTutorLevel") && faEl("faTutorLevel").value) || FA_AI.level || "none",
+        text: String(text).slice(0, 1800)
+      });
+      if (result && result.learningMemory) {
+        FA_AI.memoryProfile = result.learningMemory;
+        FA_AI.memoryEnabled = result.learningMemory.enabled === true;
+        faSaveTutorLocalData();
+      }
+      return result;
+    }
   };
   const faLiveVoiceScript = document.createElement("script");
   faLiveVoiceScript.src = new URL("./live-voice.js", FA_SCRIPT_URL || document.baseURI).href;
