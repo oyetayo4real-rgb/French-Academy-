@@ -690,3 +690,19 @@ Deno.test("forced Groq voice rate limit fails closed without trying Gemini, Mist
   assert(response.status === 429 && body.error === "provider_rate_limit", "Groq 429 was not returned to the voice client");
   assert(providerCalls === 1, "rate-limited Groq voice turn fell through to another provider");
 });
+
+Deno.test("Groq voice is disabled unless its explicit zero-cost gate is enabled", async () => {
+  const calls: any[] = [];
+  let providerCalls = 0;
+  const disabledEnv = makeEnv({ ...envValues, GROQ_VOICE_ENABLED: undefined });
+  const fetchImpl = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    if (url.includes("/rpc/")) return rpcCalls(calls)(url, init);
+    if (url.includes("api.groq.com") || url.includes("generativelanguage.googleapis.com") || url.includes("mistral.ai") || url.includes("openrouter.ai")) providerCalls++;
+    throw new Error("Unexpected fetch: " + url);
+  };
+  const response = await run(fetchImpl, calls, [], disabledEnv, request("quick", { voiceProvider: "groq" }));
+  const body = await response.json();
+  assert(response.status === 503 && body.error === "provider_unavailable", "disabled Groq voice did not fail closed");
+  assert(providerCalls === 0, "disabled Groq voice attempted a provider call");
+});
