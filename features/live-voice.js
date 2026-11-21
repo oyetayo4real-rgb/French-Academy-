@@ -16,9 +16,10 @@ function playPcm(encoded){if(!context)return;const bytes=fromB64(encoded),view=n
 function stopPlayback(){for(const node of playing){try{node.stop()}catch{}}playing.clear();playAt=context?context.currentTime:0;}
 function receive(message){let data;try{data=JSON.parse(message.data)}catch{return;}
 if(data.setupComplete){status("Connected — speak naturally. You can interrupt Académie at any time.");return;}
-if(data.inputTranscription?.text)line("You",data.inputTranscription.text);
-if(data.outputTranscription?.text)line("Académie AI",data.outputTranscription.text);
-if(data.serverContent){const c=data.serverContent;if(c.interrupted){stopPlayback();status("Listening — you interrupted. Go ahead.");}
+if(data.serverContent){const c=data.serverContent;
+if(c.inputTranscription?.text){line("You",c.inputTranscription.text);app()?.recordVoiceTurn?.(c.inputTranscription.text).catch(()=>status("Voice worked, but learning progress could not be saved.",true));}
+if(c.outputTranscription?.text)line("Académie AI",c.outputTranscription.text);
+if(c.interrupted){stopPlayback();status("Listening — you interrupted. Go ahead.");}
 if(c.modelTurn?.parts)for(const part of c.modelTurn.parts)if(part.inlineData?.data)playPcm(part.inlineData.data);
 if(c.turnComplete)status("Your turn — keep speaking whenever you're ready.");
 }
