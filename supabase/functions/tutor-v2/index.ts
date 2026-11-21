@@ -506,9 +506,18 @@ async function generateAnswer(
   system: string,
   messages: ChatMessage[],
   depth: Depth,
-  deps: Required<Pick<Dependencies, "env" | "fetchImpl" | "now" | "log">>
+  deps: Required<Pick<Dependencies, "env" | "fetchImpl" | "now" | "log">>,
+  preferredProvider?: "groq"
 ): Promise<string> {
   const startedAt = deps.now();
+  if (preferredProvider === "groq") {
+    const groq = getConfiguredProvider("groq", deps.env);
+    if (!groq) throw new TutorFault("provider_unavailable", false, 503);
+    const result = await callGroqModels(groq, getGroqModels(deps.env), system, messages, depth,
+      startedAt + OVERALL_DEADLINE_MS[depth], deps.fetchImpl, deps.now, deps.log);
+    if (result.text) return result.text;
+    throw new TutorFault(result.timedOut ? "provider_timeout" : "provider_unavailable", true, result.timedOut ? 504 : 502);
+  }
   const deadline = startedAt + OVERALL_DEADLINE_MS[depth];
   let timedOut = false;
   let attempted = false;
@@ -754,7 +763,8 @@ export function createTutorHandler(overrides: Dependencies = {}) {
           makeSystemPrompt(mode, clip(body?.level, 8), depth, learningMemoryContext(learnerMemory)),
           messages,
           depth,
-          deps
+          deps,
+          body?.voiceProvider === "groq" ? "groq" : undefined
         );
         if (!answer.trim()) throw new TutorFault("provider_unavailable", true, 502);
       } catch (error) {
