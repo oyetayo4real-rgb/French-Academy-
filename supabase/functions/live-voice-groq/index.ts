@@ -57,7 +57,7 @@ Deno.serve(async (req: Request) => {
   } catch { return json({ error: "invalid_history" }, 400); }
   const level = String(form.get("level") || "A1").slice(0, 8);
   const memory = form.get("useLearningMemory") === "true";
-  const tutor = await fetch(supabaseUrl.replace(/\\/$/, "") + "/functions/v1/tutor-v2", {
+  const tutor = await fetch(supabaseUrl.replace(/\/$/, "") + "/functions/v1/tutor-v2", {
     method: "POST",
     headers: { apikey: anonKey, Authorization: authorization, "Content-Type": "application/json" },
     body: JSON.stringify({
