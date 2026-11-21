@@ -215,7 +215,7 @@
       lastVoiceAt = now();
       if (groqResponseSpeaking) { stopSpeech(); status("You interrupted Académie — listening."); }
       if (!groqTurnBusy) beginRecording();
-    } else if (recorder && now() - lastVoiceAt > 720 && now() - speechStarted > 450) {
+    } else if (recorder && ((now() - lastVoiceAt > 720 && now() - speechStarted > 450) || now() - speechStarted > 15000)) {
       endRecording();
     }
   }
@@ -234,8 +234,9 @@
     provider = "groq";
     if (ws) { const old = ws; ws = null; try { old.close(); } catch {} }
     pcmQueue = []; stopPlayback();
-    status(reason + " Switching to Groq Voice automatically.");
-    status("Groq backup connected — speak naturally. You can interrupt responses.");
+    status(reason + " Switching to the Groq voice pipeline automatically.");
+    if (!window.MediaRecorder) status("Gemini is unavailable and this browser cannot record audio for the Groq backup.", true);
+    else status("Groq backup is ready — speak naturally. You can interrupt spoken responses.");
   }
   async function start() {
     if (busy || active) return;
