@@ -5,3 +5,6 @@ verify_jwt = true
 
 [functions.live-voice-session]
 verify_jwt = true
+
+[functions.live-voice-groq]
+verify_jwt = true
