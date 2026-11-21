@@ -58,6 +58,7 @@ const envValues: Record<string, string> = {
   SUPABASE_SERVICE_ROLE_KEY: "test-service-role",
   GEMINI_API_KEY: "test-gemini",
   GROQ_API_KEY: "test-groq",
+  GROQ_VOICE_ENABLED: "true",
   MISTRAL_API_KEY: "test-mistral",
   OPENROUTER_API_KEY: "test-openrouter",
   QUOTA_MODE: "reservation"
