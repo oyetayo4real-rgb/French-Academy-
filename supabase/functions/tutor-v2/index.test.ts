@@ -647,3 +647,45 @@ Deno.test("memory management actions are authenticated and delegated to server-o
   assert(calls[0].body.p_uid === uid && calls[0].body.p_enabled === false, "disable action did not use authenticated UID");
   assert(calls[1].body.p_uid === uid, "clear action did not use authenticated UID");
 });
+
+Deno.test("voiceProvider groq pins voice turns to Groq and never falls through to other providers", async () => {
+  const calls: any[] = [];
+  let geminiCalls = 0, groqCalls = 0, otherProviderCalls = 0;
+  const fetchImpl = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    if (url.includes("/rpc/")) return rpcCalls(calls)(url, init);
+    if (url.includes("generativelanguage.googleapis.com")) { geminiCalls++; return geminiCatalog(); }
+    if (url.includes("api.groq.com")) {
+      groqCalls++;
+      return ok({ choices: [{ message: { content: "Groq voice answer." } }] });
+    }
+    if (url.includes("mistral.ai") || url.includes("openrouter.ai")) otherProviderCalls++;
+    throw new Error("Unexpected fetch: " + url);
+  };
+  const response = await run(fetchImpl, calls, [], env, request("quick", { voiceProvider: "groq" }));
+  const body = await response.json();
+  assert(response.status === 200 && body.text === "Groq voice answer.", "forced Groq voice response failed");
+  assert(groqCalls === 1, "forced Groq voice turn did not call Groq exactly once");
+  assert(geminiCalls === 0 && otherProviderCalls === 0, "forced Groq voice turn used an unapproved provider");
+});
+
+Deno.test("forced Groq voice rate limit fails closed without trying Gemini, Mistral or OpenRouter", async () => {
+  const calls: any[] = [];
+  let providerCalls = 0;
+  const fetchImpl = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    if (url.includes("/rpc/")) return rpcCalls(calls)(url, init);
+    if (url.includes("api.groq.com")) {
+      providerCalls++;
+      return new Response(JSON.stringify({ error: { message: "rate limited" } }), { status: 429 });
+    }
+    if (url.includes("generativelanguage.googleapis.com") || url.includes("mistral.ai") || url.includes("openrouter.ai")) {
+      providerCalls++;
+    }
+    throw new Error("Unexpected fetch: " + url);
+  };
+  const response = await run(fetchImpl, calls, [], env, request("quick", { voiceProvider: "groq" }));
+  const body = await response.json();
+  assert(response.status === 429 && body.error === "provider_rate_limit", "Groq 429 was not returned to the voice client");
+  assert(providerCalls === 1, "rate-limited Groq voice turn fell through to another provider");
+});
