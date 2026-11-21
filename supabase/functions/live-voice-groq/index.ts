@@ -15,6 +15,8 @@ Deno.serve(async (req: Request) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
   const groqKey = Deno.env.get("GROQ_API_KEY");
+  // Explicit staging opt-in prevents an unverified Groq account from being used or billed.
+  if (Deno.env.get("GROQ_VOICE_ENABLED") !== "true") return json({ error: "groq_voice_disabled" }, 503);
   if (!supabaseUrl || !anonKey || !groqKey) return json({ error: "voice_service_unavailable" }, 503);
   const auth = await fetch(new URL("/auth/v1/user", supabaseUrl), {
     headers: { apikey: anonKey, Authorization: authorization },
