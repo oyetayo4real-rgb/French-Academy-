@@ -48,5 +48,5 @@ Deno.serve(async(req:Request)=>{
  });
  const data=await tokenResponse.json().catch(()=>({}));
  if(!tokenResponse.ok||typeof data.name!=="string"){console.error("[live-voice] Gemini token provisioning failed",{status:tokenResponse.status});return reply({error:"voice_session_unavailable"},502,okOrigin);}
- return reply({ephemeral_token:data.name,expires_at:data.expireTime||null,model:"gemini-3.8-live"},200,okOrigin);
+ return reply({ephemeral_token:data.name,expires_at:data.expireTime||null,model:"gemini-3.8-live",instructions},200,okOrigin);
 });
