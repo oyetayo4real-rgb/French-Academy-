@@ -1,0 +1,159 @@
+{
+ "schemaVersion": 4,
+ "layer": "rich",
+ "source": "kaikki.org French (English Wiktionary)",
+ "licence": "CC BY-SA 4.0",
+ "headwords": 2996,
+ "totals": {
+  "senses": 8811,
+  "examples": 2439,
+  "synonyms": 1510
+ },
+ "stats": {
+  "headwords": 2996,
+  "posGroups": 3822,
+  "withIpa": 2989,
+  "withEtymology": 2871,
+  "withExamples": 1125,
+  "withPhrases": 1532,
+  "vulgarSenses": 93,
+  "droppedFormOnly": 818,
+  "formFallbackGroups": 417
+ },
+ "sizes": {
+  "a": {
+   "entries": 229,
+   "bytes": 112307,
+   "gzipBytes": 32791
+  },
+  "b": {
+   "entries": 136,
+   "bytes": 78273,
+   "gzipBytes": 23832
+  },
+  "c": {
+   "entries": 367,
+   "bytes": 207955,
+   "gzipBytes": 58720
+  },
+  "d": {
+   "entries": 199,
+   "bytes": 99008,
+   "gzipBytes": 28492
+  },
+  "e": {
+   "entries": 230,
+   "bytes": 110679,
+   "gzipBytes": 31847
+  },
+  "f": {
+   "entries": 134,
+   "bytes": 82030,
+   "gzipBytes": 24441
+  },
+  "g": {
+   "entries": 82,
+   "bytes": 46356,
+   "gzipBytes": 14263
+  },
+  "h": {
+   "entries": 50,
+   "bytes": 23766,
+   "gzipBytes": 7420
+  },
+  "i": {
+   "entries": 99,
+   "bytes": 40609,
+   "gzipBytes": 11052
+  },
+  "j": {
+   "entries": 39,
+   "bytes": 17781,
+   "gzipBytes": 5846
+  },
+  "k": {
+   "entries": 2,
+   "bytes": 551,
+   "gzipBytes": 327
+  },
+  "l": {
+   "entries": 87,
+   "bytes": 48380,
+   "gzipBytes": 14351
+  },
+  "m": {
+   "entries": 182,
+   "bytes": 102785,
+   "gzipBytes": 29163
+  },
+  "n": {
+   "entries": 50,
+   "bytes": 24062,
+   "gzipBytes": 7315
+  },
+  "o": {
+   "entries": 63,
+   "bytes": 31661,
+   "gzipBytes": 9622
+  },
+  "p": {
+   "entries": 326,
+   "bytes": 191219,
+   "gzipBytes": 54268
+  },
+  "q": {
+   "entries": 9,
+   "bytes": 4679,
+   "gzipBytes": 1799
+  },
+  "r": {
+   "entries": 230,
+   "bytes": 107170,
+   "gzipBytes": 30603
+  },
+  "s": {
+   "entries": 222,
+   "bytes": 115571,
+   "gzipBytes": 33260
+  },
+  "t": {
+   "entries": 138,
+   "bytes": 77300,
+   "gzipBytes": 23317
+  },
+  "u": {
+   "entries": 16,
+   "bytes": 5559,
+   "gzipBytes": 1892
+  },
+  "v": {
+   "entries": 101,
+   "bytes": 54425,
+   "gzipBytes": 15996
+  },
+  "w": {
+   "entries": 3,
+   "bytes": 655,
+   "gzipBytes": 297
+  },
+  "z": {
+   "entries": 2,
+   "bytes": 1012,
+   "gzipBytes": 514
+  }
+ },
+ "rawBytes": 1583793,
+ "gzipBytes": 461428,
+ "limits": {
+  "MAX_SENSES": 8,
+  "MAX_GLOSS": 160,
+  "MAX_EXAMPLE": 140,
+  "MAX_EXAMPLES": 2,
+  "MAX_SYN": 4,
+  "MAX_ANT": 3,
+  "MAX_PHRASES": 10,
+  "MAX_RELATED": 8,
+  "MAX_COLLOCATIONS": 6,
+  "MAX_ETYMOLOGY": 300
+ }
+}
