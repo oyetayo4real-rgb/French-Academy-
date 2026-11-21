@@ -511,6 +511,9 @@ async function generateAnswer(
 ): Promise<string> {
   const startedAt = deps.now();
   if (preferredProvider === "groq") {
+    if (deps.env.get("GROQ_VOICE_ENABLED") !== "true") {
+      throw new TutorFault("provider_unavailable", false, 503);
+    }
     const groq = getConfiguredProvider("groq", deps.env);
     if (!groq) throw new TutorFault("provider_unavailable", false, 503);
     const result = await callGroqModels(groq, getGroqModels(deps.env), system, messages, depth,
