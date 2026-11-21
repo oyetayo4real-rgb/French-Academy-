@@ -757,7 +757,7 @@
     request: (body) => api("/functions/v1/live-voice-session", { m: "POST", body }),
     groqTurn: async (formData) => {
       if (!(formData instanceof FormData)) throw new Error("Invalid voice payload.");
-      const response = await fetch(SBURL.replace(/\\/$/, "") + "/functions/v1/live-voice-groq", {
+      const response = await fetch(SBURL.replace(/\/$/, "") + "/functions/v1/live-voice-groq", {
         method: "POST",
         headers: { apikey: SBKEY, Authorization: "Bearer " + AUTH.access_token },
         body: formData
