@@ -1,0 +1,47 @@
+name: Dictionary French-edition sample
+
+on:
+  push:
+    branches:
+      - 'feat/dictionary-*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  frsample:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[frwik-sample]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Stream French Wiktionary dump and extract headword records
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSL --retry 4 --retry-all-errors --retry-delay 3 --connect-timeout 30 'https://kaikki.org/frwiktionary/raw-wiktextract-data.jsonl.gz' \
+            | tee >(sha256sum > dump.sha256) \
+            | gunzip \
+            | KAIKKI_FILE=/dev/stdin HEADWORDS_FILE=data/dictionary/common-3000.json OUT_FILE=kaikki-fr-top3000.jsonl.gz node tools/dictionary/extract-kaikki-sample.mjs
+          echo "DUMP SHA256 (compressed):"; cat dump.sha256
+          ls -l kaikki-fr-top3000.jsonl.gz
+
+      - name: Inspect the French records
+        run: SAMPLE_FILE=kaikki-fr-top3000.jsonl.gz node tools/dictionary/inspect-frwik-sample.mjs
+
+      - name: Upload sample
+        uses: actions/upload-artifact@v4
+        with:
+          name: kaikki-fr-top3000-sample
+          path: |
+            kaikki-fr-top3000.jsonl.gz
+            dump.sha256
+          retention-days: 14
