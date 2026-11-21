@@ -755,6 +755,17 @@
     isSignedIn: () => !!(AUTH && AUTH.user),
     level: () => (faEl("faTutorLevel") && faEl("faTutorLevel").value) || FA_AI.level || "none",
     request: (body) => api("/functions/v1/live-voice-session", { m: "POST", body }),
+    groqTurn: async (formData) => {
+      if (!(formData instanceof FormData)) throw new Error("Invalid voice payload.");
+      const response = await fetch(SBURL.replace(/\\/$/, "") + "/functions/v1/live-voice-groq", {
+        method: "POST",
+        headers: { apikey: SBKEY, Authorization: "Bearer " + AUTH.access_token },
+        body: formData
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || "Groq voice turn failed.");
+      return result;
+    },
     context: () => ({
       level: (faEl("faTutorLevel") && faEl("faTutorLevel").value) || FA_AI.level || "none",
       topics: FA_AI.memoryEnabled && FA_AI.memoryProfile ? Object.keys(FA_AI.memoryProfile.topic_counts || {}).filter(k => FA_AI.memoryProfile.topic_counts[k] > 0).slice(0, 12) : [],
