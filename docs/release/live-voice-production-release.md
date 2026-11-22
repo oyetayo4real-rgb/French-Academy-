@@ -60,7 +60,7 @@ Production migration ledger currently contains:
 - `20261122190446 tutor_learning_memory`
 - `20261122190453 tutor_learning_memory_rpc`
 
-One database migration is required by the hardened Groq fallback: `20261122211000_ai_use_voice_preflight.sql`. It adds a service-role-only `ai_use_voice_preflight(uuid)` RPC that consumes one daily quota unit only when one additional unit remains for Tutor V2's response. The SQL test covers student/lecturer caps, fail-closed behavior, grants, and rollback. Apply it to staging before deploying the new Groq handler; apply it to production only after the production backup and explicit approval. The migration rollback is `supabase/rollback/20261122211000_ai_use_voice_preflight.sql`.
+One database migration is required by the hardened Groq fallback: `20261122202618_ai_use_voice_preflight.sql`. It adds a service-role-only `ai_use_voice_preflight(uuid)` RPC that consumes one daily quota unit only when one additional unit remains for Tutor V2's response. The SQL test covers student/lecturer caps, fail-closed behavior, grants, and rollback. Apply it to staging before deploying the new Groq handler; apply it to production only after the production backup and explicit approval. The migration rollback is `supabase/rollback/20261122202618_ai_use_voice_preflight.sql`.
 
 ## 3. Verified staging target
 
@@ -87,7 +87,7 @@ The Vercel preview environment for `feat/live-voice-conversation` points to this
 ## 4. Release blockers — must be closed before approval
 
 - [ ] All required GitHub Actions checks pass on the final PR head, including French Intelligence, Tutor V2 reliability, learning-memory, Deno broker tests, and controlled voice browser tests.
-- [ ] Apply and test `20261122211000_ai_use_voice_preflight.sql` on staging, then deploy the tested broker and Groq handler to **staging only**; set Groq gateway JWT verification to true as defense in depth while retaining the handler's explicit Supabase Auth check.
+- [ ] Apply and test `20261122202618_ai_use_voice_preflight.sql` on staging, then deploy the tested broker and Groq handler to **staging only**; set Groq gateway JWT verification to true as defense in depth while retaining the handler's explicit Supabase Auth check.
 - [ ] Confirm staging secrets exist on `pagytaefoumwdvwaohft`: `GEMINI_API_KEY`, `GROQ_API_KEY`, `GROQ_VOICE_ENABLED=true`. Secret values must never be read into logs or shared.
 - [ ] Confirm the staging broker returns HTTP 200 and the function log no longer records Gemini token provisioning HTTP 400.
 - [ ] Confirm the Groq handler returns a successful authenticated fallback turn; a 503 is a release blocker. Confirm quota exhaustion returns 429 before any audio is sent to Groq.
@@ -107,7 +107,7 @@ The Vercel preview environment for `feat/live-voice-conversation` points to this
 2. Preserve the current Vercel production deployment `dpl_GJ9qWLsG9LeFRxECC3adKDZ5VHqJ` and its aliases.
 3. Export/download the currently deployed production source for `live-voice-session v2`, `live-voice-groq v1`, and `tutor-v2 v6`; store these immutable snapshots with the release evidence. Do not overwrite the production `tutor v44` function.
 4. In Supabase Dashboard, verify the actual database backup/PITR availability and capture a pre-release backup reference and timestamp. The organization is on the Free plan; do not assume point-in-time recovery or a specific retention window is available.
-5. Export the production migration ledger and record the current schema/migration state. This release includes `20261122211000_ai_use_voice_preflight.sql`; apply it only after the backup reference is verified and the migration has passed staging SQL tests.
+5. Export the production migration ledger and record the current schema/migration state. This release includes `20261122202618_ai_use_voice_preflight.sql`; apply it only after the backup reference is verified and the migration has passed staging SQL tests.
 6. Record current production function versions and their verification settings (listed in Section 2).
 7. Keep all production secret values out of the backup manifest; record only the secret names and whether each is present.
 
