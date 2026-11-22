@@ -4,7 +4,7 @@
 
 type Role = "user" | "assistant";
 type ChatMessage = { role: Role; content: string };
-type ProviderName = "gemini" | "groq" | "mistral" | "openrouter";
+type ProviderName = "gemini" | "groq";
 type Depth = "quick" | "standard" | "deep";
 type QuotaMode = "legacy" | "reservation";
 type Env = { get(name: string): string | undefined };
@@ -29,7 +29,7 @@ const ATTEMPT_BUDGET_MS: Record<Depth, number> = {
   standard: 15_000,
   deep: 25_000
 };
-// Two Gemini model attempts plus three alternate-provider attempts, and a
+// Two Gemini model attempts plus one Groq fallback attempt, and a
 // one-second control-plane margin. Each individual attempt remains capped above.
 export const OVERALL_DEADLINE_MS: Record<Depth, number> = {
   quick: 40_000,
@@ -48,9 +48,7 @@ const PROVIDERS: Array<{
   base?: string;
 }> = [
   { name: "gemini", key: "GEMINI_API_KEY", model: "gemini-3.5-flash-lite" },
-  { name: "groq", key: "GROQ_API_KEY", model: "openai/gpt-oss-120b", base: "https://api.groq.com/openai/v1" },
-  { name: "mistral", key: "MISTRAL_API_KEY", model: "mistral-small-latest", base: "https://api.mistral.ai/v1" },
-  { name: "openrouter", key: "OPENROUTER_API_KEY", model: "meta-llama/llama-3.3-70b-instruct:free", base: "https://openrouter.ai/api/v1" }
+  { name: "groq", key: "GROQ_API_KEY", model: "openai/gpt-oss-120b", base: "https://api.groq.com/openai/v1" }
 ];
 
 type FaultCode =
@@ -533,7 +531,7 @@ async function generateAnswer(
     timedOut ||= result.timedOut;
   }
 
-  for (const name of ["groq", "mistral", "openrouter"] as const) {
+  for (const name of ["groq"] as const) {
     if (deps.now() >= deadline) {
       timedOut = true;
       break;
