@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "npm:@google/genai@2.32.0";
+import { GoogleGenAI, Modality } from "npm:@google/genai@2.32.0";
 
 // Gemini Live ephemeral-token broker. The permanent key never reaches the browser.
 const cors = {"Access-Control-Allow-Headers":"authorization, apikey, content-type, x-client-info","Access-Control-Allow-Methods":"POST, OPTIONS","Vary":"Origin"};
@@ -49,7 +49,7 @@ Deno.serve(async(req:Request)=>{
    expireTime:new Date(now+30*60*1000).toISOString(),
    newSessionExpireTime:new Date(now+60*1000).toISOString(),
    liveConnectConstraints:{model:"models/gemini-3.8-live",config:{
-    responseModalities:["AUDIO"],sessionResumption:{},
+    responseModalities:[Modality.AUDIO],sessionResumption:{},
     inputAudioTranscription:{},outputAudioTranscription:{},
     systemInstruction:{parts:[{text:instructions}]}
    }}
