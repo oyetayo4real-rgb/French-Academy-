@@ -138,7 +138,8 @@ try {
   await check("an established Gemini session expiry transitions to Groq without losing the microphone", async () => {
     await page.evaluate(() => window.__geminiCallbacks.onclose({ reason: "controlled session expiry" }));
     await page.waitForFunction(() => document.querySelector("#faLiveProvider")?.textContent === "Groq Voice backup");
-    assert.match(await page.locator("#faLiveStatus").innerText(), /Groq voice pipeline automatically/i);
+    assert.match(await page.locator("#faLiveStatus").innerText(), /Groq backup is ready/i);
+    assert.equal(await page.evaluate(() => window.__tracks[1].stopped), undefined, "session expiry should preserve the active microphone stream");
   });
 } finally {
   await browser.close();
