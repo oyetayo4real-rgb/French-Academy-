@@ -285,6 +285,10 @@
       endRecording();
     }
   }
+  function handleMicrophoneEnded(id) {
+    if (id !== sessionId || !active) return;
+    void stop().then(() => status("Microphone disconnected. Tap Start speaking to request microphone access again.", true));
+  }
   function setupAudio() {
     audio = new (window.AudioContext || window.webkitAudioContext)();
     return audio.resume().then(() => {
@@ -317,6 +321,20 @@
       stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
       await setupAudio();
       active = true; const id = ++sessionId, settings = config();
+      for (const track of stream.getAudioTracks()) {
+        track.addEventListener("ended", () => handleMicrophoneEnded(id), { once: true });
+        track.addEventListener("mute", () => {
+          if (id === sessionId && active) status("Microphone is muted or temporarily unavailable.", true);
+        });
+        track.addEventListener("unmute", () => {
+          if (id === sessionId && active) status("Microphone restored. Continue speaking.");
+        });
+      }
+      audio.addEventListener("statechange", () => {
+        if (id === sessionId && active && audio?.state === "suspended") {
+          status("Audio was paused by the browser. Bring this tab forward and tap the page to resume.");
+        }
+      });
       try {
         status("Preparing Google's official Live SDK…");
         await loadGoogleGenAI();
@@ -354,6 +372,12 @@
     if ($("faLiveStop")) $("faLiveStop").disabled = true;
     status("Conversation ended. Microphone is off.");
   }
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && active && audio?.state === "suspended") {
+      audio.resume().then(() => status("Audio restored. Listening again."))
+        .catch(() => status("Audio is still paused. Tap the page to resume microphone playback.", true));
+    }
+  });
   document.addEventListener("click", event => {
     if (event.target?.id === "faLiveStart") start();
     if (event.target?.id === "faLiveStop") stop();
