@@ -137,7 +137,7 @@
   }
   function connectGemini(token, settings, id) {
     return new Promise((resolve, reject) => {
-      const endpoint = "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContentConstrained?access_token=" + encodeURIComponent(token);
+      const endpoint = "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained?access_token=" + encodeURIComponent(token);
       ws = new WebSocket(endpoint);
       const timeout = setTimeout(() => reject(new Error("Gemini Live connection timed out.")), 18000);
       ws.onopen = () => {
