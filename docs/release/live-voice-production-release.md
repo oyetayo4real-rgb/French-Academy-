@@ -41,6 +41,14 @@ This deployment is the immediate Vercel rollback target. Do not delete it or its
 | `live-voice-session` | ACTIVE v2, gateway JWT verification enabled |
 | `live-voice-groq` | ACTIVE v1, gateway JWT verification disabled; application-level Auth check exists |
 
+Production function source digests captured from Supabase deployment metadata:
+- `tutor v44`: `8673ab0357d8784a93c0f46a04461fddb9056a405553ae535f4cc51f5a899174`
+- `tutor-v2 v6`: `1f855f0b1d04553f6f486bfb682ece643dd16f4b366582ff8c43f9850f8a3f7e`
+- `live-voice-session v2`: `6addcf84e3144c9b5987d97e1f5ce93466d33058b8852465403527edcae4e9de`
+- `live-voice-groq v1`: `a2c176f84d93b2fe6161c3e983446b86362f1fabe3daec1bc1d4662fe41ae6a0`
+
+The production and staging `public.tutor_learning_memory` table grants were queried directly: only `postgres` and `service_role` have table privileges; `anon` and `authenticated` have none. Its RLS-enabled/no-policy advisor finding is consistent with this service-only access model.
+
 Production migration ledger currently contains:
 - `20261009214634 french_academy_core_schema`
 - `20261009214646 move_policy_helpers_to_private_schema`
