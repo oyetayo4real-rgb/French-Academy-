@@ -15,7 +15,7 @@ export function isAllowedGroqOrigin(origin: string, env: Env): boolean {
   try {
     const url = new URL(origin);
     return url.protocol === "https:" &&
-      /^french-academy-[a-z0-9-]+-vogtay\\.vercel\\.app$/.test(url.hostname);
+      /^french-academy-[a-z0-9-]+-vogtay\.vercel\.app$/.test(url.hostname);
   } catch {
     return false;
   }
@@ -49,7 +49,7 @@ export function createGroqVoiceHandler(overrides: GroqDependencies = {}) {
     if (!allowedOrigin) return json({ error: "origin_not_allowed" }, 403, null);
 
     const authorization = req.headers.get("Authorization") || "";
-    if (!/^Bearer\\s+\\S+$/i.test(authorization)) return json({ error: "not_signed_in" }, 401, allowedOrigin);
+    if (!/^Bearer\s+\S+$/i.test(authorization)) return json({ error: "not_signed_in" }, 401, allowedOrigin);
     const supabaseUrl = env.get("SUPABASE_URL");
     const anonKey = env.get("SUPABASE_ANON_KEY");
     const groqKey = env.get("GROQ_API_KEY");
@@ -114,7 +114,7 @@ export function createGroqVoiceHandler(overrides: GroqDependencies = {}) {
       if (!Array.isArray(parsed)) return json({ error: "invalid_history" }, 400, allowedOrigin);
       history = parsed.slice(-6).map(item => ({
         role: item?.role === "assistant" ? "assistant" : "user",
-        content: typeof item?.content === "string" ? item.content.replace(/[\\u0000-\\u001f\\u007f]/g, " ").slice(0, 500) : ""
+        content: typeof item?.content === "string" ? item.content.replace(/[\u0000-\u001f\u007f]/g, " ").slice(0, 500) : ""
       })).filter(item => item.content);
     } catch {
       return json({ error: "invalid_history" }, 400, allowedOrigin);
@@ -124,7 +124,7 @@ export function createGroqVoiceHandler(overrides: GroqDependencies = {}) {
 
     let tutor: Response | null;
     try {
-      tutor = await fetchImpl(supabaseUrl.replace(/\\/$/, "") + "/functions/v1/tutor-v2", {
+      tutor = await fetchImpl(supabaseUrl.replace(/\/$/, "") + "/functions/v1/tutor-v2", {
         method: "POST",
         headers: { apikey: anonKey, Authorization: authorization, "Content-Type": "application/json" },
         body: JSON.stringify({
