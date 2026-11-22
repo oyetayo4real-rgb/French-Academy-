@@ -58,7 +58,7 @@ const cut=(text,max)=>{
   if(sentence>max*0.5)return head.slice(0,sentence+1).trim();
   return head.slice(0,head.lastIndexOf(" ")).replace(/[,;:(\s]+$/,"")+"\u2026";
 };
-const wordsOf=list=>[...new Set((Array.isArray(list)?list:[]).map(x=>clean(typeof x==="string"?x:x?.word)).filter(x=>x&&x.length<=40&&!/[<>{}\[\]\\]/.test(x)))];
+const wordsOf=list=>[...new Set((Array.isArray(list)?list:[]).map(x=>clean(typeof x==="string"?x:x?.word)).filter(x=>x&&x.length<=40&&/^[\p{L}][\p{L}' \u2019.-]*$/u.test(x)))];
 const validForm=value=>/^[\p{L}]+(?:[-'\u2019][\p{L}]+)*$/u.test(String(value||""));
 
 const ipaOf=recs=>{
@@ -80,7 +80,7 @@ const exampleOf=sense=>{
   const pick=options.find(ex=>ex.t.length>=20)||options[0];
   if(!pick)return undefined;
   const out={t:pick.t};
-  if(pick.s)out.s=cut(pick.s,MAX_SOURCE);
+  if(pick.s)out.s=cut(pick.s.split(", ").slice(0,2).join(", "),MAX_SOURCE);
   return out;
 };
 
@@ -158,9 +158,11 @@ for(const [word,recs] of records){
   }
   const entry={groups};
   const ipa=ipaOf(recs);if(ipa){entry.ipa=ipa;stats.withIpa++;}
-  const prov=wordsOf(recs.flatMap(r=>r.proverbs||[])).slice(0,MAX_PROVERBS);if(prov.length){entry.prov=prov;stats.withProverbs++;}
-  const derived=wordsOf(recs.flatMap(r=>r.derived||[])).slice(0,MAX_DERIVED);if(derived.length)entry.derived=derived;
-  const related=wordsOf(recs.flatMap(r=>r.related||[])).slice(0,MAX_RELATED);if(related.length)entry.related=related;
+  const derivedAll=wordsOf(recs.flatMap(r=>r.derived||[])),relatedAll=wordsOf(recs.flatMap(r=>r.related||[]));
+  const prov=[...new Set([...wordsOf(recs.flatMap(r=>r.proverbs||[])).slice(0,MAX_PROVERBS),...derivedAll.filter(x=>/\s/.test(x)).slice(0,6),...relatedAll.filter(x=>/\s/.test(x)).slice(0,3)])].slice(0,10);
+  if(prov.length){entry.prov=prov;stats.withProverbs++;}
+  const derived=derivedAll.filter(x=>!/\s/.test(x)).slice(0,MAX_DERIVED);if(derived.length)entry.derived=derived;
+  const related=relatedAll.filter(x=>!/\s/.test(x)).slice(0,MAX_RELATED);if(related.length)entry.related=related;
   const paro=wordsOf(recs.flatMap(r=>r.paronyms||[])).slice(0,MAX_PARONYMS);if(paro.length)entry.paro=paro;
   entries[word]=entry;
   stats.headwords++;stats.groups+=groups.length;
