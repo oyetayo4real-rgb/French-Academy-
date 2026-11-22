@@ -117,7 +117,7 @@ export function createLiveVoiceSessionHandler(overrides: SessionDependencies = {
       "Use concise natural speech, one question at a time, and leave space for the learner. Correct one or two high-value mistakes at a time.",
       "Never claim to remember anything beyond the profile and recent context explicitly provided here. Do not claim phonetic or accent scoring from audio unless an explicit assessment is available.",
       "Keep the learner's spoken practice coherent with Académie's dictionary, grammar and conjugation knowledge. If a precise rule is uncertain, say so instead of inventing it."
-    ].join("\\n");
+    ].join("\n");
 
     const issuedAt = now();
     const requestedExpiry = new Date(issuedAt + 30 * 60 * 1000).toISOString();
