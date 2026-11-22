@@ -292,7 +292,8 @@
     if (!active || provider === "groq") return;
     geminiFailure = String(reason || "Gemini Live connection failed.");
     provider = "groq";
-    if (liveSession) { const old = liveSession; liveSession = null; try { old.close(); } catch {} }\n    if (ws) { const old = ws; ws = null; try { old.close(); } catch {} }
+    if (liveSession) { const old = liveSession; liveSession = null; try { old.close(); } catch {} }
+    if (ws) { const old = ws; ws = null; try { old.close(); } catch {} }
     pcmQueue = []; stopPlayback();
     status(reason + " Switching to the Groq voice pipeline automatically.");
     if (!window.MediaRecorder) status("Gemini is unavailable and this browser cannot record audio for the Groq backup.", true);
@@ -331,7 +332,8 @@
   async function stop() {
     active = false; provider = "none"; sessionId++;
     stopSpeech(); stopPlayback();
-    if (liveSession) { try { liveSession.close(); } catch {} liveSession = null; }\n    if (ws) { try { ws.close(); } catch {} ws = null; }
+    if (liveSession) { try { liveSession.close(); } catch {} liveSession = null; }
+    if (ws) { try { ws.close(); } catch {} ws = null; }
     if (recorder) { try { recorder.onstop = null; recorder.stop(); } catch {} recorder = null; }
     if (processor) { processor.disconnect(); processor.onaudioprocess = null; processor = null; }
     if (source) { source.disconnect(); source = null; }
