@@ -137,18 +137,31 @@
     if (data.error) fallbackToGroq(data.error.message || data.error.status || "Gemini Live reported an error.");
   }
   async function connectGemini(token, settings, id) {
-    const sdkUrl = "https://esm.sh/@google/genai@2.32.0?bundle";
     status("Loading Google's official Live SDK…");
-    let sdk;\n    try { sdk = await import(sdkUrl); }\n    catch (firstError) {\n      try { sdk = await import("https://cdn.jsdelivr.net/npm/@google/genai@2.32.0/+esm"); }\n      catch { throw new Error("The official Gemini SDK could not load from either CDN. Check your connection and retry."); }\n    }\n    const { GoogleGenAI } = sdk;
+    let sdk;
+    try {
+      sdk = await import("https://esm.sh/@google/genai@2.32.0?bundle");
+    } catch {
+      try {
+        sdk = await import("https://cdn.jsdelivr.net/npm/@google/genai@2.32.0/+esm");
+      } catch {
+        throw new Error("The official Gemini SDK could not load from either CDN. Check your connection and retry.");
+      }
+    }
+    const { GoogleGenAI } = sdk;
     if (id !== sessionId || !active) throw new Error("Live conversation was cancelled.");
+
     const ai = new GoogleGenAI({
       apiKey: token,
       httpOptions: { apiVersion: "v1alpha" }
     });
-    let settledClose = false;
+
     let closeError = null;
+    let rejectTransport;
+    const transportFailure = new Promise((_, reject) => { rejectTransport = reject; });
+
     const connectPromise = ai.live.connect({
-      model: "models/gemini-3.8-live",
+      model: "gemini-3.8-live",
       config: {
         responseModalities: ["AUDIO"],
         inputAudioTranscription: {},
@@ -164,20 +177,23 @@
         onmessage: message => handleGeminiMessage(message, id),
         onerror: event => {
           const detail = event?.message || event?.error?.message || "WebSocket transport error";
-          closeError = new Error("Gemini Live transport: " + String(detail).slice(0, 180));\n          rejectTransport(closeError);
+          closeError = new Error("Gemini Live transport: " + String(detail).slice(0, 180));
+          rejectTransport(closeError);
         },
         onclose: event => {
-          settledClose = true;
-          const reason = String(event?.reason || "").replace(/[\\u0000-\\u001f\\u007f]/g, " ").slice(0, 140);
+          const reason = String(event?.reason || "").replace(/[\u0000-\u001f\u007f]/g, " ").slice(0, 140);
           closeError = new Error("Gemini Live closed (code " + (event?.code ?? 1006) + (reason ? ": " + reason : "") + ").");
+          rejectTransport(closeError);
           if (id === sessionId && active && provider === "gemini") fallbackToGroq(closeError.message);
         }
       }
     });
+
     let timeoutId;
     try {
       liveSession = await Promise.race([
         connectPromise,
+        transportFailure,
         new Promise((_, reject) => {
           timeoutId = setTimeout(() => reject(closeError || new Error("Gemini Live setup timed out after 20 seconds.")), 20000);
         })
@@ -189,12 +205,12 @@
     } finally {
       clearTimeout(timeoutId);
     }
+
     if (id !== sessionId || !active) {
       try { liveSession.close(); } catch {}
       liveSession = null;
       throw new Error("Live conversation was cancelled during connection.");
     }
-    if (settledClose) throw closeError || new Error("Gemini Live closed during setup.");
     provider = "gemini";
     status("Gemini Live connected — speak naturally. You can interrupt Académie.");
     return liveSession;
