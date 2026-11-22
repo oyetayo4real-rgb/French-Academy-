@@ -4,7 +4,7 @@
   let ws = null, stream = null, audio = null, source = null, processor = null, silent = null;
   let active = false, busy = false, provider = "none", sessionId = 0, playAt = 0;
   let playing = new Set(), recorder = null, chunks = [], speechStarted = 0, lastVoiceAt = 0;
-  let groqTurnBusy = false, groqResponseSpeaking = false, lastTranscript = "";
+  let groqTurnBusy = false, groqResponseSpeaking = false, lastTranscript = "", geminiFailure = "";
   const $ = id => document.getElementById(id);
   const bridge = () => window.FA_LIVE_VOICE_CONTEXT;
   const now = () => performance.now();
@@ -209,7 +209,7 @@
         const message = error.message || "Groq voice turn failed.";
         if (/disabled|rate_limit|unavailable|not_signed_in/i.test(message)) {
           provider = "none";
-          status(message + " Voice backup has stopped to avoid repeated requests.", true);
+          status((geminiFailure ? geminiFailure + " " : "") + message + " Voice backup has stopped to avoid repeated requests.", true);
         } else status(message, true);
       });
       };
@@ -263,6 +263,7 @@
   }
   async function fallbackToGroq(reason) {
     if (!active || provider === "groq") return;
+    geminiFailure = String(reason || "Gemini Live connection failed.");
     provider = "groq";
     if (ws) { const old = ws; ws = null; try { old.close(); } catch {} }
     pcmQueue = []; stopPlayback();
