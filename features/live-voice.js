@@ -139,7 +139,7 @@
   async function connectGemini(token, settings, id) {
     const sdkUrl = "https://esm.sh/@google/genai@2.32.0?bundle";
     status("Loading Google's official Live SDK…");
-    const { GoogleGenAI } = await import(sdkUrl);
+    let sdk;\n    try { sdk = await import(sdkUrl); }\n    catch (firstError) {\n      try { sdk = await import("https://cdn.jsdelivr.net/npm/@google/genai@2.32.0/+esm"); }\n      catch { throw new Error("The official Gemini SDK could not load from either CDN. Check your connection and retry."); }\n    }\n    const { GoogleGenAI } = sdk;
     if (id !== sessionId || !active) throw new Error("Live conversation was cancelled.");
     const ai = new GoogleGenAI({
       apiKey: token,
@@ -164,7 +164,7 @@
         onmessage: message => handleGeminiMessage(message, id),
         onerror: event => {
           const detail = event?.message || event?.error?.message || "WebSocket transport error";
-          closeError = new Error("Gemini Live transport: " + String(detail).slice(0, 180));
+          closeError = new Error("Gemini Live transport: " + String(detail).slice(0, 180));\n          rejectTransport(closeError);
         },
         onclose: event => {
           settledClose = true;
