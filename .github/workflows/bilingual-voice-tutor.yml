@@ -12,6 +12,7 @@ on:
       - "supabase/functions/live-voice-session/index.ts"
       - "features/ai-classroom.css"
       - "scripts/check-tutor-retry-browser.mjs"
+      - "scripts/check-live-voice-browser.mjs"
       - "supabase/functions/tutor-v2/index.ts"
       - "supabase/functions/tutor-v2/index.test.ts"
       - "index.html"
@@ -26,6 +27,7 @@ on:
       - "features/ai-classroom.js"
       - "features/ai-classroom.css"
       - "scripts/check-tutor-retry-browser.mjs"
+      - "scripts/check-live-voice-browser.mjs"
       - "supabase/functions/tutor-v2/index.ts"
       - "supabase/functions/tutor-v2/index.test.ts"
       - "index.html"
@@ -99,3 +101,8 @@ jobs:
         env:
           BASE_URL: http://127.0.0.1:4173
         run: node scripts/check-tutor-retry-browser.mjs
+
+      - name: Run controlled Gemini failure, Groq fallback, and microphone recovery tests
+        env:
+          BASE_URL: http://127.0.0.1:4173
+        run: node scripts/check-live-voice-browser.mjs
