@@ -4,7 +4,7 @@
   let ws = null, liveSession = null, stream = null, audio = null, source = null, processor = null, silent = null;
   let active = false, busy = false, provider = "none", sessionId = 0, playAt = 0;
   let playing = new Set(), recorder = null, chunks = [], speechStarted = 0, lastVoiceAt = 0;
-  let groqTurnBusy = false, groqResponseSpeaking = false, lastTranscript = "", geminiFailure = "";
+  let groqTurnBusy = false, groqResponseSpeaking = false, lastTranscript = "", geminiFailure = "", geminiAudioPackets = 0;
   const $ = id => document.getElementById(id);
   const bridge = () => window.FA_LIVE_VOICE_CONTEXT;
   const now = () => performance.now();
@@ -68,8 +68,13 @@
     while (pcmQueue.length >= 1600) {
       const packet = new Float32Array(pcmQueue.splice(0, 1600));
       const bytes = pcm16(packet);
-      const media = new Blob([bytes], { type: "audio/pcm;rate=16000" });
-      try { liveSession.sendRealtimeInput({ media }); }
+      try {
+        // Use the SDK's explicit realtime audio field. This is the documented
+        // browser payload shape and avoids media/Blob conversion ambiguity.
+        liveSession.sendRealtimeInput({ audio: { data: b64(bytes), mimeType: "audio/pcm;rate=16000" } });
+        geminiAudioPackets++;
+        if (geminiAudioPackets === 1) status("Microphone audio is streaming to Gemini — keep speaking.");
+      }
       catch (error) { fallbackToGroq(error?.message || "Could not stream microphone audio to Gemini."); return; }
     }
   }
@@ -215,7 +220,8 @@
       throw new Error("Live conversation was cancelled during connection.");
     }
     provider = "gemini";
-    status("Gemini Live connected — speak naturally. You can interrupt Académie.");
+    geminiAudioPackets = 0;
+    status("Gemini Live connected. Listening for your voice…");
     return liveSession;
   }
   function recorderType() {
@@ -320,7 +326,9 @@
         settings.instructions = ticket.instructions || "";
         await connectGemini(ticket.ephemeral_token, settings, id);
         provider = "gemini"; $("faLiveStop").disabled = false;
-        status("Gemini Live connected — speak naturally.");
+        const startButton = $("faLiveStart");
+        if (startButton) startButton.textContent = "Listening…";
+        status("Gemini Live connected. Listening for your voice…");
       } catch (error) {
         provider = "none";
         await fallbackToGroq(error.message || "Gemini Live is unavailable.");
@@ -328,7 +336,7 @@
       }
     } catch (error) {
       await stop(); status(error?.message || "Could not start live conversation.", true);
-    } finally { busy = false; if ($("faLiveStart")) $("faLiveStart").disabled = active; }
+    } finally { busy = false; if ($("faLiveStart")) { $("faLiveStart").disabled = active; if (active) $("faLiveStart").textContent = "Listening…"; } }
   }
   async function stop() {
     active = false; provider = "none"; sessionId++;
@@ -342,7 +350,7 @@
     if (stream) { stream.getTracks().forEach(track => track.stop()); stream = null; }
     if (audio) { try { await audio.close(); } catch {} audio = null; }
     chunks = []; pcmQueue = []; groqTurnBusy = false; groqResponseSpeaking = false;
-    if ($("faLiveStart")) $("faLiveStart").disabled = false;
+    if ($("faLiveStart")) { $("faLiveStart").disabled = false; $("faLiveStart").textContent = "Start speaking"; }
     if ($("faLiveStop")) $("faLiveStop").disabled = true;
     status("Conversation ended. Microphone is off.");
   }
