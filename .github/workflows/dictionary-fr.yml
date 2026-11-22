@@ -1,0 +1,67 @@
+name: Dictionary French layer build
+
+on:
+  push:
+    branches:
+      - 'feat/dictionary-*'
+
+permissions:
+  contents: write
+
+jobs:
+  french:
+    if: contains(github.event.head_commit.message, '[build-fr]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - name: Checkout selected dictionary branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Download French Wiktionary dump
+        timeout-minutes: 20
+        shell: bash
+        run: |
+          set -euo pipefail
+          date -u
+          curl -sS -L --retry 3 --retry-all-errors --retry-delay 5 --connect-timeout 30 --max-time 1100 -o dump.jsonl.gz 'https://kaikki.org/frwiktionary/raw-wiktextract-data.jsonl.gz'
+          date -u
+          ls -l dump.jsonl.gz
+          sha256sum dump.jsonl.gz | cut -d' ' -f1 | tee dump.sha256
+
+      - name: Keep French-language lines
+        timeout-minutes: 15
+        shell: bash
+        run: |
+          set -euo pipefail
+          gunzip -c dump.jsonl.gz | grep -a -E '"lang_code": ?"fr"' > fr-lines.jsonl || true
+          ls -l fr-lines.jsonl
+          wc -l fr-lines.jsonl
+
+      - name: Build French layer
+        run: KAIKKI_FILE=fr-lines.jsonl HEADWORDS_FILE=data/dictionary/common-3000.json OUT_DIR=data/dictionary/fr DUMP_SHA256="$(cat dump.sha256)" DUMP_DATE="$(date -u +%F)" node tools/dictionary/build-stage-d2.mjs
+
+      - name: Validate French layer
+        run: node tools/dictionary/validate-stage-d2.mjs data/dictionary/fr data/dictionary/common-3000.json
+
+      - name: Commit only the generated French layer
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- data/dictionary/fr
+          if git diff --cached --quiet; then
+            echo 'No French layer changes to commit.'
+            exit 0
+          fi
+          git diff --cached --name-only
+          git commit -m 'Dictionary French layer (generated)'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
