@@ -69,7 +69,7 @@ One database migration is required by the hardened Groq fallback: `2026112220261
 | Supabase project | `pagytaefoumwdvwaohft` (`french-academy-staging`) |
 | Status | ACTIVE_HEALTHY |
 | Region | eu-west-3 |
-| `live-voice-session` | ACTIVE v8, JWT verification enabled |
+| `live-voice-session` | ACTIVE v9, JWT verification enabled |
 | `live-voice-groq` | ACTIVE v3, JWT verification disabled in gateway |
 | `tutor-v2` | ACTIVE v8 |
 
@@ -81,13 +81,16 @@ The Vercel preview environment for `feat/live-voice-conversation` points to this
 - Staging function logs also contain Gemini token-provisioning HTTP 400 failures; the corresponding broker requests returned HTTP 502.
 - Historical Groq fallback requests returned HTTP 503. Their root cause has not yet been proven from the HTTP access log alone.
 - The hardened branch now uses the SDK model identifier `gemini-3.8-live` (without the REST `models/` prefix), emits sanitized provider error detail to server logs, restricts Groq CORS to approved origins, and bounds request/history sizes.
-- Branch tests now cover broker auth, origin policy, request bounds, one-use token issuance, 60-second session-start expiry, 30-minute token expiry, Groq auth, provider routing, rate limits, Gemini failure fallback, and microphone interruption/restart.
-- The browser harness must pass against the isolated test page before staging deployment.
+- Branch tests now cover broker auth, origin policy, request bounds, one-use token issuance, 60-second session-start expiry, 30-minute token expiry, Groq auth, provider routing, rate limits, Gemini failure fallback, established-session expiry fallback, and microphone interruption/restart.
+- The quota preflight migration is applied on staging as version `20261122202618`; a transaction-scoped live SQL check confirmed first preflight = true, second preflight at the one-unit boundary = false, usage remained at 24, and the test transaction was rolled back.
+- Staging voice functions are now `live-voice-session v9` and `live-voice-groq v4`, both with gateway JWT verification enabled. `tutor-v2 v8` remains unchanged.
+- A Vercel preview is READY at `https://french-academy-hmtupfj1e-vogtay.vercel.app` from commit `33368c13d8e6adad9357141139d310007566891f`; its generated runtime configuration was verified to target `pagytaefoumwdvwaohft.supabase.co`. The preview's AI Classroom and Live Voice assets are both served successfully.
+- The hardened functions have not yet received a real authenticated browser request after deployment. Live Gemini token issuance and a complete Groq fallback turn therefore remain unverified on the new versions.
 
 ## 4. Release blockers — must be closed before approval
 
-- [ ] All required GitHub Actions checks pass on the final PR head, including French Intelligence, Tutor V2 reliability, learning-memory, Deno broker tests, and controlled voice browser tests.
-- [ ] Apply and test `20261122202618_ai_use_voice_preflight.sql` on staging, then deploy the tested broker and Groq handler to **staging only**; set Groq gateway JWT verification to true as defense in depth while retaining the handler's explicit Supabase Auth check.
+- [x] GitHub Actions passed: French Intelligence checks (including the 639-input safety net and M2/M3 mobile/desktop checks), Tutor V2 mocked reliability, learning-memory SQL, Deno broker/Groq tests, and controlled voice browser tests. The final code/test head is `33368c13d8e6adad9357141139d310007566891f`; later commits only aligned migration filenames and updated this runbook.
+- [x] Apply and test `20261122202618_ai_use_voice_preflight.sql` on staging, then deploy the tested broker and Groq handler to **staging only**; both voice functions now have gateway JWT verification enabled and retain explicit Supabase Auth checks.
 - [ ] Confirm staging secrets exist on `pagytaefoumwdvwaohft`: `GEMINI_API_KEY`, `GROQ_API_KEY`, `GROQ_VOICE_ENABLED=true`. Secret values must never be read into logs or shared.
 - [ ] Confirm the staging broker returns HTTP 200 and the function log no longer records Gemini token provisioning HTTP 400.
 - [ ] Confirm the Groq handler returns a successful authenticated fallback turn; a 503 is a release blocker. Confirm quota exhaustion returns 429 before any audio is sent to Groq.
