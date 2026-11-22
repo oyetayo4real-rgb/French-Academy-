@@ -137,9 +137,20 @@
   }
   function connectGemini(token, settings, id) {
     return new Promise((resolve, reject) => {
+      let settled = false;
+      const finish = (error) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeout);
+        if (error) reject(error);
+        else resolve();
+      };
       const endpoint = "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained?access_token=" + encodeURIComponent(token);
       ws = new WebSocket(endpoint);
-      const timeout = setTimeout(() => reject(new Error("Gemini Live connection timed out.")), 18000);
+      const timeout = setTimeout(() => {
+        try { ws?.close(4000, "Académie setup timeout"); } catch {}
+        finish(new Error("Gemini Live did not send setupComplete within 18 seconds."));
+      }, 18000);
       ws.onopen = () => {
         ws.send(JSON.stringify({ setup: {
           model: "models/gemini-3.8-live",
@@ -151,16 +162,31 @@
         } }));
       };
       ws.onmessage = event => {
-        const before = provider !== "gemini";
+        if (id !== sessionId) return;
+        let message;
+        try { message = JSON.parse(event.data); } catch { message = null; }
+        if (message?.error) {
+          const detail = message.error.message || message.error.status || "Gemini rejected the session setup.";
+          finish(new Error("Gemini Live setup rejected: " + String(detail).slice(0, 180)));
+          return;
+        }
         handleGeminiMessage(event, id);
-        if (before && id === sessionId && event.data && String(event.data).includes("setupComplete")) {
-          clearTimeout(timeout); provider = "gemini"; resolve();
+        if (message?.setupComplete) {
+          provider = "gemini";
+          finish();
         }
       };
-      ws.onerror = () => { clearTimeout(timeout); reject(new Error("Gemini Live could not connect.")); };
-      ws.onclose = () => {
-        clearTimeout(timeout);
-        if (id === sessionId && active && provider === "gemini") fallbackToGroq("Gemini Live disconnected.");
+      ws.onerror = () => {
+        finish(new Error("Gemini Live WebSocket transport error before setup completed."));
+      };
+      ws.onclose = event => {
+        if (id !== sessionId) return;
+        const reason = String(event.reason || "").replace(/[\u0000-\u001f\u007f]/g, " ").slice(0, 140);
+        if (!settled) {
+          finish(new Error("Gemini Live closed before setup completed (code " + event.code + (reason ? ": " + reason : "") + ")."));
+        } else if (active && provider === "gemini") {
+          fallbackToGroq("Gemini Live disconnected (code " + event.code + (reason ? ": " + reason : "") + ").");
+        }
       };
     });
   }
