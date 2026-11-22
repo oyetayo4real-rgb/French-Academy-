@@ -11,7 +11,7 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ error: "invalid_request" }, 405);
   const authorization = req.headers.get("Authorization") || "";
-  if (!/^Bearer\\s+\\S+$/i.test(authorization)) return json({ error: "not_signed_in" }, 401);
+  if (!/^Bearer\s+\S+$/i.test(authorization)) return json({ error: "not_signed_in" }, 401);
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
   const groqKey = Deno.env.get("GROQ_API_KEY");
