@@ -1,3 +1,4 @@
+begin;
 select set_config('test.voice_uid', :'test_uid', false);
 
 do $$
