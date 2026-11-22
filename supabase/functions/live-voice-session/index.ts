@@ -68,7 +68,12 @@ export function createLiveVoiceSessionHandler(overrides: SessionDependencies = {
     const supabaseUrl = env.get("SUPABASE_URL");
     const anonKey = env.get("SUPABASE_ANON_KEY");
     const geminiKey = env.get("GEMINI_API_KEY");
-    if (!supabaseUrl || !anonKey || !geminiKey) return json({ error: "voice_service_not_configured" }, 503, allowedOrigin);
+    if (!supabaseUrl || !anonKey || !geminiKey) {
+      console.error("[live-voice] required environment configuration missing", {
+        supabaseUrl: !!supabaseUrl, supabaseAnonKey: !!anonKey, geminiApiKey: !!geminiKey
+      });
+      return json({ error: "voice_service_not_configured" }, 503, allowedOrigin);
+    }
 
     let auth: Response;
     try {
