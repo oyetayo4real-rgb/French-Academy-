@@ -84,6 +84,7 @@ jobs:
         run: |
           psql -h 127.0.0.1 -U postgres -d tutor_test -v test_uid="$TUTOR_TEST_UID" -v ON_ERROR_STOP=1 -f supabase/migrations/20261122211000_ai_use_voice_preflight.sql
           psql -h 127.0.0.1 -U postgres -d tutor_test -v test_uid="$TUTOR_TEST_UID" -v ON_ERROR_STOP=1 -f supabase/tests/ai_use_voice_preflight.sql
+          psql -h 127.0.0.1 -U postgres -d tutor_test -v ON_ERROR_STOP=1 -f supabase/rollback/20261122211000_ai_use_voice_preflight.sql
 
       - name: Run tutor-v2 mocked-fetch tests (network permission not granted)
         run: deno test supabase/functions/tutor-v2/index.test.ts
