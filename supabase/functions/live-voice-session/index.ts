@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "npm:@google/genai@2.34.0";
+import { GoogleGenAI } from "npm:@google/genai@2.32.0";
 
 // Gemini Live ephemeral-token broker. The permanent key never reaches the browser.
 const cors = {"Access-Control-Allow-Headers":"authorization, apikey, content-type, x-client-info","Access-Control-Allow-Methods":"POST, OPTIONS","Vary":"Origin"};
