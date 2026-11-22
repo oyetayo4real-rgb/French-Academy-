@@ -16,7 +16,7 @@ const CORS_HEADERS = {
   "Vary": "Origin"
 };
 const clean = (value: unknown, max: number) =>
-  typeof value === "string" ? value.replace(/[\\u0000-\\u001f\\u007f]/g, " ").trim().slice(0, max) : "";
+  typeof value === "string" ? value.replace(/[\u0000-\u001f\u007f]/g, " ").trim().slice(0, max) : "";
 
 export function isAllowedVoiceOrigin(origin: string, env: Env): boolean {
   const configured = (env.get("ALLOWED_APP_ORIGINS") || "").split(",").map(x => x.trim()).filter(Boolean);
@@ -24,7 +24,7 @@ export function isAllowedVoiceOrigin(origin: string, env: Env): boolean {
   try {
     const url = new URL(origin);
     return url.protocol === "https:" &&
-      /^french-academy-[a-z0-9-]+-vogtay\\.vercel\\.app$/.test(url.hostname);
+      /^french-academy-[a-z0-9-]+-vogtay\.vercel\.app$/.test(url.hostname);
   } catch {
     return false;
   }
@@ -64,7 +64,7 @@ export function createLiveVoiceSessionHandler(overrides: SessionDependencies = {
     if (!allowedOrigin) return json({ error: "origin_not_allowed" }, 403, null);
 
     const authorization = req.headers.get("Authorization") || "";
-    if (!/^Bearer\\s+\\S+$/i.test(authorization)) return json({ error: "not_signed_in" }, 401, allowedOrigin);
+    if (!/^Bearer\s+\S+$/i.test(authorization)) return json({ error: "not_signed_in" }, 401, allowedOrigin);
 
     const supabaseUrl = env.get("SUPABASE_URL");
     const anonKey = env.get("SUPABASE_ANON_KEY");
