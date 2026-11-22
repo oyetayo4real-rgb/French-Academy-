@@ -88,6 +88,50 @@ export function createGroqVoiceHandler(overrides: GroqDependencies = {}) {
       return json({ error: "unsupported_audio" }, 415, allowedOrigin);
     }
 
+    let history: unknown[] = [];
+    try {
+      const raw = form.get("history");
+      const parsed = typeof raw === "string" ? JSON.parse(raw) : [];
+      if (!Array.isArray(parsed)) return json({ error: "invalid_history" }, 400, allowedOrigin);
+      history = parsed.slice(-6).map(item => ({
+        role: item?.role === "assistant" ? "assistant" : "user",
+        content: typeof item?.content === "string" ? item.content.replace(/[\u0000-\u001f\u007f]/g, " ").slice(0, 500) : ""
+      })).filter(item => item.content);
+    } catch {
+      return json({ error: "invalid_history" }, 400, allowedOrigin);
+    }
+    // In legacy quota mode, reserve one usage unit before paid transcription.
+    // Tutor V2 consumes the final unit for the generated response.
+    if ((env.get("QUOTA_MODE") || "legacy").trim().toLowerCase() === "reservation") {
+      return json({ error: "voice_quota_mode_unsupported" }, 503, allowedOrigin);
+    }
+    const serviceRoleKey = env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!serviceRoleKey) {
+      console.error("[live-voice-groq] service role key missing for quota preflight");
+      return json({ error: "quota_unavailable" }, 503, allowedOrigin);
+    }
+    let quotaResponse: Response;
+    try {
+      quotaResponse = await fetchImpl(supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/ai_use_voice_preflight", {
+        method: "POST",
+        headers: {
+          apikey: serviceRoleKey,
+          Authorization: "Bearer " + serviceRoleKey,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ p_uid: user.id }),
+        signal: AbortSignal.timeout(8000)
+      });
+    } catch {
+      return json({ error: "quota_unavailable" }, 503, allowedOrigin);
+    }
+    if (!quotaResponse.ok) {
+      console.error("[live-voice-groq] quota preflight RPC failed", { status: quotaResponse.status });
+      return json({ error: "quota_unavailable" }, 503, allowedOrigin);
+    }
+    const quotaAllowed = await quotaResponse.json().catch(() => false);
+    if (quotaAllowed !== true) return json({ error: "quota_exceeded" }, 429, allowedOrigin);
+
     const language = form.get("language") === "auto" ? "" : (form.get("language") === "en" ? "en" : "fr");
     const groqForm = new FormData();
     groqForm.append("file", audio, audio.name || "voice-turn.webm");
@@ -115,18 +159,6 @@ export function createGroqVoiceHandler(overrides: GroqDependencies = {}) {
     const transcript = typeof transcriptBody.text === "string" ? transcriptBody.text.trim().slice(0, 1800) : "";
     if (!transcript) return json({ error: "empty_transcription" }, 422, allowedOrigin);
 
-    let history: unknown[] = [];
-    try {
-      const raw = form.get("history");
-      const parsed = typeof raw === "string" ? JSON.parse(raw) : [];
-      if (!Array.isArray(parsed)) return json({ error: "invalid_history" }, 400, allowedOrigin);
-      history = parsed.slice(-6).map(item => ({
-        role: item?.role === "assistant" ? "assistant" : "user",
-        content: typeof item?.content === "string" ? item.content.replace(/[\u0000-\u001f\u007f]/g, " ").slice(0, 500) : ""
-      })).filter(item => item.content);
-    } catch {
-      return json({ error: "invalid_history" }, 400, allowedOrigin);
-    }
     const level = String(form.get("level") || "A1").slice(0, 8);
     const memory = form.get("useLearningMemory") === "true";
 
