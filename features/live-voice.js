@@ -110,7 +110,7 @@
     return {
       level: ctx.level || bridge()?.level?.() || "A1",
       mode: $("faLiveMode")?.value || "guided",
-      language: $("faVoiceLanguage")?.value === "en-US" ? "en" : "fr",
+      language: "auto",
       topics: ctx.topics || [], recent: ctx.recent || []
     };
   }
@@ -118,20 +118,20 @@
     let data; try { data = JSON.parse(event.data); } catch { return; }
     if (id !== sessionId) return;
     if (data.setupComplete) { status("Connected — speak naturally. You can interrupt Académie."); return; }
-    const content = data.serverContent;
-    if (content) {
-      if (content.inputTranscription?.text) {
-        const text = content.inputTranscription.text.trim();
+    const content = data.serverContent || {};
+    const inputTranscript = data.inputTranscription?.text || content.inputTranscription?.text;
+    const outputTranscript = data.outputTranscription?.text || content.outputTranscription?.text;
+    if (inputTranscript) {
+        const text = inputTranscript.trim();
         if (text && text !== lastTranscript) {
           lastTranscript = text; line("You", text);
           Promise.resolve(bridge()?.recordVoiceTurn?.(text)).catch(() => status("Voice worked, but learning progress could not be saved.", true));
         }
-      }
-      if (content.outputTranscription?.text) line("Académie AI", content.outputTranscription.text);
-      if (content.interrupted) { stopPlayback(); status("Listening — you interrupted. Go ahead."); }
-      for (const part of content.modelTurn?.parts || []) if (part.inlineData?.data) playPcm(part.inlineData.data);
-      if (content.turnComplete) status("Your turn — keep speaking whenever you're ready.");
     }
+    if (outputTranscript) line("Académie AI", outputTranscript);
+    if (content.interrupted) { stopPlayback(); status("Listening — you interrupted. Go ahead."); }
+    for (const part of content.modelTurn?.parts || []) if (part.inlineData?.data) playPcm(part.inlineData.data);
+    if (content.turnComplete) status("Your turn — keep speaking whenever you're ready.");
     if (data.goAway) status("Gemini is preparing to close this session. Switching to Groq if needed.");
     if (data.error) fallbackToGroq("Gemini Live reported an error.");
   }
@@ -179,7 +179,13 @@
       recorder.onstop = () => {
         const blob = new Blob(chunks, { type: recorder?.mimeType || "audio/webm" });
         recorder = null; chunks = [];
-        if (blob.size >= 1500 && active && provider === "groq") submitGroqTurn(blob).catch(error => status(error.message || "Groq voice turn failed. Listening continues.", true));
+        if (blob.size >= 1500 && active && provider === "groq") submitGroqTurn(blob).catch(error => {
+        const message = error.message || "Groq voice turn failed.";
+        if (/disabled|rate_limit|unavailable|not_signed_in/i.test(message)) {
+          provider = "none";
+          status(message + " Voice backup has stopped to avoid repeated requests.", true);
+        } else status(message, true);
+      });
       };
       recorder.start(250);
     } catch (error) { recorder = null; status(error.message || "Could not start microphone recording.", true); }
@@ -200,7 +206,7 @@
       const result = await bridge().groqTurn(payload);
       if (!active || provider !== "groq") return;
       if (result.transcript) { lastTranscript = result.transcript; line("You", result.transcript); }
-      if (result.text) { line("Académie AI", result.text); speak(result.text, settings.language); }
+      if (result.text) { line("Académie AI", result.text); speak(result.text, "fr"); }
       status("Groq backup is active — listening continuously.");
     } finally { groqTurnBusy = false; }
   }
