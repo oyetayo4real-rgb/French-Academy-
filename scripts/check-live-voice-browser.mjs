@@ -12,9 +12,19 @@ const check = async (name, fn) => {
 
 try {
   const page = await browser.newPage();
+  const testOrigin = new URL(baseUrl).origin;
+  const minimalDocument = '<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main><h1>AI French tutor</h1></main></body></html>';
+  await page.route("**/*", route => {
+    const request = route.request();
+    const url = new URL(request.url());
+    if (url.origin !== testOrigin) return route.abort();
+    if (request.isNavigationRequest() && url.pathname === "/") {
+      return route.fulfill({ status: 200, contentType: "text/html", body: minimalDocument });
+    }
+    return route.continue();
+  });
   await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
   await page.evaluate(() => {
-    document.body.innerHTML = '<main><h1>AI French tutor</h1></main>';
     class FakeTrack extends EventTarget {
       kind = "audio";
       stop() { this.stopped = true; }
