@@ -136,18 +136,20 @@
     if (data.goAway) status("Gemini is preparing to close this session.");
     if (data.error) fallbackToGroq(data.error.message || data.error.status || "Gemini Live reported an error.");
   }
+  let genaiSdkPromise = null;
+  function loadGoogleGenAI() {
+    if (!genaiSdkPromise) {
+      genaiSdkPromise = import("https://esm.sh/@google/genai@2.32.0?bundle").catch(() =>
+        import("https://cdn.jsdelivr.net/npm/@google/genai@2.32.0/+esm")
+      );
+    }
+    return genaiSdkPromise;
+  }
   async function connectGemini(token, settings, id) {
     status("Loading Google's official Live SDK…");
     let sdk;
-    try {
-      sdk = await import("https://esm.sh/@google/genai@2.32.0?bundle");
-    } catch {
-      try {
-        sdk = await import("https://cdn.jsdelivr.net/npm/@google/genai@2.32.0/+esm");
-      } catch {
-        throw new Error("The official Gemini SDK could not load from either CDN. Check your connection and retry.");
-      }
-    }
+    try { sdk = await loadGoogleGenAI(); }
+    catch { throw new Error("The official Gemini SDK could not load from either CDN. Check your connection and retry."); }
     const { GoogleGenAI } = sdk;
     if (id !== sessionId || !active) throw new Error("Live conversation was cancelled.");
 
@@ -308,7 +310,9 @@
       await setupAudio();
       active = true; const id = ++sessionId, settings = config();
       try {
-        status("Connecting to Gemini Live…");
+        status("Preparing Google's official Live SDK…");
+        await loadGoogleGenAI();
+        status("Requesting a fresh Gemini Live session token…");
         const ticket = await app.request(settings);
         if (!ticket?.ephemeral_token) throw new Error("Gemini Live could not authorize this session.");
         settings.instructions = ticket.instructions || "";
