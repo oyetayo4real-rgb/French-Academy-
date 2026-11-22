@@ -64,6 +64,7 @@
     if (!liveSession || provider !== "gemini") return;
     const samples = resample(input, audio.sampleRate, 16000);
     for (let i = 0; i < samples.length; i++) pcmQueue.push(samples[i]);
+    // 1,600 mono samples at 16 kHz form a 100 ms realtime audio packet.
     while (pcmQueue.length >= 1600) {
       const packet = new Float32Array(pcmQueue.splice(0, 1600));
       const bytes = pcm16(packet);
