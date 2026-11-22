@@ -78,7 +78,7 @@ Deno.test("session broker enforces one-use token and 60-second start / 30-minute
   assert((captured as any)?.uses === 1, "token must be single-use");
   assert((captured as any)?.expireTime === "2026-11-22T20:30:00.000Z", "token expiry must be 30 minutes");
   assert((captured as any)?.newSessionExpireTime === "2026-11-22T20:01:00.000Z", "session must start within 60 seconds");
-  assert((captured as any)?.liveConnectConstraints?.model === "models/gemini-3.8-live", "unexpected Live model");
+  assert((captured as any)?.liveConnectConstraints?.model === "gemini-3.8-live", "unexpected Live model");
 });
 
 Deno.test("session broker fails closed when Supabase auth is unreachable", async () => {
