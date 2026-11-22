@@ -97,7 +97,7 @@ try {
   await page.route("https://esm.sh/@google/genai@2.32.0?bundle", route => route.fulfill({
     status: 200,
     contentType: "text/javascript",
-    body: 'export class GoogleGenAI { constructor(){ this.live={connect:async()=>{throw new Error("controlled Gemini outage")}}; } }'
+    body: 'export class GoogleGenAI { constructor(){ this.live={connect:async({callbacks})=>{ if(window.__geminiConnectMode==="open"){window.__geminiCallbacks=callbacks;return {sendRealtimeInput(){},close(){}};} throw new Error("controlled Gemini outage"); }}; } }'
   }));
   await page.addScriptTag({ url: baseUrl + "/features/live-voice.js" });
   await page.locator("#faLivePanel").waitFor({ state: "visible" });
@@ -129,9 +129,16 @@ try {
     await page.evaluate(() => window.__tracks[0].dispatchEvent(new Event("ended")));
     await page.waitForFunction(() => document.querySelector("#faLiveStart")?.disabled === false);
     assert.match(await page.locator("#faLiveStatus").innerText(), /Microphone disconnected/i);
+    await page.evaluate(() => { window.__geminiConnectMode = "open"; });
     await page.locator("#faLiveStart").click();
-    await page.waitForFunction(() => document.querySelector("#faLiveProvider")?.textContent === "Groq Voice backup");
+    await page.waitForFunction(() => document.querySelector("#faLiveProvider")?.textContent === "Gemini Live");
     assert.equal(await page.evaluate(() => window.__getUserMediaCalls), 2, "restart should request a fresh microphone stream");
+  });
+
+  await check("an established Gemini session expiry transitions to Groq without losing the microphone", async () => {
+    await page.evaluate(() => window.__geminiCallbacks.onclose({ reason: "controlled session expiry" }));
+    await page.waitForFunction(() => document.querySelector("#faLiveProvider")?.textContent === "Groq Voice backup");
+    assert.match(await page.locator("#faLiveStatus").innerText(), /Groq voice pipeline automatically/i);
   });
 } finally {
   await browser.close();
