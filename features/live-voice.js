@@ -148,7 +148,7 @@
     let settledClose = false;
     let closeError = null;
     const connectPromise = ai.live.connect({
-      model: "gemini-3.8-live",
+      model: "models/gemini-3.8-live",
       config: {
         responseModalities: ["AUDIO"],
         inputAudioTranscription: {},
