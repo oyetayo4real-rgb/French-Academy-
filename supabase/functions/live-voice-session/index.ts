@@ -43,7 +43,7 @@ Deno.serve(async(req:Request)=>{
   method:"POST",headers:{"x-goog-api-key":geminiKey,"Content-Type":"application/json"},
   body:JSON.stringify({
    uses:1,expireTime:new Date(now+30*60*1000).toISOString(),newSessionExpireTime:new Date(now+60*1000).toISOString(),
-   liveConnectConstraints:{model:"gemini-3.8-live",config:{responseModalities:["AUDIO"],sessionResumption:{},inputAudioTranscription:{},outputAudioTranscription:{},systemInstruction:{parts:[{text:instructions}]}}}
+   liveConnectConstraints:{model:"models/gemini-3.8-live",config:{responseModalities:["AUDIO"],sessionResumption:{},inputAudioTranscription:{},outputAudioTranscription:{},systemInstruction:{parts:[{text:instructions}]}}}
   })
  });
  const data=await tokenResponse.json().catch(()=>({}));
