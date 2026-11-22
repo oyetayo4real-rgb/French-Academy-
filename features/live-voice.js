@@ -169,7 +169,7 @@
     const transportFailure = new Promise((_, reject) => { rejectTransport = reject; });
 
     const connectPromise = ai.live.connect({
-      model: "models/gemini-3.8-live",
+      model: "gemini-3.8-live",
       config: {
         responseModalities: ["AUDIO"],
         inputAudioTranscription: {},
