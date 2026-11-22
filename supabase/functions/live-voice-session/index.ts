@@ -1,3 +1,5 @@
+import { GoogleGenAI } from "npm:@google/genai@2.34.0";
+
 // Gemini Live ephemeral-token broker. The permanent key never reaches the browser.
 const cors = {"Access-Control-Allow-Headers":"authorization, apikey, content-type, x-client-info","Access-Control-Allow-Methods":"POST, OPTIONS","Vary":"Origin"};
 function allowed(origin:string, env:(n:string)=>string|undefined) {
@@ -39,14 +41,27 @@ Deno.serve(async(req:Request)=>{
   "Keep the learner's spoken practice coherent with Académie's dictionary, grammar and conjugation knowledge. If a precise rule is uncertain, say so instead of inventing it."
  ].join("\n");
  const now=Date.now();
- const tokenResponse=await fetch("https://generativelanguage.googleapis.com/v1beta/auth_tokens",{
-  method:"POST",headers:{"x-goog-api-key":geminiKey,"Content-Type":"application/json"},
-  body:JSON.stringify({
-   uses:1,expireTime:new Date(now+30*60*1000).toISOString(),newSessionExpireTime:new Date(now+60*1000).toISOString(),
-   liveConnectConstraints:{model:"models/gemini-3.8-live",config:{responseModalities:["AUDIO"],sessionResumption:{},inputAudioTranscription:{},outputAudioTranscription:{},systemInstruction:{parts:[{text:instructions}]}}}
-  })
- });
- const data=await tokenResponse.json().catch(()=>({}));
- if(!tokenResponse.ok||typeof data.name!=="string"){console.error("[live-voice] Gemini token provisioning failed",{status:tokenResponse.status});return reply({error:"voice_session_unavailable"},502,okOrigin);}
- return reply({ephemeral_token:data.name,expires_at:data.expireTime||null,model:"gemini-3.8-live",instructions},200,okOrigin);
+ try {
+  // The official SDK enforces the required v1alpha ephemeral-token API version.
+  const genai=new GoogleGenAI({apiKey:geminiKey,apiVersion:"v1alpha"});
+  const token=await genai.authTokens.create({config:{
+   uses:1,
+   expireTime:new Date(now+30*60*1000).toISOString(),
+   newSessionExpireTime:new Date(now+60*1000).toISOString(),
+   liveConnectConstraints:{model:"gemini-3.8-live",config:{
+    responseModalities:["AUDIO"],sessionResumption:{},
+    inputAudioTranscription:{},outputAudioTranscription:{},
+    systemInstruction:{parts:[{text:instructions}]}
+   }}
+  }});
+  if(typeof token.name!=="string"||!token.name.startsWith("auth_tokens/")) {
+   console.error("[live-voice] SDK returned no usable ephemeral token");
+   return reply({error:"voice_session_unavailable"},502,okOrigin);
+  }
+  return reply({ephemeral_token:token.name,expires_at:token.expireTime||null,model:"gemini-3.8-live",instructions},200,okOrigin);
+ } catch(error) {
+  const message=error instanceof Error?error.message:String(error);
+  console.error("[live-voice] Gemini SDK token creation failed",{message:clean(message,500)});
+  return reply({error:"voice_session_unavailable"},502,okOrigin);
+ }
 });
