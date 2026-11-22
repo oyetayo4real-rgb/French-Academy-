@@ -78,6 +78,13 @@ jobs:
           psql -h 127.0.0.1 -U postgres -d tutor_test -v test_uid="$TUTOR_TEST_UID" -v ON_ERROR_STOP=1 -f supabase/migrations/20261118190000_tutor_learning_memory.sql
           psql -h 127.0.0.1 -U postgres -d tutor_test -v test_uid="$TUTOR_TEST_UID" -v ON_ERROR_STOP=1 -f supabase/migrations/20261118202000_tutor_learning_memory_rpc.sql
           psql -h 127.0.0.1 -U postgres -d tutor_test -v test_uid="$TUTOR_TEST_UID" -v ON_ERROR_STOP=1 -f supabase/tests/tutor_learning_memory.sql
+      - name: Apply and test voice quota preflight migration
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h 127.0.0.1 -U postgres -d tutor_test -v test_uid="$TUTOR_TEST_UID" -v ON_ERROR_STOP=1 -f supabase/migrations/20261122211000_ai_use_voice_preflight.sql
+          psql -h 127.0.0.1 -U postgres -d tutor_test -v test_uid="$TUTOR_TEST_UID" -v ON_ERROR_STOP=1 -f supabase/tests/ai_use_voice_preflight.sql
+
       - name: Run tutor-v2 mocked-fetch tests (network permission not granted)
         run: deno test supabase/functions/tutor-v2/index.test.ts
       - name: Set up Node.js for browser test
