@@ -1,5 +1,3 @@
-import { GoogleGenAI, Modality } from "npm:@google/genai@2.32.0";
-
 type Env = { get(name: string): string | undefined };
 type TokenResult = { name?: string; expireTime?: string };
 type SessionDependencies = {
@@ -47,6 +45,7 @@ export function createLiveVoiceSessionHandler(overrides: SessionDependencies = {
   const fetchImpl = overrides.fetchImpl || fetch;
   const now = overrides.now || Date.now;
   const createToken = overrides.createToken || (async (apiKey: string, config: Record<string, unknown>) => {
+    const { GoogleGenAI } = await import("npm:@google/genai@2.32.0");
     const genai = new GoogleGenAI({ apiKey, httpOptions: { apiVersion: "v1alpha" } });
     return await genai.authTokens.create({ config: config as never }) as TokenResult;
   });
@@ -130,7 +129,7 @@ export function createLiveVoiceSessionHandler(overrides: SessionDependencies = {
         liveConnectConstraints: {
           model: "models/gemini-3.8-live",
           config: {
-            responseModalities: [Modality.AUDIO],
+            responseModalities: ["AUDIO"],
             sessionResumption: {},
             inputAudioTranscription: {},
             outputAudioTranscription: {},
