@@ -13,7 +13,7 @@ jobs:
   frsample:
     if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[frwik-sample]')
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 50
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,15 +23,30 @@ jobs:
         with:
           node-version: 22
 
-      - name: Stream French Wiktionary dump and extract headword records
+      - name: Download French Wiktionary dump
+        timeout-minutes: 20
         shell: bash
         run: |
           set -euo pipefail
-          curl -sSL --retry 4 --retry-all-errors --retry-delay 3 --connect-timeout 30 'https://kaikki.org/frwiktionary/raw-wiktextract-data.jsonl.gz' \
-            | tee >(sha256sum > dump.sha256) \
-            | gunzip \
-            | KAIKKI_FILE=/dev/stdin HEADWORDS_FILE=data/dictionary/common-3000.json OUT_FILE=kaikki-fr-top3000.jsonl.gz node tools/dictionary/extract-kaikki-sample.mjs
-          echo "DUMP SHA256 (compressed):"; cat dump.sha256
+          date -u
+          curl -sS -L --retry 3 --retry-all-errors --retry-delay 5 --connect-timeout 30 --max-time 1100 -o dump.jsonl.gz 'https://kaikki.org/frwiktionary/raw-wiktextract-data.jsonl.gz'
+          date -u
+          ls -l dump.jsonl.gz
+          sha256sum dump.jsonl.gz | tee dump.sha256
+          echo "FIRST RECORD (first 700 chars):"
+          (gunzip -c dump.jsonl.gz | head -n 1 | cut -c1-700) || true
+
+      - name: Extract French headword records (grep prefilter)
+        timeout-minutes: 25
+        shell: bash
+        run: |
+          set -euo pipefail
+          date -u
+          gunzip -c dump.jsonl.gz | grep -a -E '"lang_code": ?"fr"' > fr-lines.jsonl || true
+          date -u
+          ls -l fr-lines.jsonl
+          wc -l fr-lines.jsonl
+          KAIKKI_FILE=fr-lines.jsonl HEADWORDS_FILE=data/dictionary/common-3000.json OUT_FILE=kaikki-fr-top3000.jsonl.gz node tools/dictionary/extract-kaikki-sample.mjs
           ls -l kaikki-fr-top3000.jsonl.gz
 
       - name: Inspect the French records
