@@ -59,9 +59,9 @@ jobs:
 
       - name: Type-check voice and tutor edge functions
         run: |
-          deno check supabase/functions/live-voice-groq/index.ts
-          deno check supabase/functions/live-voice-session/index.ts
-          deno check supabase/functions/tutor-v2/index.ts
+          deno check --node-modules-dir=auto supabase/functions/live-voice-groq/index.ts
+          deno check --node-modules-dir=auto supabase/functions/live-voice-session/index.ts
+          deno check --node-modules-dir=auto supabase/functions/tutor-v2/index.ts
 
       - name: Run tutor backend tests
         run: deno test supabase/functions/tutor-v2/index.test.ts
