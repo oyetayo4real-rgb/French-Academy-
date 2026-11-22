@@ -53,8 +53,16 @@ export function createGroqVoiceHandler(overrides: GroqDependencies = {}) {
     const supabaseUrl = env.get("SUPABASE_URL");
     const anonKey = env.get("SUPABASE_ANON_KEY");
     const groqKey = env.get("GROQ_API_KEY");
-    if (env.get("GROQ_VOICE_ENABLED") !== "true") return json({ error: "groq_voice_disabled" }, 503, allowedOrigin);
-    if (!supabaseUrl || !anonKey || !groqKey) return json({ error: "voice_service_unavailable" }, 503, allowedOrigin);
+    if (env.get("GROQ_VOICE_ENABLED") !== "true") {
+      console.warn("[live-voice-groq] fallback disabled by GROQ_VOICE_ENABLED");
+      return json({ error: "groq_voice_disabled" }, 503, allowedOrigin);
+    }
+    if (!supabaseUrl || !anonKey || !groqKey) {
+      console.error("[live-voice-groq] required environment configuration missing", {
+        supabaseUrl: !!supabaseUrl, supabaseAnonKey: !!anonKey, groqApiKey: !!groqKey
+      });
+      return json({ error: "voice_service_unavailable" }, 503, allowedOrigin);
+    }
 
     let auth: Response | null;
     try {
