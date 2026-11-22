@@ -18,6 +18,11 @@ on:
       - ".github/workflows/bilingual-voice-tutor.yml"
   pull_request:
     paths:
+      - "features/live-voice.js"
+      - "supabase/functions/live-voice-groq/index.ts"
+      - "supabase/functions/live-voice-groq/index.test.ts"
+      - "supabase/functions/live-voice-session/index.ts"
+      - "supabase/functions/live-voice-session/index.test.ts"
       - "features/ai-classroom.js"
       - "features/ai-classroom.css"
       - "scripts/check-tutor-retry-browser.mjs"
@@ -62,6 +67,11 @@ jobs:
           deno check --node-modules-dir=auto supabase/functions/live-voice-groq/index.ts
           deno check --node-modules-dir=auto supabase/functions/live-voice-session/index.ts
           deno check --node-modules-dir=auto supabase/functions/tutor-v2/index.ts
+
+      - name: Run voice broker and Groq fallback tests
+        run: |
+          deno test supabase/functions/live-voice-session/index.test.ts
+          deno test supabase/functions/live-voice-groq/index.test.ts
 
       - name: Run tutor backend tests
         run: deno test supabase/functions/tutor-v2/index.test.ts
