@@ -43,12 +43,12 @@ Deno.serve(async(req:Request)=>{
  const now=Date.now();
  try {
   // The official SDK enforces the required v1alpha ephemeral-token API version.
-  const genai=new GoogleGenAI({apiKey:geminiKey,apiVersion:"v1alpha"});
+  const genai=new GoogleGenAI({apiKey:geminiKey,httpOptions:{apiVersion:"v1alpha"}});
   const token=await genai.authTokens.create({config:{
    uses:1,
    expireTime:new Date(now+30*60*1000).toISOString(),
    newSessionExpireTime:new Date(now+60*1000).toISOString(),
-   liveConnectConstraints:{model:"gemini-3.8-live",config:{
+   liveConnectConstraints:{model:"models/gemini-3.8-live",config:{
     responseModalities:["AUDIO"],sessionResumption:{},
     inputAudioTranscription:{},outputAudioTranscription:{},
     systemInstruction:{parts:[{text:instructions}]}
@@ -58,7 +58,7 @@ Deno.serve(async(req:Request)=>{
    console.error("[live-voice] SDK returned no usable ephemeral token");
    return reply({error:"voice_session_unavailable"},502,okOrigin);
   }
-  return reply({ephemeral_token:token.name,expires_at:token.expireTime||null,model:"gemini-3.8-live",instructions},200,okOrigin);
+  return reply({ephemeral_token:token.name,expires_at:token.expireTime||null,model:"models/gemini-3.8-live",instructions},200,okOrigin);
  } catch(error) {
   const message=error instanceof Error?error.message:String(error);
   console.error("[live-voice] Gemini SDK token creation failed",{message:clean(message,500)});
