@@ -127,7 +127,7 @@ export function createLiveVoiceSessionHandler(overrides: SessionDependencies = {
         expireTime: requestedExpiry,
         newSessionExpireTime: newSessionExpiry,
         liveConnectConstraints: {
-          model: "models/gemini-3.8-live",
+          model: "gemini-3.8-live",
           config: {
             responseModalities: ["AUDIO"],
             sessionResumption: {},
@@ -143,7 +143,7 @@ export function createLiveVoiceSessionHandler(overrides: SessionDependencies = {
       return json({
         ephemeral_token: token.name,
         expires_at: token.expireTime || requestedExpiry,
-        model: "models/gemini-3.8-live",
+        model: "gemini-3.8-live",
         instructions
       }, 200, allowedOrigin);
     } catch (error) {
