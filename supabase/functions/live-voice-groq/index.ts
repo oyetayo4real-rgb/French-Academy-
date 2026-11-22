@@ -31,11 +31,11 @@ Deno.serve(async (req: Request) => {
   }
   const allowedTypes = ["audio/webm", "audio/ogg", "audio/wav", "audio/mp4", "audio/mpeg"];
   if (!allowedTypes.some(type => audio.type.toLowerCase().startsWith(type))) return json({ error: "unsupported_audio" }, 415);
-  const language = form.get("language") === "en" ? "en" : "fr";
+  const language = form.get("language") === "auto" ? "" : (form.get("language") === "en" ? "en" : "fr");
   const groqForm = new FormData();
   groqForm.append("file", audio, audio.name || "voice-turn.webm");
   groqForm.append("model", "whisper-large-v3-turbo");
-  groqForm.append("language", language);
+  if (language) groqForm.append("language", language);
   groqForm.append("response_format", "json");
   groqForm.append("temperature", "0");
   const transcription = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
