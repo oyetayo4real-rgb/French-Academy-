@@ -196,7 +196,7 @@ for(const word of OWNER_OVERRIDE_WORDS){
  schema3Assertion(word+" first POS group meaning",()=>assert.ok(OWNER_OVERRIDE_ACCEPTED_FIRST_MEANINGS[word].some(value=>normalizeEnglish(first).includes(normalizeEnglish(value))),word+" first group meaning got "+first));
  assert.equal(importedData[word]?.[4]?.curationNote,overrides[word]?.reason,word+" stores curationNote in metadata");
  const html=compat.renderDictionaryHtml(compatResult);assert.ok(html.includes("fi-imported-dictionary"));
- assert.match(html,/Curated draft · needs French-speaker review/,word+" displays review status");
+ assert.match(html,/(?:Brouillon \u00b7 \u00e0 faire relire par un francophone|Curated draft · needs French-speaker review)/,word+" displays review status");
  assert.doesNotMatch(html,/(?:curationNote|Curated draft · needs French-speaker review; verify)/i,word+" never renders private curation note");
  if(groups.length>1){const rendered=[...html.matchAll(/<h4>([^<]+)<\/h4>/g)].map(match=>match[1]);assert.deepEqual(rendered,groups.map(group=>group.pos),word+" renders distinct POS sections in order");}
 }
@@ -290,7 +290,7 @@ schema3Assertion("curated curationNote is stored but never rendered",()=>{
   assert.ok(importedData[word]?.[4]?.curationNote,word+" stores its curationNote");
   const html=compat.renderDictionaryHtml(compat.lookup(word));
   assert.doesNotMatch(html,/(?:Owner-provided|contamination|validate|curationNote)/i,word+" never renders internal curation text");
-  assert.match(html,/Curated draft · needs French-speaker review/,word+" renders only the generic curated-draft notice");
+  assert.match(html,/(?:Brouillon \u00b7 \u00e0 faire relire par un francophone|Curated draft · needs French-speaker review)/,word+" renders only the generic curated-draft notice");
  }
 });
 schema3Assertion("register labels are visible and complete",()=>{for(const [word,entry] of Object.entries(importedData))for(const sense of entry[4].senses||[]){
@@ -304,7 +304,7 @@ schema3Assertion("register labels are visible and complete",()=>{for(const [word
  }
 }});
 const verbHtml=compat.renderDictionaryHtml(compat.lookup("cuire"));
-assert.match(verbHtml,/See the Conjugate tool for forms\./,"verb entries direct learners to the Conjugate tool");
+assert.match(verbHtml,/(?:Voir l\u2019outil de conjugaison \(Conjugate\) pour les formes|See the Conjugate tool for forms)\./,"verb entries direct learners to the Conjugate tool");
 assert.doesNotMatch(verbHtml,/(?:Feminine|Plural):/,"verb entries never render gender/number form lists");
 console.log("PASS spelling-variant built-in identity, curated overrides, form-only exclusions, POS grouping and register labels");
 console.log("PASS Stage A imported dictionary core and compatibility acceptance");
