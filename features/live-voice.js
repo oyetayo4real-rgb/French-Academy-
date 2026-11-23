@@ -161,7 +161,7 @@
 
     const ai = new GoogleGenAI({
       apiKey: token,
-      httpOptions: { apiVersion: "v1alpha" }
+      httpOptions: { apiVersion: "v1beta" }
     });
 
     let closeError = null;

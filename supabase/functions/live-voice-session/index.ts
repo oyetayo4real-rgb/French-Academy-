@@ -46,7 +46,7 @@ export function createLiveVoiceSessionHandler(overrides: SessionDependencies = {
   const now = overrides.now || Date.now;
   const createToken = overrides.createToken || (async (apiKey: string, config: Record<string, unknown>) => {
     const { GoogleGenAI } = await import("npm:@google/genai@2.32.0");
-    const genai = new GoogleGenAI({ apiKey, httpOptions: { apiVersion: "v1alpha" } });
+    const genai = new GoogleGenAI({ apiKey, httpOptions: { apiVersion: "v1beta" } });
     return await genai.authTokens.create({ config: config as never }) as TokenResult;
   });
 
