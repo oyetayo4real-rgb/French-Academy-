@@ -62,8 +62,8 @@ try{
       firstMeaning:node.querySelector("ol li")?.textContent?.trim()||"",
       text:node.innerText
     })));
-    const memeAdverb=memeSections.find(group=>group.pos==="adverb");
-    const memeAdjective=memeSections.find(group=>group.pos==="adjective");
+    const memeAdverb=memeSections.find(group=>group.pos==="adverbe");
+    const memeAdjective=memeSections.find(group=>group.pos==="adjectif");
     assert.ok(memeAdverb,profile.name+" renders même adverb in its own POS section");
     assert.match(memeAdverb.firstMeaning,/even/i,profile.name+" même adverb first meaning is even");
     assert.ok(memeAdjective,profile.name+" renders même adjective in a separate POS section");

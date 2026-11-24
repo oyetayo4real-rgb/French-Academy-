@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import importedData from "../data/dictionary/common-3000.json" with { type: "json" };
 import * as core from "../features/french-intelligence-core-v1.mjs";
 import * as compat from "../features/french-intelligence-compat.mjs";
+import { posLabelFr } from "../features/dictionary-card.mjs";
 import { dictionary } from "../features/french-data.mjs";
 import goldenV4 from "../tests/golden/legacy-v4.json" with { type: "json" };
 import { VERB_PARADIGMS, REGULAR_ER_VERBS } from "../features/french-conjugation-paradigms.mjs";
@@ -162,8 +163,8 @@ schema3Assertion("même has a separate adjective POS group",()=>assert.ok(memeAd
 schema3Assertion("même adjective group contains same",()=>assert.ok(posGroupMeanings(memeAdjective).some(meaning=>normalizeEnglish(meaning).includes("same")),"même adjective group contains same"));
 const memeHtml=compat.renderDictionaryHtml(compat.lookup("même"));
 schema3Assertion("même renders distinct POS sections",()=>assert.ok((memeHtml.match(/class="fi-pos-group"/g)||[]).length>=2,"même renders distinct POS sections"));
-schema3Assertion("même rendered adverb section is distinct",()=>assert.match(memeHtml,/<h4>adverb<\/h4>/,"même rendered adverb section is distinct"));
-schema3Assertion("même rendered adjective section is distinct",()=>assert.match(memeHtml,/<h4>adjective<\/h4>/,"même rendered adjective section is distinct"));
+schema3Assertion("même rendered adverb section is distinct",()=>assert.match(memeHtml,/<h4>adverbe<\/h4>/,"même rendered adverb section is distinct"));
+schema3Assertion("même rendered adjective section is distinct",()=>assert.match(memeHtml,/<h4>adjectif<\/h4>/,"même rendered adjective section is distinct"));
 const legacyHtml=compat.renderDictionaryHtml({
  imported:true,word:"legacy",part:"noun",
  posGroups:[{pos:"noun",senses:[{meaning:"legacy noun sense",label:null}]}],
@@ -198,7 +199,7 @@ for(const word of OWNER_OVERRIDE_WORDS){
  const html=compat.renderDictionaryHtml(compatResult);assert.ok(html.includes("fi-imported-dictionary"));
  assert.match(html,/(?:Brouillon \u00b7 \u00e0 faire relire par un francophone|Curated draft · needs French-speaker review)/,word+" displays review status");
  assert.doesNotMatch(html,/(?:curationNote|Curated draft · needs French-speaker review; verify)/i,word+" never renders private curation note");
- if(groups.length>1){const rendered=[...html.matchAll(/<h4>([^<]+)<\/h4>/g)].map(match=>match[1]);assert.deepEqual(rendered,groups.map(group=>group.pos),word+" renders distinct POS sections in order");}
+ if(groups.length>1){const rendered=[...html.matchAll(/<h4>([^<]+)<\/h4>/g)].map(match=>match[1]);assert.deepEqual(rendered,groups.map(group=>posLabelFr(group.pos)),word+" renders distinct POS sections in order");}
 }
 const restoredWords=["liberté","campagne","crime","détail","trottoir","club","rivière","test","septembre","week-end","prétexte","habit","musée","impatience","raccompagner"];
 for(const word of restoredWords){const result=compat.lookup(word);assert.ok(result?.imported,word+" resolves");assert.ok(String(result.meaning||"").trim(),word+" has a meaning");assert.equal(importedData[word]?.[4]?.status,"curated-draft");}

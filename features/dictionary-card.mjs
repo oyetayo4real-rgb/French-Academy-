@@ -36,7 +36,7 @@ export function renderImportedCardHtml(d) {
       // a "feminine" form identical to the headword or to a plural form is a data artefact (merde -> merdes)
       const feminine = showForms ? (forms.feminine || []).filter(v => validForm(v) && String(v).toLocaleLowerCase("fr") !== headword && !plural.includes(v)) : [];
       const gender = isNoun ? (group.gender || item.gender || d.gender || "") : "";
-      return '<section class="fi-pos-group"><h4>' + esc(group.pos || item.part || d.part || "Part of speech") + "</h4>" +
+      return '<section class="fi-pos-group"><h4>' + esc(posLabelFr(group.pos || item.part || d.part || "Part of speech")) + "</h4>" +
         (gender && GENDER_FR[gender] ? '<p class="fi-muted">Genre : ' + esc(GENDER_FR[gender]) + "</p>" : "") +
         meaningHtml +
         (isVerb ? '<p class="fi-muted">Voir l\u2019outil de conjugaison (Conjugate) pour les formes.</p>' : "") +
@@ -69,7 +69,9 @@ export function renderBriefHtml(entry) {
 export async function attachFrenchBrief(container, word, fetchImpl = globalThis.fetch) {
   try {
     if (!container || !word) return;
-    const entry = await loadLayerEntry("fr", word, fetchImpl);
+    let entry;
+    try { entry = await loadLayerEntry("fr", word, fetchImpl); }
+    catch { await new Promise(resolve => setTimeout(resolve, 2500)); entry = await loadLayerEntry("fr", word, fetchImpl); }
     const html = renderBriefHtml(entry);
     if (!html) return;
     for (const section of container.querySelectorAll(".fi-imported-entry")) {

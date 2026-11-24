@@ -113,6 +113,7 @@ const genderOf=rec=>{
 };
 
 const entries={};
+const fixEty=text=>String(text||"").replace(/\bSynchroniquement(?=[a-z\u00e0-\u00ff])/g,"Synchroniquement ").replace(/(\.) \p{L}[\p{L}'-]{2,} \(\u00ab [^\u00bb]{1,40} \u00bb\)\.?$/u,"$1");
 const stats={headwords:0,groups:0,senses:0,examples:0,withIpa:0,withEtymology:0,withSynonyms:0,withProverbs:0,sensitiveSenses:0,formFallbackGroups:0};
 for(const [word,recs] of records){
   const groupsByKey=new Map();
@@ -131,7 +132,7 @@ for(const [word,recs] of records){
     for(const s of rec.senses||[]){const o=senseOf(s,{formFallback:!wordHasReal});if(o&&(wordHasReal||g.senses.length<3))g.senses.push(o);}
     if(!g.syn){const syn=wordsOf(rec.synonyms).slice(0,MAX_SYN);if(syn.length)g.syn=syn;}
     if(!g.ant){const ant=wordsOf(rec.antonyms).slice(0,MAX_ANT);if(ant.length)g.ant=ant;}
-    if(!g.etymology){const et=cut((rec.etymology_texts||[]).join(" "),MAX_ETYMOLOGY);if(et)g.etymology=et;}
+    if(!g.etymology){const et=cut(fixEty((rec.etymology_texts||[]).join(" ")),MAX_ETYMOLOGY);if(et)g.etymology=et;}
     if(!g.forms&&(pos==="noun"||pos==="adjective")){
       const forms={};
       for(const f of rec.forms||[]){
