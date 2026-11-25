@@ -81,6 +81,24 @@ Deno.test("session broker enforces one-use token and 60-second start / 30-minute
   assert((captured as any)?.liveConnectConstraints?.model === "gemini-3.8-live", "unexpected Live model");
 });
 
+
+Deno.test("session broker binds a supplied resumption handle into the fresh one-use token", async () => {
+  let captured: Record<string, unknown> | null = null;
+  const handler = createLiveVoiceSessionHandler({
+    env,
+    fetchImpl: validAuth,
+    createToken: async (_key, config) => {
+      captured = config;
+      return { name: "auth_tokens/resumed" };
+    }
+  });
+  const response = await handler(request({ body: { level: "A1", resumeHandle: "resume-handle-test" } }));
+  assert(response.status === 200, "resumption request should receive a fresh ephemeral token");
+  const constraints = (captured as any)?.liveConnectConstraints;
+  assert(constraints?.config?.sessionResumption?.handle === "resume-handle-test", "resumption handle must be constrained into the token");
+  assert((captured as any)?.uses === 1, "reconnect token must remain one-use");
+});
+
 Deno.test("session broker fails closed when Supabase auth is unreachable", async () => {
   const handler = createLiveVoiceSessionHandler({
     env,

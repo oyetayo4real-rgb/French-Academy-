@@ -80,11 +80,12 @@ try {
       }
     });
     window.__groqCalls = 0;
+    window.__sessionRequests = [];
     window.FA_LIVE_VOICE_CONTEXT = {
       isSignedIn: () => true,
       level: () => "A1",
       context: () => ({ level: "A1", topics: [], recent: [], memoryEnabled: false }),
-      request: async () => ({ ephemeral_token: "mock-one-use-token", instructions: "Test teacher" }),
+      request: async body => { window.__sessionRequests.push(body); return { ephemeral_token: "mock-one-use-token", instructions: "Test teacher" }; },
       groqTurn: async () => {
         window.__groqCalls++;
         return { transcript: "Bonjour, je voudrais pratiquer.", text: "Très bien ! Comment allez-vous ?" };
@@ -136,10 +137,14 @@ try {
   });
 
   await check("Gemini session interruption reconnects with a fresh one-use token and preserves the microphone", async () => {
-    await page.evaluate(() => window.__geminiCallbacks.onclose({ code: 1011, reason: "controlled transient failure" }));
+    await page.evaluate(() => {
+      window.__geminiCallbacks.onmessage({ sessionResumptionUpdate: { resumable: true, newHandle: "mock-resume-handle" } });
+      window.__geminiCallbacks.onclose({ code: 1011, reason: "controlled transient failure" });
+    });
     await page.waitForFunction(() => document.querySelector("#faLiveStatus")?.innerText.includes("reconnected"), { timeout: 8000 });
     assert.equal(await page.evaluate(() => window.__getUserMediaCalls), 2, "Gemini recovery must preserve the existing microphone stream");
     assert.equal(await page.locator("#faLiveProvider").innerText(), "Gemini Live");
+    assert.equal(await page.evaluate(() => window.__sessionRequests.at(-1)?.resumeHandle), "mock-resume-handle", "reconnect must request a fresh token bound to the latest resume handle");
   });
 
   await check("bounded Gemini reconnect failure falls back to Groq without looping", async () => {
