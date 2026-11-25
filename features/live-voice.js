@@ -231,6 +231,7 @@
     }
     provider = "gemini";
     geminiReady = true;
+    geminiFailure = "";
     geminiAudioPackets = 0;
     status("Gemini Live connected. Listening for your voice…");
     return liveSession;
