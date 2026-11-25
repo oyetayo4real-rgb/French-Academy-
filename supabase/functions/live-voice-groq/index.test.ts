@@ -45,14 +45,24 @@ Deno.test("Groq adapter rejects missing and invalid user authentication before p
   assert(calls === 1, "only the supplied invalid token should reach Supabase Auth");
 });
 
-Deno.test("Groq adapter remains disabled unless the explicit voice opt-in is true", async () => {
+Deno.test("Groq adapter is enabled by configured credentials unless explicitly disabled", async () => {
   const disabledEnv = { get: (name: string) => name === "GROQ_VOICE_ENABLED" ? "false" : envValues[name] };
   let calls = 0;
   const handler = createGroqVoiceHandler({ env: disabledEnv, fetchImpl: async () => { calls++; return new Response("{}", { status: 200 }); } });
   const response = await handler(makeRequest());
   const body = await response.json();
-  assert(response.status === 503 && body.error === "groq_voice_disabled", "disabled fallback must return 503");
+  assert(response.status === 503 && body.error === "groq_voice_disabled", "explicitly disabled fallback must return 503");
   assert(calls === 0, "disabled fallback must not call external services");
+  const defaultEnv = { get: (name: string) => name === "GROQ_VOICE_ENABLED" ? undefined : envValues[name] };
+  let defaultCalls = 0;
+  const defaultHandler = createGroqVoiceHandler({ env: defaultEnv, fetchImpl: async input => {
+    defaultCalls++;
+    if (String(input).endsWith("/auth/v1/user")) return new Response("{}", { status: 401 });
+    throw new Error("unexpected provider call");
+  }});
+  const defaultResponse = await defaultHandler(makeRequest());
+  assert(defaultResponse.status === 401, "unset flag must permit auth preflight when credentials are configured");
+  assert(defaultCalls === 1, "default-enabled path should reach Supabase Auth only");
 });
 
 Deno.test("Groq adapter transcribes audio and forces the Tutor V2 Groq provider", async () => {

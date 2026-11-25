@@ -53,7 +53,7 @@ export function createGroqVoiceHandler(overrides: GroqDependencies = {}) {
     const supabaseUrl = env.get("SUPABASE_URL");
     const anonKey = env.get("SUPABASE_ANON_KEY");
     const groqKey = env.get("GROQ_API_KEY");
-    if (env.get("GROQ_VOICE_ENABLED") !== "true") {
+    if (env.get("GROQ_VOICE_ENABLED") === "false") {
       console.warn("[live-voice-groq] fallback disabled by GROQ_VOICE_ENABLED");
       return json({ error: "groq_voice_disabled" }, 503, allowedOrigin);
     }
@@ -152,8 +152,9 @@ export function createGroqVoiceHandler(overrides: GroqDependencies = {}) {
       return json({ error: "transcription_unavailable" }, 502, allowedOrigin);
     }
     if (!transcription.ok) {
-      return json({ error: transcription.status === 429 ? "provider_rate_limit" : "transcription_unavailable" },
-        transcription.status === 429 ? 429 : 502, allowedOrigin);
+      console.error("[live-voice-groq] transcription provider rejected request", { status: transcription.status });
+      const error = transcription.status === 429 ? "provider_rate_limit" : transcription.status === 401 || transcription.status === 403 ? "provider_auth_failed" : "transcription_unavailable";
+      return json({ error }, transcription.status === 429 ? 429 : transcription.status === 401 || transcription.status === 403 ? 503 : 502, allowedOrigin);
     }
     const transcriptBody = await transcription.json().catch(() => ({}));
     const transcript = typeof transcriptBody.text === "string" ? transcriptBody.text.trim().slice(0, 1800) : "";

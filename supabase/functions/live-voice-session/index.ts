@@ -101,6 +101,7 @@ export function createLiveVoiceSessionHandler(overrides: SessionDependencies = {
       return json({ error: "invalid_request" }, 400, allowedOrigin);
     }
 
+    const resumeHandle = clean(input.resumeHandle, 4096);
     const level = ["none", "A1", "A2", "B1", "B2", "C1", "C2"].includes(String(input.level)) ? String(input.level) : "A1";
     const mode = input.mode === "conversation" ? "conversation" : "guided";
     const support = input.language === "fr" ? "French" : "English";
@@ -135,7 +136,7 @@ export function createLiveVoiceSessionHandler(overrides: SessionDependencies = {
           model: "gemini-3.8-live",
           config: {
             responseModalities: ["AUDIO"],
-            sessionResumption: {},
+            sessionResumption: resumeHandle ? { handle: resumeHandle } : {},
             inputAudioTranscription: {},
             outputAudioTranscription: {},
             systemInstruction: { parts: [{ text: instructions }] }

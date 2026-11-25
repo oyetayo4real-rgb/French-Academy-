@@ -5,6 +5,7 @@
   let active = false, busy = false, provider = "none", sessionId = 0, playAt = 0;
   let playing = new Set(), recorder = null, chunks = [], speechStarted = 0, lastVoiceAt = 0;
   let groqTurnBusy = false, groqResponseSpeaking = false, lastTranscript = "", geminiFailure = "", geminiAudioPackets = 0;
+  let geminiReady = false, geminiRecovering = false, geminiResumeHandle = "", geminiConnectionEpoch = 0;
   const $ = id => document.getElementById(id);
   const bridge = () => window.FA_LIVE_VOICE_CONTEXT;
   const now = () => performance.now();
@@ -123,8 +124,11 @@
       topics: ctx.topics || [], recent: ctx.recent || []
     };
   }
-  function handleGeminiMessage(data, id) {
-    if (id !== sessionId || !data) return;
+  function handleGeminiMessage(data, id, epoch) {
+    if (id !== sessionId || epoch !== geminiConnectionEpoch || !data) return;
+    const resume = data.sessionResumptionUpdate || data.session_resumption_update;
+    if (resume?.resumable && resume.newHandle) geminiResumeHandle = String(resume.newHandle).slice(0, 4096);
+    else if (resume?.resumable === false) geminiResumeHandle = "";
     const content = data.serverContent || {};
     const inputTranscript = data.inputTranscription?.text || content.inputTranscription?.text;
     const outputTranscript = data.outputTranscription?.text || content.outputTranscription?.text;
@@ -139,8 +143,11 @@
     if (content.interrupted) { stopPlayback(); status("Listening — you interrupted. Go ahead."); }
     for (const part of content.modelTurn?.parts || []) if (part.inlineData?.data) playPcm(part.inlineData.data);
     if (content.turnComplete) status("Listening — speak whenever you're ready.");
-    if (data.goAway) status("Gemini is preparing to close this session.");
-    if (data.error) fallbackToGroq(data.error.message || data.error.status || "Gemini Live reported an error.");
+    if (data.goAway) {
+      status("Gemini is preparing to rotate this connection. Preserving your conversation…");
+      void recoverGemini("Gemini requested a connection rotation.", id);
+    }
+    if (data.error) void recoverGemini(data.error.message || data.error.status || "Gemini Live reported an error.", id);
   }
   let genaiSdkPromise = null;
   function loadGoogleGenAI() {
@@ -151,7 +158,7 @@
     }
     return genaiSdkPromise;
   }
-  async function connectGemini(token, settings, id) {
+  async function connectGemini(token, settings, id, resumeHandle = "") {
     status("Loading Google's official Live SDK…");
     let sdk;
     try { sdk = await loadGoogleGenAI(); }
@@ -161,8 +168,10 @@
 
     const ai = new GoogleGenAI({
       apiKey: token,
-      httpOptions: { apiVersion: "v1beta" }
+      // Constrained ephemeral-token connections are currently supported on v1alpha.
+      httpOptions: { apiVersion: "v1alpha" }
     });
+    const epoch = ++geminiConnectionEpoch;
 
     let closeError = null;
     let rejectTransport;
@@ -177,22 +186,23 @@
         realtimeInputConfig: {
           automaticActivityDetection: { disabled: false }
         },
-        sessionResumption: {},
+        sessionResumption: resumeHandle ? { handle: resumeHandle } : {},
         systemInstruction: { parts: [{ text: settings.instructions || "" }] }
       },
       callbacks: {
         onopen: () => status("Gemini transport opened — configuring live session…"),
-        onmessage: message => handleGeminiMessage(message, id),
+        onmessage: message => handleGeminiMessage(message, id, epoch),
         onerror: event => {
           const detail = event?.message || event?.error?.message || "WebSocket transport error";
           closeError = new Error("Gemini Live transport: " + String(detail).slice(0, 180));
           rejectTransport(closeError);
+          if (id === sessionId && epoch === geminiConnectionEpoch && active && geminiReady) void recoverGemini(closeError.message, id);
         },
         onclose: event => {
           const reason = String(event?.reason || "").replace(/[\u0000-\u001f\u007f]/g, " ").slice(0, 140);
           closeError = new Error("Gemini Live closed (code " + (event?.code ?? 1006) + (reason ? ": " + reason : "") + ").");
           rejectTransport(closeError);
-          if (id === sessionId && active && provider === "gemini") fallbackToGroq(closeError.message);
+          if (id === sessionId && epoch === geminiConnectionEpoch && active && geminiReady) void recoverGemini(closeError.message, id);
         }
       }
     });
@@ -220,6 +230,7 @@
       throw new Error("Live conversation was cancelled during connection.");
     }
     provider = "gemini";
+    geminiReady = true;
     geminiAudioPackets = 0;
     status("Gemini Live connected. Listening for your voice…");
     return liveSession;
@@ -241,10 +252,10 @@
         recorder = null; chunks = [];
         if (blob.size >= 1500 && active && provider === "groq") submitGroqTurn(blob).catch(error => {
         const message = error.message || "Groq voice turn failed.";
-        if (/disabled|rate_limit|unavailable|not_signed_in/i.test(message)) {
+        if (/disabled|rate_limit|unavailable|not_signed_in|quota_exceeded|provider_auth_failed/i.test(message)) {
           provider = "none";
-          status((geminiFailure ? geminiFailure + " " : "") + message + " Voice backup has stopped to avoid repeated requests.", true);
-        } else status(message, true);
+          status((geminiFailure ? geminiFailure + " " : "") + "Voice backup unavailable: " + message + ". End and restart later; no repeated paid requests will be made.", true);
+        } else status("Voice backup error: " + message + ". You can try speaking again.", true);
       });
       };
       recorder.start(250);
@@ -299,16 +310,48 @@
       source.connect(processor); processor.connect(silent); silent.connect(audio.destination);
     });
   }
+  async function recoverGemini(reason, id) {
+    if (!active || id !== sessionId || geminiRecovering || provider === "groq") return;
+    geminiRecovering = true;
+    const previousHandle = geminiResumeHandle;
+    provider = "recovering";
+    if (liveSession) { const old = liveSession; liveSession = null; try { old.close(); } catch {} }
+    pcmQueue = []; stopPlayback();
+    const app = bridge(), settings = config();
+    const attempts = previousHandle ? [previousHandle, ""] : ["", ""];
+    let lastError = reason;
+    for (let index = 0; index < 2; index++) {
+      if (!active || id !== sessionId) { geminiRecovering = false; return; }
+      const handle = attempts[index];
+      status("Gemini connection interrupted. Reconnecting " + (index + 1) + "/2" + (handle ? " and restoring your conversation…" : " with a fresh session…"));
+      await new Promise(resolve => setTimeout(resolve, index === 0 ? 900 : 2200));
+      try {
+        const ticket = await app.request({ ...settings, resumeHandle: handle });
+        if (!ticket?.ephemeral_token) throw new Error("Gemini did not issue a reconnect token.");
+        settings.instructions = ticket.instructions || "";
+        await connectGemini(ticket.ephemeral_token, settings, id, handle);
+        geminiRecovering = false;
+        status("Gemini Live reconnected. Continue speaking.");
+        return;
+      } catch (error) { lastError = error?.message || String(error); }
+    }
+    geminiRecovering = false;
+    await fallbackToGroq(String(reason || "Gemini reconnect failed") + " Reconnection attempts exhausted: " + String(lastError).slice(0, 160));
+  }
   async function fallbackToGroq(reason) {
     if (!active || provider === "groq") return;
     geminiFailure = String(reason || "Gemini Live connection failed.");
+    geminiReady = false; geminiRecovering = false; geminiResumeHandle = "";
     provider = "groq";
     if (liveSession) { const old = liveSession; liveSession = null; try { old.close(); } catch {} }
     if (ws) { const old = ws; ws = null; try { old.close(); } catch {} }
     pcmQueue = []; stopPlayback();
-    status(reason + " Switching to the Groq voice pipeline automatically.");
-    if (!window.MediaRecorder) status("Gemini is unavailable and this browser cannot record audio for the Groq backup.", true);
-    else status("Groq backup is ready — speak naturally. You can interrupt spoken responses.");
+    if (!window.MediaRecorder) {
+      provider = "none";
+      status("Gemini is unavailable (" + String(reason).slice(0, 180) + "). This browser cannot record audio for voice backup.", true);
+      return;
+    }
+    status("Gemini is unavailable (" + String(reason).slice(0, 180) + "). Voice backup is selected; checking its service when you speak.");
   }
   async function start() {
     if (busy || active) return;
@@ -357,7 +400,7 @@
     } finally { busy = false; if ($("faLiveStart")) { $("faLiveStart").disabled = active; if (active) $("faLiveStart").textContent = "Listening…"; } }
   }
   async function stop() {
-    active = false; provider = "none"; sessionId++;
+    active = false; provider = "none"; geminiReady = false; geminiRecovering = false; geminiResumeHandle = ""; sessionId++;
     stopSpeech(); stopPlayback();
     if (liveSession) { try { liveSession.close(); } catch {} liveSession = null; }
     if (ws) { try { ws.close(); } catch {} ws = null; }
