@@ -13,7 +13,7 @@
     const node = $("faLiveStatus");
     if (node) { node.textContent = message; node.style.color = bad ? "var(--bad)" : "var(--mu)"; }
     const badge = $("faLiveProvider");
-    if (badge) badge.textContent = provider === "gemini" ? "Gemini Live" : provider === "groq" ? "Groq Voice backup" : "Not connected";
+    if (badge) badge.textContent = provider === "gemini" ? "Gemini Live" : provider === "recovering" ? "Reconnecting Gemini…" : provider === "groq" ? "Groq Voice backup" : "Not connected";
   }
   function line(who, value) {
     const text = String(value || "").trim();
