@@ -79,6 +79,13 @@ export function createGroqVoiceHandler(overrides: GroqDependencies = {}) {
 
     let form: FormData;
     try { form = await req.formData(); } catch { return json({ error: "invalid_request" }, 400, allowedOrigin); }
+    const stagingTest = form.get("stagingTest") === "true";
+    if (stagingTest) {
+      const testOrigin = (env.get("GROQ_STAGING_TEST_ORIGIN") || "").trim();
+      if (env.get("GROQ_STAGING_TEST_ENABLED") !== "true" || !testOrigin || requestOrigin !== testOrigin) {
+        return json({ error: "staging_test_disabled" }, 404, allowedOrigin);
+      }
+    }
     const audio = form.get("audio");
     if (!(audio instanceof File) || audio.size < 1024 || audio.size > 8 * 1024 * 1024) {
       return json({ error: "invalid_audio" }, 400, allowedOrigin);
