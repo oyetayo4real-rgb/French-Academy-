@@ -11,13 +11,14 @@ const envValues: Record<string, string> = {
 };
 const env = { get: (name: string) => envValues[name] };
 const assert = (value: unknown, message: string) => { if (!value) throw new Error(message); };
-const makeRequest = (options: { originValue?: string; authorization?: string | null; audio?: boolean } = {}) => {
+const makeRequest = (options: { originValue?: string; authorization?: string | null; audio?: boolean; stagingTest?: boolean } = {}) => {
   const form = new FormData();
   if (options.audio !== false) form.append("audio", new File([new Uint8Array(2048)], "voice.webm", { type: "audio/webm" }));
   form.append("language", "auto");
   form.append("level", "A1");
   form.append("history", JSON.stringify([{ role: "user", content: "Bonjour" }]));
   form.append("useLearningMemory", "false");
+  if (options.stagingTest) form.append("stagingTest", "true");
   const headers = new Headers({ Origin: options.originValue || origin });
   if (options.authorization !== null) headers.set("Authorization", options.authorization || "Bearer valid-user-token");
   return new Request("https://edge.test/live-voice-groq", { method: "POST", headers, body: form });
@@ -134,4 +135,34 @@ Deno.test("Groq rate limits are surfaced without attempting a Tutor generation",
   const body = await response.json();
   assert(response.status === 429 && body.error === "provider_rate_limit", "Groq 429 must be preserved");
   assert(tutorCalls === 0, "Tutor must not run when transcription is rate limited");
+});
+
+Deno.test("staging test mode is disabled unless enabled with an exact origin", async () => {
+  let authCalls = 0;
+  const disabled = createGroqVoiceHandler({ env, fetchImpl: async () => { authCalls++; return new Response(JSON.stringify({ id: "user-123" }), { status: 200 }); } });
+  const denied = await disabled(makeRequest({ stagingTest: true }));
+  assert(denied.status === 404, "staging test must remain hidden when its server flag is absent");
+  assert(authCalls === 1, "only authenticated identity lookup may occur before the disabled gate");
+  const values = { ...envValues, GROQ_STAGING_TEST_ENABLED: "true", GROQ_STAGING_TEST_ORIGIN: origin };
+  const enabledEnv = { get: (name: string) => values[name] };
+  const wrongOrigin = createGroqVoiceHandler({ env: enabledEnv, fetchImpl: async () => new Response(JSON.stringify({ id: "user-123" }), { status: 200 }) });
+  const mismatch = await wrongOrigin(makeRequest({ stagingTest: true, originValue: "https://french-academy-other-vogtay.vercel.app" }));
+  assert(mismatch.status === 404, "staging test must require the exact configured preview origin");
+});
+
+Deno.test("staging test mode still enforces authentication and quota before paid transcription", async () => {
+  const values = { ...envValues, GROQ_STAGING_TEST_ENABLED: "true", GROQ_STAGING_TEST_ORIGIN: origin };
+  const enabledEnv = { get: (name: string) => values[name] };
+  let transcriptionCalls = 0;
+  const handler = createGroqVoiceHandler({ env: enabledEnv, fetchImpl: async input => {
+    const url = String(input);
+    if (url.endsWith("/auth/v1/user")) return new Response(JSON.stringify({ id: "user-123" }), { status: 200 });
+    if (url.endsWith("/rpc/ai_use_voice_preflight")) return new Response("false", { status: 200 });
+    if (url.includes("/audio/transcriptions")) transcriptionCalls++;
+    throw new Error("Unexpected URL: " + url);
+  }});
+  const response = await handler(makeRequest({ stagingTest: true }));
+  const body = await response.json();
+  assert(response.status === 429 && body.error === "quota_exceeded", "staging test must still enforce quota");
+  assert(transcriptionCalls === 0, "quota must be checked before sending audio to Groq");
 });
