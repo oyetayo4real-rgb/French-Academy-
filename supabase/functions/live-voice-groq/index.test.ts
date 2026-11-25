@@ -143,7 +143,7 @@ Deno.test("staging test mode is disabled unless enabled with an exact origin", a
   const denied = await disabled(makeRequest({ stagingTest: true }));
   assert(denied.status === 404, "staging test must remain hidden when its server flag is absent");
   assert(authCalls === 1, "only authenticated identity lookup may occur before the disabled gate");
-  const values = { ...envValues, GROQ_STAGING_TEST_ENABLED: "true", GROQ_STAGING_TEST_ORIGIN: origin };
+  const values: Record<string, string> = { ...envValues, GROQ_STAGING_TEST_ENABLED: "true", GROQ_STAGING_TEST_ORIGIN: origin };
   const enabledEnv = { get: (name: string) => values[name] };
   const wrongOrigin = createGroqVoiceHandler({ env: enabledEnv, fetchImpl: async () => new Response(JSON.stringify({ id: "user-123" }), { status: 200 }) });
   const mismatch = await wrongOrigin(makeRequest({ stagingTest: true, originValue: "https://french-academy-other-vogtay.vercel.app" }));
