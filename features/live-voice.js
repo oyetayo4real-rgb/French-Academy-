@@ -5,6 +5,7 @@
   let active = false, busy = false, provider = "none", sessionId = 0, playAt = 0;
   let playing = new Set(), recorder = null, chunks = [], speechStarted = 0, lastVoiceAt = 0;
   let groqTurnBusy = false, groqResponseSpeaking = false, lastTranscript = "", geminiFailure = "", geminiAudioPackets = 0;
+  let stagingTestRecorder = null, stagingTestStream = null, stagingTestChunks = [], stagingTestBusy = false, stagingTestUsed = false;
   let geminiReady = false, geminiRecovering = false, geminiResumeHandle = "", geminiConnectionEpoch = 0;
   const $ = id => document.getElementById(id);
   const bridge = () => window.FA_LIVE_VOICE_CONTEXT;
@@ -33,7 +34,8 @@
     if (!heading) return;
     const section = document.createElement("section");
     section.id = "faLivePanel"; section.className = "card";
-    section.innerHTML = '<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><h2 style="margin:0">🎙️ Académie Live Conversation</h2><span id="faLiveProvider" class="mu">Not connected</span></div><p class="mu">Speak naturally in French or English. Académie listens continuously and you can interrupt its response.</p><label class="mu" for="faLiveMode">Teaching style</label><select id="faLiveMode" style="width:100%;padding:10px;border:1px solid var(--bd);border-radius:9px;background:var(--bg);color:var(--tx)"><option value="guided">Guided lesson — teach, practise, correct</option><option value="conversation">Free conversation practice</option></select><div style="display:flex;gap:8px;margin-top:10px"><button id="faLiveStart" type="button">Start speaking</button><button id="faLiveStop" type="button" class="g" disabled>End conversation</button></div><p id="faLiveStatus" class="mu" role="status" aria-live="polite">Ready. Microphone permission is requested only when you start.</p><div id="faLiveTranscript" aria-live="polite" style="max-height:220px;overflow:auto"></div>';
+    section.innerHTML = '<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><h2 style="margin:0">🎙️ Académie Live Conversation</h2><span id="faLiveProvider" class="mu">Not connected</span></div><p class="mu">Speak naturally in French or English. Académie listens continuously and you can interrupt its response.</p><label class="mu" for="faLiveMode">Teaching style</label><select id="faLiveMode" style="width:100%;padding:10px;border:1px solid var(--bd);border-radius:9px;background:var(--bg);color:var(--tx)"><option value="guided">Guided lesson — teach, practise, correct</option><option value="conversation">Free conversation practice</option></select><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button id="faLiveStart" type="button">Start speaking</button><button id="faLiveStop" type="button" class="g" disabled>End conversation</button></div><div id="faGroqTestArea" hidden style="margin-top:14px;padding:12px;border:1px dashed var(--bd);border-radius:10px"><strong>Staging diagnostics</strong><p class="mu">One isolated Groq request. This does not start Gemini or save learning memory.</p><button id="faGroqTest" type="button" class="g">Test Groq (staging)</button></div><p id="faLiveStatus" class="mu" role="status" aria-live="polite">Ready. Microphone permission is requested only when you start.</p><div id="faLiveTranscript" aria-live="polite" style="max-height:220px;overflow:auto"></div>';
+    if (bridge()?.isStagingGroqTestAvailable?.()) $("faGroqTestArea").hidden = false;
     heading.insertAdjacentElement("afterend", section);
   }
   function b64(bytes) {
@@ -282,6 +284,52 @@
       status("Groq backup is active — listening continuously.");
     } finally { groqTurnBusy = false; }
   }
+  async function stagingGroqTest() {
+    const button = $("faGroqTest");
+    if (stagingTestBusy) {
+      if (stagingTestRecorder && stagingTestRecorder.state !== "inactive") { button.disabled = true; button.textContent = "Processing one test…"; stagingTestRecorder.stop(); }
+      return;
+    }
+    if (stagingTestUsed) { status("This page has already sent its single Groq staging test. Reload only if you intentionally need another test.", true); return; }
+    const app = bridge();
+    if (!app?.isSignedIn?.() || !app?.isStagingGroqTestAvailable?.()) { status("The isolated Groq test is available only to signed-in users on the approved staging preview.", true); return; }
+    if (active || busy) { status("End the normal Gemini conversation before running the isolated Groq test.", true); return; }
+    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) { status("This browser cannot record audio for the staging test.", true); return; }
+    stagingTestBusy = true; button.textContent = "Stop and send one test";
+    try {
+      status("Requesting microphone for one isolated Groq test…");
+      stagingTestStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+      const type = recorderType();
+      stagingTestRecorder = new MediaRecorder(stagingTestStream, type ? { mimeType: type } : undefined);
+      stagingTestChunks = [];
+      stagingTestRecorder.ondataavailable = event => { if (event.data?.size) stagingTestChunks.push(event.data); };
+      stagingTestRecorder.onstop = async () => {
+        const mime = stagingTestRecorder?.mimeType || "audio/webm";
+        const blob = new Blob(stagingTestChunks, { type: mime });
+        stagingTestRecorder = null; stagingTestChunks = [];
+        stagingTestStream?.getTracks().forEach(track => track.stop()); stagingTestStream = null;
+        stagingTestUsed = true; button.disabled = true; button.textContent = "Test already used";
+        try {
+          if (blob.size < 1500) throw new Error("Recording was too short. Reload the preview before another test.");
+          if (blob.size > 2 * 1024 * 1024) throw new Error("Recording exceeded the 2 MB staging test limit.");
+          const ctx = app.context?.() || {}, settings = config(), payload = new FormData();
+          payload.append("audio", blob, "groq-staging-test.webm"); payload.append("language", settings.language); payload.append("level", settings.level);
+          payload.append("history", JSON.stringify((ctx.recent || []).slice(-2))); payload.append("useLearningMemory", "false"); payload.append("stagingTest", "true");
+          status("Sending exactly one authenticated Groq staging request…");
+          const result = await app.groqTurn(payload);
+          if (result.transcript) line("You (Groq test)", result.transcript);
+          if (result.text) line("Académie AI (Groq test)", result.text);
+          status("Groq staging test passed. Gemini settings and learning memory were not changed.");
+        } catch (error) { status("Groq staging test failed: " + String(error?.message || error).slice(0, 220), true); }
+        finally { stagingTestBusy = false; }
+      };
+      stagingTestRecorder.start(250);
+      status("Recording one short test. Speak a sentence, then tap Stop and send one test.");
+    } catch (error) {
+      stagingTestStream?.getTracks().forEach(track => track.stop()); stagingTestStream = null; stagingTestRecorder = null; stagingTestBusy = false;
+      button.disabled = false; button.textContent = "Test Groq (staging)"; status(error?.message || "Could not start the staging test recording.", true);
+    }
+  }
   function onAudioFrame(input) {
     if (!active || !input?.length) return;
     if (provider === "gemini") { sendGeminiAudio(input); return; }
@@ -425,7 +473,8 @@
   document.addEventListener("click", event => {
     if (event.target?.id === "faLiveStart") start();
     if (event.target?.id === "faLiveStop") stop();
+    if (event.target?.id === "faGroqTest") stagingGroqTest();
   });
   new MutationObserver(mount).observe(document.body, { childList: true, subtree: true });
-  mount(); window.addEventListener("pagehide", stop);
+  mount(); window.addEventListener("pagehide", () => { void stop(); stagingTestStream?.getTracks().forEach(track => track.stop()); });
 })();
