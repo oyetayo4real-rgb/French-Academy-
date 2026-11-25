@@ -151,7 +151,7 @@ Deno.test("staging test mode is disabled unless enabled with an exact origin", a
 });
 
 Deno.test("staging test mode still enforces authentication and quota before paid transcription", async () => {
-  const values = { ...envValues, GROQ_STAGING_TEST_ENABLED: "true", GROQ_STAGING_TEST_ORIGIN: origin };
+  const values: Record<string, string> = { ...envValues, GROQ_STAGING_TEST_ENABLED: "true", GROQ_STAGING_TEST_ORIGIN: origin };
   const enabledEnv = { get: (name: string) => values[name] };
   let transcriptionCalls = 0;
   const handler = createGroqVoiceHandler({ env: enabledEnv, fetchImpl: async input => {
