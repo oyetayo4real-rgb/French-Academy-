@@ -135,11 +135,18 @@ try {
     assert.equal(await page.evaluate(() => window.__getUserMediaCalls), 2, "restart should request a fresh microphone stream");
   });
 
-  await check("an established Gemini session expiry transitions to Groq without losing the microphone", async () => {
-    await page.evaluate(() => window.__geminiCallbacks.onclose({ reason: "controlled session expiry" }));
-    await page.waitForFunction(() => document.querySelector("#faLiveProvider")?.textContent === "Groq Voice backup");
-    assert.match(await page.locator("#faLiveStatus").innerText(), /Groq backup is ready/i);
-    assert.equal(await page.evaluate(() => window.__tracks[1].stopped), undefined, "session expiry should preserve the active microphone stream");
+  await check("Gemini session interruption reconnects with a fresh one-use token and preserves the microphone", async () => {
+    await page.evaluate(() => window.__geminiCallbacks.onclose({ code: 1011, reason: "controlled transient failure" }));
+    await page.waitForFunction(() => document.querySelector("#faLiveStatus")?.innerText.includes("reconnected"), { timeout: 8000 });
+    assert.equal(await page.evaluate(() => window.__getUserMediaCalls), 2, "Gemini recovery must preserve the existing microphone stream");
+    assert.equal(await page.locator("#faLiveProvider").innerText(), "Gemini Live");
+  });
+
+  await check("bounded Gemini reconnect failure falls back to Groq without looping", async () => {
+    await page.evaluate(() => { window.__geminiConnectMode = "closed"; window.__geminiCallbacks.onclose({ code: 1011, reason: "controlled persistent failure" }); });
+    await page.waitForFunction(() => document.querySelector("#faLiveProvider")?.textContent === "Groq Voice backup", { timeout: 10000 });
+    assert.match(await page.locator("#faLiveStatus").innerText(), /Voice backup is selected/i);
+    assert.equal(await page.evaluate(() => window.__getUserMediaCalls), 2, "fallback must keep the same microphone stream");
   });
 } finally {
   await browser.close();
