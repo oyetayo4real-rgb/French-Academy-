@@ -105,7 +105,7 @@ try {
   await check("Gemini connection failure automatically activates Groq fallback", async () => {
     await page.locator("#faLiveStart").click();
     await page.waitForFunction(() => document.querySelector("#faLiveProvider")?.textContent === "Groq Voice backup");
-    assert.match(await page.locator("#faLiveStatus").innerText(), /Groq backup is ready/i);
+    assert.match(await page.locator("#faLiveStatus").innerText(), /Voice backup is selected/i);
     assert.equal(await page.evaluate(() => window.__getUserMediaCalls), 1);
   });
 
