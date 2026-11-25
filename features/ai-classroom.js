@@ -753,7 +753,7 @@
   // Narrow bridge: the standalone voice module reuses existing auth and learner state.
   window.FA_LIVE_VOICE_CONTEXT = {
     isSignedIn: () => !!(AUTH && AUTH.user),
-    isStagingGroqTestAvailable: () => location.hostname === "french-academy-1g3p4wzz9-vogtay.vercel.app",
+    isStagingGroqTestAvailable: () => location.hostname === "french-academy-git-feat-live-voice-conversation-vogtay.vercel.app",
     level: () => (faEl("faTutorLevel") && faEl("faTutorLevel").value) || FA_AI.level || "none",
     request: (body) => api("/functions/v1/live-voice-session", { m: "POST", body }),
     groqTurn: async (formData) => {
