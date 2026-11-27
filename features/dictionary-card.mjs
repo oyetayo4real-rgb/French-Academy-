@@ -44,7 +44,7 @@ export function renderImportedCardHtml(d) {
         (plural.length ? '<p class="fi-muted">Pluriel : ' + esc(plural.join(", ")) + "</p>" : "") + "</section>";
     }).join("");
     return '<section class="fi-imported-entry"><h3>' + esc(item.word || d.word) + "</h3>" + '<div data-fi-brief></div>' + groupHtml +
-      '<span class="fi-tag">' + (item.importedStatus === "curated-draft" ? "Brouillon \u00b7 \u00e0 faire relire par un francophone" : "Entr\u00e9e import\u00e9e \u00b7 pas encore relue") + "</span></section>";
+      '<span class="fi-tag">' + (item.importedStatus === "curated-draft" ? "Brouillon \u00b7 \u00e0 faire relire par un francophone" : "Entr\u00e9e import\u00e9e \u00b7 pas encore relue") + '</span><p style="font-size:.85em">Sources : <a href="https://en.wiktionary.org/wiki/' + encodeURIComponent(String(item.word || d.word)) + '?action=history" target="_blank" rel="noopener noreferrer">Wiktionary</a> (CC BY-SA 4.0) \u00b7 <a href="https://fr.wiktionary.org/wiki/' + encodeURIComponent(String(item.word || d.word)) + '?action=history" target="_blank" rel="noopener noreferrer">Wiktionnaire</a> (CC BY-SA 3.0)</p></section>';
   }).join("") + "</div>";
 }
 

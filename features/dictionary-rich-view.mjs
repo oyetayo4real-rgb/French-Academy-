@@ -64,7 +64,7 @@ export function renderRichHtml(word, entry, { showSensitive = false } = {}) {
     (entry.ipa ? '<p class="fi-muted">Pronunciation: ' + escapeHtml(entry.ipa) + "</p>" : "") + groups +
     (entry.phrases?.length ? "<p><b>Phrases:</b> " + escapeHtml(entry.phrases.join(" \u00b7 ")) + "</p>" : "") +
     (entry.related?.length ? "<p><b>Related words:</b> " + escapeHtml(entry.related.join(", ")) + "</p>" : "") +
-    toggle + '<span class="fi-tag">Wiktionary-derived \u00b7 not yet reviewed by a French speaker</span></div>';
+    toggle + '<span class="fi-tag">Source: <a href="https://en.wiktionary.org/wiki/' + encodeURIComponent(word) + '?action=history" target="_blank" rel="noopener noreferrer">Wiktionary</a> (<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>) \u00b7 shared under the same licence \u00b7 not yet reviewed by a French speaker</span></div>';
 }
 
 // ---- French view ----
@@ -100,7 +100,7 @@ export function renderFrenchHtml(word, entry, { showSensitive = false } = {}) {
     (entry.derived?.length ? "<p><b>Mots d\u00e9riv\u00e9s :</b> " + escapeHtml(entry.derived.join(", ")) + "</p>" : "") +
     (entry.related?.length ? "<p><b>Mots apparent\u00e9s :</b> " + escapeHtml(entry.related.join(", ")) + "</p>" : "") +
     (entry.paro?.length ? "<p><b>\u00c0 ne pas confondre :</b> " + escapeHtml(entry.paro.join(", ")) + "</p>" : "") +
-    toggle + '<span class="fi-tag">Source : Wiktionnaire (CC BY-SA) \u00b7 pas encore relu par un francophone</span></div>';
+    toggle + '<span class="fi-tag">Source : <a href="https://fr.wiktionary.org/wiki/' + encodeURIComponent(word) + '?action=history" target="_blank" rel="noopener noreferrer">Wiktionnaire</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/deed.fr" target="_blank" rel="noopener noreferrer">CC BY-SA 3.0</a>) \u00b7 partag\u00e9 sous la m\u00eame licence \u00b7 pas encore relu par un francophone</span></div>';
 }
 
 // ---- switch between French, English, both ----
