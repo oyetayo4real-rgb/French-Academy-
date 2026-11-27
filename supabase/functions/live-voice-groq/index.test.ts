@@ -24,6 +24,24 @@ const makeRequest = (options: { originValue?: string; authorization?: string | n
   return new Request("https://edge.test/live-voice-groq", { method: "POST", headers, body: form });
 };
 
+Deno.test("Groq adapter serves browser CORS preflight before manual bearer authentication", async () => {
+  const handler = createGroqVoiceHandler({ env, fetchImpl: async () => {
+    throw new Error("OPTIONS preflight must not call upstream services");
+  }});
+  const response = await handler(new Request("https://edge.test/live-voice-groq", {
+    method: "OPTIONS",
+    headers: {
+      Origin: origin,
+      "Access-Control-Request-Method": "POST",
+      "Access-Control-Request-Headers": "authorization, apikey, content-type"
+    }
+  }));
+  assert(response.status === 204, "allowed browser preflight must return 204");
+  assert(response.headers.get("Access-Control-Allow-Origin") === origin, "preflight must allow the exact staging origin");
+  assert(response.headers.get("Access-Control-Allow-Methods")?.includes("POST"), "preflight must allow POST");
+  assert(response.headers.get("Access-Control-Allow-Headers")?.includes("authorization"), "preflight must allow bearer authorization");
+});
+
 Deno.test("Groq adapter denies untrusted origins and does not reflect them", async () => {
   let calls = 0;
   const handler = createGroqVoiceHandler({ env, fetchImpl: async () => { calls++; return new Response("{}", { status: 200 }); } });
