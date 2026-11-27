@@ -3,7 +3,7 @@
   "use strict";
   let FA_DAILY_CALL = null, FA_DAILY_META = null, FA_DAILY_SDK_PROMISE = null;
   const FA_TUTOR_FUNCTION_SLUG = "tutor-v2";
-  const FA_SCRIPT_URL = document.currentScript && document.currentScript.src;
+  const FA_SCRIPT_URL = (document.currentScript && document.currentScript.src) || Array.from(document.scripts).reverse().find(s => /\/features\/ai-classroom\.js(?:\?|$)/.test(s.src))?.src || new URL("/features/ai-classroom.js", document.baseURI).href;
   const FA_AI = { level: "A1", mode: "chat", depth: "quick", messages: [], pending: false, error: "", lastRequest: null, memoryUserId: null, memoryLoaded: false, memoryLoading: false, memoryBusy: false, memoryEnabled: false, memoryProfile: null, memoryStatus: "", conversations: [], activeConversationId: null, localStorageError: "" };
   const FA_TUTOR_LOCAL_VERSION = 1;
   const FA_TUTOR_LOCAL_PREFIX = "fa_tutor_local_v1:";
@@ -436,7 +436,8 @@
     if(!FA_AI.activeConversationId)faStartTutorConversation();
     const messageHtml = FA_AI.messages.map((m, index) => '<div class="card" style="margin:8px 0"><b>' + (m.role === "user" ? "You" : "Académie AI") + '</b><div class="fa-answer" style="margin-top:8px;line-height:1.75">' + (m.role === "assistant" ? faMarkdown(m.content) : '<div style="white-space:pre-wrap">' + faSafe(m.content) + "</div>") + "</div>" + (m.role === "assistant" ? '<button class="g" type="button" data-fa-speak="' + index + '">🔊 Listen</button><p class="fa-tutor-answer-note" role="note">AI answers can contain mistakes. Check important points in a dictionary or grammar reference.</p>' : "") + "</div>").join("");
     const conversationOptions=FA_AI.conversations.slice().sort((a,b)=>b.updatedAt-a.updatedAt).map(item=>'<option value="'+faSafe(item.id)+'"'+(item.id===FA_AI.activeConversationId?" selected":"")+'>'+faSafe(item.title||"New conversation")+'</option>').join("");
-    $.innerHTML = (typeof topbar === "function" ? topbar() : "") + '<button class="g" id="faHome">← Home</button><h1>🤖 Académie French Intelligence</h1><p class="mu">A French-language tutor for grammar, syntax, semantics, literature, history, translation, writing and contemporary usage. CEFR level is optional guidance.</p>' +
+    const liveConversationPanel = '<section id="faLivePanel" class="card"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><h2 style="margin:0">🎙️ Académie Live Conversation</h2><span id="faLiveProvider" class="mu">Not connected</span></div><p class="mu">Speak naturally in French or English. Académie listens continuously and you can interrupt its response.</p><label class="mu" for="faLiveMode">Teaching style</label><select id="faLiveMode" style="width:100%;padding:10px;border:1px solid var(--bd);border-radius:9px;background:var(--bg);color:var(--tx)"><option value="guided">Guided lesson — teach, practise, correct</option><option value="conversation">Free conversation practice</option></select><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button id="faLiveStart" type="button">Start speaking</button><button id="faLiveStop" type="button" class="g" disabled>End conversation</button></div><div id="faGroqTestArea" hidden style="margin-top:14px;padding:12px;border:1px dashed var(--bd);border-radius:10px"><strong>Staging diagnostics</strong><p class="mu">One isolated Groq request. This does not start Gemini or save learning memory.</p><button id="faGroqTest" type="button" class="g">Test Groq (staging)</button></div><p id="faLiveStatus" class="mu" role="status" aria-live="polite">Ready. Microphone permission is requested only when you start.</p><div id="faLiveTranscript" aria-live="polite" style="max-height:220px;overflow:auto"></div></section>';
+    $.innerHTML = (typeof topbar === "function" ? topbar() : "") + '<button class="g" id="faHome">← Home</button><h1>🤖 Académie French Intelligence</h1><p class="mu">A French-language tutor for grammar, syntax, semantics, literature, history, translation, writing and contemporary usage. CEFR level is optional guidance.</p>' + liveConversationPanel +
       '<div class="card fa-conversation-manager"><b>Your conversations</b><select class="inp" id="faConversationSelect" aria-label="Choose a saved conversation">'+conversationOptions+'</select><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="g" id="faNewConversation" type="button">＋ New chat</button><button class="g" id="faRenameConversation" type="button">Rename</button><button class="g" id="faDeleteConversation" type="button">Delete chat</button><button class="g" id="faClearAllConversations" type="button">Clear all chats</button></div><p class="mu">Conversations are stored in this browser. Your messages are still sent to the AI tutor when you ask a question.</p></div>' +
       '<div class="card"><label for="faTutorDepth"><b>Answer depth</b></label><select class="inp" id="faTutorDepth">' +
       '<option value="quick"' + (FA_AI.depth === "quick" ? " selected" : "") + '>Quick answer</option><option value="deep"' + (FA_AI.depth === "deep" ? " selected" : "") + '>Deep answer</option></select>' +
@@ -750,4 +751,53 @@
     if (event.target && event.target.id === "faTutorInput" && event.key === "Enter" && (event.ctrlKey || event.metaKey)) { event.preventDefault(); faTutorSend(); }
     if (event.target && event.target.id === "faDictInput" && event.key === "Enter") { event.preventDefault(); faDictionaryLookup(); }
   });
+  // Narrow bridge: the standalone voice module reuses existing auth and learner state.
+  window.FA_LIVE_VOICE_CONTEXT = {
+    isSignedIn: () => !!(AUTH && AUTH.user),
+    isStagingGroqTestAvailable: () => { const host = location.hostname; const canonical = "french-academy-git-feat-live-voice-conversation-vogtay.vercel.app"; const productionHosts = new Set(["french-academy-vogtay.vercel.app", "french-academy-one.vercel.app", "french-academy-git-main-vogtay.vercel.app"]); if (host === canonical) return true; const deploymentPreview = /^french-academy-[a-z0-9]+-vogtay\.vercel\.app$/.test(host); if (deploymentPreview && !productionHosts.has(host)) { location.replace("https://" + canonical + location.pathname + location.search + location.hash); return false; } return false; },
+    level: () => (faEl("faTutorLevel") && faEl("faTutorLevel").value) || FA_AI.level || "none",
+    request: (body) => api("/functions/v1/live-voice-session", { m: "POST", body }),
+    groqTurn: async (formData) => {
+      if (!(formData instanceof FormData)) throw new Error("Invalid voice payload.");
+      const response = await fetch(SBURL.replace(/\/$/, "") + "/functions/v1/live-voice-groq", {
+        method: "POST",
+        headers: { apikey: SBKEY, Authorization: "Bearer " + AUTH.access_token },
+        body: formData
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || "Groq voice turn failed.");
+      return result;
+    },
+    context: () => ({
+      level: (faEl("faTutorLevel") && faEl("faTutorLevel").value) || FA_AI.level || "none",
+      memoryEnabled: FA_AI.memoryEnabled === true,
+      topics: FA_AI.memoryEnabled && FA_AI.memoryProfile ? Object.keys(FA_AI.memoryProfile.topic_counts || {}).filter(k => FA_AI.memoryProfile.topic_counts[k] > 0).slice(0, 12) : [],
+      recent: FA_AI.messages.slice(-6).map(m => ({ role: m.role, content: String(m.content || "").slice(0, 500) }))
+    }),
+    appendTranscript: (role, content) => {
+      const text = String(content || "").trim().slice(0, 4000);
+      if (!text || !FA_AI.activeConversationId) return;
+      FA_AI.messages.push({ role, content: text });
+      FA_AI.messages = FA_AI.messages.slice(-100);
+      const active = FA_AI.conversations.find(x => x.id === FA_AI.activeConversationId);
+      if (active && active.title === "New conversation" && role === "user") active.title = text.replace(/\\s+/g, " ").slice(0, 48);
+      faSaveTutorLocalData();
+    },
+    recordVoiceTurn: async (text) => {
+      if (!FA_AI.memoryEnabled || !text) return;
+      const result = await faTutorRequest({
+        recordVoiceLearningInteraction: true,
+        useLearningMemory: true,
+        level: (faEl("faTutorLevel") && faEl("faTutorLevel").value) || FA_AI.level || "none",
+        text: String(text).slice(0, 1800)
+      });
+      if (result && result.learningMemory) {
+        FA_AI.memoryProfile = result.learningMemory;
+        FA_AI.memoryEnabled = result.learningMemory.enabled === true;
+        faSaveTutorLocalData();
+      }
+      return result;
+    }
+  };
+  // Live voice module is loaded statically by index.html after this bridge is initialized.
 })();

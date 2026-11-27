@@ -4,7 +4,7 @@
 
 type Role = "user" | "assistant";
 type ChatMessage = { role: Role; content: string };
-type ProviderName = "gemini" | "groq" | "mistral" | "openrouter";
+type ProviderName = "gemini" | "groq";
 type Depth = "quick" | "standard" | "deep";
 type QuotaMode = "legacy" | "reservation";
 type Env = { get(name: string): string | undefined };
@@ -29,7 +29,7 @@ const ATTEMPT_BUDGET_MS: Record<Depth, number> = {
   standard: 15_000,
   deep: 25_000
 };
-// Two Gemini model attempts plus three alternate-provider attempts, and a
+// Two Gemini model attempts plus one Groq fallback attempt, and a
 // one-second control-plane margin. Each individual attempt remains capped above.
 export const OVERALL_DEADLINE_MS: Record<Depth, number> = {
   quick: 40_000,
@@ -48,9 +48,7 @@ const PROVIDERS: Array<{
   base?: string;
 }> = [
   { name: "gemini", key: "GEMINI_API_KEY", model: "gemini-3.5-flash-lite" },
-  { name: "groq", key: "GROQ_API_KEY", model: "openai/gpt-oss-120b", base: "https://api.groq.com/openai/v1" },
-  { name: "mistral", key: "MISTRAL_API_KEY", model: "mistral-small-latest", base: "https://api.mistral.ai/v1" },
-  { name: "openrouter", key: "OPENROUTER_API_KEY", model: "meta-llama/llama-3.3-70b-instruct:free", base: "https://openrouter.ai/api/v1" }
+  { name: "groq", key: "GROQ_API_KEY", model: "openai/gpt-oss-120b", base: "https://api.groq.com/openai/v1" }
 ];
 
 type FaultCode =
@@ -506,9 +504,21 @@ async function generateAnswer(
   system: string,
   messages: ChatMessage[],
   depth: Depth,
-  deps: Required<Pick<Dependencies, "env" | "fetchImpl" | "now" | "log">>
+  deps: Required<Pick<Dependencies, "env" | "fetchImpl" | "now" | "log">>,
+  preferredProvider?: "groq"
 ): Promise<string> {
   const startedAt = deps.now();
+  if (preferredProvider === "groq") {
+    if (deps.env.get("GROQ_VOICE_ENABLED") !== "true") {
+      throw new TutorFault("provider_unavailable", false, 503);
+    }
+    const groq = getConfiguredProvider("groq", deps.env);
+    if (!groq) throw new TutorFault("provider_unavailable", false, 503);
+    const result = await callGroqModels(groq, getGroqModels(deps.env), system, messages, depth,
+      startedAt + OVERALL_DEADLINE_MS[depth], deps.fetchImpl, deps.now, deps.log);
+    if (result.text) return result.text;
+    throw new TutorFault(result.timedOut ? "provider_timeout" : "provider_unavailable", true, result.timedOut ? 504 : 502);
+  }
   const deadline = startedAt + OVERALL_DEADLINE_MS[depth];
   let timedOut = false;
   let attempted = false;
@@ -521,7 +531,7 @@ async function generateAnswer(
     timedOut ||= result.timedOut;
   }
 
-  for (const name of ["groq", "mistral", "openrouter"] as const) {
+  for (const name of ["groq"] as const) {
     if (deps.now() >= deadline) {
       timedOut = true;
       break;
@@ -701,6 +711,25 @@ export function createTutorHandler(overrides: Dependencies = {}) {
       } catch { return json({ error: "memory_unavailable", retryable: true }, 503); }
     }
 
+    // Voice transcripts update the same opt-in learning profile without triggering a second AI generation or quota charge.
+    if (body?.recordVoiceLearningInteraction === true) {
+      if (body?.useLearningMemory !== true) return json({ learningMemory: null, memoryDisabled: true });
+      const text = clip(body?.text, 1_800).trim();
+      if (!text) return json({ error: "invalid_request", retryable: false }, 400);
+      try {
+        const saved = await rpc("tutor_record_learning_interaction", {
+          p_uid: uid,
+          p_cefr_level: ["A1", "A2", "B1", "B2", "C1", "C2"].includes(body?.level) ? body.level : null,
+          p_topics: classifyLearningTopics(text, "practice"),
+          p_mode: "practice"
+        }, deps);
+        return json({ learningMemory: normalizeClientLearningMemory(saved) });
+      } catch {
+        deps.log("voice_learning_memory_save_failed", { enabled: true });
+        return json({ error: "memory_unavailable", retryable: true }, 503);
+      }
+    }
+
     const mode = ["chat", "translate", "correct", "practice", "examples"].includes(body?.mode) ? body.mode : "chat";
     const question = clip(body?.text, 1_800).trim();
     if (!question) return json({ error: "invalid_request", retryable: false }, 400);
@@ -735,7 +764,8 @@ export function createTutorHandler(overrides: Dependencies = {}) {
           makeSystemPrompt(mode, clip(body?.level, 8), depth, learningMemoryContext(learnerMemory)),
           messages,
           depth,
-          deps
+          deps,
+          body?.voiceProvider === "groq" ? "groq" : undefined
         );
         if (!answer.trim()) throw new TutorFault("provider_unavailable", true, 502);
       } catch (error) {

@@ -58,8 +58,7 @@ const envValues: Record<string, string> = {
   SUPABASE_SERVICE_ROLE_KEY: "test-service-role",
   GEMINI_API_KEY: "test-gemini",
   GROQ_API_KEY: "test-groq",
-  MISTRAL_API_KEY: "test-mistral",
-  OPENROUTER_API_KEY: "test-openrouter",
+  GROQ_VOICE_ENABLED: "true",
   QUOTA_MODE: "reservation"
 };
 const env = { get: (name: string) => envValues[name] };
@@ -326,12 +325,10 @@ Deno.test("T1c acceptance matrix collects all failures as JSON", async () => {
     assert(seen.join(",") === "missing-a,missing-b", "not all configured Groq models were attempted");
   });
 
-  await check("provider-specific keys route only to their provider hosts", "one dedicated provider key at a time", "Gemini/Groq/Mistral/OpenRouter each receive only their own key at their own host", async () => {
+  await check("provider-specific keys route only to Gemini or Groq", "one dedicated provider key at a time", "only Gemini and Groq receive their own keys at their own hosts", async () => {
     const cases = [
       { name: "gemini", key: "GEMINI_API_KEY", host: "generativelanguage.googleapis.com" },
-      { name: "groq", key: "GROQ_API_KEY", host: "api.groq.com" },
-      { name: "mistral", key: "MISTRAL_API_KEY", host: "api.mistral.ai" },
-      { name: "openrouter", key: "OPENROUTER_API_KEY", host: "openrouter.ai" }
+      { name: "groq", key: "GROQ_API_KEY", host: "api.groq.com" }
     ];
     for (const item of cases) {
       const values: Record<string, string | undefined> = { ...base, AI_PROVIDER: item.name, QUOTA_MODE: "legacy", [item.key]: "only-" + item.name };
@@ -340,12 +337,12 @@ Deno.test("T1c acceptance matrix collects all failures as JSON", async () => {
         const url = String(input);
         if (url.includes("/rpc/ai_use")) return ok(true);
         if (url.includes("generativelanguage.googleapis.com") && url.includes("pageSize")) return geminiCatalog();
-        if (url.includes("generativelanguage.googleapis.com") || url.includes("api.groq.com") || url.includes("api.mistral.ai") || url.includes("openrouter.ai")) {
+        if (url.includes("generativelanguage.googleapis.com") || url.includes("api.groq.com")) {
           const parsed = new URL(url);
           const headers = new Headers(init?.headers);
           seen.push({ host: parsed.hostname, authorization: headers.get("Authorization"), googleKey: headers.get("x-goog-api-key") });
           if (item.name === "gemini" && url.includes(":generateContent")) return completion("Gemini routed.");
-          if (url.includes("/chat/completions")) return ok({ choices: [{ message: { content: "Compatible provider routed." } }] });
+          if (url.includes("/chat/completions")) return ok({ choices: [{ message: { content: "Groq routed." } }] });
           return ok({});
         }
         throw new Error("unexpected host");
@@ -354,30 +351,30 @@ Deno.test("T1c acceptance matrix collects all failures as JSON", async () => {
       assert(response.status === 200, item.name + " request failed");
       assert(seen.length > 0 && seen.every((entry) => entry.host === item.host), item.name + " key reached an unexpected host");
       if (item.name === "gemini") assert(seen.every((entry) => entry.googleKey === "only-gemini"), "Gemini key was not sent only as x-goog-api-key");
-      else assert(seen.every((entry) => entry.authorization === "Bearer only-" + item.name), item.name + " key was not sent as its provider bearer credential");
+      else assert(seen.every((entry) => entry.authorization === "Bearer only-groq"), "Groq key was not sent as its provider bearer credential");
     }
   });
 
-  await check("generic AI_API_KEY is restricted to AI_PROVIDER", "AI_PROVIDER=mistral with generic key; then AI_PROVIDER=gemini with Gemini failure", "generic key is used only on the selected provider host", async () => {
-    const values = { ...base, AI_PROVIDER: "mistral", AI_API_KEY: "generic-only", QUOTA_MODE: "legacy" };
+  await check("generic AI_API_KEY is restricted to AI_PROVIDER", "AI_PROVIDER=groq with generic key; then AI_PROVIDER=gemini with Gemini failure", "generic key is used only on the selected approved provider host", async () => {
+    const values = { ...base, AI_PROVIDER: "groq", AI_API_KEY: "generic-only", QUOTA_MODE: "legacy" };
     const hosts: string[] = [];
     const fetchImpl = async (input: RequestInfo | URL) => {
       const url = String(input);
       if (url.includes("/rpc/ai_use")) return ok(true);
       hosts.push(new URL(url).hostname);
-      if (url.includes("api.mistral.ai")) return ok({ choices: [{ message: { content: "Selected provider only." } }] });
+      if (url.includes("api.groq.com")) return ok({ choices: [{ message: { content: "Selected Groq provider only." } }] });
       throw new Error("generic key leaked to another provider");
     };
     const response = await run(fetchImpl, [], [], makeEnv(values));
-    assert(response.status === 200 && hosts.every((host) => host === "api.mistral.ai"), "generic key was not restricted to AI_PROVIDER");
+    assert(response.status === 200 && hosts.length === 1 && hosts.every((host) => host === "api.groq.com"), "generic key was not restricted to Groq");
 
     const geminiHosts: string[] = [];
     const geminiValues = { ...base, AI_PROVIDER: "gemini", AI_API_KEY: "generic-gemini-only", QUOTA_MODE: "legacy" };
     const failedGemini = async (input: RequestInfo | URL) => {
       const url = String(input);
       if (url.includes("/rpc/ai_use")) return ok(true);
-      geminiHosts.push(new URL(url).hostname);
       if (url.includes("pageSize")) return geminiCatalog();
+      geminiHosts.push(new URL(url).hostname);
       if (url.includes("generativelanguage.googleapis.com")) return new Response("unavailable", { status: 503 });
       throw new Error("generic Gemini key reached another provider");
     };
@@ -422,7 +419,7 @@ Deno.test("T1c acceptance matrix collects all failures as JSON", async () => {
     const response = await handler(request("quick", { health: true }));
     const body = await response.json();
     assert(response.status === 200, "health check failed");
-    assert(JSON.stringify(body.providerKeys) === JSON.stringify({ gemini: false, groq: true, mistral: false, openrouter: false }), "health provider-key booleans mismatch");
+    assert(JSON.stringify(body.providerKeys) === JSON.stringify({ gemini: false, groq: true }), "health provider-key booleans mismatch");
     assert(body.groqModels.join(",") === "groq/model-a,groq/model-b", "health returned wrong Groq model list");
     assert(body.quotaMode === "reservation", "health returned wrong quota mode");
     assert(fetchCalls === 0, "health check called quota or provider endpoint");
@@ -646,4 +643,62 @@ Deno.test("memory management actions are authenticated and delegated to server-o
   assert(cleared.status === 200 && (await cleared.json()).memoryCleared === true, "clear action failed");
   assert(calls[0].body.p_uid === uid && calls[0].body.p_enabled === false, "disable action did not use authenticated UID");
   assert(calls[1].body.p_uid === uid, "clear action did not use authenticated UID");
+});
+
+Deno.test("voiceProvider groq pins voice turns to Groq and never falls through to other providers", async () => {
+  const calls: any[] = [];
+  let geminiCalls = 0, groqCalls = 0, otherProviderCalls = 0;
+  const fetchImpl = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    if (url.includes("/rpc/")) return rpcCalls(calls)(url, init);
+    if (url.includes("generativelanguage.googleapis.com")) { geminiCalls++; return geminiCatalog(); }
+    if (url.includes("api.groq.com")) {
+      groqCalls++;
+      return ok({ choices: [{ message: { content: "Groq voice answer." } }] });
+    }
+    if (url.includes("mistral.ai") || url.includes("openrouter.ai")) otherProviderCalls++;
+    throw new Error("Unexpected fetch: " + url);
+  };
+  const response = await run(fetchImpl, calls, [], env, request("quick", { voiceProvider: "groq" }));
+  const body = await response.json();
+  assert(response.status === 200 && body.text === "Groq voice answer.", "forced Groq voice response failed");
+  assert(groqCalls === 1, "forced Groq voice turn did not call Groq exactly once");
+  assert(geminiCalls === 0 && otherProviderCalls === 0, "forced Groq voice turn used an unapproved provider");
+});
+
+Deno.test("forced Groq voice rate limit fails closed without trying Gemini, Mistral or OpenRouter", async () => {
+  const calls: any[] = [];
+  let providerCalls = 0;
+  const fetchImpl = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    if (url.includes("/rpc/")) return rpcCalls(calls)(url, init);
+    if (url.includes("api.groq.com")) {
+      providerCalls++;
+      return new Response(JSON.stringify({ error: { message: "rate limited" } }), { status: 429 });
+    }
+    if (url.includes("generativelanguage.googleapis.com") || url.includes("mistral.ai") || url.includes("openrouter.ai")) {
+      providerCalls++;
+    }
+    throw new Error("Unexpected fetch: " + url);
+  };
+  const response = await run(fetchImpl, calls, [], env, request("quick", { voiceProvider: "groq" }));
+  const body = await response.json();
+  assert(response.status === 429 && body.error === "provider_rate_limit", "Groq 429 was not returned to the voice client");
+  assert(providerCalls === 1, "rate-limited Groq voice turn fell through to another provider");
+});
+
+Deno.test("Groq voice is disabled unless its explicit zero-cost gate is enabled", async () => {
+  const calls: any[] = [];
+  let providerCalls = 0;
+  const disabledEnv = makeEnv({ ...envValues, GROQ_VOICE_ENABLED: undefined });
+  const fetchImpl = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    if (url.includes("/rpc/")) return rpcCalls(calls)(url, init);
+    if (url.includes("api.groq.com") || url.includes("generativelanguage.googleapis.com") || url.includes("mistral.ai") || url.includes("openrouter.ai")) providerCalls++;
+    throw new Error("Unexpected fetch: " + url);
+  };
+  const response = await run(fetchImpl, calls, [], disabledEnv, request("quick", { voiceProvider: "groq" }));
+  const body = await response.json();
+  assert(response.status === 503 && body.error === "provider_unavailable", "disabled Groq voice did not fail closed");
+  assert(providerCalls === 0, "disabled Groq voice attempted a provider call");
 });
