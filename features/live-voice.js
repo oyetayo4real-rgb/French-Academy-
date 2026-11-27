@@ -29,7 +29,12 @@
     bridge()?.appendTranscript?.(who === "You" ? "user" : "assistant", text);
   }
   function mount() {
-    if ($("faLivePanel")) return;
+    const existingPanel = $("faLivePanel");
+    if (existingPanel) {
+      const diagnostics = $("faGroqTestArea");
+      if (diagnostics) diagnostics.hidden = !(bridge()?.isStagingGroqTestAvailable?.());
+      return;
+    }
     const heading = [...document.querySelectorAll("h1")].find(n => /Académie French Intelligence|AI French tutor/i.test(n.textContent || ""));
     if (!heading) return;
     const section = document.createElement("section");
