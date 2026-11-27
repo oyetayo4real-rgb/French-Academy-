@@ -753,7 +753,7 @@
   // Narrow bridge: the standalone voice module reuses existing auth and learner state.
   window.FA_LIVE_VOICE_CONTEXT = {
     isSignedIn: () => !!(AUTH && AUTH.user),
-    isStagingGroqTestAvailable: () => { const approvedHost = "french-academy-git-feat-live-voice-conversation-vogtay.vercel.app"; const deploymentHost = "french-academy-fqra16j9x-vogtay.vercel.app"; if (location.hostname === deploymentHost) { location.replace("https://" + approvedHost + location.pathname + location.search + location.hash); return false; } return location.hostname === approvedHost; },
+    isStagingGroqTestAvailable: () => { const host = location.hostname; const canonical = "french-academy-git-feat-live-voice-conversation-vogtay.vercel.app"; const productionHosts = new Set(["french-academy-vogtay.vercel.app", "french-academy-one.vercel.app", "french-academy-git-main-vogtay.vercel.app"]); if (host === canonical) return true; const deploymentPreview = /^french-academy-[a-z0-9]+-vogtay\.vercel\.app$/.test(host); if (deploymentPreview && !productionHosts.has(host)) { location.replace("https://" + canonical + location.pathname + location.search + location.hash); return false; } return false; },
     level: () => (faEl("faTutorLevel") && faEl("faTutorLevel").value) || FA_AI.level || "none",
     request: (body) => api("/functions/v1/live-voice-session", { m: "POST", body }),
     groqTurn: async (formData) => {
