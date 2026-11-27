@@ -798,16 +798,5 @@
       return result;
     }
   };
-  const faLiveVoiceScript = document.createElement("script");
-  faLiveVoiceScript.src = new URL("/features/live-voice.js", location.origin).href;
-  faLiveVoiceScript.async = true;
-  faLiveVoiceScript.onerror = () => {
-    const heading = Array.from(document.querySelectorAll("h1")).find(n => /Académie French Intelligence|AI French tutor/i.test(n.textContent || ""));
-    if (heading && !document.getElementById("faLiveVoiceLoadError")) {
-      const error = document.createElement("div"); error.id = "faLiveVoiceLoadError"; error.className = "card err";
-      error.setAttribute("role", "alert"); error.textContent = "Live Conversation could not load its voice module. Reload this page; if the problem continues, contact support with this message.";
-      heading.insertAdjacentElement("afterend", error);
-    }
-  };
-  document.head.appendChild(faLiveVoiceScript);
+  // Live voice module is loaded statically by index.html after this bridge is initialized.
 })();
