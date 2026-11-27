@@ -1,5 +1,7 @@
 import * as structuredCore from "./french-intelligence-core-v1.mjs";
 import importedDictionary from "../data/dictionary/common-3000.json" with { type: "json" };
+import { attachRichDetail } from "./dictionary-rich-view.mjs";
+import { renderImportedCardHtml, attachFrenchBrief } from "./dictionary-card.mjs";
 structuredCore.registerImportedEntries(importedDictionary);
 import { checkSection12Rules } from "./french-section12-rules.mjs";
 /* Exact legacy HTML renderer extracted from the golden source. Keep its output byte-stable. */
@@ -44,6 +46,7 @@ function lookup(word){
 function showAnswer(html){const out=$("fiAnswer");if(out)out.innerHTML=html;}
   function dictionaryHtml(d){
     if(d.imported){
+      return renderImportedCardHtml(d);
       const matches=Array.isArray(d.matches)&&d.matches.length>1?d.matches:[d];
       return '<div class="fi-answer fi-imported-dictionary">'+matches.map(item=>{
         const groups=Array.isArray(item.posGroups)&&item.posGroups.length?item.posGroups:[{pos:item.part,meanings:(item.senses||[]).map(s=>({meaning:s.meaning,register:s.label||"neutral"})),forms:item.forms||{feminine:[],plural:[]}}];
@@ -315,7 +318,7 @@ function suggestionHtml(query){
 }
 function runAction(id){
     if(id==="fiAsk"){const q=$("fiInput")?.value||"";showAnswer(answerQuestion(q));}
-    if(id==="fiLookup"){const q=$("fiWord")?.value||"";const d=publicLookup(q);showAnswer(d?dictionaryHtml(d):`<div class="fi-answer">No built-in or imported entry for <b>${esc(q)}</b>. No definition has been fabricated. ${suggestionHtml(q)}<div class="fi-result">Check <a href="https://www.dictionnaire-academie.fr/" target="_blank" rel="noopener noreferrer">Académie française</a>, <a href="https://www.cnrtl.fr/definition/${encodeURIComponent(q)}" target="_blank" rel="noopener noreferrer">CNRTL/TLFi</a> or <a href="https://fr.wiktionary.org/wiki/${encodeURIComponent(q)}" target="_blank" rel="noopener noreferrer">Wiktionnaire</a>.</div></div>`);}
+    if(id==="fiLookup"){const q=$("fiWord")?.value||"";const d=publicLookup(q);if(d&&d.imported)queueMicrotask(()=>{attachRichDetail($("fiAnswer"),d.word);attachFrenchBrief($("fiAnswer"),d.word);});showAnswer(d?dictionaryHtml(d):`<div class="fi-answer">No built-in or imported entry for <b>${esc(q)}</b>. No definition has been fabricated. ${suggestionHtml(q)}<div class="fi-result">Check <a href="https://www.dictionnaire-academie.fr/" target="_blank" rel="noopener noreferrer">Académie française</a>, <a href="https://www.cnrtl.fr/definition/${encodeURIComponent(q)}" target="_blank" rel="noopener noreferrer">CNRTL/TLFi</a> or <a href="https://fr.wiktionary.org/wiki/${encodeURIComponent(q)}" target="_blank" rel="noopener noreferrer">Wiktionnaire</a>.</div></div>`);}
     if(id==="fiTranslate"){showAnswer(translate($("fiInput")?.value||"",$("fiDirection")?.value||"fr-en"));}
     if(id==="fiConjugate"){
       const tense=$("fiTense")?.value||"present";

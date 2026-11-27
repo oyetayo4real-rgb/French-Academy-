@@ -33,8 +33,8 @@ try{
       const text=await page.locator("#fiAnswer").innerText();
       assert.ok(text.includes(word),profile.name+" displays "+word);
       const status=importedData[word][4].status;
-      if(status==="curated-draft")assert.match(text,/Curated draft · needs French-speaker review/);
-      else assert.match(text,/Imported entry · not yet reviewed/);
+      if(status==="curated-draft")assert.match(text,/(?:Brouillon \u00b7 \u00e0 faire relire par un francophone|Curated draft · needs French-speaker review)/);
+      else assert.match(text,/(?:Entr\u00e9e import\u00e9e \u00b7 pas encore relue|Imported entry · not yet reviewed)/);
       for(const sense of importedData[word][4].senses||[])if(sense.label)assert.ok(text.includes("("+sense.label+")"),profile.name+" displays register label for "+word);
       const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth);
       assert.equal(overflow,false,profile.name+" must not scroll horizontally at "+profile.viewport.width+"px");
@@ -62,8 +62,8 @@ try{
       firstMeaning:node.querySelector("ol li")?.textContent?.trim()||"",
       text:node.innerText
     })));
-    const memeAdverb=memeSections.find(group=>group.pos==="adverb");
-    const memeAdjective=memeSections.find(group=>group.pos==="adjective");
+    const memeAdverb=memeSections.find(group=>group.pos==="adverbe");
+    const memeAdjective=memeSections.find(group=>group.pos==="adjectif");
     assert.ok(memeAdverb,profile.name+" renders même adverb in its own POS section");
     assert.match(memeAdverb.firstMeaning,/even/i,profile.name+" même adverb first meaning is even");
     assert.ok(memeAdjective,profile.name+" renders même adjective in a separate POS section");
