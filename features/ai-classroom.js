@@ -3,7 +3,7 @@
   "use strict";
   let FA_DAILY_CALL = null, FA_DAILY_META = null, FA_DAILY_SDK_PROMISE = null;
   const FA_TUTOR_FUNCTION_SLUG = "tutor-v2";
-  const FA_SCRIPT_URL = document.currentScript && document.currentScript.src;
+  const FA_SCRIPT_URL = (document.currentScript && document.currentScript.src) || Array.from(document.scripts).reverse().find(s => /\/features\/ai-classroom\.js(?:\?|$)/.test(s.src))?.src || new URL("/features/ai-classroom.js", document.baseURI).href;
   const FA_AI = { level: "A1", mode: "chat", depth: "quick", messages: [], pending: false, error: "", lastRequest: null, memoryUserId: null, memoryLoaded: false, memoryLoading: false, memoryBusy: false, memoryEnabled: false, memoryProfile: null, memoryStatus: "", conversations: [], activeConversationId: null, localStorageError: "" };
   const FA_TUTOR_LOCAL_VERSION = 1;
   const FA_TUTOR_LOCAL_PREFIX = "fa_tutor_local_v1:";
