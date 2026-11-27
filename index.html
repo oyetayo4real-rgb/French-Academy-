@@ -825,7 +825,7 @@ async function refreshAll(){try{const p=await api("/rest/v1/profiles?id=eq."+AUT
   await pullState();await Promise.all([loadClips(),loadMine()]);dirty=true;syncNow()}
 const EMBED=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const guestOk=()=>{try{return !!localStorage.getItem("fa_guest")||EMBED}catch(e){return EMBED}};
-function boot(){if("serviceWorker" in navigator&&/^https?:/.test(location.protocol)){const had=!!navigator.serviceWorker.controller;let rl=false;navigator.serviceWorker.addEventListener("controllerchange",()=>{if(had&&!rl){rl=true;location.reload()}});navigator.serviceWorker.register("/sw.js").then(g=>{try{g.update()}catch(e){}}).catch(()=>{})}if(recoverFromHash()){recoverView();return}
+function boot(){if("serviceWorker" in navigator&&/^https?:/.test(location.protocol)){navigator.serviceWorker.register("/sw.js").catch(()=>{})}if(recoverFromHash()){recoverView();return}
   if(AUTH&&AUTH.user&&PROF){setUserStorage();view=isLect()?"dash":"home";render();if(online())refreshAll()}
   else if(AUTH&&AUTH.user){afterLogin("")}
   else if(guestOk()){view="home";render()}else{let seen=null;try{seen=localStorage.getItem("fa_seen")}catch(e){}view=seen?"auth":"landing";render()}}
