@@ -1,0 +1,425 @@
+{
+  "même": {
+    "status": "curated-draft",
+    "reason": "Owner-provided draft meanings; validate contextual adjective and adverb senses with a French speaker.",
+    "meanings": [
+      "same",
+      "even",
+      "very, as in « le jour même »"
+    ],
+    "meaningsByPos": {
+      "adverb": [
+        "even"
+      ],
+      "adjective": [
+        "same",
+        "very, as in « le jour même »"
+      ]
+    }
+  },
+  "cent": {
+    "status": "curated-draft",
+    "reason": "Owner-provided draft meanings; distinguish the numeral, noun, and currency use.",
+    "meanings": [
+      "hundred",
+      "one hundred",
+      "cent, coin"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "cent, coin"
+      ],
+      "numeral": [
+        "hundred"
+      ]
+    }
+  },
+  "véritable": {
+    "status": "curated-draft",
+    "reason": "Owner-provided draft meanings; verify nuance and usage with a French speaker.",
+    "meanings": [
+      "real",
+      "genuine",
+      "true"
+    ],
+    "meaningsByPos": {
+      "adjective": [
+        "real",
+        "genuine",
+        "true"
+      ]
+    }
+  },
+  "là": {
+    "status": "curated-draft",
+    "reason": "Owner-provided draft meanings; verify spatial and discourse uses with a French speaker.",
+    "meanings": [
+      "there",
+      "(over) there",
+      "at that point, then"
+    ],
+    "meaningsByPos": {
+      "adverb": [
+        "there",
+        "(over) there",
+        "at that point, then"
+      ]
+    }
+  },
+  "chéri": {
+    "status": "curated-draft",
+    "reason": "Owner-provided draft meanings; remove homograph contamination and verify register.",
+    "meanings": [
+      "darling",
+      "dear",
+      "beloved"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "darling",
+        "dear",
+        "beloved"
+      ],
+      "adjective": [
+        "beloved",
+        "cherished"
+      ]
+    }
+  },
+  "peu": {
+    "status": "curated-draft",
+    "reason": "Curated learner meanings only; primary POS is selected from Lexique frequency and is never overridden.",
+    "meanings": [
+      "little; not much",
+      "few (peu de gens)",
+      "not very (peu probable)"
+    ],
+    "meaningsByPos": {
+      "adverb": [
+        "little; not much",
+        "few (peu de gens)",
+        "not very (peu probable)"
+      ],
+      "noun": [
+        "the little; a little (le peu que je sais)"
+      ]
+    }
+  },
+  "cuire": {
+    "status": "curated-draft",
+    "reason": "Owner-provided draft meanings; exclude inflection-only senses and verify the verb's cooking and burning senses.",
+    "meanings": [
+      "to cook",
+      "to bake",
+      "to burn, as of skin"
+    ],
+    "meaningsByPos": {
+      "verb": [
+        "to cook",
+        "to bake",
+        "to burn, as of skin"
+      ]
+    }
+  },
+  "retourner": {
+    "status": "curated-draft",
+    "reason": "The first selected Wiktionary verb record is transitive and omits the common return/go-back sense; this POS-specific learner gloss restores that everyday verb meaning.",
+    "meanings": [
+      "to return",
+      "to go back",
+      "to turn over"
+    ],
+    "meaningsByPos": {
+      "verb": [
+        "to return",
+        "to go back",
+        "to turn over"
+      ]
+    }
+  },
+  "minute": {
+    "status": "curated-draft",
+    "reason": "The source gloss contains etymology metadata rather than a learner definition; keep the time-unit meaning as the noun group's first gloss.",
+    "meanings": [
+      "minute"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "minute"
+      ]
+    }
+  },
+  "jeter": {
+    "status": "curated-draft",
+    "reason": "Keep the everyday verb meaning first and collapse repeated throw-away glosses.",
+    "meanings": [
+      "to throw",
+      "to throw away",
+      "to discard"
+    ],
+    "meaningsByPos": {
+      "verb": [
+        "to throw",
+        "to throw away",
+        "to discard"
+      ]
+    }
+  },
+  "nouveau": {
+    "status": "curated-draft",
+    "reason": "Explicit display-order exception: adjective first for the learner-facing meaning new; Lexique frequencies remain unchanged.",
+    "meanings": [
+      "new person",
+      "new thing"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "new person",
+        "new thing"
+      ],
+      "adjective": [
+        "new",
+        "novel"
+      ]
+    }
+  },
+  "souvenir": {
+    "status": "curated-draft",
+    "reason": "Explicit display-order exception: noun first for the learner-facing meaning memory; Lexique frequencies remain unchanged.",
+    "meanings": [
+      "to remember"
+    ],
+    "meaningsByPos": {
+      "verb": [
+        "to remember"
+      ],
+      "noun": [
+        "memory",
+        "souvenir"
+      ]
+    }
+  },
+  "quitter": {
+    "status": "curated-draft",
+    "reason": "Prioritize the everyday learner meaning leave over a narrower source-record gloss.",
+    "meanings": [
+      "to leave",
+      "to quit",
+      "to depart"
+    ],
+    "meaningsByPos": {
+      "verb": [
+        "to leave",
+        "to quit",
+        "to depart"
+      ]
+    }
+  },
+  "liberté": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review; verify nuance and usage.",
+    "gender": "f",
+    "meanings": [
+      "freedom",
+      "liberty"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "freedom",
+        "liberty"
+      ]
+    }
+  },
+  "campagne": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review; verify both common senses.",
+    "gender": "f",
+    "meanings": [
+      "countryside",
+      "campaign"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "countryside",
+        "campaign"
+      ]
+    }
+  },
+  "crime": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review.",
+    "gender": "m",
+    "meanings": [
+      "crime"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "crime"
+      ]
+    }
+  },
+  "détail": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review.",
+    "gender": "m",
+    "meanings": [
+      "detail"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "detail"
+      ]
+    }
+  },
+  "trottoir": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review; verify regional equivalents.",
+    "gender": "m",
+    "meanings": [
+      "sidewalk",
+      "pavement"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "sidewalk",
+        "pavement"
+      ]
+    }
+  },
+  "club": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review; verify contextual senses.",
+    "gender": "m",
+    "meanings": [
+      "club"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "club"
+      ]
+    }
+  },
+  "rivière": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review.",
+    "gender": "f",
+    "meanings": [
+      "river"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "river"
+      ]
+    }
+  },
+  "test": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review; verify context-specific uses.",
+    "gender": "m",
+    "meanings": [
+      "test"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "test"
+      ]
+    }
+  },
+  "septembre": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review.",
+    "gender": "m",
+    "meanings": [
+      "September"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "September"
+      ]
+    }
+  },
+  "week-end": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review; retain French headword spelling.",
+    "gender": "m",
+    "meanings": [
+      "weekend"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "weekend"
+      ]
+    }
+  },
+  "prétexte": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review; verify distinction between pretext and excuse.",
+    "gender": "m",
+    "meanings": [
+      "pretext",
+      "excuse"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "pretext",
+        "excuse"
+      ]
+    }
+  },
+  "habit": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review; clothing sense, not the English homograph.",
+    "gender": "m",
+    "meanings": [
+      "outfit",
+      "clothes"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "outfit",
+        "clothes"
+      ]
+    }
+  },
+  "musée": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review.",
+    "gender": "m",
+    "meanings": [
+      "museum"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "museum"
+      ]
+    }
+  },
+  "impatience": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review.",
+    "gender": "f",
+    "meanings": [
+      "impatience"
+    ],
+    "meaningsByPos": {
+      "noun": [
+        "impatience"
+      ]
+    }
+  },
+  "raccompagner": {
+    "status": "curated-draft",
+    "reason": "Curated draft · needs French-speaker review; verify object and destination nuance.",
+    "gender": null,
+    "meanings": [
+      "to take (someone) home",
+      "to see (someone) off"
+    ],
+    "meaningsByPos": {
+      "verb": [
+        "to take (someone) home",
+        "to see (someone) off"
+      ]
+    }
+  }
+}

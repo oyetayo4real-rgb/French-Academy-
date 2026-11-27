@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 3,
+  "entryCount": 3000,
+  "requestedCount": 3000,
+  "minimumAccepted": 2800,
+  "sourceFiles": {
+    "lexique": {
+      "name": "Lexique383.tsv",
+      "sha256": "637ba37a767a66679c48371d673ece50cbf541b49a4e40e598963d4f3fbce52b",
+      "extractDate": "2019-06-04",
+      "url": "https://www.lexique.org/databases/Lexique383/Lexique383.tsv"
+    },
+    "wiktionary": {
+      "name": "kaikki.org-dictionary-French.jsonl",
+      "sha256": "9053b1845fb3e045fa1fbe3f749122fa43e21b49bfa741cadd50255ae6ca0126",
+      "extractDate": "2026-10-30",
+      "dumpDate": "2026-10-01",
+      "url": "https://kaikki.org/dictionary/French/kaikki.org-dictionary-French.jsonl"
+    }
+  },
+  "ranking": "freqlemfilms2 + freqlemlivres; highest-frequency POS per lemma except explicit learner display-order exceptions",
+  "displayOrderExceptions": {
+    "nouveau": "adjective",
+    "souvenir": "noun",
+    "peu": "adverb"
+  },
+  "posDistribution": {
+    "noun": 1679,
+    "verb": 823,
+    "adjective": 393,
+    "adverb": 105
+  },
+  "qualityRules": {
+    "firstKaikkiEntryPerPos": true,
+    "formOnlyGlossesRemoved": true,
+    "metaGlossesRejected": true,
+    "overlongGlossesRejected": true,
+    "maxMeaningCharacters": 70,
+    "maxMeaningsPerPos": 3,
+    "maxMeaningsPerEntry": 5,
+    "lowRegisterFallbackRequiresFewerThanTwoNeutralMeanings": true,
+    "caseAndTokenSetDeduplication": true,
+    "explicitLigatureWhitelist": 11,
+    "neutralSensesFirst": true,
+    "formsOnlyForNounsAndAdjectives": true,
+    "registerLabels": [
+      "archaic",
+      "dated",
+      "rare",
+      "slang",
+      "colloquial",
+      "familiar",
+      "vulgar",
+      "offensive",
+      "derogatory",
+      "informal",
+      "literary",
+      "figurative",
+      "regional",
+      "nautical",
+      "obsolete"
+    ],
+    "childGlossPreferred": true,
+    "commonAlternatePosRatio": 0.01
+  },
+  "qualityStats": {
+    "homographRecordsIgnored": 1026,
+    "formOnlySensesDropped": 404,
+    "entriesSkippedNoUsableSenses": 1110,
+    "variantOnlyEntriesSkipped": 17,
+    "registerTaggedSenses": 4588,
+    "entriesWithRegisterLabels": 210,
+    "parentGlossesReplacedBySubglosses": 6,
+    "secondaryPosGroups": 319,
+    "alternatePosRowsGrouped": 338,
+    "descriptiveGlossesDropped": 20,
+    "overlongGlossesRejected": 1833,
+    "entriesDroppedBecauseOfOverlongGlosses": 655,
+    "nearDuplicateSensesRemoved": 702,
+    "lowRegisterSensesSkipped": 1076,
+    "overridesApplied": 57,
+    "selectedEntries": 3000
+  },
+  "overridesApplied": 57,
+  "sizes": {
+    "rawBytes": 3846514,
+    "gzipBytes": 225724
+  }
+}
