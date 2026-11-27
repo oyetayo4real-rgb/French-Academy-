@@ -81,8 +81,10 @@ try {
     });
     window.__groqCalls = 0;
     window.__sessionRequests = [];
+    window.__stagingGroqAvailable = false;
     window.FA_LIVE_VOICE_CONTEXT = {
       isSignedIn: () => true,
+      isStagingGroqTestAvailable: () => window.__stagingGroqAvailable,
       level: () => "A1",
       context: () => ({ level: "A1", topics: [], recent: [], memoryEnabled: false }),
       request: async body => { window.__sessionRequests.push(body); return { ephemeral_token: "mock-one-use-token", instructions: "Test teacher" }; },
@@ -102,6 +104,13 @@ try {
   }));
   await page.addScriptTag({ url: baseUrl + "/features/live-voice.js" });
   await page.locator("#faLivePanel").waitFor({ state: "visible" });
+
+  await check("Staging Groq diagnostics become visible when the bridge initializes after the panel", async () => {
+    assert.equal(await page.locator("#faGroqTestArea").isHidden(), true, "test begins with staging gate unavailable");
+    await page.evaluate(() => { window.__stagingGroqAvailable = true; document.body.appendChild(document.createElement("span")); });
+    await page.waitForFunction(() => document.querySelector("#faGroqTestArea")?.hidden === false);
+    assert.equal(await page.locator("#faGroqTest").innerText(), "Test Groq (staging)");
+  });
 
   await check("Gemini connection failure automatically activates Groq fallback", async () => {
     await page.locator("#faLiveStart").click();
